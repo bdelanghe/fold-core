@@ -1,0 +1,310 @@
+[
+  [
+    "root",
+    {
+      "title": "Agent fleet",
+      "trail": [],
+      "kids": [
+        {
+          "id": "needs",
+          "title": "Needs you",
+          "hint": "What the agents need from you, each with what to do."
+        },
+        {
+          "id": "goals",
+          "title": "Goal sessions",
+          "hint": "Each running goal session, its goal, and its last progress."
+        },
+        {
+          "id": "seats",
+          "title": "Seats",
+          "hint": "The standing agents by cluster: what each is for, its last progress, what it waits on."
+        },
+        {
+          "id": "inbox",
+          "title": "Messages to you",
+          "hint": "The latest messages agents sent you, newest first, each cut short."
+        },
+        {
+          "id": "requests",
+          "title": "Your latest requests",
+          "hint": "The newest things you asked for in comments on this page, cut short."
+        }
+      ],
+      "updated": "2026-10-28T16:00:00.000Z",
+      "source": "golden"
+    }
+  ],
+  [
+    "needs",
+    {
+      "title": "Needs you",
+      "trail": [
+        "Agent fleet"
+      ],
+      "kids": [
+        {
+          "id": "needs-ask-0",
+          "title": "Merge the policy note",
+          "hint": "You merge every policy change yourself. Agents may not."
+        },
+        {
+          "id": "needs-landing-3",
+          "title": "Register your passkey once at the desk",
+          "hint": "Phone approval with your passkey"
+        }
+      ],
+      "text": [
+        "What the agents need from you, each with what to do."
+      ]
+    }
+  ],
+  [
+    "needs~needs-ask-0",
+    {
+      "title": "Merge the policy note",
+      "trail": [
+        "Agent fleet",
+        "Needs you"
+      ],
+      "kids": [],
+      "text": [
+        "You merge every policy change yourself. Agents may not."
+      ],
+      "href": "https://git.example.test/acme/policy/pull/4",
+      "hrefLabel": "Open acme/policy#4"
+    }
+  ],
+  [
+    "needs~needs-landing-3",
+    {
+      "title": "Register your passkey once at the desk",
+      "trail": [
+        "Agent fleet",
+        "Needs you"
+      ],
+      "kids": [],
+      "text": [
+        "Phone approval with your passkey"
+      ]
+    }
+  ],
+  [
+    "goals",
+    {
+      "title": "Goal sessions",
+      "trail": [
+        "Agent fleet"
+      ],
+      "kids": [
+        {
+          "id": "goal-port-goal",
+          "title": "port-goal",
+          "hint": "Alert: waits on nothing it has said: it should be working, last progress Tue 14:44"
+        }
+      ],
+      "text": [
+        "Each running goal session, its goal, and its last progress."
+      ]
+    }
+  ],
+  [
+    "goals~goal-port-goal",
+    {
+      "title": "port-goal",
+      "trail": [
+        "Agent fleet",
+        "Goal sessions"
+      ],
+      "kids": [],
+      "text": [
+        "Alert: stuck or quiet too long.",
+        "Port the tooling to Rust.",
+        "Status: idle",
+        "Last progress: Tue 14:44",
+        "Waits on: nothing it has said: it should be working",
+        "What to do: Comment here asking the lead to nudge it."
+      ]
+    }
+  ],
+  [
+    "seats",
+    {
+      "title": "Seats",
+      "trail": [
+        "Agent fleet"
+      ],
+      "kids": [
+        {
+          "id": "your-hands",
+          "title": "Your hands"
+        },
+        {
+          "id": "work-one-author-per-repo",
+          "title": "Work: one author per repo"
+        }
+      ],
+      "text": [
+        "The standing agents by cluster: what each is for, its last progress, what it waits on."
+      ]
+    }
+  ],
+  [
+    "seats~your-hands",
+    {
+      "title": "Your hands",
+      "trail": [
+        "Agent fleet",
+        "Seats"
+      ],
+      "kids": [
+        {
+          "id": "seat-lead",
+          "title": "lead",
+          "hint": "idle between turns; it wakes on your comments, last progress Tue 17:52"
+        }
+      ]
+    }
+  ],
+  [
+    "seats~your-hands~seat-lead",
+    {
+      "title": "lead",
+      "trail": [
+        "Agent fleet",
+        "Seats",
+        "Your hands"
+      ],
+      "kids": [],
+      "text": [
+        "acts for you: lands and merges work, answers this page",
+        "Status: idle between turns; it wakes on your comments",
+        "Last progress: Tue 17:52",
+        "Waits on: your next comment"
+      ]
+    }
+  ],
+  [
+    "seats~work-one-author-per-repo",
+    {
+      "title": "Work: one author per repo",
+      "trail": [
+        "Agent fleet",
+        "Seats"
+      ],
+      "kids": [
+        {
+          "id": "seat-widgets-author",
+          "title": "widgets-author",
+          "hint": "idle, last progress Mon 18:43"
+        },
+        {
+          "id": "seat-publisher",
+          "title": "publisher",
+          "hint": "Alert: waits on an answer in its terminal (a question or a permission), last progress…"
+        }
+      ]
+    }
+  ],
+  [
+    "seats~work-one-author-per-repo~seat-widgets-author",
+    {
+      "title": "widgets-author",
+      "trail": [
+        "Agent fleet",
+        "Seats",
+        "Work: one author per repo"
+      ],
+      "kids": [],
+      "text": [
+        "writes code in acme/widgets",
+        "Status: idle",
+        "Last progress: Mon 18:43"
+      ]
+    }
+  ],
+  [
+    "seats~work-one-author-per-repo~seat-publisher",
+    {
+      "title": "publisher",
+      "trail": [
+        "Agent fleet",
+        "Seats",
+        "Work: one author per repo"
+      ],
+      "kids": [],
+      "text": [
+        "Alert: stuck or quiet too long.",
+        "pushes branches and opens pull requests",
+        "Status: waiting for an answer",
+        "Last progress: Tue 13:00",
+        "Waits on: an answer in its terminal (a question or a permission)",
+        "What to do: Comment here asking the lead to nudge it."
+      ]
+    }
+  ],
+  [
+    "inbox",
+    {
+      "title": "Messages to you",
+      "trail": [
+        "Agent fleet"
+      ],
+      "kids": [
+        {
+          "id": "inbox-0",
+          "title": "assistant",
+          "hint": "widgets #607 merged; the deploy picked it up."
+        }
+      ],
+      "text": [
+        "The latest messages agents sent you, newest first, each cut short."
+      ]
+    }
+  ],
+  [
+    "inbox~inbox-0",
+    {
+      "title": "assistant",
+      "trail": [
+        "Agent fleet",
+        "Messages to you"
+      ],
+      "kids": [],
+      "text": [
+        "widgets #607 merged; the deploy picked it up.",
+        "Tue 13:55"
+      ]
+    }
+  ],
+  [
+    "requests",
+    {
+      "title": "Your latest requests",
+      "trail": [
+        "Agent fleet"
+      ],
+      "kids": [
+        {
+          "id": "request-43",
+          "title": "why does it say part 1 of 14",
+          "hint": "Page thread #43"
+        }
+      ],
+      "text": [
+        "The newest things you asked for in comments on this page, cut short."
+      ]
+    }
+  ],
+  [
+    "requests~request-43",
+    {
+      "title": "why does it say part 1 of 14",
+      "trail": [
+        "Agent fleet",
+        "Your latest requests"
+      ],
+      "kids": []
+    }
+  ]
+]

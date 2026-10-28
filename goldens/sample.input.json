@@ -1,0 +1,173 @@
+{
+  "root": {
+    "title": "Agent fleet",
+    "health": {
+      "verdict": "Stuck",
+      "alert": true,
+      "gate": {
+        "ok": true
+      },
+      "lines": [
+        {
+          "id": "health/goal/port-goal",
+          "alert": true,
+          "scope": "Agent fleet › Goal sessions",
+          "text": "port-goal: quiet since Tue 14:44",
+          "action": "Comment here asking the lead to nudge it."
+        }
+      ]
+    },
+    "sections": [
+      {
+        "id": "needs",
+        "title": "Needs you",
+        "purpose": "What the agents need from you, each with what to do.",
+        "empty": "Nothing needs you right now.",
+        "groups": [
+          {
+            "title": "",
+            "items": [
+              {
+                "id": "needs/ask-0",
+                "action": "Merge the policy note",
+                "why": "You merge every policy change yourself. Agents may not.",
+                "link": {
+                  "href": "https://git.example.test/acme/policy/pull/4",
+                  "label": "Open acme/policy#4"
+                }
+              },
+              {
+                "id": "needs/landing-3",
+                "text": "Phone approval with your passkey",
+                "action": "Register your passkey once at the desk"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "goals",
+        "title": "Goal sessions",
+        "purpose": "Each running goal session, its goal, and its last progress.",
+        "empty": "No goal session is running.",
+        "groups": [
+          {
+            "title": "",
+            "items": [
+              {
+                "id": "goal/port-goal",
+                "name": "port-goal",
+                "nameKind": "agent",
+                "alert": true,
+                "text": "Port the tooling to Rust.",
+                "state": "idle",
+                "last": "2026-10-27T18:44:17Z",
+                "waits": "nothing it has said: it should be working",
+                "action": "Comment here asking the lead to nudge it."
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "seats",
+        "title": "Seats",
+        "purpose": "The standing agents by cluster: what each is for, its last progress, what it waits on.",
+        "groups": [
+          {
+            "title": "Your hands",
+            "items": [
+              {
+                "id": "seat/lead",
+                "name": "lead",
+                "nameKind": "agent",
+                "text": "acts for you: lands and merges work, answers this page",
+                "state": "idle between turns; it wakes on your comments",
+                "last": "2026-10-27T21:52:12Z",
+                "waits": "your next comment"
+              }
+            ]
+          },
+          {
+            "title": "Work: one author per repo",
+            "items": [
+              {
+                "id": "seat/widgets-author",
+                "name": "widgets-author",
+                "nameKind": "agent",
+                "text": "writes code in acme/widgets",
+                "state": "idle",
+                "last": "2026-10-26T22:43:19Z"
+              },
+              {
+                "id": "seat/publisher",
+                "name": "publisher",
+                "nameKind": "agent",
+                "text": "pushes branches and opens pull requests",
+                "state": "waiting for an answer",
+                "last": "2026-10-27T17:00:00Z",
+                "waits": "an answer in its terminal (a question or a permission)",
+                "alert": true,
+                "action": "Comment here asking the lead to nudge it."
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "inbox",
+        "title": "Messages to you",
+        "purpose": "The latest messages agents sent you, newest first, each cut short.",
+        "empty": "No messages to you in the last six hours.",
+        "groups": [
+          {
+            "title": "",
+            "items": [
+              {
+                "id": "inbox/0",
+                "name": "assistant",
+                "nameKind": "agent",
+                "text": "widgets #607 merged; the deploy picked it up.",
+                "quoted": true,
+                "at": "2026-10-27T17:55:00Z"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "requests",
+        "title": "Your latest requests",
+        "purpose": "The newest things you asked for in comments on this page, cut short.",
+        "empty": "You have no open requests.",
+        "groups": [
+          {
+            "title": "",
+            "items": [
+              {
+                "id": "request-43",
+                "name": "Page thread #43",
+                "nameKind": "thread",
+                "text": "why does it say part 1 of 14",
+                "quoted": true
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "meta": {
+      "updated": "2026-10-27T18:07:00Z",
+      "timeZone": "America/New_York",
+      "sources": [
+        "sessions.json",
+        "plan.json"
+      ]
+    }
+  },
+  "files": {},
+  "opts": {
+    "updated": "2026-10-28T16:00:00.000Z",
+    "source": "golden"
+  }
+}

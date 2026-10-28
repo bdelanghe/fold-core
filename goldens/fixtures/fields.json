@@ -1,0 +1,178 @@
+{
+  "root": {
+    "title": "Fields",
+    "meta": {
+      "timeZone": "America/New_York"
+    },
+    "sections": [
+      {
+        "id": "s",
+        "title": "Seats",
+        "purpose": "Seats and their fields.",
+        "groups": [
+          {
+            "title": "",
+            "items": [
+              {
+                "id": "a",
+                "name": "alpha",
+                "alert": true,
+                "why": "it has been quiet for a day",
+                "state": "idle",
+                "last": "2026-10-28T04:05:00Z",
+                "owner": "lead-seat"
+              },
+              {
+                "id": "b",
+                "name": "beta",
+                "alert": true,
+                "waits": "an answer ",
+                "last": "2026-10-28T03:59:59Z"
+              },
+              {
+                "id": "c",
+                "name": "gamma",
+                "alert": true
+              },
+              {
+                "id": "d",
+                "name": "delta",
+                "state": "working",
+                "last": "2026-10-27T18:44:17.123+01:00",
+                "action": "Nudge it",
+                "at": "not a time"
+              },
+              {
+                "id": "e",
+                "name": "epsilon",
+                "last": "2026-10-27T23:30:00-04:00"
+              },
+              {
+                "id": "a",
+                "name": "duplicate id",
+                "text": "Same id as alpha."
+              },
+              {
+                "id": "a",
+                "name": "another duplicate",
+                "summary": "Third one."
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "refs",
+        "title": "Requests",
+        "groups": [
+          {
+            "title": "",
+            "items": [
+              {
+                "id": "r70",
+                "name": "Page thread #70",
+                "text": "\"why does it say part 1 of 14\"",
+                "quoted": true
+              },
+              {
+                "id": "r71",
+                "name": "Page thread #71",
+                "text": "a request whose words are long enough that the label is clipped at seventy code units for sure"
+              },
+              {
+                "id": "r72",
+                "name": "Page thread #72"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "pages",
+        "title": "Your pages",
+        "groups": [
+          {
+            "title": "",
+            "items": [
+              {
+                "id": "a1b2c3d4e5f6",
+                "title": "Fleet page (this page)",
+                "purpose": "Where you are now.",
+                "link": {
+                  "href": "https://host.example.test/a/a1b2c3d4e5f6",
+                  "label": "Open"
+                }
+              },
+              {
+                "id": "other",
+                "title": "Other page",
+                "link": {
+                  "href": "https://host.example.test/a/a1b2c3d4e5f6x",
+                  "label": "Open other"
+                }
+              },
+              {
+                "id": "query",
+                "title": "Self with query",
+                "href": "https://host.example.test/a/a1b2c3d4e5f6?x=1"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "hints",
+        "title": "Hints",
+        "kids": [
+          {
+            "title": "Long one",
+            "purpose": "This hint is long enough to pass ninety code units, and it ends its first sentence here. Then it keeps going on."
+          },
+          {
+            "title": "Long two",
+            "purpose": "This hint is also long, longer than ninety code units, but it has no sentence end anywhere in it at all so it is cut"
+          },
+          {
+            "title": "Long three",
+            "summary": "Emoji 😀 and dashes – and arrows › count as code units in JS strings so this hint cuts somewhere else entirely… right"
+          },
+          {
+            "title": "Same as label",
+            "text": "Same as label"
+          },
+          {
+            "title": "Why only",
+            "why": "because ✓",
+            "detail": [
+              "one",
+              "two"
+            ],
+            "note": "  padded  "
+          }
+        ]
+      },
+      {
+        "id": "empty",
+        "title": "Empty",
+        "empty": "Nothing is empty here."
+      },
+      {
+        "id": "empty2",
+        "title": "Empty with kids",
+        "empty": "Not shown.",
+        "kids": [
+          {
+            "title": "A kid"
+          }
+        ]
+      }
+    ]
+  },
+  "files": {},
+  "opts": {
+    "updated": "2026-10-28T16:00:00.000Z",
+    "source": "golden",
+    "self": "a1b2c3d4e5f6",
+    "stale": "stale since a test"
+  }
+}

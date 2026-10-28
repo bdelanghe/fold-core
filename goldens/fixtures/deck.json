@@ -1,0 +1,46 @@
+{
+  "root": {
+    "title": "Decks",
+    "present": "folds",
+    "sections": [
+      {
+        "id": "intro",
+        "title": "Intro",
+        "text": "Before the deck."
+      },
+      {
+        "id": "decks",
+        "title": "Decks",
+        "text": "Read inline.",
+        "kids": [
+          {
+            "id": "engine",
+            "title": "Engine deck",
+            "text": [
+              "Kept line."
+            ],
+            "from": "deck.json"
+          },
+          {
+            "id": "talk",
+            "title": "Talk",
+            "from": "talk.json"
+          }
+        ]
+      },
+      {
+        "id": "after",
+        "title": "After",
+        "text": "After the deck."
+      }
+    ]
+  },
+  "files": {
+    "deck.json": "{\"title\":\"Fold engine deck\",\"present\":\"slides\",\"text\":\"One engine.\",\"sections\":[{\"id\":\"s1\",\"title\":\"Slide 1: why\",\"text\":[\"Of list seat list row to row gate.\"],\"kids\":[{\"title\":\"Point 0a\",\"text\":\"Item heading seat naïve ›.\"},{\"title\":\"Point 0b\",\"kids\":[{\"title\":\"Deep 0\"}]}]},{\"id\":\"s2\",\"title\":\"Slide 2: what\",\"text\":[\"To gate section budget to seat item word.\"]},{\"id\":\"s3\",\"title\":\"Slide 3: how\",\"text\":[\"Fold a a – rule hint “quoted” slide.\"]},{\"id\":\"s4\",\"title\":\"Slide 4: who\",\"text\":[\"To 😀 › and reader screen section slide.\"],\"kids\":[{\"title\":\"Point 3a\",\"text\":\"List item budget budget fold.\"},{\"title\":\"Point 3b\",\"kids\":[{\"title\":\"Deep 3\"}]}]},{\"id\":\"s5\",\"title\":\"Slide 5: when\",\"text\":[\"Screen 😀 … budget the naïve walk row.\"],\"kids\":[{\"id\":\"inner\",\"title\":\"Inner deck\",\"present\":\"slides\",\"kids\":[{\"title\":\"Inner one\"},{\"title\":\"Inner two\",\"kids\":[{\"title\":\"Inner two a\"}]}]}]},{\"id\":\"s6\",\"title\":\"Slide 6: where\",\"text\":[\"Slide page budget reader section agent heading fold.\"]},{\"id\":\"s7\",\"title\":\"Slide 7: next\",\"text\":[\"Page of of section agent 😀 agent seat.\"],\"kids\":[{\"title\":\"Point 6a\",\"text\":\"Agent row row item row.\"},{\"title\":\"Point 6b\",\"kids\":[{\"title\":\"Deep 6\"}]}]}]}",
+    "talk.json": "{\"meta\":{\"title\":\"A talk\",\"subtitle\":\"Spoken and shown\"},\"slides\":[{\"id\":\"open\",\"body\":[{\"text\":\"**Opening** line\"},{\"items\":[\"first\",{\"text\":\"`second`\"}]}],\"transcript\":\"– – – rule section the to item of “quoted” walk walk seat section deck agent viewer gate list section. Walk the list item viewer reader! A of › “quoted” list über slide – – slide budget list über row agent agent to viewer › hint? Row of budget “quoted” › a of of “quoted” fold screen 😀 a rule heading the agent row. Rule über fold a › hint naïve the page seat seat viewer “quoted” “quoted” heading ›. Seat list “quoted” and the a über “quoted” rule – deck viewer seat gate! Fold › of café deck seat a item deck to? Hint deck 😀 row reader item slide naïve heading walk. Screen › 😀 row page slide café naïve viewer a list and and a. Agent agent the screen reader agent item the walk 😀 deck reader row row viewer über walk slide hint the! A reader hint gate and seat screen the screen a item and the word fold seat? Of deck budget … word … and … hint and “quoted” deck. › row › rule of of to slide list a hint gate and to naïve list. Heading page word deck heading hint walk agent – deck walk agent – item café section!\"},{\"kicker\":\"No body text\",\"body\":[]},{\"body\":{\"rows\":[{\"text\":\"Word to café … budget item word 😀 list … … über “quoted” agent. And the agent café item word of “quoted” fold ›! Gate page budget budget? Of – – to … café. Of section über section slide section budget list heading walk the seat über über › walk agent reader. Reader item screen a the item! And … slide agent reader list rule … page walk seat naïve 😀 budget › screen café to reader the? › rule section café … naïve über – heading of gate hint über agent a section. – reader slide heading screen to screen – word viewer slide – a viewer. Fold the hint gate list a! Agent › and slide “quoted” word? Seat … gate viewer über –.\"},{\"text\":\"😀 of “quoted” list screen › seat “quoted” screen agent viewer agent viewer the. Heading viewer word hint fold … viewer budget viewer item! List budget hint word list reader naïve and slide rule rule page 😀 hint to ›? Hint page heading café gate … page hint and row agent heading screen café › naïve. Viewer seat deck to heading heading rule word seat – deck gate seat viewer. Naïve section agent deck naïve hint rule a walk item list and heading viewer! Hint list and walk budget seat? Section naïve word screen deck naïve fold and to – page ›. – viewer reader the item gate naïve rule deck heading list deck.\"}]}}]}"
+  },
+  "opts": {
+    "updated": "2026-10-28T16:00:00.000Z",
+    "source": "golden"
+  }
+}

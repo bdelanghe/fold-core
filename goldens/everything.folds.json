@@ -1,0 +1,637 @@
+[
+  [
+    "root",
+    {
+      "title": "Everything",
+      "trail": [],
+      "kids": [
+        {
+          "id": "needs",
+          "title": "Needs you",
+          "hint": "What the agents need from you, each with what to do."
+        },
+        {
+          "id": "machines",
+          "title": "Machines",
+          "hint": "Which machines are up. The agents and CI run on them."
+        },
+        {
+          "id": "fleet",
+          "title": "Agent fleet",
+          "hint": "port-goal and others need a look."
+        },
+        {
+          "id": "pages",
+          "title": "Pages",
+          "hint": "The pages you keep, and what you are reading."
+        },
+        {
+          "id": "repos",
+          "title": "Repos",
+          "hint": "Your repositories with pull requests not merged yet."
+        }
+      ],
+      "updated": "2026-10-28T16:00:00.000Z",
+      "source": "golden"
+    }
+  ],
+  [
+    "needs",
+    {
+      "title": "Needs you",
+      "trail": [
+        "Everything"
+      ],
+      "kids": [
+        {
+          "id": "needs-ask-0",
+          "title": "Merge the policy note",
+          "hint": "You merge every policy change yourself."
+        }
+      ],
+      "text": [
+        "What the agents need from you, each with what to do."
+      ]
+    }
+  ],
+  [
+    "needs~needs-ask-0",
+    {
+      "title": "Merge the policy note",
+      "trail": [
+        "Everything",
+        "Needs you"
+      ],
+      "kids": [],
+      "text": [
+        "You merge every policy change yourself."
+      ],
+      "href": "https://git.example.test/acme/policy/pull/4",
+      "hrefLabel": "Open acme/policy#4"
+    }
+  ],
+  [
+    "machines",
+    {
+      "title": "Machines",
+      "trail": [
+        "Everything"
+      ],
+      "kids": [
+        {
+          "id": "machine-alpha",
+          "title": "alpha",
+          "hint": "up, last progress Tue 23:30"
+        },
+        {
+          "id": "machine-beta",
+          "title": "beta",
+          "hint": "Alert: no heartbeat for an hour"
+        },
+        {
+          "id": "machine-gamma",
+          "title": "gamma",
+          "hint": "up"
+        },
+        {
+          "id": "ci",
+          "title": "CI timings",
+          "hint": "How long the runners take."
+        }
+      ],
+      "text": [
+        "Which machines are up. The agents and CI run on them."
+      ]
+    }
+  ],
+  [
+    "machines~machine-alpha",
+    {
+      "title": "alpha",
+      "trail": [
+        "Everything",
+        "Machines"
+      ],
+      "kids": [],
+      "text": [
+        "the build host",
+        "Status: up",
+        "Last progress: Tue 23:30"
+      ]
+    }
+  ],
+  [
+    "machines~machine-beta",
+    {
+      "title": "beta",
+      "trail": [
+        "Everything",
+        "Machines"
+      ],
+      "kids": [],
+      "text": [
+        "Alert: no heartbeat for an hour.",
+        "the spare",
+        "Status: asleep",
+        "Last progress: Tue 22:10"
+      ]
+    }
+  ],
+  [
+    "machines~machine-gamma",
+    {
+      "title": "gamma",
+      "trail": [
+        "Everything",
+        "Machines"
+      ],
+      "kids": [],
+      "text": [
+        "a small board",
+        "Status: up"
+      ],
+      "href": "https://gamma.example.test/status",
+      "hrefLabel": "Status page"
+    }
+  ],
+  [
+    "machines~ci",
+    {
+      "title": "CI timings",
+      "trail": [
+        "Everything",
+        "Machines"
+      ],
+      "kids": [
+        {
+          "id": "ci-main",
+          "title": "main",
+          "hint": "last run took four minutes"
+        },
+        {
+          "id": "ci-pr",
+          "title": "pull requests",
+          "hint": "last run took two minutes"
+        }
+      ],
+      "text": [
+        "How long the runners take."
+      ]
+    }
+  ],
+  [
+    "machines~ci~ci-main",
+    {
+      "title": "main",
+      "trail": [
+        "Everything",
+        "Machines",
+        "CI timings"
+      ],
+      "kids": [],
+      "text": [
+        "last run took four minutes",
+        "Tue 11:00"
+      ]
+    }
+  ],
+  [
+    "machines~ci~ci-pr",
+    {
+      "title": "pull requests",
+      "trail": [
+        "Everything",
+        "Machines",
+        "CI timings"
+      ],
+      "kids": [],
+      "text": [
+        "last run took two minutes",
+        "Tue 11:05"
+      ]
+    }
+  ],
+  [
+    "fleet",
+    {
+      "title": "Agent fleet",
+      "trail": [
+        "Everything"
+      ],
+      "kids": [
+        {
+          "id": "goals",
+          "title": "Goal sessions",
+          "hint": "Each running goal session."
+        },
+        {
+          "id": "seats",
+          "title": "Seats",
+          "hint": "The standing agents by cluster."
+        },
+        {
+          "id": "pace",
+          "title": "Pace",
+          "hint": "How fast the fleet moves."
+        },
+        {
+          "id": "inbox",
+          "title": "Messages to you"
+        },
+        {
+          "id": "more",
+          "title": "More in Agent fleet",
+          "hint": "Your latest requests, Down"
+        }
+      ],
+      "text": [
+        "port-goal and others need a look. The agents: goal sessions, standing seats, their pace, what they sent you, and how to reach them without this page."
+      ]
+    }
+  ],
+  [
+    "fleet~goals",
+    {
+      "title": "Goal sessions",
+      "trail": [
+        "Everything",
+        "Agent fleet"
+      ],
+      "kids": [
+        {
+          "id": "goal-port-goal",
+          "title": "port-goal",
+          "hint": "Alert: waits on nothing it has said, last progress Tue 14:44"
+        }
+      ],
+      "text": [
+        "Each running goal session."
+      ]
+    }
+  ],
+  [
+    "fleet~goals~goal-port-goal",
+    {
+      "title": "port-goal",
+      "trail": [
+        "Everything",
+        "Agent fleet",
+        "Goal sessions"
+      ],
+      "kids": [],
+      "text": [
+        "Alert: stuck or quiet too long.",
+        "Port the tooling to Rust.",
+        "Status: idle",
+        "Last progress: Tue 14:44",
+        "Waits on: nothing it has said"
+      ]
+    }
+  ],
+  [
+    "fleet~seats",
+    {
+      "title": "Seats",
+      "trail": [
+        "Everything",
+        "Agent fleet"
+      ],
+      "kids": [
+        {
+          "id": "your-hands",
+          "title": "Your hands"
+        },
+        {
+          "id": "work",
+          "title": "Work"
+        }
+      ],
+      "text": [
+        "The standing agents by cluster."
+      ]
+    }
+  ],
+  [
+    "fleet~seats~your-hands",
+    {
+      "title": "Your hands",
+      "trail": [
+        "Everything",
+        "Agent fleet",
+        "Seats"
+      ],
+      "kids": [
+        {
+          "id": "seat-lead",
+          "title": "lead",
+          "hint": "idle, last progress Tue 17:52"
+        }
+      ]
+    }
+  ],
+  [
+    "fleet~seats~your-hands~seat-lead",
+    {
+      "title": "lead",
+      "trail": [
+        "Everything",
+        "Agent fleet",
+        "Seats",
+        "Your hands"
+      ],
+      "kids": [],
+      "text": [
+        "acts for you",
+        "Status: idle",
+        "Last progress: Tue 17:52"
+      ]
+    }
+  ],
+  [
+    "fleet~seats~work",
+    {
+      "title": "Work",
+      "trail": [
+        "Everything",
+        "Agent fleet",
+        "Seats"
+      ],
+      "kids": [
+        {
+          "id": "seat-publisher",
+          "title": "publisher",
+          "hint": "Alert: waits on an answer in its terminal"
+        }
+      ]
+    }
+  ],
+  [
+    "fleet~seats~work~seat-publisher",
+    {
+      "title": "publisher",
+      "trail": [
+        "Everything",
+        "Agent fleet",
+        "Seats",
+        "Work"
+      ],
+      "kids": [],
+      "text": [
+        "Alert: stuck or quiet too long.",
+        "pushes branches",
+        "Status: waiting for an answer",
+        "Waits on: an answer in its terminal"
+      ]
+    }
+  ],
+  [
+    "fleet~pace",
+    {
+      "title": "Pace",
+      "trail": [
+        "Everything",
+        "Agent fleet"
+      ],
+      "kids": [
+        {
+          "id": "pace-today",
+          "title": "today",
+          "hint": "steady"
+        }
+      ],
+      "text": [
+        "How fast the fleet moves."
+      ]
+    }
+  ],
+  [
+    "fleet~pace~pace-today",
+    {
+      "title": "today",
+      "trail": [
+        "Everything",
+        "Agent fleet",
+        "Pace"
+      ],
+      "kids": [],
+      "text": [
+        "twelve changes landed",
+        "Status: steady"
+      ]
+    }
+  ],
+  [
+    "fleet~inbox",
+    {
+      "title": "Messages to you",
+      "trail": [
+        "Everything",
+        "Agent fleet"
+      ],
+      "kids": [],
+      "text": [
+        "No messages to you in the last six hours."
+      ]
+    }
+  ],
+  [
+    "fleet~more",
+    {
+      "title": "More in Agent fleet",
+      "trail": [
+        "Everything",
+        "Agent fleet"
+      ],
+      "kids": [
+        {
+          "id": "requests",
+          "title": "Your latest requests"
+        },
+        {
+          "id": "down",
+          "title": "Down",
+          "hint": "Seats that stopped."
+        }
+      ]
+    }
+  ],
+  [
+    "fleet~more~requests",
+    {
+      "title": "Your latest requests",
+      "trail": [
+        "Everything",
+        "Agent fleet",
+        "More in Agent fleet"
+      ],
+      "kids": [
+        {
+          "id": "request-43",
+          "title": "why does it say part 1 of 14",
+          "hint": "Page thread #43"
+        }
+      ]
+    }
+  ],
+  [
+    "fleet~more~requests~request-43",
+    {
+      "title": "why does it say part 1 of 14",
+      "trail": [
+        "Everything",
+        "Agent fleet",
+        "More in Agent fleet",
+        "Your latest requests"
+      ],
+      "kids": []
+    }
+  ],
+  [
+    "fleet~more~down",
+    {
+      "title": "Down",
+      "trail": [
+        "Everything",
+        "Agent fleet",
+        "More in Agent fleet"
+      ],
+      "kids": [],
+      "text": [
+        "Seats that stopped.",
+        "Nothing is down."
+      ]
+    }
+  ],
+  [
+    "pages",
+    {
+      "title": "Pages",
+      "trail": [
+        "Everything"
+      ],
+      "kids": [],
+      "text": [
+        "The pages you keep, and what you are reading."
+      ]
+    }
+  ],
+  [
+    "repos",
+    {
+      "title": "Repos",
+      "trail": [
+        "Everything"
+      ],
+      "kids": [
+        {
+          "id": "repo-widgets",
+          "title": "widgets",
+          "hint": "Open pull requests in bdelanghe/widgets."
+        },
+        {
+          "id": "repo-gadgets",
+          "title": "gadgets",
+          "hint": "Open pull requests in bdelanghe/gadgets."
+        }
+      ],
+      "text": [
+        "Your repositories with pull requests not merged yet."
+      ]
+    }
+  ],
+  [
+    "repos~repo-widgets",
+    {
+      "title": "widgets",
+      "trail": [
+        "Everything",
+        "Repos"
+      ],
+      "kids": [
+        {
+          "id": "pr-widgets-123",
+          "title": "Fix the frobnicator",
+          "hint": "widgets #123"
+        },
+        {
+          "id": "pr-widgets-124",
+          "title": "Add a second frobnicator",
+          "hint": "widgets #124"
+        }
+      ],
+      "text": [
+        "Open pull requests in bdelanghe/widgets."
+      ]
+    }
+  ],
+  [
+    "repos~repo-widgets~pr-widgets-123",
+    {
+      "title": "Fix the frobnicator",
+      "trail": [
+        "Everything",
+        "Repos",
+        "widgets"
+      ],
+      "kids": [],
+      "text": [
+        "Status: checks passing"
+      ],
+      "href": "https://git.example.test/acme/widgets/pull/123",
+      "hrefLabel": "Open widgets #123"
+    }
+  ],
+  [
+    "repos~repo-widgets~pr-widgets-124",
+    {
+      "title": "Add a second frobnicator",
+      "trail": [
+        "Everything",
+        "Repos",
+        "widgets"
+      ],
+      "kids": [],
+      "text": [
+        "Status: checks running",
+        "Last progress: Tue 16:00"
+      ]
+    }
+  ],
+  [
+    "repos~repo-gadgets",
+    {
+      "title": "gadgets",
+      "trail": [
+        "Everything",
+        "Repos"
+      ],
+      "kids": [
+        {
+          "id": "pr-gadgets-7",
+          "title": "Bump the toolchain",
+          "hint": "Alert: waits on a fix to the build"
+        }
+      ],
+      "text": [
+        "Open pull requests in bdelanghe/gadgets."
+      ]
+    }
+  ],
+  [
+    "repos~repo-gadgets~pr-gadgets-7",
+    {
+      "title": "Bump the toolchain",
+      "trail": [
+        "Everything",
+        "Repos",
+        "gadgets"
+      ],
+      "kids": [],
+      "text": [
+        "Alert: stuck or quiet too long.",
+        "Status: checks failing",
+        "Waits on: a fix to the build"
+      ]
+    }
+  ]
+]

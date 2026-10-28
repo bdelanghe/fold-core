@@ -1,0 +1,294 @@
+{
+  "root": {
+    "title": "Everything",
+    "health": {
+      "verdict": "Stuck",
+      "alert": true,
+      "lines": [
+        {
+          "id": "health/goal/port-goal",
+          "alert": true,
+          "scope": "Agent fleet › Goal sessions",
+          "text": "port-goal: quiet since Tue 14:44"
+        },
+        {
+          "id": "health/seat/publisher",
+          "alert": true,
+          "scope": "Agent fleet › Seats",
+          "text": "publisher: waiting for an answer"
+        },
+        {
+          "id": "health/machine/beta",
+          "alert": true,
+          "scope": "Machines",
+          "text": "beta: no heartbeat"
+        }
+      ]
+    },
+    "sections": [
+      {
+        "id": "needs",
+        "title": "Needs you",
+        "purpose": "What the agents need from you, each with what to do.",
+        "empty": "Nothing needs you right now.",
+        "groups": [
+          {
+            "title": "",
+            "items": [
+              {
+                "id": "needs/ask-0",
+                "action": "Merge the policy note",
+                "why": "You merge every policy change yourself.",
+                "link": {
+                  "href": "https://git.example.test/acme/policy/pull/4",
+                  "label": "Open acme/policy#4"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "machines",
+        "title": "Machines",
+        "purpose": "Which machines are up. The agents and CI run on them.",
+        "groups": [
+          {
+            "title": "",
+            "items": [
+              {
+                "id": "machine/alpha",
+                "name": "alpha",
+                "text": "the build host",
+                "state": "up",
+                "last": "2026-10-28T03:30:00Z"
+              },
+              {
+                "id": "machine/beta",
+                "name": "beta",
+                "text": "the spare",
+                "state": "asleep",
+                "alert": true,
+                "why": "no heartbeat for an hour",
+                "last": "2026-10-28T02:10:00Z"
+              },
+              {
+                "id": "machine/gamma",
+                "name": "gamma",
+                "text": "a small board",
+                "state": "up",
+                "link": {
+                  "href": "https://gamma.example.test/status",
+                  "label": "Status page"
+                }
+              }
+            ]
+          },
+          {
+            "id": "ci",
+            "title": "CI timings",
+            "purpose": "How long the runners take.",
+            "groups": [
+              {
+                "title": "",
+                "items": [
+                  {
+                    "id": "ci/main",
+                    "name": "main",
+                    "text": "last run took four minutes",
+                    "at": "2026-10-27T15:00:00Z"
+                  },
+                  {
+                    "id": "ci/pr",
+                    "name": "pull requests",
+                    "text": "last run took two minutes",
+                    "at": "2026-10-27T15:05:00Z"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "fleet",
+        "title": "Agent fleet",
+        "purpose": "port-goal and others need a look. The agents: goal sessions, standing seats, their pace, what they sent you, and how to reach them without this page.",
+        "sections": [
+          {
+            "id": "goals",
+            "title": "Goal sessions",
+            "purpose": "Each running goal session.",
+            "empty": "No goal session is running.",
+            "groups": [
+              {
+                "title": "",
+                "items": [
+                  {
+                    "id": "goal/port-goal",
+                    "name": "port-goal",
+                    "alert": true,
+                    "text": "Port the tooling to Rust.",
+                    "state": "idle",
+                    "last": "2026-10-27T18:44:17Z",
+                    "waits": "nothing it has said"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": "seats",
+            "title": "Seats",
+            "purpose": "The standing agents by cluster.",
+            "groups": [
+              {
+                "title": "Your hands",
+                "items": [
+                  {
+                    "id": "seat/lead",
+                    "name": "lead",
+                    "text": "acts for you",
+                    "state": "idle",
+                    "last": "2026-10-27T21:52:12Z"
+                  }
+                ]
+              },
+              {
+                "title": "Work",
+                "items": [
+                  {
+                    "id": "seat/publisher",
+                    "name": "publisher",
+                    "text": "pushes branches",
+                    "state": "waiting for an answer",
+                    "alert": true,
+                    "waits": "an answer in its terminal"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": "pace",
+            "title": "Pace",
+            "purpose": "How fast the fleet moves.",
+            "items": [
+              {
+                "id": "pace/today",
+                "name": "today",
+                "text": "twelve changes landed",
+                "state": "steady"
+              }
+            ]
+          },
+          {
+            "id": "inbox",
+            "title": "Messages to you",
+            "empty": "No messages to you in the last six hours.",
+            "groups": [
+              {
+                "title": "",
+                "items": []
+              }
+            ]
+          },
+          {
+            "id": "requests",
+            "title": "Your latest requests",
+            "groups": [
+              {
+                "title": "",
+                "items": [
+                  {
+                    "id": "request-43",
+                    "name": "Page thread #43",
+                    "text": "why does it say part 1 of 14"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": "down",
+            "title": "Down",
+            "purpose": "Seats that stopped.",
+            "empty": "Nothing is down."
+          }
+        ]
+      },
+      {
+        "id": "pages",
+        "title": "Pages",
+        "purpose": "The pages you keep, and what you are reading.",
+        "kids": []
+      },
+      {
+        "id": "repos",
+        "title": "Repos",
+        "purpose": "Your repositories with pull requests not merged yet.",
+        "empty": "No open pull requests in your repositories.",
+        "sections": [
+          {
+            "id": "repo/widgets",
+            "title": "widgets",
+            "purpose": "Open pull requests in bdelanghe/widgets.",
+            "groups": [
+              {
+                "title": "",
+                "items": [
+                  {
+                    "id": "pr/widgets/123",
+                    "name": "widgets #123",
+                    "text": "Fix the frobnicator",
+                    "state": "checks passing",
+                    "link": {
+                      "href": "https://git.example.test/acme/widgets/pull/123",
+                      "label": "Open widgets #123"
+                    }
+                  },
+                  {
+                    "id": "pr/widgets/124",
+                    "name": "widgets #124",
+                    "text": "Add a second frobnicator",
+                    "state": "checks running",
+                    "last": "2026-10-27T20:00:00Z"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": "repo/gadgets",
+            "title": "gadgets",
+            "purpose": "Open pull requests in bdelanghe/gadgets.",
+            "groups": [
+              {
+                "title": "",
+                "items": [
+                  {
+                    "id": "pr/gadgets/7",
+                    "name": "gadgets #7",
+                    "text": "Bump the toolchain",
+                    "state": "checks failing",
+                    "alert": true,
+                    "waits": "a fix to the build"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "meta": {
+      "updated": "2026-10-27T18:07:00Z",
+      "timeZone": "America/New_York"
+    }
+  },
+  "files": {},
+  "opts": {
+    "updated": "2026-10-28T16:00:00.000Z",
+    "source": "golden"
+  }
+}

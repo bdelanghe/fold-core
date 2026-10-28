@@ -1,0 +1,14 @@
+[package]
+name = "fold-core"
+version = "0.1.0"
+edition = "2021"
+license = "MIT"
+description = "The shared fold core: one JSON object (pages, decks, Markdown) into fold-viewer nodes, byte-identical to the fold viewer it was ported from"
+repository = "https://github.com/bdelanghe/fold-core"
+
+[dependencies]
+serde = { version = "1", features = ["derive"] }
+serde_json = { version = "1", features = ["preserve_order"] }
+chrono = { version = "0.4", default-features = false, features = ["std"] }
+chrono-tz = "0.10"
+regex = "1"

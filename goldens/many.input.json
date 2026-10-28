@@ -1,0 +1,725 @@
+{
+  "root": {
+    "title": "Many",
+    "sections": [
+      {
+        "id": "root",
+        "title": "Taken ids",
+        "purpose": "Kids whose ids fold() makes itself.",
+        "kids": [
+          {
+            "id": "more",
+            "title": "A kid called more"
+          },
+          {
+            "id": "part-2",
+            "title": "A kid called part-2"
+          },
+          {
+            "id": "part-x",
+            "title": "Not a run id"
+          },
+          {
+            "title": "More"
+          }
+        ]
+      },
+      {
+        "id": "big",
+        "title": "Thirty-seven",
+        "purpose": "A long list splits into named runs.",
+        "items": [
+          {
+            "title": "Same name"
+          },
+          {
+            "title": "Item 2 über — long label that goes past twenty-two"
+          },
+          {
+            "title": "Item 3 😀 emoji start"
+          },
+          {
+            "title": "Item 4 plain"
+          },
+          {
+            "title": "Item 5 naïve café"
+          },
+          {
+            "title": "Item 6 über — long label that goes past twenty-two"
+          },
+          {
+            "title": "Same name"
+          },
+          {
+            "title": "Item 8 plain"
+          },
+          {
+            "title": "Item 9 naïve café"
+          },
+          {
+            "title": "Item 10 über — long label that goes past twenty-two"
+          },
+          {
+            "title": "Item 11 😀 emoji start"
+          },
+          {
+            "title": "Item 12 plain"
+          },
+          {
+            "title": "Same name"
+          },
+          {
+            "title": "Item 14 über — long label that goes past twenty-two"
+          },
+          {
+            "title": "Item 15 😀 emoji start"
+          },
+          {
+            "title": "Item 16 plain"
+          },
+          {
+            "title": "Item 17 naïve café"
+          },
+          {
+            "title": "Item 18 über — long label that goes past twenty-two"
+          },
+          {
+            "title": "Same name"
+          },
+          {
+            "title": "Item 20 plain"
+          },
+          {
+            "title": "Item 21 naïve café"
+          },
+          {
+            "title": "Item 22 über — long label that goes past twenty-two"
+          },
+          {
+            "title": "Item 23 😀 emoji start"
+          },
+          {
+            "title": "Item 24 plain"
+          },
+          {
+            "title": "Same name"
+          },
+          {
+            "title": "Item 26 über — long label that goes past twenty-two"
+          },
+          {
+            "title": "Item 27 😀 emoji start"
+          },
+          {
+            "title": "Item 28 plain"
+          },
+          {
+            "title": "Item 29 naïve café"
+          },
+          {
+            "title": "Item 30 über — long label that goes past twenty-two"
+          },
+          {
+            "title": "Same name"
+          },
+          {
+            "title": "Item 32 plain"
+          },
+          {
+            "title": "Item 33 naïve café"
+          },
+          {
+            "title": "Item 34 über — long label that goes past twenty-two"
+          },
+          {
+            "title": "Item 35 😀 emoji start"
+          },
+          {
+            "title": "Item 36 plain"
+          },
+          {
+            "title": "Same name"
+          }
+        ]
+      },
+      {
+        "id": "seven",
+        "title": "Seven",
+        "purpose": "A short list keeps four and the rest under More.",
+        "kids": [
+          {
+            "name": "Row 0",
+            "text": "Row 0 does a thing."
+          },
+          {
+            "name": "Row 1",
+            "text": "Row 1 does a thing."
+          },
+          {
+            "name": "Row 2",
+            "text": "Row 2 does a thing."
+          },
+          {
+            "name": "Row 3",
+            "text": "Row 3 does a thing."
+          },
+          {
+            "name": "Row 4",
+            "text": "Row 4 does a thing."
+          },
+          {
+            "name": "Row 5",
+            "text": "Row 5 does a thing."
+          },
+          {
+            "name": "Row 6",
+            "text": "Row 6 does a thing."
+          }
+        ]
+      },
+      {
+        "id": "huge",
+        "title": "Hundred and twenty",
+        "groups": [
+          {
+            "title": "",
+            "items": [
+              {
+                "id": "h/0",
+                "title": "Entry 000"
+              },
+              {
+                "id": "h/1",
+                "title": "Entry 001"
+              },
+              {
+                "id": "h/2",
+                "title": "Entry 002"
+              },
+              {
+                "id": "h/3",
+                "title": "Entry 003"
+              },
+              {
+                "id": "h/4",
+                "title": "Entry 004"
+              },
+              {
+                "id": "h/5",
+                "title": "Entry 005"
+              },
+              {
+                "id": "h/6",
+                "title": "Entry 006"
+              },
+              {
+                "id": "h/7",
+                "title": "Entry 007"
+              },
+              {
+                "id": "h/8",
+                "title": "Entry 008"
+              },
+              {
+                "id": "h/9",
+                "title": "Entry 009"
+              },
+              {
+                "id": "h/10",
+                "title": "Entry 010"
+              },
+              {
+                "id": "h/11",
+                "title": "Entry 011"
+              },
+              {
+                "id": "h/12",
+                "title": "Entry 012"
+              },
+              {
+                "id": "h/13",
+                "title": "Entry 013"
+              },
+              {
+                "id": "h/14",
+                "title": "Entry 014"
+              },
+              {
+                "id": "h/15",
+                "title": "Entry 015"
+              },
+              {
+                "id": "h/16",
+                "title": "Entry 016"
+              },
+              {
+                "id": "h/17",
+                "title": "Entry 017"
+              },
+              {
+                "id": "h/18",
+                "title": "Entry 018"
+              },
+              {
+                "id": "h/19",
+                "title": "Entry 019"
+              },
+              {
+                "id": "h/20",
+                "title": "Entry 020"
+              },
+              {
+                "id": "h/21",
+                "title": "Entry 021"
+              },
+              {
+                "id": "h/22",
+                "title": "Entry 022"
+              },
+              {
+                "id": "h/23",
+                "title": "Entry 023"
+              },
+              {
+                "id": "h/24",
+                "title": "Entry 024"
+              },
+              {
+                "id": "h/25",
+                "title": "Entry 025"
+              },
+              {
+                "id": "h/26",
+                "title": "Entry 026"
+              },
+              {
+                "id": "h/27",
+                "title": "Entry 027"
+              },
+              {
+                "id": "h/28",
+                "title": "Entry 028"
+              },
+              {
+                "id": "h/29",
+                "title": "Entry 029"
+              },
+              {
+                "id": "h/30",
+                "title": "Entry 030"
+              },
+              {
+                "id": "h/31",
+                "title": "Entry 031"
+              },
+              {
+                "id": "h/32",
+                "title": "Entry 032"
+              },
+              {
+                "id": "h/33",
+                "title": "Entry 033"
+              },
+              {
+                "id": "h/34",
+                "title": "Entry 034"
+              },
+              {
+                "id": "h/35",
+                "title": "Entry 035"
+              },
+              {
+                "id": "h/36",
+                "title": "Entry 036"
+              },
+              {
+                "id": "h/37",
+                "title": "Entry 037"
+              },
+              {
+                "id": "h/38",
+                "title": "Entry 038"
+              },
+              {
+                "id": "h/39",
+                "title": "Entry 039"
+              },
+              {
+                "id": "h/40",
+                "title": "Entry 040"
+              },
+              {
+                "id": "h/41",
+                "title": "Entry 041"
+              },
+              {
+                "id": "h/42",
+                "title": "Entry 042"
+              },
+              {
+                "id": "h/43",
+                "title": "Entry 043"
+              },
+              {
+                "id": "h/44",
+                "title": "Entry 044"
+              },
+              {
+                "id": "h/45",
+                "title": "Entry 045"
+              },
+              {
+                "id": "h/46",
+                "title": "Entry 046"
+              },
+              {
+                "id": "h/47",
+                "title": "Entry 047"
+              },
+              {
+                "id": "h/48",
+                "title": "Entry 048"
+              },
+              {
+                "id": "h/49",
+                "title": "Entry 049"
+              },
+              {
+                "id": "h/50",
+                "title": "Entry 050"
+              },
+              {
+                "id": "h/51",
+                "title": "Entry 051"
+              },
+              {
+                "id": "h/52",
+                "title": "Entry 052"
+              },
+              {
+                "id": "h/53",
+                "title": "Entry 053"
+              },
+              {
+                "id": "h/54",
+                "title": "Entry 054"
+              },
+              {
+                "id": "h/55",
+                "title": "Entry 055"
+              },
+              {
+                "id": "h/56",
+                "title": "Entry 056"
+              },
+              {
+                "id": "h/57",
+                "title": "Entry 057"
+              },
+              {
+                "id": "h/58",
+                "title": "Entry 058"
+              },
+              {
+                "id": "h/59",
+                "title": "Entry 059"
+              },
+              {
+                "id": "h/60",
+                "title": "Entry 060"
+              },
+              {
+                "id": "h/61",
+                "title": "Entry 061"
+              },
+              {
+                "id": "h/62",
+                "title": "Entry 062"
+              },
+              {
+                "id": "h/63",
+                "title": "Entry 063"
+              },
+              {
+                "id": "h/64",
+                "title": "Entry 064"
+              },
+              {
+                "id": "h/65",
+                "title": "Entry 065"
+              },
+              {
+                "id": "h/66",
+                "title": "Entry 066"
+              },
+              {
+                "id": "h/67",
+                "title": "Entry 067"
+              },
+              {
+                "id": "h/68",
+                "title": "Entry 068"
+              },
+              {
+                "id": "h/69",
+                "title": "Entry 069"
+              },
+              {
+                "id": "h/70",
+                "title": "Entry 070"
+              },
+              {
+                "id": "h/71",
+                "title": "Entry 071"
+              },
+              {
+                "id": "h/72",
+                "title": "Entry 072"
+              },
+              {
+                "id": "h/73",
+                "title": "Entry 073"
+              },
+              {
+                "id": "h/74",
+                "title": "Entry 074"
+              },
+              {
+                "id": "h/75",
+                "title": "Entry 075"
+              },
+              {
+                "id": "h/76",
+                "title": "Entry 076"
+              },
+              {
+                "id": "h/77",
+                "title": "Entry 077"
+              },
+              {
+                "id": "h/78",
+                "title": "Entry 078"
+              },
+              {
+                "id": "h/79",
+                "title": "Entry 079"
+              },
+              {
+                "id": "h/80",
+                "title": "Entry 080"
+              },
+              {
+                "id": "h/81",
+                "title": "Entry 081"
+              },
+              {
+                "id": "h/82",
+                "title": "Entry 082"
+              },
+              {
+                "id": "h/83",
+                "title": "Entry 083"
+              },
+              {
+                "id": "h/84",
+                "title": "Entry 084"
+              },
+              {
+                "id": "h/85",
+                "title": "Entry 085"
+              },
+              {
+                "id": "h/86",
+                "title": "Entry 086"
+              },
+              {
+                "id": "h/87",
+                "title": "Entry 087"
+              },
+              {
+                "id": "h/88",
+                "title": "Entry 088"
+              },
+              {
+                "id": "h/89",
+                "title": "Entry 089"
+              },
+              {
+                "id": "h/90",
+                "title": "Entry 090"
+              },
+              {
+                "id": "h/91",
+                "title": "Entry 091"
+              },
+              {
+                "id": "h/92",
+                "title": "Entry 092"
+              },
+              {
+                "id": "h/93",
+                "title": "Entry 093"
+              },
+              {
+                "id": "h/94",
+                "title": "Entry 094"
+              },
+              {
+                "id": "h/95",
+                "title": "Entry 095"
+              },
+              {
+                "id": "h/96",
+                "title": "Entry 096"
+              },
+              {
+                "id": "h/97",
+                "title": "Entry 097"
+              },
+              {
+                "id": "h/98",
+                "title": "Entry 098"
+              },
+              {
+                "id": "h/99",
+                "title": "Entry 099"
+              },
+              {
+                "id": "h/100",
+                "title": "Entry 100"
+              },
+              {
+                "id": "h/101",
+                "title": "Entry 101"
+              },
+              {
+                "id": "h/102",
+                "title": "Entry 102"
+              },
+              {
+                "id": "h/103",
+                "title": "Entry 103"
+              },
+              {
+                "id": "h/104",
+                "title": "Entry 104"
+              },
+              {
+                "id": "h/105",
+                "title": "Entry 105"
+              },
+              {
+                "id": "h/106",
+                "title": "Entry 106"
+              },
+              {
+                "id": "h/107",
+                "title": "Entry 107"
+              },
+              {
+                "id": "h/108",
+                "title": "Entry 108"
+              },
+              {
+                "id": "h/109",
+                "title": "Entry 109"
+              },
+              {
+                "id": "h/110",
+                "title": "Entry 110"
+              },
+              {
+                "id": "h/111",
+                "title": "Entry 111"
+              },
+              {
+                "id": "h/112",
+                "title": "Entry 112"
+              },
+              {
+                "id": "h/113",
+                "title": "Entry 113"
+              },
+              {
+                "id": "h/114",
+                "title": "Entry 114"
+              },
+              {
+                "id": "h/115",
+                "title": "Entry 115"
+              },
+              {
+                "id": "h/116",
+                "title": "Entry 116"
+              },
+              {
+                "id": "h/117",
+                "title": "Entry 117"
+              },
+              {
+                "id": "h/118",
+                "title": "Entry 118"
+              },
+              {
+                "id": "h/119",
+                "title": "Entry 119"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "grouped",
+        "title": "Grouped",
+        "groups": [
+          {
+            "title": "Named group",
+            "items": [
+              {
+                "title": "One"
+              },
+              {
+                "title": "Two"
+              }
+            ]
+          },
+          {
+            "title": "",
+            "items": [
+              {
+                "title": "Loose"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "title": "Fifth",
+        "text": "No id, a text only."
+      },
+      {
+        "id": "sixth",
+        "title": "Sixth",
+        "empty": "Nothing here."
+      },
+      {
+        "id": "seventh",
+        "label": "Seventh by label",
+        "children": [
+          {
+            "nav": "Nav label"
+          },
+          {
+            "action": "Do it"
+          },
+          {}
+        ]
+      }
+    ]
+  },
+  "files": {},
+  "opts": {
+    "updated": "2026-10-28T16:00:00.000Z",
+    "source": "golden"
+  }
+}
