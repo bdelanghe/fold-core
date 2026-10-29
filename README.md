@@ -7,6 +7,12 @@ text.
     fold(root, opts) -> Vec<(id, Node)>      // insertion order, as the viewer's Map
     from_markdown(md), pages(lines), from_deck(deck), with_sources(value, read)
 
+## WebAssembly
+
+`nix build .#wasm` gives `lib/fold_core.wasm` (a plain C ABI, src/wasm.rs) and `lib/fold-core.ts`, its loader:
+`(await load(bytes))({root, files, opts})` returns the fold list exactly as a golden holds it. `files` maps each `from` path to its
+text. `nix flake check` runs js/parity.test.ts against every golden with the built module.
+
 ## Tests
 
     nix develop -c cargo test     # or: nix flake check
@@ -27,6 +33,7 @@ is a change in behaviour.
 | `many` | `More of this page` at the top, `More in …` for a short list, `part-N` runs two levels deep (37 and 120 items), id dedupe, ids the fold makes itself taken (`root`, `more`, `part-2`), untitled groups as layout, labels from `nav`/`action`/`label`, `Untitled`, non-ASCII and emoji labels cut by `short()` |
 | `markdown` | a `from` Markdown file: headings and nesting, a ~3,000-word section split into screenfuls (list items, paragraphs, then sentences), `p2…` folds, a heading ending in `\r`, a second `#`, `#######`, and a missing file's note |
 | `deck` | a root presenting as folds holding a `from` fold page that presents as slides, which holds a third deck: each sequence starts and ends at its own folds; string `text` from a source; a `{meta, slides}` deck through `from_deck` (kickers, transcript pages, markup stripped) |
+| `md-pages` | a section split at words (a 400-word list item with no full stop), a section long enough that its page size grows to the cap and still pages twice, subsections after the pages, a section that fits one screen |
 | `fields` | alerts (why, waits and last, neither), labelled fields, times near midnight and with offsets, a non-time in `at`, reference names with and without text, a self row and look-alikes, hints over 90 code units with and without a sentence end and with emoji, duplicate ids, `empty` with and without kids, `stale` |
 
 ## Known limits against JS

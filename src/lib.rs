@@ -8,6 +8,7 @@
 //! set, `.` stops at JS line terminators.
 
 mod js;
+pub mod wasm;
 
 use std::cell::RefCell;
 use std::collections::{HashMap, HashSet};
@@ -464,18 +465,31 @@ fn sentences(l: &str) -> Option<Vec<String>> {
     (!out.is_empty()).then_some(out)
 }
 
-/// fold.ts `pages`: lines into screenfuls of at most PAGE_WORDS words, a long line split at its sentences.
+/// fold.ts `pages` at its default size, PAGE_WORDS.
 pub fn pages(lines: &[String]) -> Vec<Vec<String>> {
+    pages_of(lines, PAGE_WORDS)
+}
+
+/// fold.ts `byWords`: a sentence still over a page split every `size` words.
+fn by_words(s: &str, size: usize) -> Vec<String> {
+    let w: Vec<&str> = js::split_ws(s).filter(|w| !w.is_empty()).collect();
+    w.chunks(size).map(|c| c.join(" ")).collect()
+}
+
+/// fold.ts `pages(lines, size)`: lines into screenfuls of at most `size` words, a long line split at its sentences, a sentence
+/// still over a page at its words.
+pub fn pages_of(lines: &[String], size: usize) -> Vec<Vec<String>> {
     let mut out: Vec<Vec<String>> = vec![vec![]];
     let mut n = 0;
     let parts = lines
         .iter()
-        .flat_map(|l| if words(l) > PAGE_WORDS { sentences(l).unwrap_or_else(|| vec![l.clone()]) } else { vec![l.clone()] })
+        .flat_map(|l| if words(l) > size { sentences(l).unwrap_or_else(|| vec![l.clone()]) } else { vec![l.clone()] })
+        .flat_map(|x| if words(&x) > size { by_words(&x, size) } else { vec![x] })
         .map(|x| js_trim(&x).to_string())
         .filter(|x| !x.is_empty());
     for p in parts {
         let w = words(&p);
-        if n > 0 && n + w > PAGE_WORDS {
+        if n > 0 && n + w > size {
             out.push(vec![]);
             n = 0;
         }
@@ -489,8 +503,16 @@ fn strings(v: &[String]) -> Value {
     Value::Array(v.iter().map(|x| Value::String(x.clone())).collect())
 }
 
-/// fold.ts `goesOn`: a screenful after the first, named by how it starts.
-fn goes_on(p: &[String], i: usize) -> Value {
+const MD_PAGE_WORDS: usize = 120;
+const MD_PAGE_MAX: usize = 160;
+
+/// fold.ts `mdPage`: a Markdown section's page size, grown until its pages and subsections fit one level of named runs.
+pub fn md_page(lines: &[String], subsections: usize) -> usize {
+    (MD_PAGE_WORDS..MD_PAGE_MAX).step_by(10).find(|&size| pages_of(lines, size).len() + subsections <= MAX_KIDS * MAX_KIDS).unwrap_or(MD_PAGE_MAX)
+}
+
+/// fold.ts `goesOn(p, i)`: a screenful named by how it starts, id `p{i + 2}` (i may be -1: a section's first page is `p1`).
+fn goes_on(p: &[String], i: i64) -> Value {
     let mut m = Map::new();
     m.insert("id".into(), Value::String(format!("p{}", i + 2)));
     m.insert("title".into(), Value::String(clip(&p[0], 60)));
@@ -543,13 +565,15 @@ pub fn from_markdown(md: &str) -> Value {
     flush(&mut arena, &stack, &mut para);
     fn tidy(arena: &[Md], i: usize) -> Value {
         let n = &arena[i];
-        let pg = if n.text.is_empty() { vec![vec![]] } else { pages(&n.text) };
-        let (first, rest) = pg.split_first().expect("one page");
-        let kids: Vec<Value> = rest.iter().enumerate().map(|(i, p)| goes_on(p, i)).chain(n.kids.iter().map(|&k| tidy(arena, k))).collect();
+        // one screen holds its text; a longer section is split once into sibling folds, ahead of its subsections (fold.ts #787)
+        let ps = if n.text.is_empty() { vec![vec![]] } else { pages_of(&n.text, md_page(&n.text, n.kids.len())) };
+        let own: &[String] = if ps.len() == 1 { &ps[0] } else { &[] };
+        let split = if ps.len() > 1 { ps.iter().enumerate().map(|(i, p)| goes_on(p, i as i64 - 1)).collect() } else { vec![] };
+        let kids: Vec<Value> = split.into_iter().chain(n.kids.iter().map(|&k| tidy(arena, k))).collect();
         let mut m = Map::new();
         m.insert("title".into(), Value::String(if n.title.is_empty() { "Untitled".into() } else { n.title.clone() }));
-        if !first.is_empty() {
-            m.insert("text".into(), strings(first));
+        if !own.is_empty() {
+            m.insert("text".into(), strings(own));
         }
         if !kids.is_empty() {
             m.insert("kids".into(), Value::Array(kids));
@@ -594,14 +618,14 @@ pub fn from_deck(d: &Value) -> Result<Value, String> {
             let pg = pages(&t);
             let (first, rest) = pg.split_first().expect("one page");
             let said = if s(get(sl, "transcript")).is_some() { pages(&[raw(get(sl, "transcript")).to_string()]) } else { vec![] };
-            let mut sk: Vec<Value> = rest.iter().enumerate().map(|(i, p)| goes_on(p, i)).collect();
+            let mut sk: Vec<Value> = rest.iter().enumerate().map(|(i, p)| goes_on(p, i as i64)).collect();
             if let Some((s0, srest)) = said.split_first() {
                 let mut sp = Map::new();
                 sp.insert("id".into(), "spoken".into());
                 sp.insert("title".into(), "What was said".into());
                 sp.insert("text".into(), strings(s0));
                 if !srest.is_empty() {
-                    sp.insert("kids".into(), Value::Array(srest.iter().enumerate().map(|(i, p)| goes_on(p, i)).collect()));
+                    sp.insert("kids".into(), Value::Array(srest.iter().enumerate().map(|(i, p)| goes_on(p, i as i64)).collect()));
                 }
                 sk.push(Value::Object(sp));
             }
