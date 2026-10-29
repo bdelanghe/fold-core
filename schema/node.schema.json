@@ -1,0 +1,101 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Node",
+  "description": "One fold. Field order is fold.ts's key order; absent fields are left out, as `JSON.stringify` leaves out `undefined`.",
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string"
+    },
+    "trail": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "kids": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/Kid"
+      }
+    },
+    "text": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "href": {
+      "type": "string"
+    },
+    "hrefLabel": {
+      "type": "string"
+    },
+    "act": {
+      "description": "fold.ts `act`: the fold's one action, `{cap, call, args, label}` (the viewer calls `claude.use(cap)[call](args)`)."
+    },
+    "updated": {
+      "type": "string"
+    },
+    "source": {
+      "type": "string"
+    },
+    "stale": {
+      "type": "string"
+    },
+    "present": {
+      "type": "string"
+    },
+    "prev": {
+      "$ref": "#/$defs/Step"
+    },
+    "next": {
+      "$ref": "#/$defs/Step"
+    }
+  },
+  "required": [
+    "title",
+    "trail",
+    "kids"
+  ],
+  "$defs": {
+    "Kid": {
+      "description": "A link on a fold: one row.",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "title": {
+          "type": "string"
+        },
+        "hint": {
+          "type": "string"
+        },
+        "href": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "title"
+      ]
+    },
+    "Step": {
+      "description": "The fold before or after one in a presenting subtree's reading order.",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "title": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "title"
+      ]
+    }
+  }
+}
