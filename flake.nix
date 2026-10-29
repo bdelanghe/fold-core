@@ -14,7 +14,9 @@
         wasm = default.overrideAttrs (old: {
           pname = "fold-core-wasm";
           nativeBuildInputs = old.nativeBuildInputs ++ [ pkgs.lld ];
-          buildPhase = "cargo build --offline --release --lib --target wasm32-unknown-unknown";
+          # the build dir is random per build (/nix/var/nix/builds/nix-<pid>-<n>) and panic paths name it: remapped, the bytes are the same
+          # on every build, so a consumer can pin their digest (home checks.fold-core-parity)
+          buildPhase = "RUSTFLAGS=\"--remap-path-prefix=$NIX_BUILD_TOP=/build\" cargo build --offline --release --lib --target wasm32-unknown-unknown";
           doCheck = false;
           installPhase = "mkdir -p $out/lib && cp target/wasm32-unknown-unknown/release/fold_core.wasm $out/lib/ && cp js/fold-core.ts $out/lib/";
           dontFixup = true;
