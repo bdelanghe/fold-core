@@ -1,0 +1,216 @@
+[
+  [
+    "root",
+    {
+      "title": "Zones",
+      "trail": [],
+      "kids": [
+        {
+          "id": "local",
+          "title": "Times in the machine's zone"
+        }
+      ],
+      "updated": "2026-10-27T00:00:00Z",
+      "source": "test"
+    }
+  ],
+  [
+    "local",
+    {
+      "title": "Times in the machine's zone",
+      "trail": [
+        "Zones"
+      ],
+      "kids": [
+        {
+          "id": "gap",
+          "title": "Gap",
+          "hint": "idle, last progress Sun 03:30"
+        },
+        {
+          "id": "overlap",
+          "title": "Overlap",
+          "hint": "idle, last progress Sun 01:30"
+        },
+        {
+          "id": "before-the-gap",
+          "title": "Before the gap"
+        },
+        {
+          "id": "after-the-overlap",
+          "title": "After the overlap"
+        },
+        {
+          "id": "more",
+          "title": "More in Times in the machine's zone",
+          "hint": "With an offset, UTC, A date alone, Midnight as 24, Long ago"
+        }
+      ]
+    }
+  ],
+  [
+    "local~gap",
+    {
+      "title": "Gap",
+      "trail": [
+        "Zones",
+        "Times in the machine's zone"
+      ],
+      "kids": [],
+      "text": [
+        "Status: idle",
+        "Last progress: Sun 03:30"
+      ]
+    }
+  ],
+  [
+    "local~overlap",
+    {
+      "title": "Overlap",
+      "trail": [
+        "Zones",
+        "Times in the machine's zone"
+      ],
+      "kids": [],
+      "text": [
+        "Status: idle",
+        "Last progress: Sun 01:30"
+      ]
+    }
+  ],
+  [
+    "local~before-the-gap",
+    {
+      "title": "Before the gap",
+      "trail": [
+        "Zones",
+        "Times in the machine's zone"
+      ],
+      "kids": [],
+      "text": [
+        "Sun 01:59"
+      ]
+    }
+  ],
+  [
+    "local~after-the-overlap",
+    {
+      "title": "After the overlap",
+      "trail": [
+        "Zones",
+        "Times in the machine's zone"
+      ],
+      "kids": [],
+      "text": [
+        "Sun 02:00"
+      ]
+    }
+  ],
+  [
+    "local~more",
+    {
+      "title": "More in Times in the machine's zone",
+      "trail": [
+        "Zones",
+        "Times in the machine's zone"
+      ],
+      "kids": [
+        {
+          "id": "with-an-offset",
+          "title": "With an offset"
+        },
+        {
+          "id": "utc",
+          "title": "UTC"
+        },
+        {
+          "id": "a-date-alone",
+          "title": "A date alone"
+        },
+        {
+          "id": "midnight-as-24",
+          "title": "Midnight as 24"
+        },
+        {
+          "id": "long-ago",
+          "title": "Long ago"
+        }
+      ]
+    }
+  ],
+  [
+    "local~more~with-an-offset",
+    {
+      "title": "With an offset",
+      "trail": [
+        "Zones",
+        "Times in the machine's zone",
+        "More in Times in the machine's zone"
+      ],
+      "kids": [],
+      "text": [
+        "Sat 02:30"
+      ]
+    }
+  ],
+  [
+    "local~more~utc",
+    {
+      "title": "UTC",
+      "trail": [
+        "Zones",
+        "Times in the machine's zone",
+        "More in Times in the machine's zone"
+      ],
+      "kids": [],
+      "text": [
+        "Thu 18:30"
+      ]
+    }
+  ],
+  [
+    "local~more~a-date-alone",
+    {
+      "title": "A date alone",
+      "trail": [
+        "Zones",
+        "Times in the machine's zone",
+        "More in Times in the machine's zone"
+      ],
+      "kids": [],
+      "text": [
+        "Fri 20:00"
+      ]
+    }
+  ],
+  [
+    "local~more~midnight-as-24",
+    {
+      "title": "Midnight as 24",
+      "trail": [
+        "Zones",
+        "Times in the machine's zone",
+        "More in Times in the machine's zone"
+      ],
+      "kids": [],
+      "text": [
+        "Sun 00:00"
+      ]
+    }
+  ],
+  [
+    "local~more~long-ago",
+    {
+      "title": "Long ago",
+      "trail": [
+        "Zones",
+        "Times in the machine's zone",
+        "More in Times in the machine's zone"
+      ],
+      "kids": [],
+      "text": [
+        "Sun 12:00"
+      ]
+    }
+  ]
+]

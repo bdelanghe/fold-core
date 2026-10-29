@@ -9,6 +9,7 @@
 
 pub mod ax;
 mod js;
+mod tz;
 pub mod walk;
 pub mod wasm;
 

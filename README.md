@@ -17,6 +17,12 @@ text.
 each `from` path to its text); `walk({nodes, opts, facto?})` returns `{walk, verdict, facto?}` as a walk golden holds it, where
 `opts.budgets` is budgets.json's `budgets` (the walk reads `view.words`) and `opts.localTimeZone` the machine's zone. `nix flake check` runs js/parity.test.ts against every golden with the built module.
 
+The module carries no zone data. It imports `fold_core.tz_offset(zone_ptr, zone_len, epoch_ms) -> seconds` (`i32::MIN` for an
+unknown zone), and the loader answers it from `Intl`, the same zone rules fold.ts reads. A host that loads the module without
+`core()` has to provide that import. The native library builds the rules in instead (the default `tzdb` feature, chrono-tz).
+`checks.wasm-size` holds the module to 200 KB gzipped: it is about 235 KB raw and 104 KB gzipped (it was 2.1 MB raw and 539 KB
+gzipped with chrono-tz and regex built in).
+
 ## Tests
 
     nix develop -c cargo test     # or: nix flake check
@@ -47,6 +53,8 @@ is a change in behaviour.
 | walk `inline` | a kept page read inline (`artifacts~…`): nothing blocks but fold-bytes; nested runs on the page and inline; fold docs over 8 KB |
 | walk `slides` | folds that `present`: slide words over budget, prev/next that exist and that dangle; every property row (stale, act with and without a label, href and hrefLabel, health, checked, "Data from" with and without a source, times with offsets, no offset, a date alone and a non-time) |
 | walk `order` | no root, every fold unreachable, ranked by id as `localeCompare` orders it (punctuation, digits, case) |
+| `zones`, `zones-page` | times in the machine's zone (`opts.localTimeZone`): a DST gap (moves forward) and overlap (the earlier), offsets, `Z`, a date alone, `24:00`, 1883; a page in its own zone with a +12:45 offset |
+| walk `zones` | "Data from" times in a gap and an overlap, in the machine's zone |
 | walk `repeats` | a repeated id (first place, last node) and a cycle back to a fold already walked |
 
 ## Known limits against JS
