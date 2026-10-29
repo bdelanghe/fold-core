@@ -1,0 +1,49 @@
+{
+  "walk": {
+    "folds": 8,
+    "reached": 8,
+    "findings": [
+      {
+        "fold": "s",
+        "check": "unexplained-state",
+        "kind": "rename",
+        "blocks": true,
+        "said": "Stuck.",
+        "reduction": "say what \"Stuck.\" is about and what to do, or drop the line"
+      },
+      {
+        "fold": "over",
+        "check": "words",
+        "kind": "restructure",
+        "blocks": true,
+        "said": "221 words",
+        "reduction": "split below 220 words"
+      },
+      {
+        "fold": "root",
+        "check": "choices",
+        "kind": "restructure",
+        "blocks": true,
+        "said": "7 links",
+        "reduction": "group into at most 5"
+      },
+      {
+        "fold": "blank",
+        "check": "no-intent",
+        "kind": "remove",
+        "blocks": false,
+        "said": "",
+        "reduction": "an empty fold: remove it from its parent"
+      },
+      {
+        "fold": "three",
+        "check": "no-intent",
+        "kind": "remove",
+        "blocks": false,
+        "said": "one two three",
+        "reduction": "an empty fold: remove it from its parent"
+      }
+    ]
+  },
+  "verdict": "The artificial viewer is stuck on \"Stuck.\" (s): say what \"Stuck.\" is about and what to do, or drop the line."
+}

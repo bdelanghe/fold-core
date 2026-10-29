@@ -1,0 +1,117 @@
+{
+  "nodes": [
+    [
+      "root",
+      {
+        "title": "Words",
+        "trail": [],
+        "kids": [
+          {
+            "id": "s",
+            "title": "As a string"
+          },
+          {
+            "id": "h",
+            "title": "Href"
+          },
+          {
+            "id": "at",
+            "title": "At"
+          },
+          {
+            "id": "over",
+            "title": "Over"
+          },
+          {
+            "id": "three",
+            "title": "Three"
+          },
+          {
+            "id": "four",
+            "title": "Four"
+          },
+          {
+            "id": "blank",
+            "title": "Blank"
+          }
+        ]
+      }
+    ],
+    [
+      "s",
+      {
+        "title": "A string",
+        "trail": [],
+        "kids": [],
+        "text": "Stuck."
+      }
+    ],
+    [
+      "h",
+      {
+        "title": "H",
+        "trail": [
+          "Words"
+        ],
+        "kids": [],
+        "href": "https://example.org/h"
+      }
+    ],
+    [
+      "at",
+      {
+        "title": "At",
+        "trail": [],
+        "kids": [],
+        "text": [
+          "word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word"
+        ]
+      }
+    ],
+    [
+      "over",
+      {
+        "title": "Over",
+        "trail": [],
+        "kids": [],
+        "text": [
+          "word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word"
+        ]
+      }
+    ],
+    [
+      "three",
+      {
+        "title": "one two three",
+        "trail": [],
+        "kids": []
+      }
+    ],
+    [
+      "four",
+      {
+        "title": "one two three four",
+        "trail": [],
+        "kids": []
+      }
+    ],
+    [
+      "blank",
+      {
+        "title": "",
+        "trail": [],
+        "kids": [],
+        "text": ""
+      }
+    ]
+  ],
+  "opts": {
+    "budgets": [
+      {
+        "id": "view.words",
+        "value": 220
+      }
+    ],
+    "localTimeZone": "UTC"
+  }
+}

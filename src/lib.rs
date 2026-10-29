@@ -7,7 +7,9 @@
 //! JS string semantics are kept where they show: lengths and cuts count UTF-16 code units, `\s` and `trim()` are JS's whitespace
 //! set, `.` stops at JS line terminators.
 
+pub mod ax;
 mod js;
+pub mod walk;
 pub mod wasm;
 
 use std::cell::RefCell;
@@ -310,7 +312,9 @@ impl Folder<'_> {
         // fold.ts: cap, call and label non-blank strings, args a truthy object (arrays too, as `typeof` says); cap and call as written
         let act = get(o, "act");
         let args = act.and_then(|a| get(a, "args")).filter(|v| v.is_object() || v.is_array());
-        if let (Some(_), Some(_), Some(label), Some(args)) = (s(act.and_then(|a| get(a, "cap"))), s(act.and_then(|a| get(a, "call"))), s(act.and_then(|a| get(a, "label"))), args) {
+        if let (Some(_), Some(_), Some(label), Some(args)) =
+            (s(act.and_then(|a| get(a, "cap"))), s(act.and_then(|a| get(a, "call"))), s(act.and_then(|a| get(a, "label"))), args)
+        {
             let a = act.expect("act");
             let mut m = Map::new();
             m.insert("cap".into(), a["cap"].clone());
@@ -523,7 +527,10 @@ const MD_PAGE_MAX: usize = 160;
 
 /// fold.ts `mdPage`: a Markdown section's page size, grown until its pages and subsections fit one level of named runs.
 pub fn md_page(lines: &[String], subsections: usize) -> usize {
-    (MD_PAGE_WORDS..MD_PAGE_MAX).step_by(10).find(|&size| pages_of(lines, size).len() + subsections <= MAX_KIDS * MAX_KIDS).unwrap_or(MD_PAGE_MAX)
+    (MD_PAGE_WORDS..MD_PAGE_MAX)
+        .step_by(10)
+        .find(|&size| pages_of(lines, size).len() + subsections <= MAX_KIDS * MAX_KIDS)
+        .unwrap_or(MD_PAGE_MAX)
 }
 
 /// fold.ts `goesOn(p, i)`: a screenful named by how it starts, id `p{i + 2}` (i may be -1: a section's first page is `p1`).

@@ -4,12 +4,14 @@
 //!   alloc(len) -> ptr           the host writes its UTF-8 input there
 //!   fold_json(ptr, len) -> u64  folds `{root, files, opts}` (the shape of goldens/<case>.input.json) and returns
 //!                               (out_ptr << 32) | out_len: `[[id, node], ...]` in insertion order, or `{"error": "..."}`
+//!   walk_json(ptr, len) -> u64  walks `{nodes, opts, facto?}` (goldens/walk/<case>.input.json): `{walk, verdict, facto?}`
 //!   dealloc(ptr, len)           frees either buffer
 //!
 //! `files` maps each `from` path to its text; a path not in it reads as missing, with fold.ts's ENOENT note.
 
-use serde_json::Value;
+use serde_json::{json, Value};
 
+use crate::walk::{facto_body, verdict, walk, WalkOpts};
 use crate::{fold, with_sources, FoldOpts};
 
 #[no_mangle]
@@ -21,16 +23,22 @@ pub extern "C" fn alloc(len: usize) -> *mut u8 {
 }
 
 /// # Safety
-/// `ptr` and `len` are a buffer this module returned (from `alloc`, or packed in `fold_json`'s result), freed once.
+/// `ptr` and `len` are a buffer this module returned (from `alloc`, or packed in a call's result), freed once.
 #[no_mangle]
 pub unsafe extern "C" fn dealloc(ptr: *mut u8, len: usize) {
     drop(Vec::from_raw_parts(ptr, 0, len.max(1)));
 }
 
+fn json_call(input: &str, f: impl FnOnce(Value) -> Result<String, String>) -> String {
+    serde_json::from_str(input)
+        .map_err(|e| format!("input is not JSON: {e}"))
+        .and_then(f)
+        .unwrap_or_else(|e| json!({ "error": e }).to_string())
+}
+
 /// Folds one `{root, files, opts}` JSON text into its fold list's JSON text.
 pub fn fold_text(input: &str) -> String {
-    let run = || -> Result<String, String> {
-        let case: Value = serde_json::from_str(input).map_err(|e| format!("input is not JSON: {e}"))?;
+    json_call(input, |case| {
         let opts: FoldOpts = match case.get("opts") {
             Some(o @ Value::Object(_)) => serde_json::from_value(o.clone()).map_err(|e| format!("opts: {e}"))?,
             _ => FoldOpts::default(),
@@ -39,16 +47,46 @@ pub fn fold_text(input: &str) -> String {
         let read = |p: &str| files.get(p).and_then(Value::as_str).map(str::to_string);
         let root = case.get("root").ok_or("no root")?;
         serde_json::to_string(&fold(&with_sources(root, &read), &opts)).map_err(|e| e.to_string())
-    };
-    run().unwrap_or_else(|e| serde_json::json!({ "error": e }).to_string())
+    })
+}
+
+/// Walks one `{nodes, opts, facto?}` JSON text: `nodes` is the fold collection as `[[id, node], ...]` (or an `{id: node}`
+/// object), `opts` the walk's (budgets.json's `budgets`, the machine's zone), `facto` `{artifact, at, rev}` for its Observations.
+pub fn walk_text(input: &str) -> String {
+    json_call(input, |case| {
+        let nodes: Vec<(String, Value)> = match case.get("nodes") {
+            Some(Value::Array(a)) => serde_json::from_value(Value::Array(a.clone())).map_err(|e| format!("nodes: {e}"))?,
+            Some(Value::Object(m)) => m.iter().map(|(k, v)| (k.clone(), v.clone())).collect(),
+            _ => return Err("no nodes".into()),
+        };
+        let opts: WalkOpts = serde_json::from_value(case.get("opts").cloned().unwrap_or(Value::Null)).map_err(|e| format!("opts: {e}"))?;
+        let r = walk(&nodes, &opts)?;
+        let mut out = json!({ "walk": r, "verdict": verdict(&r) });
+        if let Some(f) = case.get("facto").filter(|f| f.is_object()) {
+            let s = |k: &str| f.get(k).and_then(Value::as_str).unwrap_or("");
+            out["facto"] = facto_body(s("artifact"), s("at"), s("rev"), &r);
+        }
+        serde_json::to_string(&out).map_err(|e| e.to_string())
+    })
+}
+
+unsafe fn call(ptr: *const u8, len: usize, f: fn(&str) -> String) -> u64 {
+    let input = std::str::from_utf8(std::slice::from_raw_parts(ptr, len)).unwrap_or("");
+    let out = f(input).into_bytes().into_boxed_slice();
+    let (n, p) = (out.len(), Box::into_raw(out) as *mut u8);
+    ((p as u64) << 32) | n as u64
 }
 
 /// # Safety
 /// `ptr` and `len` are UTF-8 the host wrote into a buffer from `alloc(len)`.
 #[no_mangle]
 pub unsafe extern "C" fn fold_json(ptr: *const u8, len: usize) -> u64 {
-    let input = std::str::from_utf8(std::slice::from_raw_parts(ptr, len)).unwrap_or("");
-    let out = fold_text(input).into_bytes().into_boxed_slice();
-    let (n, p) = (out.len(), Box::into_raw(out) as *mut u8);
-    ((p as u64) << 32) | n as u64
+    call(ptr, len, fold_text)
+}
+
+/// # Safety
+/// `ptr` and `len` are UTF-8 the host wrote into a buffer from `alloc(len)`.
+#[no_mangle]
+pub unsafe extern "C" fn walk_json(ptr: *const u8, len: usize) -> u64 {
+    call(ptr, len, walk_text)
 }

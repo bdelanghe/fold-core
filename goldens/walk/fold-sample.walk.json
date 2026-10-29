@@ -1,0 +1,17 @@
+{
+  "walk": {
+    "folds": 16,
+    "reached": 16,
+    "findings": [
+      {
+        "fold": "seats~work-one-author-per-repo",
+        "check": "cut-hint",
+        "kind": "rename",
+        "blocks": false,
+        "said": "publisher: Alert: waits on an answer in its terminal (a question or a permission), last progress…",
+        "reduction": "a hint that is a whole sentence for \"publisher\""
+      }
+    ]
+  },
+  "verdict": "Checked by the artificial viewer: every fold reached, nothing blocking."
+}

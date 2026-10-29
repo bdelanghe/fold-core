@@ -1,0 +1,49 @@
+{
+  "walk": {
+    "folds": 26,
+    "reached": 26,
+    "findings": [
+      {
+        "fold": "hints~same-as-label",
+        "check": "no-intent",
+        "kind": "remove",
+        "blocks": false,
+        "said": "Same as label",
+        "reduction": "an empty fold: remove it from its parent"
+      },
+      {
+        "fold": "more~empty2~a-kid",
+        "check": "no-intent",
+        "kind": "remove",
+        "blocks": false,
+        "said": "A kid",
+        "reduction": "an empty fold: remove it from its parent"
+      },
+      {
+        "fold": "refs~r72",
+        "check": "no-intent",
+        "kind": "remove",
+        "blocks": false,
+        "said": "Page thread #72",
+        "reduction": "an empty fold: remove it from its parent"
+      },
+      {
+        "fold": "hints",
+        "check": "cut-hint",
+        "kind": "rename",
+        "blocks": false,
+        "said": "Long two: This hint is also long, longer than ninety code units, but it has no sentence end…",
+        "reduction": "a hint that is a whole sentence for \"Long two\""
+      },
+      {
+        "fold": "hints",
+        "check": "cut-hint",
+        "kind": "rename",
+        "blocks": false,
+        "said": "Long three: Emoji 😀 and dashes – and arrows › count as code units in JS strings so this hint cuts…",
+        "reduction": "a hint that is a whole sentence for \"Long three\""
+      }
+    ]
+  },
+  "verdict": "Checked by the artificial viewer: every fold reached, nothing blocking."
+}

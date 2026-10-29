@@ -1,0 +1,177 @@
+{
+  "walk": {
+    "folds": 20,
+    "reached": 0,
+    "findings": [
+      {
+        "fold": "root",
+        "check": "dangling",
+        "kind": "restructure",
+        "blocks": true,
+        "said": "no root",
+        "reduction": "the viewer has nothing to open on"
+      },
+      {
+        "fold": "_x",
+        "check": "unreachable",
+        "kind": "remove",
+        "blocks": false,
+        "said": "Fold _x",
+        "reduction": "no path from the top reaches it: remove it or link it"
+      },
+      {
+        "fold": "1x",
+        "check": "unreachable",
+        "kind": "remove",
+        "blocks": false,
+        "said": "Fold 1x",
+        "reduction": "no path from the top reaches it: remove it or link it"
+      },
+      {
+        "fold": "a",
+        "check": "unreachable",
+        "kind": "remove",
+        "blocks": false,
+        "said": "Fold a",
+        "reduction": "no path from the top reaches it: remove it or link it"
+      },
+      {
+        "fold": "A",
+        "check": "unreachable",
+        "kind": "remove",
+        "blocks": false,
+        "said": "Fold A",
+        "reduction": "no path from the top reaches it: remove it or link it"
+      },
+      {
+        "fold": "a_b",
+        "check": "unreachable",
+        "kind": "remove",
+        "blocks": false,
+        "said": "Fold a_b",
+        "reduction": "no path from the top reaches it: remove it or link it"
+      },
+      {
+        "fold": "a-",
+        "check": "unreachable",
+        "kind": "remove",
+        "blocks": false,
+        "said": "Fold a-",
+        "reduction": "no path from the top reaches it: remove it or link it"
+      },
+      {
+        "fold": "a-b",
+        "check": "unreachable",
+        "kind": "remove",
+        "blocks": false,
+        "said": "Fold a-b",
+        "reduction": "no path from the top reaches it: remove it or link it"
+      },
+      {
+        "fold": "a.b",
+        "check": "unreachable",
+        "kind": "remove",
+        "blocks": false,
+        "said": "Fold a.b",
+        "reduction": "no path from the top reaches it: remove it or link it"
+      },
+      {
+        "fold": "a~a~b",
+        "check": "unreachable",
+        "kind": "remove",
+        "blocks": false,
+        "said": "Fold a~a~b",
+        "reduction": "no path from the top reaches it: remove it or link it"
+      },
+      {
+        "fold": "a~ab",
+        "check": "unreachable",
+        "kind": "remove",
+        "blocks": false,
+        "said": "Fold a~ab",
+        "reduction": "no path from the top reaches it: remove it or link it"
+      },
+      {
+        "fold": "a~b",
+        "check": "unreachable",
+        "kind": "remove",
+        "blocks": false,
+        "said": "Fold a~b",
+        "reduction": "no path from the top reaches it: remove it or link it"
+      },
+      {
+        "fold": "a1",
+        "check": "unreachable",
+        "kind": "remove",
+        "blocks": false,
+        "said": "Fold a1",
+        "reduction": "no path from the top reaches it: remove it or link it"
+      },
+      {
+        "fold": "aa",
+        "check": "unreachable",
+        "kind": "remove",
+        "blocks": false,
+        "said": "Fold aa",
+        "reduction": "no path from the top reaches it: remove it or link it"
+      },
+      {
+        "fold": "ab",
+        "check": "unreachable",
+        "kind": "remove",
+        "blocks": false,
+        "said": "Fold ab",
+        "reduction": "no path from the top reaches it: remove it or link it"
+      },
+      {
+        "fold": "aB",
+        "check": "unreachable",
+        "kind": "remove",
+        "blocks": false,
+        "said": "Fold aB",
+        "reduction": "no path from the top reaches it: remove it or link it"
+      },
+      {
+        "fold": "Ab",
+        "check": "unreachable",
+        "kind": "remove",
+        "blocks": false,
+        "said": "Fold Ab",
+        "reduction": "no path from the top reaches it: remove it or link it"
+      },
+      {
+        "fold": "b",
+        "check": "unreachable",
+        "kind": "remove",
+        "blocks": false,
+        "said": "Fold b",
+        "reduction": "no path from the top reaches it: remove it or link it"
+      },
+      {
+        "fold": "part-10",
+        "check": "unreachable",
+        "kind": "remove",
+        "blocks": false,
+        "said": "Fold part-10",
+        "reduction": "no path from the top reaches it: remove it or link it"
+      },
+      {
+        "fold": "part-2",
+        "check": "unreachable",
+        "kind": "remove",
+        "blocks": false,
+        "said": "Fold part-2",
+        "reduction": "no path from the top reaches it: remove it or link it"
+      },
+      {
+        "fold": "z9",
+        "check": "unreachable",
+        "kind": "remove",
+        "blocks": false,
+        "said": "Fold z9",
+        "reduction": "no path from the top reaches it: remove it or link it"
+      }
+    ]
+  },
+  "verdict": "The artificial viewer is stuck on \"no root\" (this fold): the viewer has nothing to open on."
+}

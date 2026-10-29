@@ -1,0 +1,121 @@
+{
+  "walk": {
+    "folds": 90,
+    "reached": 90,
+    "findings": [
+      {
+        "fold": "words~long~part-1~part-1",
+        "check": "nested-runs",
+        "kind": "restructure",
+        "blocks": true,
+        "said": "Paragraph 0 fold… – Paragraph 4 page row…",
+        "reduction": "group the list by what its items share, so one level of runs holds it"
+      },
+      {
+        "fold": "words~long~part-1~part-2",
+        "check": "nested-runs",
+        "kind": "restructure",
+        "blocks": true,
+        "said": "Paragraph 5 viewer… – Paragraph 9 über…",
+        "reduction": "group the list by what its items share, so one level of runs holds it"
+      },
+      {
+        "fold": "words~long~part-1~part-3",
+        "check": "nested-runs",
+        "kind": "restructure",
+        "blocks": true,
+        "said": "Paragraph 10 fold… – Paragraph 14 page…",
+        "reduction": "group the list by what its items share, so one level of runs holds it"
+      },
+      {
+        "fold": "words~long~part-1~part-4",
+        "check": "nested-runs",
+        "kind": "restructure",
+        "blocks": true,
+        "said": "Paragraph 15 viewer… – Paragraph 19 über…",
+        "reduction": "group the list by what its items share, so one level of runs holds it"
+      },
+      {
+        "fold": "words~long~part-1~part-5",
+        "check": "nested-runs",
+        "kind": "restructure",
+        "blocks": true,
+        "said": "Paragraph 20 fold… – Paragraph 20 fold…",
+        "reduction": "group the list by what its items share, so one level of runs holds it"
+      },
+      {
+        "fold": "words~long~part-2~part-1",
+        "check": "nested-runs",
+        "kind": "restructure",
+        "blocks": true,
+        "said": "Paragraph 21 row… – Paragraph 25 viewer…",
+        "reduction": "group the list by what its items share, so one level of runs holds it"
+      },
+      {
+        "fold": "words~long~part-2~part-2",
+        "check": "nested-runs",
+        "kind": "restructure",
+        "blocks": true,
+        "said": "Paragraph 26 gate… – Paragraph 30 fold…",
+        "reduction": "group the list by what its items share, so one level of runs holds it"
+      },
+      {
+        "fold": "words~long~part-2~part-3",
+        "check": "nested-runs",
+        "kind": "restructure",
+        "blocks": true,
+        "said": "Paragraph 31 row… – Paragraph 35 viewer…",
+        "reduction": "group the list by what its items share, so one level of runs holds it"
+      },
+      {
+        "fold": "words~long~part-2~part-4",
+        "check": "nested-runs",
+        "kind": "restructure",
+        "blocks": true,
+        "said": "Paragraph 36 gate… – Paragraph 40 fold…",
+        "reduction": "group the list by what its items share, so one level of runs holds it"
+      },
+      {
+        "fold": "words~long~part-2~part-5",
+        "check": "nested-runs",
+        "kind": "restructure",
+        "blocks": true,
+        "said": "Paragraph 41 row… – Paragraph 41 row…",
+        "reduction": "group the list by what its items share, so one level of runs holds it"
+      },
+      {
+        "fold": "words~long~part-3~part-1",
+        "check": "nested-runs",
+        "kind": "restructure",
+        "blocks": true,
+        "said": "Paragraph 42 seat… – Paragraph 46 gate…",
+        "reduction": "group the list by what its items share, so one level of runs holds it"
+      },
+      {
+        "fold": "words~long~part-3~part-2",
+        "check": "nested-runs",
+        "kind": "restructure",
+        "blocks": true,
+        "said": "Paragraph 47 café… – Paragraph 51 row…",
+        "reduction": "group the list by what its items share, so one level of runs holds it"
+      },
+      {
+        "fold": "words~long~part-3~part-3",
+        "check": "nested-runs",
+        "kind": "restructure",
+        "blocks": true,
+        "said": "Paragraph 52 seat… – Paragraph 56 gate…",
+        "reduction": "group the list by what its items share, so one level of runs holds it"
+      },
+      {
+        "fold": "words~long~part-3~part-4",
+        "check": "nested-runs",
+        "kind": "restructure",
+        "blocks": true,
+        "said": "Paragraph 57 café… – Sub two",
+        "reduction": "group the list by what its items share, so one level of runs holds it"
+      }
+    ]
+  },
+  "verdict": "The artificial viewer is stuck on \"Paragraph 0 fold… – Paragraph 4 page row…\" (words › long › part-1 › part-1): group the list by what its items share, so one level of runs holds it."
+}

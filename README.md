@@ -6,24 +6,29 @@ text.
 
     fold(root, opts) -> Vec<(id, Node)>      // insertion order, as the viewer's Map
     from_markdown(md), pages(lines), from_deck(deck), with_sources(value, read)
+    walk::walk(nodes, opts) -> Walk               // walk.ts: the artificial viewer's findings, ranked
+    walk::verdict(walk), walk::facto_body(...)    // its one line for the page, and its facto Observations
+    ax::ax_of(node, path, href, mode, clock)      // fold-ax.js axOf: one fold's accessibility tree; ax::spoken(tree)
 
 ## WebAssembly
 
 `nix build .#wasm` gives `lib/fold_core.wasm` (a plain C ABI, src/wasm.rs) and `lib/fold-core.ts`, its loader:
-`(await load(bytes))({root, files, opts})` returns the fold list exactly as a golden holds it. `files` maps each `from` path to its
-text. `nix flake check` runs js/parity.test.ts against every golden with the built module.
+`const {fold, walk} = await core(bytes)`: `fold({root, files, opts})` returns the fold list exactly as a golden holds it (`files` maps
+each `from` path to its text); `walk({nodes, opts, facto?})` returns `{walk, verdict, facto?}` as a walk golden holds it, where
+`opts.budgets` is budgets.json's `budgets` (the walk reads `view.words`) and `opts.localTimeZone` the machine's zone. `nix flake check` runs js/parity.test.ts against every golden with the built module.
 
 ## Tests
 
     nix develop -c cargo test     # or: nix flake check
 
 `tests/parity.rs` folds every `goldens/<case>.input.json` and requires `serde_json::to_string` of the result to equal that of
-`goldens/<case>.folds.json`.
+`goldens/<case>.folds.json`; `tests/walk.rs` does the same for `goldens/walk/<case>.input.json` against `<case>.walk.json`.
 
 ## Goldens
 
-Every input is synthetic (`goldens/fixtures/*.json`). The expected folds come from the fold viewer's own `fold.ts` at the rev in
-`goldens/REV`, by `FOLD_SRC=<its source tree> FOLD_REV=<rev> bun goldens/gen.ts`. Regenerate them only on purpose: a diff in them
+Every input is synthetic (`goldens/fixtures/*.json`, `goldens/walk/fixtures/*.json`). The expected folds and walks come from the fold
+viewer's own `fold.ts` and `walk.ts` at the rev in `goldens/REV`, by `TZ=UTC FOLD_SRC=<its source tree> FOLD_REV=<rev> bun goldens/gen.ts`.
+Every fold case's folds are walked too (`walk/fold-<case>`). Regenerate them only on purpose: a diff in them
 is a change in behaviour.
 
 | case | exercises |
@@ -37,9 +42,17 @@ is a change in behaviour.
 | `act` | a fold's one action (`{cap, call, args, label}`): label trimmed, cap and call as written, args an object or array; missing label, null args or a blank cap give none |
 | `fields` | alerts (why, waits and last, neither), labelled fields, times near midnight and with offsets, a non-time in `at`, reference names with and without text, a self row and look-alikes, hints over 90 code units with and without a sentence end and with emoji, duplicate ids, `empty` with and without kids, `stale` |
 
+| walk `checks` | every check once: unexplained states (bare, with punctuation, labelled or with a reason: not), no-intent, choices, dangling, unreachable, cut hints (`…` and `...`), ruled words in hints and text; its facto Observations |
+| walk `words` | the `view.words` budget at 220 (passes) and 221 (blocks), text as one string, a leaf with only an href, titles of three and four words, a blank title |
+| walk `inline` | a kept page read inline (`artifacts~…`): nothing blocks but fold-bytes; nested runs on the page and inline; fold docs over 8 KB |
+| walk `slides` | folds that `present`: slide words over budget, prev/next that exist and that dangle; every property row (stale, act with and without a label, href and hrefLabel, health, checked, "Data from" with and without a source, times with offsets, no offset, a date alone and a non-time) |
+| walk `order` | no root, every fold unreachable, ranked by id as `localeCompare` orders it (punctuation, digits, case) |
+| walk `repeats` | a repeated id (first place, last node) and a cycle back to a fold already walked |
+
 ## Known limits against JS
 
 A cut through a surrogate pair (a lone surrogate in JS) becomes U+FFFD; `new Date()` is reproduced for ISO-like forms only
 (JavaScriptCore's free-form fallback is not); a time with no offset, or a page with no `meta.timeZone`, is read in
 `opts.localTimeZone` (UTC when absent) where JS uses the machine's zone; JSON parse error messages in a `from` note differ from
-JavaScriptCore's wording.
+JavaScriptCore's wording. The walk's ranking orders fold ids as ICU does for ASCII; past ASCII it orders by code point (ICU
+interleaves; ids are slugs). A fold's `updated` that is not a string reads as "Invalid Date" (JS would read a number as epoch ms).

@@ -1,0 +1,41 @@
+{
+  "walk": {
+    "folds": 9,
+    "reached": 9,
+    "findings": [
+      {
+        "fold": "two",
+        "check": "dangling",
+        "kind": "remove",
+        "blocks": true,
+        "said": "next: Nowhere",
+        "reduction": "the slide's next leads nowhere: refold the page"
+      },
+      {
+        "fold": "two~p0",
+        "check": "dangling",
+        "kind": "remove",
+        "blocks": true,
+        "said": "prev: Gone",
+        "reduction": "the slide's prev leads nowhere: refold the page"
+      },
+      {
+        "fold": "three",
+        "check": "words",
+        "kind": "restructure",
+        "blocks": true,
+        "said": "223 words",
+        "reduction": "split below 220 words"
+      },
+      {
+        "fold": "three",
+        "check": "slide-words",
+        "kind": "restructure",
+        "blocks": true,
+        "said": "234 words on the slide",
+        "reduction": "split the slide below 220 words"
+      }
+    ]
+  },
+  "verdict": "The artificial viewer is stuck on \"next: Nowhere\" (two): the slide's next leads nowhere: refold the page."
+}

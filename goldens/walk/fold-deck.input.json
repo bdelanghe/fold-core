@@ -1,0 +1,1036 @@
+{
+  "nodes": [
+    [
+      "root",
+      {
+        "title": "Decks",
+        "trail": [],
+        "kids": [
+          {
+            "id": "intro",
+            "title": "Intro",
+            "hint": "Before the deck."
+          },
+          {
+            "id": "decks",
+            "title": "Decks",
+            "hint": "Read inline."
+          },
+          {
+            "id": "after",
+            "title": "After",
+            "hint": "After the deck."
+          }
+        ],
+        "updated": "2026-10-28T16:00:00.000Z",
+        "source": "golden",
+        "present": "folds",
+        "next": {
+          "id": "intro",
+          "title": "Intro"
+        }
+      }
+    ],
+    [
+      "intro",
+      {
+        "title": "Intro",
+        "trail": [
+          "Decks"
+        ],
+        "kids": [],
+        "text": [
+          "Before the deck."
+        ],
+        "present": "folds",
+        "prev": {
+          "id": "root",
+          "title": "Decks"
+        },
+        "next": {
+          "id": "decks",
+          "title": "Decks"
+        }
+      }
+    ],
+    [
+      "decks",
+      {
+        "title": "Decks",
+        "trail": [
+          "Decks"
+        ],
+        "kids": [
+          {
+            "id": "engine",
+            "title": "Engine deck"
+          },
+          {
+            "id": "talk",
+            "title": "Talk"
+          }
+        ],
+        "text": [
+          "Read inline."
+        ],
+        "present": "folds",
+        "prev": {
+          "id": "intro",
+          "title": "Intro"
+        },
+        "next": {
+          "id": "decks~engine",
+          "title": "Engine deck"
+        }
+      }
+    ],
+    [
+      "decks~engine",
+      {
+        "title": "Engine deck",
+        "trail": [
+          "Decks",
+          "Decks"
+        ],
+        "kids": [
+          {
+            "id": "s1",
+            "title": "Slide 1: why"
+          },
+          {
+            "id": "s2",
+            "title": "Slide 2: what"
+          },
+          {
+            "id": "s3",
+            "title": "Slide 3: how"
+          },
+          {
+            "id": "s4",
+            "title": "Slide 4: who"
+          },
+          {
+            "id": "more",
+            "title": "More in Engine deck",
+            "hint": "Slide 5: when, Slide 6: where, Slide 7: next"
+          }
+        ],
+        "text": [
+          "Kept line.",
+          "One engine."
+        ],
+        "present": "slides",
+        "next": {
+          "id": "decks~engine~s1",
+          "title": "Slide 1: why"
+        }
+      }
+    ],
+    [
+      "decks~engine~s1",
+      {
+        "title": "Slide 1: why",
+        "trail": [
+          "Decks",
+          "Decks",
+          "Engine deck"
+        ],
+        "kids": [
+          {
+            "id": "point-0a",
+            "title": "Point 0a",
+            "hint": "Item heading seat naïve ›."
+          },
+          {
+            "id": "point-0b",
+            "title": "Point 0b"
+          }
+        ],
+        "text": [
+          "Of list seat list row to row gate."
+        ],
+        "present": "slides",
+        "prev": {
+          "id": "decks~engine",
+          "title": "Engine deck"
+        },
+        "next": {
+          "id": "decks~engine~s1~point-0a",
+          "title": "Point 0a"
+        }
+      }
+    ],
+    [
+      "decks~engine~s1~point-0a",
+      {
+        "title": "Point 0a",
+        "trail": [
+          "Decks",
+          "Decks",
+          "Engine deck",
+          "Slide 1: why"
+        ],
+        "kids": [],
+        "text": [
+          "Item heading seat naïve ›."
+        ],
+        "present": "slides",
+        "prev": {
+          "id": "decks~engine~s1",
+          "title": "Slide 1: why"
+        },
+        "next": {
+          "id": "decks~engine~s1~point-0b",
+          "title": "Point 0b"
+        }
+      }
+    ],
+    [
+      "decks~engine~s1~point-0b",
+      {
+        "title": "Point 0b",
+        "trail": [
+          "Decks",
+          "Decks",
+          "Engine deck",
+          "Slide 1: why"
+        ],
+        "kids": [
+          {
+            "id": "deep-0",
+            "title": "Deep 0"
+          }
+        ],
+        "present": "slides",
+        "prev": {
+          "id": "decks~engine~s1~point-0a",
+          "title": "Point 0a"
+        },
+        "next": {
+          "id": "decks~engine~s1~point-0b~deep-0",
+          "title": "Deep 0"
+        }
+      }
+    ],
+    [
+      "decks~engine~s1~point-0b~deep-0",
+      {
+        "title": "Deep 0",
+        "trail": [
+          "Decks",
+          "Decks",
+          "Engine deck",
+          "Slide 1: why",
+          "Point 0b"
+        ],
+        "kids": [],
+        "present": "slides",
+        "prev": {
+          "id": "decks~engine~s1~point-0b",
+          "title": "Point 0b"
+        },
+        "next": {
+          "id": "decks~engine~s2",
+          "title": "Slide 2: what"
+        }
+      }
+    ],
+    [
+      "decks~engine~s2",
+      {
+        "title": "Slide 2: what",
+        "trail": [
+          "Decks",
+          "Decks",
+          "Engine deck"
+        ],
+        "kids": [],
+        "text": [
+          "To gate section budget to seat item word."
+        ],
+        "present": "slides",
+        "prev": {
+          "id": "decks~engine~s1~point-0b~deep-0",
+          "title": "Deep 0"
+        },
+        "next": {
+          "id": "decks~engine~s3",
+          "title": "Slide 3: how"
+        }
+      }
+    ],
+    [
+      "decks~engine~s3",
+      {
+        "title": "Slide 3: how",
+        "trail": [
+          "Decks",
+          "Decks",
+          "Engine deck"
+        ],
+        "kids": [],
+        "text": [
+          "Fold a a – rule hint “quoted” slide."
+        ],
+        "present": "slides",
+        "prev": {
+          "id": "decks~engine~s2",
+          "title": "Slide 2: what"
+        },
+        "next": {
+          "id": "decks~engine~s4",
+          "title": "Slide 4: who"
+        }
+      }
+    ],
+    [
+      "decks~engine~s4",
+      {
+        "title": "Slide 4: who",
+        "trail": [
+          "Decks",
+          "Decks",
+          "Engine deck"
+        ],
+        "kids": [
+          {
+            "id": "point-3a",
+            "title": "Point 3a",
+            "hint": "List item budget budget fold."
+          },
+          {
+            "id": "point-3b",
+            "title": "Point 3b"
+          }
+        ],
+        "text": [
+          "To 😀 › and reader screen section slide."
+        ],
+        "present": "slides",
+        "prev": {
+          "id": "decks~engine~s3",
+          "title": "Slide 3: how"
+        },
+        "next": {
+          "id": "decks~engine~s4~point-3a",
+          "title": "Point 3a"
+        }
+      }
+    ],
+    [
+      "decks~engine~s4~point-3a",
+      {
+        "title": "Point 3a",
+        "trail": [
+          "Decks",
+          "Decks",
+          "Engine deck",
+          "Slide 4: who"
+        ],
+        "kids": [],
+        "text": [
+          "List item budget budget fold."
+        ],
+        "present": "slides",
+        "prev": {
+          "id": "decks~engine~s4",
+          "title": "Slide 4: who"
+        },
+        "next": {
+          "id": "decks~engine~s4~point-3b",
+          "title": "Point 3b"
+        }
+      }
+    ],
+    [
+      "decks~engine~s4~point-3b",
+      {
+        "title": "Point 3b",
+        "trail": [
+          "Decks",
+          "Decks",
+          "Engine deck",
+          "Slide 4: who"
+        ],
+        "kids": [
+          {
+            "id": "deep-3",
+            "title": "Deep 3"
+          }
+        ],
+        "present": "slides",
+        "prev": {
+          "id": "decks~engine~s4~point-3a",
+          "title": "Point 3a"
+        },
+        "next": {
+          "id": "decks~engine~s4~point-3b~deep-3",
+          "title": "Deep 3"
+        }
+      }
+    ],
+    [
+      "decks~engine~s4~point-3b~deep-3",
+      {
+        "title": "Deep 3",
+        "trail": [
+          "Decks",
+          "Decks",
+          "Engine deck",
+          "Slide 4: who",
+          "Point 3b"
+        ],
+        "kids": [],
+        "present": "slides",
+        "prev": {
+          "id": "decks~engine~s4~point-3b",
+          "title": "Point 3b"
+        },
+        "next": {
+          "id": "decks~engine~more",
+          "title": "More in Engine deck"
+        }
+      }
+    ],
+    [
+      "decks~engine~more",
+      {
+        "title": "More in Engine deck",
+        "trail": [
+          "Decks",
+          "Decks",
+          "Engine deck"
+        ],
+        "kids": [
+          {
+            "id": "s5",
+            "title": "Slide 5: when"
+          },
+          {
+            "id": "s6",
+            "title": "Slide 6: where"
+          },
+          {
+            "id": "s7",
+            "title": "Slide 7: next"
+          }
+        ],
+        "present": "slides",
+        "prev": {
+          "id": "decks~engine~s4~point-3b~deep-3",
+          "title": "Deep 3"
+        },
+        "next": {
+          "id": "decks~engine~more~s5",
+          "title": "Slide 5: when"
+        }
+      }
+    ],
+    [
+      "decks~engine~more~s5",
+      {
+        "title": "Slide 5: when",
+        "trail": [
+          "Decks",
+          "Decks",
+          "Engine deck",
+          "More in Engine deck"
+        ],
+        "kids": [
+          {
+            "id": "inner",
+            "title": "Inner deck"
+          }
+        ],
+        "text": [
+          "Screen 😀 … budget the naïve walk row."
+        ],
+        "present": "slides",
+        "prev": {
+          "id": "decks~engine~more",
+          "title": "More in Engine deck"
+        },
+        "next": {
+          "id": "decks~engine~more~s5~inner",
+          "title": "Inner deck"
+        }
+      }
+    ],
+    [
+      "decks~engine~more~s5~inner",
+      {
+        "title": "Inner deck",
+        "trail": [
+          "Decks",
+          "Decks",
+          "Engine deck",
+          "More in Engine deck",
+          "Slide 5: when"
+        ],
+        "kids": [
+          {
+            "id": "inner-one",
+            "title": "Inner one"
+          },
+          {
+            "id": "inner-two",
+            "title": "Inner two"
+          }
+        ],
+        "present": "slides",
+        "next": {
+          "id": "decks~engine~more~s5~inner~inner-one",
+          "title": "Inner one"
+        }
+      }
+    ],
+    [
+      "decks~engine~more~s5~inner~inner-one",
+      {
+        "title": "Inner one",
+        "trail": [
+          "Decks",
+          "Decks",
+          "Engine deck",
+          "More in Engine deck",
+          "Slide 5: when",
+          "Inner deck"
+        ],
+        "kids": [],
+        "present": "slides",
+        "prev": {
+          "id": "decks~engine~more~s5~inner",
+          "title": "Inner deck"
+        },
+        "next": {
+          "id": "decks~engine~more~s5~inner~inner-two",
+          "title": "Inner two"
+        }
+      }
+    ],
+    [
+      "decks~engine~more~s5~inner~inner-two",
+      {
+        "title": "Inner two",
+        "trail": [
+          "Decks",
+          "Decks",
+          "Engine deck",
+          "More in Engine deck",
+          "Slide 5: when",
+          "Inner deck"
+        ],
+        "kids": [
+          {
+            "id": "inner-two-a",
+            "title": "Inner two a"
+          }
+        ],
+        "present": "slides",
+        "prev": {
+          "id": "decks~engine~more~s5~inner~inner-one",
+          "title": "Inner one"
+        },
+        "next": {
+          "id": "decks~engine~more~s5~inner~inner-two~inner-two-a",
+          "title": "Inner two a"
+        }
+      }
+    ],
+    [
+      "decks~engine~more~s5~inner~inner-two~inner-two-a",
+      {
+        "title": "Inner two a",
+        "trail": [
+          "Decks",
+          "Decks",
+          "Engine deck",
+          "More in Engine deck",
+          "Slide 5: when",
+          "Inner deck",
+          "Inner two"
+        ],
+        "kids": [],
+        "present": "slides",
+        "prev": {
+          "id": "decks~engine~more~s5~inner~inner-two",
+          "title": "Inner two"
+        }
+      }
+    ],
+    [
+      "decks~engine~more~s6",
+      {
+        "title": "Slide 6: where",
+        "trail": [
+          "Decks",
+          "Decks",
+          "Engine deck",
+          "More in Engine deck"
+        ],
+        "kids": [],
+        "text": [
+          "Slide page budget reader section agent heading fold."
+        ],
+        "present": "slides",
+        "prev": {
+          "id": "decks~engine~more~s5~inner~inner-two~inner-two-a",
+          "title": "Inner two a"
+        },
+        "next": {
+          "id": "decks~engine~more~s7",
+          "title": "Slide 7: next"
+        }
+      }
+    ],
+    [
+      "decks~engine~more~s7",
+      {
+        "title": "Slide 7: next",
+        "trail": [
+          "Decks",
+          "Decks",
+          "Engine deck",
+          "More in Engine deck"
+        ],
+        "kids": [
+          {
+            "id": "point-6a",
+            "title": "Point 6a",
+            "hint": "Agent row row item row."
+          },
+          {
+            "id": "point-6b",
+            "title": "Point 6b"
+          }
+        ],
+        "text": [
+          "Page of of section agent 😀 agent seat."
+        ],
+        "present": "slides",
+        "prev": {
+          "id": "decks~engine~more~s6",
+          "title": "Slide 6: where"
+        },
+        "next": {
+          "id": "decks~engine~more~s7~point-6a",
+          "title": "Point 6a"
+        }
+      }
+    ],
+    [
+      "decks~engine~more~s7~point-6a",
+      {
+        "title": "Point 6a",
+        "trail": [
+          "Decks",
+          "Decks",
+          "Engine deck",
+          "More in Engine deck",
+          "Slide 7: next"
+        ],
+        "kids": [],
+        "text": [
+          "Agent row row item row."
+        ],
+        "present": "slides",
+        "prev": {
+          "id": "decks~engine~more~s7",
+          "title": "Slide 7: next"
+        },
+        "next": {
+          "id": "decks~engine~more~s7~point-6b",
+          "title": "Point 6b"
+        }
+      }
+    ],
+    [
+      "decks~engine~more~s7~point-6b",
+      {
+        "title": "Point 6b",
+        "trail": [
+          "Decks",
+          "Decks",
+          "Engine deck",
+          "More in Engine deck",
+          "Slide 7: next"
+        ],
+        "kids": [
+          {
+            "id": "deep-6",
+            "title": "Deep 6"
+          }
+        ],
+        "present": "slides",
+        "prev": {
+          "id": "decks~engine~more~s7~point-6a",
+          "title": "Point 6a"
+        },
+        "next": {
+          "id": "decks~engine~more~s7~point-6b~deep-6",
+          "title": "Deep 6"
+        }
+      }
+    ],
+    [
+      "decks~engine~more~s7~point-6b~deep-6",
+      {
+        "title": "Deep 6",
+        "trail": [
+          "Decks",
+          "Decks",
+          "Engine deck",
+          "More in Engine deck",
+          "Slide 7: next",
+          "Point 6b"
+        ],
+        "kids": [],
+        "present": "slides",
+        "prev": {
+          "id": "decks~engine~more~s7~point-6b",
+          "title": "Point 6b"
+        }
+      }
+    ],
+    [
+      "decks~talk",
+      {
+        "title": "Talk",
+        "trail": [
+          "Decks",
+          "Decks"
+        ],
+        "kids": [
+          {
+            "id": "open",
+            "title": "Opening line"
+          },
+          {
+            "id": "s2",
+            "title": "No body text"
+          },
+          {
+            "id": "s3",
+            "title": "Word to café … budget item word 😀 list … … über “quoted” agent. And…"
+          }
+        ],
+        "text": [
+          "Spoken and shown"
+        ],
+        "present": "folds",
+        "prev": {
+          "id": "decks~engine~more~s7~point-6b~deep-6",
+          "title": "Deep 6"
+        },
+        "next": {
+          "id": "decks~talk~open",
+          "title": "Opening line"
+        }
+      }
+    ],
+    [
+      "decks~talk~open",
+      {
+        "title": "Opening line",
+        "trail": [
+          "Decks",
+          "Decks",
+          "Talk"
+        ],
+        "kids": [
+          {
+            "id": "spoken",
+            "title": "What was said"
+          }
+        ],
+        "text": [
+          "first",
+          "second"
+        ],
+        "present": "folds",
+        "prev": {
+          "id": "decks~talk",
+          "title": "Talk"
+        },
+        "next": {
+          "id": "decks~talk~open~spoken",
+          "title": "What was said"
+        }
+      }
+    ],
+    [
+      "decks~talk~open~spoken",
+      {
+        "title": "What was said",
+        "trail": [
+          "Decks",
+          "Decks",
+          "Talk",
+          "Opening line"
+        ],
+        "kids": [
+          {
+            "id": "p2",
+            "title": "Seat list “quoted” and the a über “quoted” rule – deck…"
+          },
+          {
+            "id": "p3",
+            "title": "A reader hint gate and seat screen the screen a item and…"
+          }
+        ],
+        "text": [
+          "– – – rule section the to item of “quoted” walk walk seat section deck agent viewer gate list section.",
+          "Walk the list item viewer reader!",
+          "A of › “quoted” list über slide – – slide budget list über row agent agent to viewer › hint?",
+          "Row of budget “quoted” › a of of “quoted” fold screen 😀 a rule heading the agent row.",
+          "Rule über fold a › hint naïve the page seat seat viewer “quoted” “quoted” heading ›."
+        ],
+        "present": "folds",
+        "prev": {
+          "id": "decks~talk~open",
+          "title": "Opening line"
+        },
+        "next": {
+          "id": "decks~talk~open~spoken~p2",
+          "title": "Seat list “quoted” and the a über “quoted” rule – deck…"
+        }
+      }
+    ],
+    [
+      "decks~talk~open~spoken~p2",
+      {
+        "title": "Seat list “quoted” and the a über “quoted” rule – deck…",
+        "trail": [
+          "Decks",
+          "Decks",
+          "Talk",
+          "Opening line",
+          "What was said"
+        ],
+        "kids": [],
+        "text": [
+          "Seat list “quoted” and the a über “quoted” rule – deck viewer seat gate!",
+          "Fold › of café deck seat a item deck to?",
+          "Hint deck 😀 row reader item slide naïve heading walk.",
+          "Screen › 😀 row page slide café naïve viewer a list and and a.",
+          "Agent agent the screen reader agent item the walk 😀 deck reader row row viewer über walk slide hint the!"
+        ],
+        "present": "folds",
+        "prev": {
+          "id": "decks~talk~open~spoken",
+          "title": "What was said"
+        },
+        "next": {
+          "id": "decks~talk~open~spoken~p3",
+          "title": "A reader hint gate and seat screen the screen a item and…"
+        }
+      }
+    ],
+    [
+      "decks~talk~open~spoken~p3",
+      {
+        "title": "A reader hint gate and seat screen the screen a item and…",
+        "trail": [
+          "Decks",
+          "Decks",
+          "Talk",
+          "Opening line",
+          "What was said"
+        ],
+        "kids": [],
+        "text": [
+          "A reader hint gate and seat screen the screen a item and the word fold seat?",
+          "Of deck budget … word … and … hint and “quoted” deck.",
+          "› row › rule of of to slide list a hint gate and to naïve list.",
+          "Heading page word deck heading hint walk agent – deck walk agent – item café section!"
+        ],
+        "present": "folds",
+        "prev": {
+          "id": "decks~talk~open~spoken~p2",
+          "title": "Seat list “quoted” and the a über “quoted” rule – deck…"
+        },
+        "next": {
+          "id": "decks~talk~s2",
+          "title": "No body text"
+        }
+      }
+    ],
+    [
+      "decks~talk~s2",
+      {
+        "title": "No body text",
+        "trail": [
+          "Decks",
+          "Decks",
+          "Talk"
+        ],
+        "kids": [],
+        "present": "folds",
+        "prev": {
+          "id": "decks~talk~open~spoken~p3",
+          "title": "A reader hint gate and seat screen the screen a item and…"
+        },
+        "next": {
+          "id": "decks~talk~s3",
+          "title": "Word to café … budget item word 😀 list … … über “quoted” agent. And…"
+        }
+      }
+    ],
+    [
+      "decks~talk~s3",
+      {
+        "title": "Word to café … budget item word 😀 list … … über “quoted” agent. And…",
+        "trail": [
+          "Decks",
+          "Decks",
+          "Talk"
+        ],
+        "kids": [
+          {
+            "id": "p2",
+            "title": "› rule section café … naïve über – heading of gate hint…"
+          },
+          {
+            "id": "p3",
+            "title": "List budget hint word list reader naïve and slide rule…"
+          },
+          {
+            "id": "p4",
+            "title": "– viewer reader the item gate naïve rule deck heading list…"
+          }
+        ],
+        "text": [
+          "Word to café … budget item word 😀 list … … über “quoted” agent.",
+          "And the agent café item word of “quoted” fold ›!",
+          "Gate page budget budget?",
+          "Of – – to … café.",
+          "Of section über section slide section budget list heading walk the seat über über › walk agent reader.",
+          "Reader item screen a the item!",
+          "And … slide agent reader list rule … page walk seat naïve 😀 budget › screen café to reader the?"
+        ],
+        "present": "folds",
+        "prev": {
+          "id": "decks~talk~s2",
+          "title": "No body text"
+        },
+        "next": {
+          "id": "decks~talk~s3~p2",
+          "title": "› rule section café … naïve über – heading of gate hint…"
+        }
+      }
+    ],
+    [
+      "decks~talk~s3~p2",
+      {
+        "title": "› rule section café … naïve über – heading of gate hint…",
+        "trail": [
+          "Decks",
+          "Decks",
+          "Talk",
+          "Word to café … budget item word 😀 list … … über “quoted” agent. And…"
+        ],
+        "kids": [],
+        "text": [
+          "› rule section café … naïve über – heading of gate hint über agent a section.",
+          "– reader slide heading screen to screen – word viewer slide – a viewer.",
+          "Fold the hint gate list a!",
+          "Agent › and slide “quoted” word?",
+          "Seat … gate viewer über –.",
+          "😀 of “quoted” list screen › seat “quoted” screen agent viewer agent viewer the.",
+          "Heading viewer word hint fold … viewer budget viewer item!"
+        ],
+        "present": "folds",
+        "prev": {
+          "id": "decks~talk~s3",
+          "title": "Word to café … budget item word 😀 list … … über “quoted” agent. And…"
+        },
+        "next": {
+          "id": "decks~talk~s3~p3",
+          "title": "List budget hint word list reader naïve and slide rule…"
+        }
+      }
+    ],
+    [
+      "decks~talk~s3~p3",
+      {
+        "title": "List budget hint word list reader naïve and slide rule…",
+        "trail": [
+          "Decks",
+          "Decks",
+          "Talk",
+          "Word to café … budget item word 😀 list … … über “quoted” agent. And…"
+        ],
+        "kids": [],
+        "text": [
+          "List budget hint word list reader naïve and slide rule rule page 😀 hint to ›?",
+          "Hint page heading café gate … page hint and row agent heading screen café › naïve.",
+          "Viewer seat deck to heading heading rule word seat – deck gate seat viewer.",
+          "Naïve section agent deck naïve hint rule a walk item list and heading viewer!",
+          "Hint list and walk budget seat?",
+          "Section naïve word screen deck naïve fold and to – page ›."
+        ],
+        "present": "folds",
+        "prev": {
+          "id": "decks~talk~s3~p2",
+          "title": "› rule section café … naïve über – heading of gate hint…"
+        },
+        "next": {
+          "id": "decks~talk~s3~p4",
+          "title": "– viewer reader the item gate naïve rule deck heading list…"
+        }
+      }
+    ],
+    [
+      "decks~talk~s3~p4",
+      {
+        "title": "– viewer reader the item gate naïve rule deck heading list…",
+        "trail": [
+          "Decks",
+          "Decks",
+          "Talk",
+          "Word to café … budget item word 😀 list … … über “quoted” agent. And…"
+        ],
+        "kids": [],
+        "text": [
+          "– viewer reader the item gate naïve rule deck heading list deck."
+        ],
+        "present": "folds",
+        "prev": {
+          "id": "decks~talk~s3~p3",
+          "title": "List budget hint word list reader naïve and slide rule…"
+        },
+        "next": {
+          "id": "after",
+          "title": "After"
+        }
+      }
+    ],
+    [
+      "after",
+      {
+        "title": "After",
+        "trail": [
+          "Decks"
+        ],
+        "kids": [],
+        "text": [
+          "After the deck."
+        ],
+        "present": "folds",
+        "prev": {
+          "id": "decks~talk~s3~p4",
+          "title": "– viewer reader the item gate naïve rule deck heading list…"
+        }
+      }
+    ]
+  ],
+  "opts": {
+    "budgets": [
+      {
+        "id": "view.words",
+        "value": 220
+      }
+    ],
+    "localTimeZone": "UTC"
+  }
+}

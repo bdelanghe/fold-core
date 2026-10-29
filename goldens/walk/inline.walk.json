@@ -1,0 +1,81 @@
+{
+  "walk": {
+    "folds": 10,
+    "reached": 10,
+    "findings": [
+      {
+        "fold": "artifacts~x",
+        "check": "fold-bytes",
+        "kind": "restructure",
+        "blocks": true,
+        "said": "8292 bytes to open",
+        "reduction": "fold it further, below 8192 bytes per fold"
+      },
+      {
+        "fold": "fat",
+        "check": "fold-bytes",
+        "kind": "restructure",
+        "blocks": true,
+        "said": "8315 bytes to open",
+        "reduction": "fold it further, below 8192 bytes per fold"
+      },
+      {
+        "fold": "fat",
+        "check": "words",
+        "kind": "restructure",
+        "blocks": true,
+        "said": "3548 words",
+        "reduction": "split below 220 words"
+      },
+      {
+        "fold": "part-1~part-2",
+        "check": "nested-runs",
+        "kind": "restructure",
+        "blocks": true,
+        "said": "A – A",
+        "reduction": "group the list by what its items share, so one level of runs holds it"
+      },
+      {
+        "fold": "artifacts~p1",
+        "check": "dangling",
+        "kind": "remove",
+        "blocks": false,
+        "said": "Gone",
+        "reduction": "\"Gone\" leads nowhere: remove it or write its fold"
+      },
+      {
+        "fold": "artifacts~p1",
+        "check": "unexplained-state",
+        "kind": "rename",
+        "blocks": false,
+        "said": "Stuck.",
+        "reduction": "say what \"Stuck.\" is about and what to do, or drop the line"
+      },
+      {
+        "fold": "artifacts~p1~part-1~part-2",
+        "check": "nested-runs",
+        "kind": "restructure",
+        "blocks": false,
+        "said": "Inner",
+        "reduction": "group the list by what its items share, so one level of runs holds it"
+      },
+      {
+        "fold": "artifacts~p1~s",
+        "check": "words",
+        "kind": "restructure",
+        "blocks": false,
+        "said": "309 words",
+        "reduction": "split below 220 words"
+      },
+      {
+        "fold": "artifacts~x",
+        "check": "words",
+        "kind": "restructure",
+        "blocks": false,
+        "said": "3549 words",
+        "reduction": "split below 220 words"
+      }
+    ]
+  },
+  "verdict": "The artificial viewer is stuck on \"8292 bytes to open\" (artifacts › x): fold it further, below 8192 bytes per fold."
+}

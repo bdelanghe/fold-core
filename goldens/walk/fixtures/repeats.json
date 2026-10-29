@@ -1,0 +1,82 @@
+{
+  "nodes": [
+    [
+      "root",
+      {
+        "title": "Top",
+        "trail": [],
+        "kids": [
+          {
+            "id": "a",
+            "title": "A",
+            "hint": "What A is."
+          }
+        ]
+      }
+    ],
+    [
+      "a",
+      {
+        "title": "A first",
+        "trail": [],
+        "kids": [
+          {
+            "id": "b",
+            "title": "B"
+          }
+        ]
+      }
+    ],
+    [
+      "b",
+      {
+        "title": "Stray",
+        "trail": [],
+        "kids": []
+      }
+    ],
+    [
+      "a",
+      {
+        "title": "A",
+        "trail": [],
+        "kids": [
+          {
+            "id": "back",
+            "title": "Back"
+          }
+        ],
+        "text": [
+          "A holds one thing."
+        ]
+      }
+    ],
+    [
+      "a~back",
+      {
+        "title": "Back",
+        "trail": [],
+        "kids": [
+          {
+            "id": "a",
+            "title": "A again"
+          }
+        ],
+        "text": [
+          "Back to A."
+        ]
+      }
+    ],
+    [
+      "a~back~a",
+      {
+        "title": "A again",
+        "trail": [],
+        "kids": [],
+        "text": [
+          "Here again."
+        ]
+      }
+    ]
+  ]
+}

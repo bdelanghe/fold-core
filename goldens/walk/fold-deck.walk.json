@@ -1,0 +1,57 @@
+{
+  "walk": {
+    "folds": 36,
+    "reached": 36,
+    "findings": [
+      {
+        "fold": "decks~engine~more~s5~inner~inner-one",
+        "check": "no-intent",
+        "kind": "remove",
+        "blocks": false,
+        "said": "Inner one",
+        "reduction": "an empty fold: remove it from its parent"
+      },
+      {
+        "fold": "decks~engine~more~s5~inner~inner-two~inner-two-a",
+        "check": "no-intent",
+        "kind": "remove",
+        "blocks": false,
+        "said": "Inner two a",
+        "reduction": "an empty fold: remove it from its parent"
+      },
+      {
+        "fold": "decks~engine~more~s7~point-6b~deep-6",
+        "check": "no-intent",
+        "kind": "remove",
+        "blocks": false,
+        "said": "Deep 6",
+        "reduction": "an empty fold: remove it from its parent"
+      },
+      {
+        "fold": "decks~engine~s1~point-0b~deep-0",
+        "check": "no-intent",
+        "kind": "remove",
+        "blocks": false,
+        "said": "Deep 0",
+        "reduction": "an empty fold: remove it from its parent"
+      },
+      {
+        "fold": "decks~engine~s4~point-3b~deep-3",
+        "check": "no-intent",
+        "kind": "remove",
+        "blocks": false,
+        "said": "Deep 3",
+        "reduction": "an empty fold: remove it from its parent"
+      },
+      {
+        "fold": "decks~talk~s2",
+        "check": "no-intent",
+        "kind": "remove",
+        "blocks": false,
+        "said": "No body text",
+        "reduction": "an empty fold: remove it from its parent"
+      }
+    ]
+  },
+  "verdict": "Checked by the artificial viewer: every fold reached, nothing blocking."
+}
