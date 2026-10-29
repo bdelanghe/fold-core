@@ -1,0 +1,118 @@
+{
+  "nodes": [
+    [
+      "root",
+      {
+        "title": "Ids to encode",
+        "trail": [],
+        "kids": [
+          {
+            "id": "a b",
+            "title": "A space",
+            "hint": "An id with a space."
+          },
+          {
+            "id": "über",
+            "title": "Über",
+            "hint": "An id past ASCII."
+          },
+          {
+            "id": "x/y?z#w",
+            "title": "Delimiters",
+            "hint": "An id with URL delimiters."
+          },
+          {
+            "id": "100%&'()*!~",
+            "title": "Marks",
+            "hint": "An id with marks encodeURIComponent keeps and drops."
+          }
+        ]
+      }
+    ],
+    [
+      "a b",
+      {
+        "title": "A space",
+        "trail": [
+          "Ids to encode"
+        ],
+        "kids": [
+          {
+            "id": "🙂",
+            "title": "Emoji"
+          }
+        ],
+        "text": [
+          "Inside a space."
+        ]
+      }
+    ],
+    [
+      "a b~🙂",
+      {
+        "title": "Emoji",
+        "trail": [
+          "Ids to encode",
+          "A space"
+        ],
+        "kids": [],
+        "text": [
+          "Two levels in."
+        ],
+        "present": "slides",
+        "prev": {
+          "id": "a b",
+          "title": "A space"
+        }
+      }
+    ],
+    [
+      "über",
+      {
+        "title": "Über",
+        "trail": [
+          "Ids to encode"
+        ],
+        "kids": [],
+        "text": [
+          "Past ASCII."
+        ]
+      }
+    ],
+    [
+      "x/y?z#w",
+      {
+        "title": "Delimiters",
+        "trail": [
+          "Ids to encode"
+        ],
+        "kids": [],
+        "text": [
+          "Delimiters."
+        ]
+      }
+    ],
+    [
+      "100%&'()*!~",
+      {
+        "title": "Marks",
+        "trail": [
+          "Ids to encode"
+        ],
+        "kids": [],
+        "text": [
+          "Marks."
+        ]
+      }
+    ]
+  ],
+  "opts": {
+    "budgets": [
+      {
+        "id": "view.words",
+        "value": 220
+      }
+    ],
+    "localTimeZone": "UTC"
+  }
+}

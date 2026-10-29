@@ -274,3 +274,16 @@ pub fn locale_compare(a: &str, b: &str) -> std::cmp::Ordering {
     let case = |s: &str| s.chars().map(|c| c.is_ascii_uppercase()).collect::<Vec<_>>();
     p(a).cmp(&p(b)).then_with(|| case(a).cmp(&case(b)))
 }
+
+/// JS `encodeURIComponent`: every UTF-8 byte but `A-Z a-z 0-9 - _ . ! ~ * ' ( )` as `%XX`.
+pub fn encode_uri_component(s: &str) -> String {
+    let mut out = String::new();
+    for b in s.bytes() {
+        if b.is_ascii_alphanumeric() || b"-_.!~*'()".contains(&b) {
+            out.push(b as char);
+        } else {
+            out.push_str(&format!("%{b:02X}"));
+        }
+    }
+    out
+}
