@@ -1,0 +1,488 @@
+{
+  "nodes": [
+    [
+      "root",
+      {
+        "title": "Fields",
+        "trail": [],
+        "kids": [
+          {
+            "id": "s",
+            "title": "Seats",
+            "hint": "Seats and their fields."
+          },
+          {
+            "id": "refs",
+            "title": "Requests"
+          },
+          {
+            "id": "pages",
+            "title": "Your pages"
+          },
+          {
+            "id": "hints",
+            "title": "Hints"
+          },
+          {
+            "id": "more",
+            "title": "More of this page",
+            "hint": "Empty, Empty with kids"
+          }
+        ],
+        "updated": "2026-10-28T16:00:00.000Z",
+        "source": "golden",
+        "stale": "stale since a test"
+      }
+    ],
+    [
+      "s",
+      {
+        "title": "Seats",
+        "trail": [
+          "Fields"
+        ],
+        "kids": [
+          {
+            "id": "a",
+            "title": "alpha",
+            "hint": "Alert: it has been quiet for a day"
+          },
+          {
+            "id": "b",
+            "title": "beta",
+            "hint": "Alert: waits on an answer , last progress Tue 23:59"
+          },
+          {
+            "id": "c",
+            "title": "gamma",
+            "hint": "Alert: quiet too long"
+          },
+          {
+            "id": "d",
+            "title": "delta",
+            "hint": "working, last progress Tue 13:44"
+          },
+          {
+            "id": "more",
+            "title": "More in Seats",
+            "hint": "epsilon, duplicate id, another duplicate"
+          }
+        ],
+        "text": [
+          "Seats and their fields."
+        ]
+      }
+    ],
+    [
+      "s~a",
+      {
+        "title": "alpha",
+        "trail": [
+          "Fields",
+          "Seats"
+        ],
+        "kids": [],
+        "text": [
+          "Alert: it has been quiet for a day.",
+          "Status: idle",
+          "Last progress: Wed 00:05",
+          "Owner: lead-seat"
+        ]
+      }
+    ],
+    [
+      "s~b",
+      {
+        "title": "beta",
+        "trail": [
+          "Fields",
+          "Seats"
+        ],
+        "kids": [],
+        "text": [
+          "Alert: stuck or quiet too long.",
+          "Last progress: Tue 23:59",
+          "Waits on: an answer"
+        ]
+      }
+    ],
+    [
+      "s~c",
+      {
+        "title": "gamma",
+        "trail": [
+          "Fields",
+          "Seats"
+        ],
+        "kids": [],
+        "text": [
+          "Alert: stuck or quiet too long."
+        ]
+      }
+    ],
+    [
+      "s~d",
+      {
+        "title": "delta",
+        "trail": [
+          "Fields",
+          "Seats"
+        ],
+        "kids": [],
+        "text": [
+          "Status: working",
+          "Last progress: Tue 13:44",
+          "not a time",
+          "What to do: Nudge it"
+        ]
+      }
+    ],
+    [
+      "s~more",
+      {
+        "title": "More in Seats",
+        "trail": [
+          "Fields",
+          "Seats"
+        ],
+        "kids": [
+          {
+            "id": "e",
+            "title": "epsilon",
+            "hint": "last progress Tue 23:30"
+          },
+          {
+            "id": "a",
+            "title": "duplicate id",
+            "hint": "Same id as alpha."
+          },
+          {
+            "id": "a-2",
+            "title": "another duplicate",
+            "hint": "Third one."
+          }
+        ]
+      }
+    ],
+    [
+      "s~more~e",
+      {
+        "title": "epsilon",
+        "trail": [
+          "Fields",
+          "Seats",
+          "More in Seats"
+        ],
+        "kids": [],
+        "text": [
+          "Last progress: Tue 23:30"
+        ]
+      }
+    ],
+    [
+      "s~more~a",
+      {
+        "title": "duplicate id",
+        "trail": [
+          "Fields",
+          "Seats",
+          "More in Seats"
+        ],
+        "kids": [],
+        "text": [
+          "Same id as alpha."
+        ]
+      }
+    ],
+    [
+      "s~more~a-2",
+      {
+        "title": "another duplicate",
+        "trail": [
+          "Fields",
+          "Seats",
+          "More in Seats"
+        ],
+        "kids": [],
+        "text": [
+          "Third one."
+        ]
+      }
+    ],
+    [
+      "refs",
+      {
+        "title": "Requests",
+        "trail": [
+          "Fields"
+        ],
+        "kids": [
+          {
+            "id": "r70",
+            "title": "why does it say part 1 of 14",
+            "hint": "Page thread #70"
+          },
+          {
+            "id": "r71",
+            "title": "a request whose words are long enough that the label is clipped at…",
+            "hint": "Page thread #71"
+          },
+          {
+            "id": "r72",
+            "title": "Page thread #72"
+          }
+        ]
+      }
+    ],
+    [
+      "refs~r70",
+      {
+        "title": "why does it say part 1 of 14",
+        "trail": [
+          "Fields",
+          "Requests"
+        ],
+        "kids": []
+      }
+    ],
+    [
+      "refs~r71",
+      {
+        "title": "a request whose words are long enough that the label is clipped at…",
+        "trail": [
+          "Fields",
+          "Requests"
+        ],
+        "kids": [],
+        "text": [
+          "a request whose words are long enough that the label is clipped at seventy code units for sure"
+        ]
+      }
+    ],
+    [
+      "refs~r72",
+      {
+        "title": "Page thread #72",
+        "trail": [
+          "Fields",
+          "Requests"
+        ],
+        "kids": []
+      }
+    ],
+    [
+      "pages",
+      {
+        "title": "Your pages",
+        "trail": [
+          "Fields"
+        ],
+        "kids": [
+          {
+            "id": "a1b2c3d4e5f6",
+            "title": "Fleet page: back to the top",
+            "hint": "Where you are now.",
+            "href": "#/"
+          },
+          {
+            "id": "other",
+            "title": "Other page"
+          },
+          {
+            "id": "query",
+            "title": "Self with query: back to the top",
+            "href": "#/"
+          }
+        ]
+      }
+    ],
+    [
+      "pages~other",
+      {
+        "title": "Other page",
+        "trail": [
+          "Fields",
+          "Your pages"
+        ],
+        "kids": [],
+        "href": "https://host.example.test/a/a1b2c3d4e5f6x",
+        "hrefLabel": "Open other"
+      }
+    ],
+    [
+      "hints",
+      {
+        "title": "Hints",
+        "trail": [
+          "Fields"
+        ],
+        "kids": [
+          {
+            "id": "long-one",
+            "title": "Long one",
+            "hint": "This hint is long enough to pass ninety code units, and it ends its first sentence here."
+          },
+          {
+            "id": "long-two",
+            "title": "Long two",
+            "hint": "This hint is also long, longer than ninety code units, but it has no sentence end…"
+          },
+          {
+            "id": "long-three",
+            "title": "Long three",
+            "hint": "Emoji 😀 and dashes – and arrows › count as code units in JS strings so this hint cuts…"
+          },
+          {
+            "id": "same-as-label",
+            "title": "Same as label"
+          },
+          {
+            "id": "why-only",
+            "title": "Why only",
+            "hint": "because ✓"
+          }
+        ]
+      }
+    ],
+    [
+      "hints~long-one",
+      {
+        "title": "Long one",
+        "trail": [
+          "Fields",
+          "Hints"
+        ],
+        "kids": [],
+        "text": [
+          "This hint is long enough to pass ninety code units, and it ends its first sentence here. Then it keeps going on."
+        ]
+      }
+    ],
+    [
+      "hints~long-two",
+      {
+        "title": "Long two",
+        "trail": [
+          "Fields",
+          "Hints"
+        ],
+        "kids": [],
+        "text": [
+          "This hint is also long, longer than ninety code units, but it has no sentence end anywhere in it at all so it is cut"
+        ]
+      }
+    ],
+    [
+      "hints~long-three",
+      {
+        "title": "Long three",
+        "trail": [
+          "Fields",
+          "Hints"
+        ],
+        "kids": [],
+        "text": [
+          "Emoji 😀 and dashes – and arrows › count as code units in JS strings so this hint cuts somewhere else entirely… right"
+        ]
+      }
+    ],
+    [
+      "hints~same-as-label",
+      {
+        "title": "Same as label",
+        "trail": [
+          "Fields",
+          "Hints"
+        ],
+        "kids": []
+      }
+    ],
+    [
+      "hints~why-only",
+      {
+        "title": "Why only",
+        "trail": [
+          "Fields",
+          "Hints"
+        ],
+        "kids": [],
+        "text": [
+          "because ✓",
+          "one",
+          "two",
+          "padded"
+        ]
+      }
+    ],
+    [
+      "more",
+      {
+        "title": "More of this page",
+        "trail": [
+          "Fields"
+        ],
+        "kids": [
+          {
+            "id": "empty",
+            "title": "Empty"
+          },
+          {
+            "id": "empty2",
+            "title": "Empty with kids"
+          }
+        ]
+      }
+    ],
+    [
+      "more~empty",
+      {
+        "title": "Empty",
+        "trail": [
+          "Fields",
+          "More of this page"
+        ],
+        "kids": [],
+        "text": [
+          "Nothing is empty here."
+        ]
+      }
+    ],
+    [
+      "more~empty2",
+      {
+        "title": "Empty with kids",
+        "trail": [
+          "Fields",
+          "More of this page"
+        ],
+        "kids": [
+          {
+            "id": "a-kid",
+            "title": "A kid"
+          }
+        ]
+      }
+    ],
+    [
+      "more~empty2~a-kid",
+      {
+        "title": "A kid",
+        "trail": [
+          "Fields",
+          "More of this page",
+          "Empty with kids"
+        ],
+        "kids": []
+      }
+    ]
+  ],
+  "opts": {
+    "budgets": [
+      {
+        "id": "view.words",
+        "value": 220
+      }
+    ],
+    "localTimeZone": "UTC"
+  }
+}

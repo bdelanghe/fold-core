@@ -1,0 +1,176 @@
+{
+  "nodes": {
+    "root": {
+      "title": "Deck",
+      "trail": [],
+      "kids": [
+        {
+          "id": "one",
+          "title": "One",
+          "hint": "The first."
+        },
+        {
+          "id": "two",
+          "title": "Two",
+          "hint": "The second."
+        },
+        {
+          "id": "three",
+          "title": "Three",
+          "hint": "The third."
+        }
+      ],
+      "text": [
+        "A deck."
+      ],
+      "present": "slides",
+      "next": {
+        "id": "one",
+        "title": "One"
+      },
+      "updated": "2026-10-27T13:05:00Z",
+      "source": "deck-sync",
+      "stale": "Old data.",
+      "checked": "Checked."
+    },
+    "one": {
+      "title": "One",
+      "trail": [
+        "Deck"
+      ],
+      "kids": [],
+      "text": [
+        "One says one thing."
+      ],
+      "present": "slides",
+      "prev": {
+        "id": "root",
+        "title": "Deck"
+      },
+      "next": {
+        "id": "two",
+        "title": "Two"
+      },
+      "href": "https://example.org/one",
+      "hrefLabel": "The page",
+      "act": {
+        "cap": "webauthn",
+        "call": "approve",
+        "args": {},
+        "label": "Approve it"
+      },
+      "health": "Healthy.",
+      "updated": "2026-01-05T23:59:59+05:30"
+    },
+    "two": {
+      "title": "Two",
+      "trail": [],
+      "kids": [
+        {
+          "id": "p0",
+          "title": "Point 0",
+          "hint": "hint hint hint hint hint hint hint hint hint hint hint hint hint hint hint hint hint hint hint hint"
+        },
+        {
+          "id": "p1",
+          "title": "Point 1",
+          "hint": "hint hint hint hint hint hint hint hint hint hint hint hint hint hint hint hint hint hint hint hint"
+        },
+        {
+          "id": "p2",
+          "title": "Point 2",
+          "hint": "hint hint hint hint hint hint hint hint hint hint hint hint hint hint hint hint hint hint hint hint"
+        },
+        {
+          "id": "p3",
+          "title": "Point 3",
+          "hint": "hint hint hint hint hint hint hint hint hint hint hint hint hint hint hint hint hint hint hint hint"
+        },
+        {
+          "id": "p4",
+          "title": "Point 4",
+          "hint": "hint hint hint hint hint hint hint hint hint hint hint hint hint hint hint hint hint hint hint hint"
+        }
+      ],
+      "present": "folds",
+      "prev": {
+        "id": "one",
+        "title": "One"
+      },
+      "next": {
+        "id": "nowhere",
+        "title": "Nowhere"
+      },
+      "href": "https://example.org/two",
+      "act": {
+        "cap": "x",
+        "call": "y",
+        "args": []
+      },
+      "updated": "not a time"
+    },
+    "two~p0": {
+      "title": "Point 0",
+      "trail": [],
+      "kids": [],
+      "text": [
+        "word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word"
+      ],
+      "present": "slides",
+      "prev": {
+        "id": "gone",
+        "title": "Gone"
+      },
+      "updated": "2026-10-27"
+    },
+    "two~p1": {
+      "title": "Point 1",
+      "trail": [],
+      "kids": [],
+      "text": [
+        "One."
+      ]
+    },
+    "two~p2": {
+      "title": "Point 2",
+      "trail": [],
+      "kids": [],
+      "text": [
+        "Two."
+      ]
+    },
+    "two~p3": {
+      "title": "Point 3",
+      "trail": [],
+      "kids": [],
+      "text": [
+        "Three."
+      ]
+    },
+    "two~p4": {
+      "title": "Point 4",
+      "trail": [],
+      "kids": [],
+      "text": [
+        "Four."
+      ]
+    },
+    "three": {
+      "title": "Three",
+      "trail": [
+        "Deck"
+      ],
+      "kids": [],
+      "text": [
+        "word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word"
+      ],
+      "present": "slides",
+      "prev": {
+        "id": "two",
+        "title": "Two"
+      },
+      "updated": "2026-10-27T10:00:00",
+      "source": "a writer"
+    }
+  }
+}

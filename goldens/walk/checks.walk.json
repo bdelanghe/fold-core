@@ -1,0 +1,646 @@
+{
+  "walk": {
+    "folds": 7,
+    "reached": 5,
+    "findings": [
+      {
+        "fold": "root",
+        "check": "dangling",
+        "kind": "remove",
+        "blocks": true,
+        "said": "Gone",
+        "reduction": "\"Gone\" leads nowhere: remove it or write its fold"
+      },
+      {
+        "fold": "root",
+        "check": "unexplained-state",
+        "kind": "rename",
+        "blocks": true,
+        "said": "Stuck.",
+        "reduction": "say what \"Stuck.\" is about and what to do, or drop the line"
+      },
+      {
+        "fold": "states",
+        "check": "unexplained-state",
+        "kind": "rename",
+        "blocks": true,
+        "said": "Down",
+        "reduction": "say what \"Down\" is about and what to do, or drop the line"
+      },
+      {
+        "fold": "states",
+        "check": "unexplained-state",
+        "kind": "rename",
+        "blocks": true,
+        "said": "  **BLOCKED!!**  ",
+        "reduction": "say what \"**BLOCKED!!**\" is about and what to do, or drop the line"
+      },
+      {
+        "fold": "states",
+        "check": "unexplained-state",
+        "kind": "rename",
+        "blocks": true,
+        "said": "Waiting…",
+        "reduction": "say what \"Waiting…\" is about and what to do, or drop the line"
+      },
+      {
+        "fold": "states",
+        "check": "unexplained-state",
+        "kind": "rename",
+        "blocks": true,
+        "said": "stale",
+        "reduction": "say what \"stale\" is about and what to do, or drop the line"
+      },
+      {
+        "fold": "states",
+        "check": "unexplained-state",
+        "kind": "rename",
+        "blocks": true,
+        "said": "Unknown?",
+        "reduction": "say what \"Unknown?\" is about and what to do, or drop the line"
+      },
+      {
+        "fold": "states",
+        "check": "unexplained-state",
+        "kind": "rename",
+        "blocks": true,
+        "said": "— Failed —",
+        "reduction": "say what \"— Failed —\" is about and what to do, or drop the line"
+      },
+      {
+        "fold": "states",
+        "check": "unexplained-state",
+        "kind": "rename",
+        "blocks": true,
+        "said": "erroré",
+        "reduction": "say what \"erroré\" is about and what to do, or drop the line"
+      },
+      {
+        "fold": "a",
+        "check": "choices",
+        "kind": "restructure",
+        "blocks": true,
+        "said": "6 links",
+        "reduction": "group into at most 5"
+      },
+      {
+        "fold": "root",
+        "check": "choices",
+        "kind": "restructure",
+        "blocks": true,
+        "said": "6 links",
+        "reduction": "group into at most 5"
+      },
+      {
+        "fold": "b",
+        "check": "no-intent",
+        "kind": "remove",
+        "blocks": false,
+        "said": "Beta",
+        "reduction": "an empty fold: remove it from its parent"
+      },
+      {
+        "fold": "orphan",
+        "check": "unreachable",
+        "kind": "remove",
+        "blocks": false,
+        "said": "Orphan",
+        "reduction": "no path from the top reaches it: remove it or link it"
+      },
+      {
+        "fold": "orphan2",
+        "check": "unreachable",
+        "kind": "remove",
+        "blocks": false,
+        "said": "Orphan two words",
+        "reduction": "no path from the top reaches it: remove it or link it"
+      },
+      {
+        "fold": "root",
+        "check": "ruled-words",
+        "kind": "rename",
+        "blocks": false,
+        "said": "Alpha: Work in progress: alpha",
+        "reduction": "drop \"Work in progress\" (Bobby 10-27)"
+      },
+      {
+        "fold": "root",
+        "check": "cut-hint",
+        "kind": "rename",
+        "blocks": false,
+        "said": "Beta: A hint that was cut…",
+        "reduction": "a hint that is a whole sentence for \"Beta\""
+      },
+      {
+        "fold": "root",
+        "check": "cut-hint",
+        "kind": "rename",
+        "blocks": false,
+        "said": "Gamma: Three dots...",
+        "reduction": "a hint that is a whole sentence for \"Gamma\""
+      },
+      {
+        "fold": "root",
+        "check": "ruled-words",
+        "kind": "rename",
+        "blocks": false,
+        "said": "We are being worked on today.",
+        "reduction": "say which goal session, not that work is in progress (Bobby 10-27)"
+      }
+    ]
+  },
+  "verdict": "The artificial viewer is stuck on \"Gone\" (this fold): \"Gone\" leads nowhere: remove it or write its fold.",
+  "facto": {
+    "vertices": [
+      {
+        "id": "38564effddde1e596f52ae8443b19899",
+        "labels": [
+          "Observation",
+          "ArtificialViewerWalk"
+        ],
+        "props": {
+          "name": "artificial viewer walk art 2026-10-28T00:00:00Z",
+          "artifact": "art",
+          "observedAt": "2026-10-28T00:00:00Z",
+          "rev": "abc",
+          "folds": 7,
+          "reached": 5,
+          "findings": 18,
+          "blocking": 11,
+          "source": "fold-viewer/walk.ts",
+          "evidence": "a static walk of the fold data's accessibility trees (fold-ax.js), proxies only; not a person and not a cold read"
+        }
+      },
+      {
+        "id": "4c36cce4d27e6c56bd90fa3ba13d5723",
+        "labels": [
+          "Observation",
+          "ArtificialViewerFinding"
+        ],
+        "props": {
+          "name": "dangling: Gone",
+          "rank": 1,
+          "fold": "root",
+          "check": "dangling",
+          "kind": "remove",
+          "blocks": true,
+          "said": "Gone",
+          "reduction": "\"Gone\" leads nowhere: remove it or write its fold",
+          "artifact": "art",
+          "observedAt": "2026-10-28T00:00:00Z",
+          "source": "fold-viewer/walk.ts"
+        }
+      },
+      {
+        "id": "f8f7948c7df6c0c8da2fdc394772ce58",
+        "labels": [
+          "Observation",
+          "ArtificialViewerFinding"
+        ],
+        "props": {
+          "name": "unexplained-state: Stuck.",
+          "rank": 2,
+          "fold": "root",
+          "check": "unexplained-state",
+          "kind": "rename",
+          "blocks": true,
+          "said": "Stuck.",
+          "reduction": "say what \"Stuck.\" is about and what to do, or drop the line",
+          "artifact": "art",
+          "observedAt": "2026-10-28T00:00:00Z",
+          "source": "fold-viewer/walk.ts"
+        }
+      },
+      {
+        "id": "96eeef9d97ba5f5caa3ad5061a74dba4",
+        "labels": [
+          "Observation",
+          "ArtificialViewerFinding"
+        ],
+        "props": {
+          "name": "unexplained-state: Down",
+          "rank": 3,
+          "fold": "states",
+          "check": "unexplained-state",
+          "kind": "rename",
+          "blocks": true,
+          "said": "Down",
+          "reduction": "say what \"Down\" is about and what to do, or drop the line",
+          "artifact": "art",
+          "observedAt": "2026-10-28T00:00:00Z",
+          "source": "fold-viewer/walk.ts"
+        }
+      },
+      {
+        "id": "0477beb57ffec1f2c6419099d4e0451b",
+        "labels": [
+          "Observation",
+          "ArtificialViewerFinding"
+        ],
+        "props": {
+          "name": "unexplained-state:   **BLOCKED!!**  ",
+          "rank": 4,
+          "fold": "states",
+          "check": "unexplained-state",
+          "kind": "rename",
+          "blocks": true,
+          "said": "  **BLOCKED!!**  ",
+          "reduction": "say what \"**BLOCKED!!**\" is about and what to do, or drop the line",
+          "artifact": "art",
+          "observedAt": "2026-10-28T00:00:00Z",
+          "source": "fold-viewer/walk.ts"
+        }
+      },
+      {
+        "id": "5196bdc4ea6ef88a4ac53f82969d6ee3",
+        "labels": [
+          "Observation",
+          "ArtificialViewerFinding"
+        ],
+        "props": {
+          "name": "unexplained-state: Waiting…",
+          "rank": 5,
+          "fold": "states",
+          "check": "unexplained-state",
+          "kind": "rename",
+          "blocks": true,
+          "said": "Waiting…",
+          "reduction": "say what \"Waiting…\" is about and what to do, or drop the line",
+          "artifact": "art",
+          "observedAt": "2026-10-28T00:00:00Z",
+          "source": "fold-viewer/walk.ts"
+        }
+      },
+      {
+        "id": "e2e11fb16430709fbfb9e20a749c1725",
+        "labels": [
+          "Observation",
+          "ArtificialViewerFinding"
+        ],
+        "props": {
+          "name": "unexplained-state: stale",
+          "rank": 6,
+          "fold": "states",
+          "check": "unexplained-state",
+          "kind": "rename",
+          "blocks": true,
+          "said": "stale",
+          "reduction": "say what \"stale\" is about and what to do, or drop the line",
+          "artifact": "art",
+          "observedAt": "2026-10-28T00:00:00Z",
+          "source": "fold-viewer/walk.ts"
+        }
+      },
+      {
+        "id": "9232c52a46fa7d30c6c5e12c77999d14",
+        "labels": [
+          "Observation",
+          "ArtificialViewerFinding"
+        ],
+        "props": {
+          "name": "unexplained-state: Unknown?",
+          "rank": 7,
+          "fold": "states",
+          "check": "unexplained-state",
+          "kind": "rename",
+          "blocks": true,
+          "said": "Unknown?",
+          "reduction": "say what \"Unknown?\" is about and what to do, or drop the line",
+          "artifact": "art",
+          "observedAt": "2026-10-28T00:00:00Z",
+          "source": "fold-viewer/walk.ts"
+        }
+      },
+      {
+        "id": "f1434e56b508b54cdeee41087b9fbf52",
+        "labels": [
+          "Observation",
+          "ArtificialViewerFinding"
+        ],
+        "props": {
+          "name": "unexplained-state: — Failed —",
+          "rank": 8,
+          "fold": "states",
+          "check": "unexplained-state",
+          "kind": "rename",
+          "blocks": true,
+          "said": "— Failed —",
+          "reduction": "say what \"— Failed —\" is about and what to do, or drop the line",
+          "artifact": "art",
+          "observedAt": "2026-10-28T00:00:00Z",
+          "source": "fold-viewer/walk.ts"
+        }
+      },
+      {
+        "id": "1e163f490d4a42e233bddb2409114bbc",
+        "labels": [
+          "Observation",
+          "ArtificialViewerFinding"
+        ],
+        "props": {
+          "name": "unexplained-state: erroré",
+          "rank": 9,
+          "fold": "states",
+          "check": "unexplained-state",
+          "kind": "rename",
+          "blocks": true,
+          "said": "erroré",
+          "reduction": "say what \"erroré\" is about and what to do, or drop the line",
+          "artifact": "art",
+          "observedAt": "2026-10-28T00:00:00Z",
+          "source": "fold-viewer/walk.ts"
+        }
+      },
+      {
+        "id": "a79cfb18c858f687cb559100aad8566b",
+        "labels": [
+          "Observation",
+          "ArtificialViewerFinding"
+        ],
+        "props": {
+          "name": "choices: 6 links",
+          "rank": 10,
+          "fold": "a",
+          "check": "choices",
+          "kind": "restructure",
+          "blocks": true,
+          "said": "6 links",
+          "reduction": "group into at most 5",
+          "artifact": "art",
+          "observedAt": "2026-10-28T00:00:00Z",
+          "source": "fold-viewer/walk.ts"
+        }
+      },
+      {
+        "id": "a3ca590e4f08ef8a450df516dfa12573",
+        "labels": [
+          "Observation",
+          "ArtificialViewerFinding"
+        ],
+        "props": {
+          "name": "choices: 6 links",
+          "rank": 11,
+          "fold": "root",
+          "check": "choices",
+          "kind": "restructure",
+          "blocks": true,
+          "said": "6 links",
+          "reduction": "group into at most 5",
+          "artifact": "art",
+          "observedAt": "2026-10-28T00:00:00Z",
+          "source": "fold-viewer/walk.ts"
+        }
+      },
+      {
+        "id": "d931920689adb156528ebb98c458d5c7",
+        "labels": [
+          "Observation",
+          "ArtificialViewerFinding"
+        ],
+        "props": {
+          "name": "no-intent: Beta",
+          "rank": 12,
+          "fold": "b",
+          "check": "no-intent",
+          "kind": "remove",
+          "blocks": false,
+          "said": "Beta",
+          "reduction": "an empty fold: remove it from its parent",
+          "artifact": "art",
+          "observedAt": "2026-10-28T00:00:00Z",
+          "source": "fold-viewer/walk.ts"
+        }
+      },
+      {
+        "id": "23d5c3fc440e69dcf93c6a49d29fe140",
+        "labels": [
+          "Observation",
+          "ArtificialViewerFinding"
+        ],
+        "props": {
+          "name": "unreachable: Orphan",
+          "rank": 13,
+          "fold": "orphan",
+          "check": "unreachable",
+          "kind": "remove",
+          "blocks": false,
+          "said": "Orphan",
+          "reduction": "no path from the top reaches it: remove it or link it",
+          "artifact": "art",
+          "observedAt": "2026-10-28T00:00:00Z",
+          "source": "fold-viewer/walk.ts"
+        }
+      },
+      {
+        "id": "e2c86854b566862e8fda79e0668c954a",
+        "labels": [
+          "Observation",
+          "ArtificialViewerFinding"
+        ],
+        "props": {
+          "name": "unreachable: Orphan two words",
+          "rank": 14,
+          "fold": "orphan2",
+          "check": "unreachable",
+          "kind": "remove",
+          "blocks": false,
+          "said": "Orphan two words",
+          "reduction": "no path from the top reaches it: remove it or link it",
+          "artifact": "art",
+          "observedAt": "2026-10-28T00:00:00Z",
+          "source": "fold-viewer/walk.ts"
+        }
+      },
+      {
+        "id": "bf66fb712552070548f42d40cba5c1fb",
+        "labels": [
+          "Observation",
+          "ArtificialViewerFinding"
+        ],
+        "props": {
+          "name": "ruled-words: Alpha: Work in progress: alpha",
+          "rank": 15,
+          "fold": "root",
+          "check": "ruled-words",
+          "kind": "rename",
+          "blocks": false,
+          "said": "Alpha: Work in progress: alpha",
+          "reduction": "drop \"Work in progress\" (Bobby 10-27)",
+          "artifact": "art",
+          "observedAt": "2026-10-28T00:00:00Z",
+          "source": "fold-viewer/walk.ts"
+        }
+      },
+      {
+        "id": "7a3380b8ed926b94775f8422ea3b3e86",
+        "labels": [
+          "Observation",
+          "ArtificialViewerFinding"
+        ],
+        "props": {
+          "name": "cut-hint: Beta: A hint that was cut…",
+          "rank": 16,
+          "fold": "root",
+          "check": "cut-hint",
+          "kind": "rename",
+          "blocks": false,
+          "said": "Beta: A hint that was cut…",
+          "reduction": "a hint that is a whole sentence for \"Beta\"",
+          "artifact": "art",
+          "observedAt": "2026-10-28T00:00:00Z",
+          "source": "fold-viewer/walk.ts"
+        }
+      },
+      {
+        "id": "994074d2097ff6c80b52e7df6956062e",
+        "labels": [
+          "Observation",
+          "ArtificialViewerFinding"
+        ],
+        "props": {
+          "name": "cut-hint: Gamma: Three dots...",
+          "rank": 17,
+          "fold": "root",
+          "check": "cut-hint",
+          "kind": "rename",
+          "blocks": false,
+          "said": "Gamma: Three dots...",
+          "reduction": "a hint that is a whole sentence for \"Gamma\"",
+          "artifact": "art",
+          "observedAt": "2026-10-28T00:00:00Z",
+          "source": "fold-viewer/walk.ts"
+        }
+      },
+      {
+        "id": "eacef55381f86f199dcb5cb176a820a0",
+        "labels": [
+          "Observation",
+          "ArtificialViewerFinding"
+        ],
+        "props": {
+          "name": "ruled-words: We are being worked on today.",
+          "rank": 18,
+          "fold": "root",
+          "check": "ruled-words",
+          "kind": "rename",
+          "blocks": false,
+          "said": "We are being worked on today.",
+          "reduction": "say which goal session, not that work is in progress (Bobby 10-27)",
+          "artifact": "art",
+          "observedAt": "2026-10-28T00:00:00Z",
+          "source": "fold-viewer/walk.ts"
+        }
+      }
+    ],
+    "edges": [
+      {
+        "id": "f77b4edc289cba6b4fcc2b621808ac34",
+        "src_id": "4c36cce4d27e6c56bd90fa3ba13d5723",
+        "dst_id": "38564effddde1e596f52ae8443b19899",
+        "label": "found_in"
+      },
+      {
+        "id": "9e4fdd1e15b546e98dfceeeb5bb2eb89",
+        "src_id": "f8f7948c7df6c0c8da2fdc394772ce58",
+        "dst_id": "38564effddde1e596f52ae8443b19899",
+        "label": "found_in"
+      },
+      {
+        "id": "f0cda66a6772a988e16510aea244c10b",
+        "src_id": "96eeef9d97ba5f5caa3ad5061a74dba4",
+        "dst_id": "38564effddde1e596f52ae8443b19899",
+        "label": "found_in"
+      },
+      {
+        "id": "07e755b80c46f5b1f8d130a597bd9518",
+        "src_id": "0477beb57ffec1f2c6419099d4e0451b",
+        "dst_id": "38564effddde1e596f52ae8443b19899",
+        "label": "found_in"
+      },
+      {
+        "id": "fcc98b3b261105201a30f76d8cf1e514",
+        "src_id": "5196bdc4ea6ef88a4ac53f82969d6ee3",
+        "dst_id": "38564effddde1e596f52ae8443b19899",
+        "label": "found_in"
+      },
+      {
+        "id": "14233b9d29ab23d12dce7fbbbbc4cb55",
+        "src_id": "e2e11fb16430709fbfb9e20a749c1725",
+        "dst_id": "38564effddde1e596f52ae8443b19899",
+        "label": "found_in"
+      },
+      {
+        "id": "142e9b0b06b8df8060c36096a434a07f",
+        "src_id": "9232c52a46fa7d30c6c5e12c77999d14",
+        "dst_id": "38564effddde1e596f52ae8443b19899",
+        "label": "found_in"
+      },
+      {
+        "id": "5f2927ea2f72d72d41fe658991e38bf1",
+        "src_id": "f1434e56b508b54cdeee41087b9fbf52",
+        "dst_id": "38564effddde1e596f52ae8443b19899",
+        "label": "found_in"
+      },
+      {
+        "id": "37a34d92ed93e717070d348b9a78ae17",
+        "src_id": "1e163f490d4a42e233bddb2409114bbc",
+        "dst_id": "38564effddde1e596f52ae8443b19899",
+        "label": "found_in"
+      },
+      {
+        "id": "40df3a125cdd74ec395e0d549481ae18",
+        "src_id": "a79cfb18c858f687cb559100aad8566b",
+        "dst_id": "38564effddde1e596f52ae8443b19899",
+        "label": "found_in"
+      },
+      {
+        "id": "4cf50295cb004b9fe428278afd235cca",
+        "src_id": "a3ca590e4f08ef8a450df516dfa12573",
+        "dst_id": "38564effddde1e596f52ae8443b19899",
+        "label": "found_in"
+      },
+      {
+        "id": "2752b759a28356ac44bf0272fedd3072",
+        "src_id": "d931920689adb156528ebb98c458d5c7",
+        "dst_id": "38564effddde1e596f52ae8443b19899",
+        "label": "found_in"
+      },
+      {
+        "id": "09d7f097300dc32a12539977d7abe43b",
+        "src_id": "23d5c3fc440e69dcf93c6a49d29fe140",
+        "dst_id": "38564effddde1e596f52ae8443b19899",
+        "label": "found_in"
+      },
+      {
+        "id": "ccf8029bd0562a50ba09307e58f96633",
+        "src_id": "e2c86854b566862e8fda79e0668c954a",
+        "dst_id": "38564effddde1e596f52ae8443b19899",
+        "label": "found_in"
+      },
+      {
+        "id": "1bdd8ff77a7aa8bde533f61f4c51a3c5",
+        "src_id": "bf66fb712552070548f42d40cba5c1fb",
+        "dst_id": "38564effddde1e596f52ae8443b19899",
+        "label": "found_in"
+      },
+      {
+        "id": "aec98ec315be00bb24ff057274c61e21",
+        "src_id": "7a3380b8ed926b94775f8422ea3b3e86",
+        "dst_id": "38564effddde1e596f52ae8443b19899",
+        "label": "found_in"
+      },
+      {
+        "id": "fa56968b5026ced095f9316ac5f709a5",
+        "src_id": "994074d2097ff6c80b52e7df6956062e",
+        "dst_id": "38564effddde1e596f52ae8443b19899",
+        "label": "found_in"
+      },
+      {
+        "id": "d15bab3e9c0161fdf55b5d6636a14eca",
+        "src_id": "eacef55381f86f199dcb5cb176a820a0",
+        "dst_id": "38564effddde1e596f52ae8443b19899",
+        "label": "found_in"
+      }
+    ]
+  }
+}

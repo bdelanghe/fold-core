@@ -1,0 +1,124 @@
+{
+  "nodes": {
+    "root": {
+      "title": "Top",
+      "trail": [],
+      "kids": [
+        {
+          "id": "a",
+          "title": "Alpha",
+          "hint": "Work in progress: alpha"
+        },
+        {
+          "id": "gone",
+          "title": "Gone"
+        },
+        {
+          "id": "b",
+          "title": "Beta",
+          "hint": "A hint that was cut…"
+        },
+        {
+          "id": "c",
+          "title": "Gamma",
+          "hint": "Three dots..."
+        },
+        {
+          "id": "link",
+          "title": "Only a link",
+          "href": "https://example.org"
+        },
+        {
+          "id": "states",
+          "title": "States",
+          "hint": "Lines that name a state."
+        }
+      ],
+      "text": [
+        "Stuck.",
+        "Status: idle",
+        "Stuck: these are not moving.",
+        "We are being worked on today."
+      ]
+    },
+    "a": {
+      "title": "Alpha",
+      "trail": [],
+      "kids": [
+        {
+          "id": "x0",
+          "title": "X 0",
+          "href": "https://example.org"
+        },
+        {
+          "id": "x1",
+          "title": "X 1",
+          "href": "https://example.org"
+        },
+        {
+          "id": "x2",
+          "title": "X 2",
+          "href": "https://example.org"
+        },
+        {
+          "id": "x3",
+          "title": "X 3",
+          "href": "https://example.org"
+        },
+        {
+          "id": "x4",
+          "title": "X 4",
+          "href": "https://example.org"
+        },
+        {
+          "id": "x5",
+          "title": "X 5",
+          "href": "https://example.org"
+        }
+      ]
+    },
+    "b": {
+      "title": "Beta",
+      "trail": [],
+      "kids": []
+    },
+    "c": {
+      "title": "  Gamma  delta epsilon",
+      "trail": [],
+      "kids": []
+    },
+    "states": {
+      "title": "States",
+      "trail": [],
+      "kids": [],
+      "text": [
+        "Down",
+        "  **BLOCKED!!**  ",
+        "Waiting…",
+        "stale",
+        "Unknown?",
+        "offline now",
+        "— Failed —",
+        "Error_",
+        "erroré",
+        "Degraded 2"
+      ]
+    },
+    "orphan": {
+      "title": "Orphan",
+      "trail": [],
+      "kids": [],
+      "text": [
+        "No one links here."
+      ]
+    },
+    "orphan2": {
+      "title": "Orphan two words"
+    }
+  },
+  "facto": {
+    "artifact": "art",
+    "at": "2026-10-28T00:00:00Z",
+    "rev": "abc"
+  }
+}

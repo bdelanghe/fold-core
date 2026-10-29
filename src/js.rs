@@ -179,3 +179,54 @@ pub fn when(iso: &str, clock: &Clock) -> String {
 pub fn is_run_id(id: &str) -> bool {
     id.strip_prefix("part-").is_some_and(|d| !d.is_empty() && d.bytes().all(|b| b.is_ascii_digit()))
 }
+
+/// `new Date(iso).toLocaleString([], {dateStyle: "medium", timeStyle: "short"})` in en-US as bun prints it ("Oct 27, 2026 at
+/// 9:05 AM"), in the machine's zone (the clock's local zone); what `new Date` cannot read is "Invalid Date".
+pub fn medium(iso: &str, clock: &Clock) -> String {
+    use chrono::{Datelike, Timelike};
+    let Some(d) = parse_in(iso, clock) else { return "Invalid Date".into() };
+    let d = d.with_timezone(&clock.local);
+    let h = match d.hour() % 12 {
+        0 => 12,
+        h => h,
+    };
+    format!("{} {}, {} at {h}:{:02} {}", d.format("%b"), d.day(), d.year(), d.minute(), if d.hour() < 12 { "AM" } else { "PM" })
+}
+
+/// JS `String(v)` for a JSON value (`undefined` when missing): what `"…" + v` writes.
+pub fn string(v: Option<&serde_json::Value>) -> String {
+    use serde_json::Value;
+    match v {
+        None => "undefined".into(),
+        Some(Value::Null) => "null".into(),
+        Some(Value::String(s)) => s.clone(),
+        Some(Value::Bool(b)) => b.to_string(),
+        Some(Value::Number(n)) => n.to_string(),
+        Some(Value::Array(a)) => a.iter().map(|x| if x.is_null() { String::new() } else { string(Some(x)) }).collect::<Vec<_>>().join(","),
+        Some(Value::Object(_)) => "[object Object]".into(),
+    }
+}
+
+/// `s.slice(0, n)` in UTF-16 code units (a cut through a surrogate pair becomes U+FFFD, as in `clip`).
+pub fn slice16(s: &str, n: usize) -> String {
+    let u: Vec<u16> = s.encode_utf16().take(n).collect();
+    String::from_utf16_lossy(&u)
+}
+
+/// `a.localeCompare(b)` as bun (ICU root collation, punctuation not ignored) orders ASCII: whitespace and punctuation, then
+/// digits, then letters, case only breaking a tie (lower first). Characters past ASCII sort after every ASCII one, by code point
+/// (ICU interleaves them; fold ids are slugs, so they meet none).
+pub fn locale_compare(a: &str, b: &str) -> std::cmp::Ordering {
+    // bun 1.3.13: [...printable ASCII].sort((a, b) => a.localeCompare(b)), case pairs equal at the first level
+    const ORDER: &str = " _-,;:!?.'\"()[]{}@*/\\&#%`^+<=>|~$0123456789abcdefghijklmnopqrstuvwxyz";
+    let primary = |c: char| -> u32 {
+        let l = c.to_ascii_lowercase();
+        match ORDER.find(l) {
+            Some(i) if c.is_ascii() && !c.is_ascii_control() => i as u32,
+            _ => 0x100 + c as u32,
+        }
+    };
+    let p = |s: &str| s.chars().map(primary).collect::<Vec<_>>();
+    let case = |s: &str| s.chars().map(|c| c.is_ascii_uppercase()).collect::<Vec<_>>();
+    p(a).cmp(&p(b)).then_with(|| case(a).cmp(&case(b)))
+}

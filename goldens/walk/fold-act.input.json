@@ -1,0 +1,155 @@
+{
+  "nodes": [
+    [
+      "root",
+      {
+        "title": "Needs you",
+        "trail": [],
+        "kids": [
+          {
+            "id": "needs",
+            "title": "Needs you",
+            "hint": "What waits for you."
+          }
+        ],
+        "updated": "2026-10-29T12:00:00.000Z",
+        "source": "golden"
+      }
+    ],
+    [
+      "needs",
+      {
+        "title": "Needs you",
+        "trail": [
+          "Needs you"
+        ],
+        "kids": [
+          {
+            "id": "needs-sign-a",
+            "title": "To a seat",
+            "hint": "Ship the fix."
+          },
+          {
+            "id": "needs-no-label",
+            "title": "No label"
+          },
+          {
+            "id": "needs-null-args",
+            "title": "Null args"
+          },
+          {
+            "id": "needs-list-args",
+            "title": "List args"
+          },
+          {
+            "id": "needs-blank-cap",
+            "title": "Blank cap"
+          }
+        ],
+        "text": [
+          "What waits for you."
+        ]
+      }
+    ],
+    [
+      "needs~needs-sign-a",
+      {
+        "title": "To a seat",
+        "trail": [
+          "Needs you",
+          "Needs you"
+        ],
+        "kids": [],
+        "text": [
+          "Ship the fix.",
+          "What to do: Approve with your passkey."
+        ],
+        "href": "https://example.test/approve/#i-a",
+        "hrefLabel": "Approve on the approval page",
+        "act": {
+          "cap": "webauthn",
+          "call": "approve",
+          "args": {
+            "challenge": "/approve/v1/challenge/a",
+            "assertion": "/approve/v1/assertion/a"
+          },
+          "label": "Approve with passkey"
+        }
+      }
+    ],
+    [
+      "needs~needs-no-label",
+      {
+        "title": "No label",
+        "trail": [
+          "Needs you",
+          "Needs you"
+        ],
+        "kids": [],
+        "text": [
+          "What to do: x"
+        ]
+      }
+    ],
+    [
+      "needs~needs-null-args",
+      {
+        "title": "Null args",
+        "trail": [
+          "Needs you",
+          "Needs you"
+        ],
+        "kids": [],
+        "text": [
+          "What to do: x"
+        ]
+      }
+    ],
+    [
+      "needs~needs-list-args",
+      {
+        "title": "List args",
+        "trail": [
+          "Needs you",
+          "Needs you"
+        ],
+        "kids": [],
+        "text": [
+          "What to do: x"
+        ],
+        "act": {
+          "cap": " w ",
+          "call": "c",
+          "args": [
+            1,
+            2
+          ],
+          "label": "Go"
+        }
+      }
+    ],
+    [
+      "needs~needs-blank-cap",
+      {
+        "title": "Blank cap",
+        "trail": [
+          "Needs you",
+          "Needs you"
+        ],
+        "kids": [],
+        "text": [
+          "What to do: x"
+        ]
+      }
+    ]
+  ],
+  "opts": {
+    "budgets": [
+      {
+        "id": "view.words",
+        "value": 220
+      }
+    ],
+    "localTimeZone": "UTC"
+  }
+}

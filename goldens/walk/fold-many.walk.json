@@ -1,0 +1,1417 @@
+{
+  "walk": {
+    "folds": 226,
+    "reached": 226,
+    "findings": [
+      {
+        "fold": "big~part-1~part-1",
+        "check": "nested-runs",
+        "kind": "restructure",
+        "blocks": true,
+        "said": "Same name – Item 5 naïve café",
+        "reduction": "group the list by what its items share, so one level of runs holds it"
+      },
+      {
+        "fold": "big~part-1~part-2",
+        "check": "nested-runs",
+        "kind": "restructure",
+        "blocks": true,
+        "said": "Item 6 über — long… – Item 10 über — long…",
+        "reduction": "group the list by what its items share, so one level of runs holds it"
+      },
+      {
+        "fold": "big~part-1~part-3",
+        "check": "nested-runs",
+        "kind": "restructure",
+        "blocks": true,
+        "said": "Item 11 😀 emoji start – Item 15 😀 emoji start",
+        "reduction": "group the list by what its items share, so one level of runs holds it"
+      },
+      {
+        "fold": "big~part-1~part-4",
+        "check": "nested-runs",
+        "kind": "restructure",
+        "blocks": true,
+        "said": "Item 16 plain – Same name",
+        "reduction": "group the list by what its items share, so one level of runs holds it"
+      },
+      {
+        "fold": "big~part-2~part-1",
+        "check": "nested-runs",
+        "kind": "restructure",
+        "blocks": true,
+        "said": "Item 20 plain – Item 24 plain",
+        "reduction": "group the list by what its items share, so one level of runs holds it"
+      },
+      {
+        "fold": "big~part-2~part-2",
+        "check": "nested-runs",
+        "kind": "restructure",
+        "blocks": true,
+        "said": "Same name – Item 29 naïve café",
+        "reduction": "group the list by what its items share, so one level of runs holds it"
+      },
+      {
+        "fold": "big~part-2~part-3",
+        "check": "nested-runs",
+        "kind": "restructure",
+        "blocks": true,
+        "said": "Item 30 über — long… – Item 34 über — long…",
+        "reduction": "group the list by what its items share, so one level of runs holds it"
+      },
+      {
+        "fold": "big~part-2~part-4",
+        "check": "nested-runs",
+        "kind": "restructure",
+        "blocks": true,
+        "said": "Item 35 😀 emoji start – Same name",
+        "reduction": "group the list by what its items share, so one level of runs holds it"
+      },
+      {
+        "fold": "huge~part-1~part-1",
+        "check": "nested-runs",
+        "kind": "restructure",
+        "blocks": true,
+        "said": "Entry 000 – Entry 004",
+        "reduction": "group the list by what its items share, so one level of runs holds it"
+      },
+      {
+        "fold": "huge~part-1~part-2",
+        "check": "nested-runs",
+        "kind": "restructure",
+        "blocks": true,
+        "said": "Entry 005 – Entry 009",
+        "reduction": "group the list by what its items share, so one level of runs holds it"
+      },
+      {
+        "fold": "huge~part-1~part-3",
+        "check": "nested-runs",
+        "kind": "restructure",
+        "blocks": true,
+        "said": "Entry 010 – Entry 014",
+        "reduction": "group the list by what its items share, so one level of runs holds it"
+      },
+      {
+        "fold": "huge~part-1~part-4",
+        "check": "nested-runs",
+        "kind": "restructure",
+        "blocks": true,
+        "said": "Entry 015 – Entry 019",
+        "reduction": "group the list by what its items share, so one level of runs holds it"
+      },
+      {
+        "fold": "huge~part-1~part-5",
+        "check": "nested-runs",
+        "kind": "restructure",
+        "blocks": true,
+        "said": "Entry 020 – Entry 023",
+        "reduction": "group the list by what its items share, so one level of runs holds it"
+      },
+      {
+        "fold": "huge~part-2~part-1",
+        "check": "nested-runs",
+        "kind": "restructure",
+        "blocks": true,
+        "said": "Entry 024 – Entry 028",
+        "reduction": "group the list by what its items share, so one level of runs holds it"
+      },
+      {
+        "fold": "huge~part-2~part-2",
+        "check": "nested-runs",
+        "kind": "restructure",
+        "blocks": true,
+        "said": "Entry 029 – Entry 033",
+        "reduction": "group the list by what its items share, so one level of runs holds it"
+      },
+      {
+        "fold": "huge~part-2~part-3",
+        "check": "nested-runs",
+        "kind": "restructure",
+        "blocks": true,
+        "said": "Entry 034 – Entry 038",
+        "reduction": "group the list by what its items share, so one level of runs holds it"
+      },
+      {
+        "fold": "huge~part-2~part-4",
+        "check": "nested-runs",
+        "kind": "restructure",
+        "blocks": true,
+        "said": "Entry 039 – Entry 043",
+        "reduction": "group the list by what its items share, so one level of runs holds it"
+      },
+      {
+        "fold": "huge~part-2~part-5",
+        "check": "nested-runs",
+        "kind": "restructure",
+        "blocks": true,
+        "said": "Entry 044 – Entry 047",
+        "reduction": "group the list by what its items share, so one level of runs holds it"
+      },
+      {
+        "fold": "huge~part-3~part-1",
+        "check": "nested-runs",
+        "kind": "restructure",
+        "blocks": true,
+        "said": "Entry 048 – Entry 052",
+        "reduction": "group the list by what its items share, so one level of runs holds it"
+      },
+      {
+        "fold": "huge~part-3~part-2",
+        "check": "nested-runs",
+        "kind": "restructure",
+        "blocks": true,
+        "said": "Entry 053 – Entry 057",
+        "reduction": "group the list by what its items share, so one level of runs holds it"
+      },
+      {
+        "fold": "huge~part-3~part-3",
+        "check": "nested-runs",
+        "kind": "restructure",
+        "blocks": true,
+        "said": "Entry 058 – Entry 062",
+        "reduction": "group the list by what its items share, so one level of runs holds it"
+      },
+      {
+        "fold": "huge~part-3~part-4",
+        "check": "nested-runs",
+        "kind": "restructure",
+        "blocks": true,
+        "said": "Entry 063 – Entry 067",
+        "reduction": "group the list by what its items share, so one level of runs holds it"
+      },
+      {
+        "fold": "huge~part-3~part-5",
+        "check": "nested-runs",
+        "kind": "restructure",
+        "blocks": true,
+        "said": "Entry 068 – Entry 071",
+        "reduction": "group the list by what its items share, so one level of runs holds it"
+      },
+      {
+        "fold": "huge~part-4~part-1",
+        "check": "nested-runs",
+        "kind": "restructure",
+        "blocks": true,
+        "said": "Entry 072 – Entry 076",
+        "reduction": "group the list by what its items share, so one level of runs holds it"
+      },
+      {
+        "fold": "huge~part-4~part-2",
+        "check": "nested-runs",
+        "kind": "restructure",
+        "blocks": true,
+        "said": "Entry 077 – Entry 081",
+        "reduction": "group the list by what its items share, so one level of runs holds it"
+      },
+      {
+        "fold": "huge~part-4~part-3",
+        "check": "nested-runs",
+        "kind": "restructure",
+        "blocks": true,
+        "said": "Entry 082 – Entry 086",
+        "reduction": "group the list by what its items share, so one level of runs holds it"
+      },
+      {
+        "fold": "huge~part-4~part-4",
+        "check": "nested-runs",
+        "kind": "restructure",
+        "blocks": true,
+        "said": "Entry 087 – Entry 091",
+        "reduction": "group the list by what its items share, so one level of runs holds it"
+      },
+      {
+        "fold": "huge~part-4~part-5",
+        "check": "nested-runs",
+        "kind": "restructure",
+        "blocks": true,
+        "said": "Entry 092 – Entry 095",
+        "reduction": "group the list by what its items share, so one level of runs holds it"
+      },
+      {
+        "fold": "huge~part-5~part-1",
+        "check": "nested-runs",
+        "kind": "restructure",
+        "blocks": true,
+        "said": "Entry 096 – Entry 100",
+        "reduction": "group the list by what its items share, so one level of runs holds it"
+      },
+      {
+        "fold": "huge~part-5~part-2",
+        "check": "nested-runs",
+        "kind": "restructure",
+        "blocks": true,
+        "said": "Entry 101 – Entry 105",
+        "reduction": "group the list by what its items share, so one level of runs holds it"
+      },
+      {
+        "fold": "huge~part-5~part-3",
+        "check": "nested-runs",
+        "kind": "restructure",
+        "blocks": true,
+        "said": "Entry 106 – Entry 110",
+        "reduction": "group the list by what its items share, so one level of runs holds it"
+      },
+      {
+        "fold": "huge~part-5~part-4",
+        "check": "nested-runs",
+        "kind": "restructure",
+        "blocks": true,
+        "said": "Entry 111 – Entry 115",
+        "reduction": "group the list by what its items share, so one level of runs holds it"
+      },
+      {
+        "fold": "huge~part-5~part-5",
+        "check": "nested-runs",
+        "kind": "restructure",
+        "blocks": true,
+        "said": "Entry 116 – Entry 119",
+        "reduction": "group the list by what its items share, so one level of runs holds it"
+      },
+      {
+        "fold": "big~part-1~part-1~item-4-plain",
+        "check": "no-intent",
+        "kind": "remove",
+        "blocks": false,
+        "said": "Item 4 plain",
+        "reduction": "an empty fold: remove it from its parent"
+      },
+      {
+        "fold": "big~part-1~part-1~same-name",
+        "check": "no-intent",
+        "kind": "remove",
+        "blocks": false,
+        "said": "Same name",
+        "reduction": "an empty fold: remove it from its parent"
+      },
+      {
+        "fold": "big~part-1~part-2~item-8-plain",
+        "check": "no-intent",
+        "kind": "remove",
+        "blocks": false,
+        "said": "Item 8 plain",
+        "reduction": "an empty fold: remove it from its parent"
+      },
+      {
+        "fold": "big~part-1~part-2~same-name",
+        "check": "no-intent",
+        "kind": "remove",
+        "blocks": false,
+        "said": "Same name",
+        "reduction": "an empty fold: remove it from its parent"
+      },
+      {
+        "fold": "big~part-1~part-3~item-12-plain",
+        "check": "no-intent",
+        "kind": "remove",
+        "blocks": false,
+        "said": "Item 12 plain",
+        "reduction": "an empty fold: remove it from its parent"
+      },
+      {
+        "fold": "big~part-1~part-3~same-name",
+        "check": "no-intent",
+        "kind": "remove",
+        "blocks": false,
+        "said": "Same name",
+        "reduction": "an empty fold: remove it from its parent"
+      },
+      {
+        "fold": "big~part-1~part-4~item-16-plain",
+        "check": "no-intent",
+        "kind": "remove",
+        "blocks": false,
+        "said": "Item 16 plain",
+        "reduction": "an empty fold: remove it from its parent"
+      },
+      {
+        "fold": "big~part-1~part-4~same-name",
+        "check": "no-intent",
+        "kind": "remove",
+        "blocks": false,
+        "said": "Same name",
+        "reduction": "an empty fold: remove it from its parent"
+      },
+      {
+        "fold": "big~part-2~part-1~item-20-plain",
+        "check": "no-intent",
+        "kind": "remove",
+        "blocks": false,
+        "said": "Item 20 plain",
+        "reduction": "an empty fold: remove it from its parent"
+      },
+      {
+        "fold": "big~part-2~part-1~item-24-plain",
+        "check": "no-intent",
+        "kind": "remove",
+        "blocks": false,
+        "said": "Item 24 plain",
+        "reduction": "an empty fold: remove it from its parent"
+      },
+      {
+        "fold": "big~part-2~part-2~item-28-plain",
+        "check": "no-intent",
+        "kind": "remove",
+        "blocks": false,
+        "said": "Item 28 plain",
+        "reduction": "an empty fold: remove it from its parent"
+      },
+      {
+        "fold": "big~part-2~part-2~same-name",
+        "check": "no-intent",
+        "kind": "remove",
+        "blocks": false,
+        "said": "Same name",
+        "reduction": "an empty fold: remove it from its parent"
+      },
+      {
+        "fold": "big~part-2~part-3~item-32-plain",
+        "check": "no-intent",
+        "kind": "remove",
+        "blocks": false,
+        "said": "Item 32 plain",
+        "reduction": "an empty fold: remove it from its parent"
+      },
+      {
+        "fold": "big~part-2~part-3~same-name",
+        "check": "no-intent",
+        "kind": "remove",
+        "blocks": false,
+        "said": "Same name",
+        "reduction": "an empty fold: remove it from its parent"
+      },
+      {
+        "fold": "big~part-2~part-4~item-36-plain",
+        "check": "no-intent",
+        "kind": "remove",
+        "blocks": false,
+        "said": "Item 36 plain",
+        "reduction": "an empty fold: remove it from its parent"
+      },
+      {
+        "fold": "big~part-2~part-4~same-name",
+        "check": "no-intent",
+        "kind": "remove",
+        "blocks": false,
+        "said": "Same name",
+        "reduction": "an empty fold: remove it from its parent"
+      },
+      {
+        "fold": "huge~part-1~part-1~h-0",
+        "check": "no-intent",
+        "kind": "remove",
+        "blocks": false,
+        "said": "Entry 000",
+        "reduction": "an empty fold: remove it from its parent"
+      },
+      {
+        "fold": "huge~part-1~part-1~h-1",
+        "check": "no-intent",
+        "kind": "remove",
+        "blocks": false,
+        "said": "Entry 001",
+        "reduction": "an empty fold: remove it from its parent"
+      },
+      {
+        "fold": "huge~part-1~part-1~h-2",
+        "check": "no-intent",
+        "kind": "remove",
+        "blocks": false,
+        "said": "Entry 002",
+        "reduction": "an empty fold: remove it from its parent"
+      },
+      {
+        "fold": "huge~part-1~part-1~h-3",
+        "check": "no-intent",
+        "kind": "remove",
+        "blocks": false,
+        "said": "Entry 003",
+        "reduction": "an empty fold: remove it from its parent"
+      },
+      {
+        "fold": "huge~part-1~part-1~h-4",
+        "check": "no-intent",
+        "kind": "remove",
+        "blocks": false,
+        "said": "Entry 004",
+        "reduction": "an empty fold: remove it from its parent"
+      },
+      {
+        "fold": "huge~part-1~part-2~h-5",
+        "check": "no-intent",
+        "kind": "remove",
+        "blocks": false,
+        "said": "Entry 005",
+        "reduction": "an empty fold: remove it from its parent"
+      },
+      {
+        "fold": "huge~part-1~part-2~h-6",
+        "check": "no-intent",
+        "kind": "remove",
+        "blocks": false,
+        "said": "Entry 006",
+        "reduction": "an empty fold: remove it from its parent"
+      },
+      {
+        "fold": "huge~part-1~part-2~h-7",
+        "check": "no-intent",
+        "kind": "remove",
+        "blocks": false,
+        "said": "Entry 007",
+        "reduction": "an empty fold: remove it from its parent"
+      },
+      {
+        "fold": "huge~part-1~part-2~h-8",
+        "check": "no-intent",
+        "kind": "remove",
+        "blocks": false,
+        "said": "Entry 008",
+        "reduction": "an empty fold: remove it from its parent"
+      },
+      {
+        "fold": "huge~part-1~part-2~h-9",
+        "check": "no-intent",
+        "kind": "remove",
+        "blocks": false,
+        "said": "Entry 009",
+        "reduction": "an empty fold: remove it from its parent"
+      },
+      {
+        "fold": "huge~part-1~part-3~h-10",
+        "check": "no-intent",
+        "kind": "remove",
+        "blocks": false,
+        "said": "Entry 010",
+        "reduction": "an empty fold: remove it from its parent"
+      },
+      {
+        "fold": "huge~part-1~part-3~h-11",
+        "check": "no-intent",
+        "kind": "remove",
+        "blocks": false,
+        "said": "Entry 011",
+        "reduction": "an empty fold: remove it from its parent"
+      },
+      {
+        "fold": "huge~part-1~part-3~h-12",
+        "check": "no-intent",
+        "kind": "remove",
+        "blocks": false,
+        "said": "Entry 012",
+        "reduction": "an empty fold: remove it from its parent"
+      },
+      {
+        "fold": "huge~part-1~part-3~h-13",
+        "check": "no-intent",
+        "kind": "remove",
+        "blocks": false,
+        "said": "Entry 013",
+        "reduction": "an empty fold: remove it from its parent"
+      },
+      {
+        "fold": "huge~part-1~part-3~h-14",
+        "check": "no-intent",
+        "kind": "remove",
+        "blocks": false,
+        "said": "Entry 014",
+        "reduction": "an empty fold: remove it from its parent"
+      },
+      {
+        "fold": "huge~part-1~part-4~h-15",
+        "check": "no-intent",
+        "kind": "remove",
+        "blocks": false,
+        "said": "Entry 015",
+        "reduction": "an empty fold: remove it from its parent"
+      },
+      {
+        "fold": "huge~part-1~part-4~h-16",
+        "check": "no-intent",
+        "kind": "remove",
+        "blocks": false,
+        "said": "Entry 016",
+        "reduction": "an empty fold: remove it from its parent"
+      },
+      {
+        "fold": "huge~part-1~part-4~h-17",
+        "check": "no-intent",
+        "kind": "remove",
+        "blocks": false,
+        "said": "Entry 017",
+        "reduction": "an empty fold: remove it from its parent"
+      },
+      {
+        "fold": "huge~part-1~part-4~h-18",
+        "check": "no-intent",
+        "kind": "remove",
+        "blocks": false,
+        "said": "Entry 018",
+        "reduction": "an empty fold: remove it from its parent"
+      },
+      {
+        "fold": "huge~part-1~part-4~h-19",
+        "check": "no-intent",
+        "kind": "remove",
+        "blocks": false,
+        "said": "Entry 019",
+        "reduction": "an empty fold: remove it from its parent"
+      },
+      {
+        "fold": "huge~part-1~part-5~h-20",
+        "check": "no-intent",
+        "kind": "remove",
+        "blocks": false,
+        "said": "Entry 020",
+        "reduction": "an empty fold: remove it from its parent"
+      },
+      {
+        "fold": "huge~part-1~part-5~h-21",
+        "check": "no-intent",
+        "kind": "remove",
+        "blocks": false,
+        "said": "Entry 021",
+        "reduction": "an empty fold: remove it from its parent"
+      },
+      {
+        "fold": "huge~part-1~part-5~h-22",
+        "check": "no-intent",
+        "kind": "remove",
+        "blocks": false,
+        "said": "Entry 022",
+        "reduction": "an empty fold: remove it from its parent"
+      },
+      {
+        "fold": "huge~part-1~part-5~h-23",
+        "check": "no-intent",
+        "kind": "remove",
+        "blocks": false,
+        "said": "Entry 023",
+        "reduction": "an empty fold: remove it from its parent"
+      },
+      {
+        "fold": "huge~part-2~part-1~h-24",
+        "check": "no-intent",
+        "kind": "remove",
+        "blocks": false,
+        "said": "Entry 024",
+        "reduction": "an empty fold: remove it from its parent"
+      },
+      {
+        "fold": "huge~part-2~part-1~h-25",
+        "check": "no-intent",
+        "kind": "remove",
+        "blocks": false,
+        "said": "Entry 025",
+        "reduction": "an empty fold: remove it from its parent"
+      },
+      {
+        "fold": "huge~part-2~part-1~h-26",
+        "check": "no-intent",
+        "kind": "remove",
+        "blocks": false,
+        "said": "Entry 026",
+        "reduction": "an empty fold: remove it from its parent"
+      },
+      {
+        "fold": "huge~part-2~part-1~h-27",
+        "check": "no-intent",
+        "kind": "remove",
+        "blocks": false,
+        "said": "Entry 027",
+        "reduction": "an empty fold: remove it from its parent"
+      },
+      {
+        "fold": "huge~part-2~part-1~h-28",
+        "check": "no-intent",
+        "kind": "remove",
+        "blocks": false,
+        "said": "Entry 028",
+        "reduction": "an empty fold: remove it from its parent"
+      },
+      {
+        "fold": "huge~part-2~part-2~h-29",
+        "check": "no-intent",
+        "kind": "remove",
+        "blocks": false,
+        "said": "Entry 029",
+        "reduction": "an empty fold: remove it from its parent"
+      },
+      {
+        "fold": "huge~part-2~part-2~h-30",
+        "check": "no-intent",
+        "kind": "remove",
+        "blocks": false,
+        "said": "Entry 030",
+        "reduction": "an empty fold: remove it from its parent"
+      },
+      {
+        "fold": "huge~part-2~part-2~h-31",
+        "check": "no-intent",
+        "kind": "remove",
+        "blocks": false,
+        "said": "Entry 031",
+        "reduction": "an empty fold: remove it from its parent"
+      },
+      {
+        "fold": "huge~part-2~part-2~h-32",
+        "check": "no-intent",
+        "kind": "remove",
+        "blocks": false,
+        "said": "Entry 032",
+        "reduction": "an empty fold: remove it from its parent"
+      },
+      {
+        "fold": "huge~part-2~part-2~h-33",
+        "check": "no-intent",
+        "kind": "remove",
+        "blocks": false,
+        "said": "Entry 033",
+        "reduction": "an empty fold: remove it from its parent"
+      },
+      {
+        "fold": "huge~part-2~part-3~h-34",
+        "check": "no-intent",
+        "kind": "remove",
+        "blocks": false,
+        "said": "Entry 034",
+        "reduction": "an empty fold: remove it from its parent"
+      },
+      {
+        "fold": "huge~part-2~part-3~h-35",
+        "check": "no-intent",
+        "kind": "remove",
+        "blocks": false,
+        "said": "Entry 035",
+        "reduction": "an empty fold: remove it from its parent"
+      },
+      {
+        "fold": "huge~part-2~part-3~h-36",
+        "check": "no-intent",
+        "kind": "remove",
+        "blocks": false,
+        "said": "Entry 036",
+        "reduction": "an empty fold: remove it from its parent"
+      },
+      {
+        "fold": "huge~part-2~part-3~h-37",
+        "check": "no-intent",
+        "kind": "remove",
+        "blocks": false,
+        "said": "Entry 037",
+        "reduction": "an empty fold: remove it from its parent"
+      },
+      {
+        "fold": "huge~part-2~part-3~h-38",
+        "check": "no-intent",
+        "kind": "remove",
+        "blocks": false,
+        "said": "Entry 038",
+        "reduction": "an empty fold: remove it from its parent"
+      },
+      {
+        "fold": "huge~part-2~part-4~h-39",
+        "check": "no-intent",
+        "kind": "remove",
+        "blocks": false,
+        "said": "Entry 039",
+        "reduction": "an empty fold: remove it from its parent"
+      },
+      {
+        "fold": "huge~part-2~part-4~h-40",
+        "check": "no-intent",
+        "kind": "remove",
+        "blocks": false,
+        "said": "Entry 040",
+        "reduction": "an empty fold: remove it from its parent"
+      },
+      {
+        "fold": "huge~part-2~part-4~h-41",
+        "check": "no-intent",
+        "kind": "remove",
+        "blocks": false,
+        "said": "Entry 041",
+        "reduction": "an empty fold: remove it from its parent"
+      },
+      {
+        "fold": "huge~part-2~part-4~h-42",
+        "check": "no-intent",
+        "kind": "remove",
+        "blocks": false,
+        "said": "Entry 042",
+        "reduction": "an empty fold: remove it from its parent"
+      },
+      {
+        "fold": "huge~part-2~part-4~h-43",
+        "check": "no-intent",
+        "kind": "remove",
+        "blocks": false,
+        "said": "Entry 043",
+        "reduction": "an empty fold: remove it from its parent"
+      },
+      {
+        "fold": "huge~part-2~part-5~h-44",
+        "check": "no-intent",
+        "kind": "remove",
+        "blocks": false,
+        "said": "Entry 044",
+        "reduction": "an empty fold: remove it from its parent"
+      },
+      {
+        "fold": "huge~part-2~part-5~h-45",
+        "check": "no-intent",
+        "kind": "remove",
+        "blocks": false,
+        "said": "Entry 045",
+        "reduction": "an empty fold: remove it from its parent"
+      },
+      {
+        "fold": "huge~part-2~part-5~h-46",
+        "check": "no-intent",
+        "kind": "remove",
+        "blocks": false,
+        "said": "Entry 046",
+        "reduction": "an empty fold: remove it from its parent"
+      },
+      {
+        "fold": "huge~part-2~part-5~h-47",
+        "check": "no-intent",
+        "kind": "remove",
+        "blocks": false,
+        "said": "Entry 047",
+        "reduction": "an empty fold: remove it from its parent"
+      },
+      {
+        "fold": "huge~part-3~part-1~h-48",
+        "check": "no-intent",
+        "kind": "remove",
+        "blocks": false,
+        "said": "Entry 048",
+        "reduction": "an empty fold: remove it from its parent"
+      },
+      {
+        "fold": "huge~part-3~part-1~h-49",
+        "check": "no-intent",
+        "kind": "remove",
+        "blocks": false,
+        "said": "Entry 049",
+        "reduction": "an empty fold: remove it from its parent"
+      },
+      {
+        "fold": "huge~part-3~part-1~h-50",
+        "check": "no-intent",
+        "kind": "remove",
+        "blocks": false,
+        "said": "Entry 050",
+        "reduction": "an empty fold: remove it from its parent"
+      },
+      {
+        "fold": "huge~part-3~part-1~h-51",
+        "check": "no-intent",
+        "kind": "remove",
+        "blocks": false,
+        "said": "Entry 051",
+        "reduction": "an empty fold: remove it from its parent"
+      },
+      {
+        "fold": "huge~part-3~part-1~h-52",
+        "check": "no-intent",
+        "kind": "remove",
+        "blocks": false,
+        "said": "Entry 052",
+        "reduction": "an empty fold: remove it from its parent"
+      },
+      {
+        "fold": "huge~part-3~part-2~h-53",
+        "check": "no-intent",
+        "kind": "remove",
+        "blocks": false,
+        "said": "Entry 053",
+        "reduction": "an empty fold: remove it from its parent"
+      },
+      {
+        "fold": "huge~part-3~part-2~h-54",
+        "check": "no-intent",
+        "kind": "remove",
+        "blocks": false,
+        "said": "Entry 054",
+        "reduction": "an empty fold: remove it from its parent"
+      },
+      {
+        "fold": "huge~part-3~part-2~h-55",
+        "check": "no-intent",
+        "kind": "remove",
+        "blocks": false,
+        "said": "Entry 055",
+        "reduction": "an empty fold: remove it from its parent"
+      },
+      {
+        "fold": "huge~part-3~part-2~h-56",
+        "check": "no-intent",
+        "kind": "remove",
+        "blocks": false,
+        "said": "Entry 056",
+        "reduction": "an empty fold: remove it from its parent"
+      },
+      {
+        "fold": "huge~part-3~part-2~h-57",
+        "check": "no-intent",
+        "kind": "remove",
+        "blocks": false,
+        "said": "Entry 057",
+        "reduction": "an empty fold: remove it from its parent"
+      },
+      {
+        "fold": "huge~part-3~part-3~h-58",
+        "check": "no-intent",
+        "kind": "remove",
+        "blocks": false,
+        "said": "Entry 058",
+        "reduction": "an empty fold: remove it from its parent"
+      },
+      {
+        "fold": "huge~part-3~part-3~h-59",
+        "check": "no-intent",
+        "kind": "remove",
+        "blocks": false,
+        "said": "Entry 059",
+        "reduction": "an empty fold: remove it from its parent"
+      },
+      {
+        "fold": "huge~part-3~part-3~h-60",
+        "check": "no-intent",
+        "kind": "remove",
+        "blocks": false,
+        "said": "Entry 060",
+        "reduction": "an empty fold: remove it from its parent"
+      },
+      {
+        "fold": "huge~part-3~part-3~h-61",
+        "check": "no-intent",
+        "kind": "remove",
+        "blocks": false,
+        "said": "Entry 061",
+        "reduction": "an empty fold: remove it from its parent"
+      },
+      {
+        "fold": "huge~part-3~part-3~h-62",
+        "check": "no-intent",
+        "kind": "remove",
+        "blocks": false,
+        "said": "Entry 062",
+        "reduction": "an empty fold: remove it from its parent"
+      },
+      {
+        "fold": "huge~part-3~part-4~h-63",
+        "check": "no-intent",
+        "kind": "remove",
+        "blocks": false,
+        "said": "Entry 063",
+        "reduction": "an empty fold: remove it from its parent"
+      },
+      {
+        "fold": "huge~part-3~part-4~h-64",
+        "check": "no-intent",
+        "kind": "remove",
+        "blocks": false,
+        "said": "Entry 064",
+        "reduction": "an empty fold: remove it from its parent"
+      },
+      {
+        "fold": "huge~part-3~part-4~h-65",
+        "check": "no-intent",
+        "kind": "remove",
+        "blocks": false,
+        "said": "Entry 065",
+        "reduction": "an empty fold: remove it from its parent"
+      },
+      {
+        "fold": "huge~part-3~part-4~h-66",
+        "check": "no-intent",
+        "kind": "remove",
+        "blocks": false,
+        "said": "Entry 066",
+        "reduction": "an empty fold: remove it from its parent"
+      },
+      {
+        "fold": "huge~part-3~part-4~h-67",
+        "check": "no-intent",
+        "kind": "remove",
+        "blocks": false,
+        "said": "Entry 067",
+        "reduction": "an empty fold: remove it from its parent"
+      },
+      {
+        "fold": "huge~part-3~part-5~h-68",
+        "check": "no-intent",
+        "kind": "remove",
+        "blocks": false,
+        "said": "Entry 068",
+        "reduction": "an empty fold: remove it from its parent"
+      },
+      {
+        "fold": "huge~part-3~part-5~h-69",
+        "check": "no-intent",
+        "kind": "remove",
+        "blocks": false,
+        "said": "Entry 069",
+        "reduction": "an empty fold: remove it from its parent"
+      },
+      {
+        "fold": "huge~part-3~part-5~h-70",
+        "check": "no-intent",
+        "kind": "remove",
+        "blocks": false,
+        "said": "Entry 070",
+        "reduction": "an empty fold: remove it from its parent"
+      },
+      {
+        "fold": "huge~part-3~part-5~h-71",
+        "check": "no-intent",
+        "kind": "remove",
+        "blocks": false,
+        "said": "Entry 071",
+        "reduction": "an empty fold: remove it from its parent"
+      },
+      {
+        "fold": "huge~part-4~part-1~h-72",
+        "check": "no-intent",
+        "kind": "remove",
+        "blocks": false,
+        "said": "Entry 072",
+        "reduction": "an empty fold: remove it from its parent"
+      },
+      {
+        "fold": "huge~part-4~part-1~h-73",
+        "check": "no-intent",
+        "kind": "remove",
+        "blocks": false,
+        "said": "Entry 073",
+        "reduction": "an empty fold: remove it from its parent"
+      },
+      {
+        "fold": "huge~part-4~part-1~h-74",
+        "check": "no-intent",
+        "kind": "remove",
+        "blocks": false,
+        "said": "Entry 074",
+        "reduction": "an empty fold: remove it from its parent"
+      },
+      {
+        "fold": "huge~part-4~part-1~h-75",
+        "check": "no-intent",
+        "kind": "remove",
+        "blocks": false,
+        "said": "Entry 075",
+        "reduction": "an empty fold: remove it from its parent"
+      },
+      {
+        "fold": "huge~part-4~part-1~h-76",
+        "check": "no-intent",
+        "kind": "remove",
+        "blocks": false,
+        "said": "Entry 076",
+        "reduction": "an empty fold: remove it from its parent"
+      },
+      {
+        "fold": "huge~part-4~part-2~h-77",
+        "check": "no-intent",
+        "kind": "remove",
+        "blocks": false,
+        "said": "Entry 077",
+        "reduction": "an empty fold: remove it from its parent"
+      },
+      {
+        "fold": "huge~part-4~part-2~h-78",
+        "check": "no-intent",
+        "kind": "remove",
+        "blocks": false,
+        "said": "Entry 078",
+        "reduction": "an empty fold: remove it from its parent"
+      },
+      {
+        "fold": "huge~part-4~part-2~h-79",
+        "check": "no-intent",
+        "kind": "remove",
+        "blocks": false,
+        "said": "Entry 079",
+        "reduction": "an empty fold: remove it from its parent"
+      },
+      {
+        "fold": "huge~part-4~part-2~h-80",
+        "check": "no-intent",
+        "kind": "remove",
+        "blocks": false,
+        "said": "Entry 080",
+        "reduction": "an empty fold: remove it from its parent"
+      },
+      {
+        "fold": "huge~part-4~part-2~h-81",
+        "check": "no-intent",
+        "kind": "remove",
+        "blocks": false,
+        "said": "Entry 081",
+        "reduction": "an empty fold: remove it from its parent"
+      },
+      {
+        "fold": "huge~part-4~part-3~h-82",
+        "check": "no-intent",
+        "kind": "remove",
+        "blocks": false,
+        "said": "Entry 082",
+        "reduction": "an empty fold: remove it from its parent"
+      },
+      {
+        "fold": "huge~part-4~part-3~h-83",
+        "check": "no-intent",
+        "kind": "remove",
+        "blocks": false,
+        "said": "Entry 083",
+        "reduction": "an empty fold: remove it from its parent"
+      },
+      {
+        "fold": "huge~part-4~part-3~h-84",
+        "check": "no-intent",
+        "kind": "remove",
+        "blocks": false,
+        "said": "Entry 084",
+        "reduction": "an empty fold: remove it from its parent"
+      },
+      {
+        "fold": "huge~part-4~part-3~h-85",
+        "check": "no-intent",
+        "kind": "remove",
+        "blocks": false,
+        "said": "Entry 085",
+        "reduction": "an empty fold: remove it from its parent"
+      },
+      {
+        "fold": "huge~part-4~part-3~h-86",
+        "check": "no-intent",
+        "kind": "remove",
+        "blocks": false,
+        "said": "Entry 086",
+        "reduction": "an empty fold: remove it from its parent"
+      },
+      {
+        "fold": "huge~part-4~part-4~h-87",
+        "check": "no-intent",
+        "kind": "remove",
+        "blocks": false,
+        "said": "Entry 087",
+        "reduction": "an empty fold: remove it from its parent"
+      },
+      {
+        "fold": "huge~part-4~part-4~h-88",
+        "check": "no-intent",
+        "kind": "remove",
+        "blocks": false,
+        "said": "Entry 088",
+        "reduction": "an empty fold: remove it from its parent"
+      },
+      {
+        "fold": "huge~part-4~part-4~h-89",
+        "check": "no-intent",
+        "kind": "remove",
+        "blocks": false,
+        "said": "Entry 089",
+        "reduction": "an empty fold: remove it from its parent"
+      },
+      {
+        "fold": "huge~part-4~part-4~h-90",
+        "check": "no-intent",
+        "kind": "remove",
+        "blocks": false,
+        "said": "Entry 090",
+        "reduction": "an empty fold: remove it from its parent"
+      },
+      {
+        "fold": "huge~part-4~part-4~h-91",
+        "check": "no-intent",
+        "kind": "remove",
+        "blocks": false,
+        "said": "Entry 091",
+        "reduction": "an empty fold: remove it from its parent"
+      },
+      {
+        "fold": "huge~part-4~part-5~h-92",
+        "check": "no-intent",
+        "kind": "remove",
+        "blocks": false,
+        "said": "Entry 092",
+        "reduction": "an empty fold: remove it from its parent"
+      },
+      {
+        "fold": "huge~part-4~part-5~h-93",
+        "check": "no-intent",
+        "kind": "remove",
+        "blocks": false,
+        "said": "Entry 093",
+        "reduction": "an empty fold: remove it from its parent"
+      },
+      {
+        "fold": "huge~part-4~part-5~h-94",
+        "check": "no-intent",
+        "kind": "remove",
+        "blocks": false,
+        "said": "Entry 094",
+        "reduction": "an empty fold: remove it from its parent"
+      },
+      {
+        "fold": "huge~part-4~part-5~h-95",
+        "check": "no-intent",
+        "kind": "remove",
+        "blocks": false,
+        "said": "Entry 095",
+        "reduction": "an empty fold: remove it from its parent"
+      },
+      {
+        "fold": "huge~part-5~part-1~h-100",
+        "check": "no-intent",
+        "kind": "remove",
+        "blocks": false,
+        "said": "Entry 100",
+        "reduction": "an empty fold: remove it from its parent"
+      },
+      {
+        "fold": "huge~part-5~part-1~h-96",
+        "check": "no-intent",
+        "kind": "remove",
+        "blocks": false,
+        "said": "Entry 096",
+        "reduction": "an empty fold: remove it from its parent"
+      },
+      {
+        "fold": "huge~part-5~part-1~h-97",
+        "check": "no-intent",
+        "kind": "remove",
+        "blocks": false,
+        "said": "Entry 097",
+        "reduction": "an empty fold: remove it from its parent"
+      },
+      {
+        "fold": "huge~part-5~part-1~h-98",
+        "check": "no-intent",
+        "kind": "remove",
+        "blocks": false,
+        "said": "Entry 098",
+        "reduction": "an empty fold: remove it from its parent"
+      },
+      {
+        "fold": "huge~part-5~part-1~h-99",
+        "check": "no-intent",
+        "kind": "remove",
+        "blocks": false,
+        "said": "Entry 099",
+        "reduction": "an empty fold: remove it from its parent"
+      },
+      {
+        "fold": "huge~part-5~part-2~h-101",
+        "check": "no-intent",
+        "kind": "remove",
+        "blocks": false,
+        "said": "Entry 101",
+        "reduction": "an empty fold: remove it from its parent"
+      },
+      {
+        "fold": "huge~part-5~part-2~h-102",
+        "check": "no-intent",
+        "kind": "remove",
+        "blocks": false,
+        "said": "Entry 102",
+        "reduction": "an empty fold: remove it from its parent"
+      },
+      {
+        "fold": "huge~part-5~part-2~h-103",
+        "check": "no-intent",
+        "kind": "remove",
+        "blocks": false,
+        "said": "Entry 103",
+        "reduction": "an empty fold: remove it from its parent"
+      },
+      {
+        "fold": "huge~part-5~part-2~h-104",
+        "check": "no-intent",
+        "kind": "remove",
+        "blocks": false,
+        "said": "Entry 104",
+        "reduction": "an empty fold: remove it from its parent"
+      },
+      {
+        "fold": "huge~part-5~part-2~h-105",
+        "check": "no-intent",
+        "kind": "remove",
+        "blocks": false,
+        "said": "Entry 105",
+        "reduction": "an empty fold: remove it from its parent"
+      },
+      {
+        "fold": "huge~part-5~part-3~h-106",
+        "check": "no-intent",
+        "kind": "remove",
+        "blocks": false,
+        "said": "Entry 106",
+        "reduction": "an empty fold: remove it from its parent"
+      },
+      {
+        "fold": "huge~part-5~part-3~h-107",
+        "check": "no-intent",
+        "kind": "remove",
+        "blocks": false,
+        "said": "Entry 107",
+        "reduction": "an empty fold: remove it from its parent"
+      },
+      {
+        "fold": "huge~part-5~part-3~h-108",
+        "check": "no-intent",
+        "kind": "remove",
+        "blocks": false,
+        "said": "Entry 108",
+        "reduction": "an empty fold: remove it from its parent"
+      },
+      {
+        "fold": "huge~part-5~part-3~h-109",
+        "check": "no-intent",
+        "kind": "remove",
+        "blocks": false,
+        "said": "Entry 109",
+        "reduction": "an empty fold: remove it from its parent"
+      },
+      {
+        "fold": "huge~part-5~part-3~h-110",
+        "check": "no-intent",
+        "kind": "remove",
+        "blocks": false,
+        "said": "Entry 110",
+        "reduction": "an empty fold: remove it from its parent"
+      },
+      {
+        "fold": "huge~part-5~part-4~h-111",
+        "check": "no-intent",
+        "kind": "remove",
+        "blocks": false,
+        "said": "Entry 111",
+        "reduction": "an empty fold: remove it from its parent"
+      },
+      {
+        "fold": "huge~part-5~part-4~h-112",
+        "check": "no-intent",
+        "kind": "remove",
+        "blocks": false,
+        "said": "Entry 112",
+        "reduction": "an empty fold: remove it from its parent"
+      },
+      {
+        "fold": "huge~part-5~part-4~h-113",
+        "check": "no-intent",
+        "kind": "remove",
+        "blocks": false,
+        "said": "Entry 113",
+        "reduction": "an empty fold: remove it from its parent"
+      },
+      {
+        "fold": "huge~part-5~part-4~h-114",
+        "check": "no-intent",
+        "kind": "remove",
+        "blocks": false,
+        "said": "Entry 114",
+        "reduction": "an empty fold: remove it from its parent"
+      },
+      {
+        "fold": "huge~part-5~part-4~h-115",
+        "check": "no-intent",
+        "kind": "remove",
+        "blocks": false,
+        "said": "Entry 115",
+        "reduction": "an empty fold: remove it from its parent"
+      },
+      {
+        "fold": "huge~part-5~part-5~h-116",
+        "check": "no-intent",
+        "kind": "remove",
+        "blocks": false,
+        "said": "Entry 116",
+        "reduction": "an empty fold: remove it from its parent"
+      },
+      {
+        "fold": "huge~part-5~part-5~h-117",
+        "check": "no-intent",
+        "kind": "remove",
+        "blocks": false,
+        "said": "Entry 117",
+        "reduction": "an empty fold: remove it from its parent"
+      },
+      {
+        "fold": "huge~part-5~part-5~h-118",
+        "check": "no-intent",
+        "kind": "remove",
+        "blocks": false,
+        "said": "Entry 118",
+        "reduction": "an empty fold: remove it from its parent"
+      },
+      {
+        "fold": "huge~part-5~part-5~h-119",
+        "check": "no-intent",
+        "kind": "remove",
+        "blocks": false,
+        "said": "Entry 119",
+        "reduction": "an empty fold: remove it from its parent"
+      },
+      {
+        "fold": "more~grouped~loose",
+        "check": "no-intent",
+        "kind": "remove",
+        "blocks": false,
+        "said": "Loose",
+        "reduction": "an empty fold: remove it from its parent"
+      },
+      {
+        "fold": "more~grouped~named-group~one",
+        "check": "no-intent",
+        "kind": "remove",
+        "blocks": false,
+        "said": "One",
+        "reduction": "an empty fold: remove it from its parent"
+      },
+      {
+        "fold": "more~grouped~named-group~two",
+        "check": "no-intent",
+        "kind": "remove",
+        "blocks": false,
+        "said": "Two",
+        "reduction": "an empty fold: remove it from its parent"
+      },
+      {
+        "fold": "more~seventh~do-it",
+        "check": "no-intent",
+        "kind": "remove",
+        "blocks": false,
+        "said": "Do it",
+        "reduction": "an empty fold: remove it from its parent"
+      },
+      {
+        "fold": "more~seventh~nav-label",
+        "check": "no-intent",
+        "kind": "remove",
+        "blocks": false,
+        "said": "Nav label",
+        "reduction": "an empty fold: remove it from its parent"
+      },
+      {
+        "fold": "more~seventh~untitled",
+        "check": "no-intent",
+        "kind": "remove",
+        "blocks": false,
+        "said": "Untitled",
+        "reduction": "an empty fold: remove it from its parent"
+      },
+      {
+        "fold": "root-2~more-3",
+        "check": "no-intent",
+        "kind": "remove",
+        "blocks": false,
+        "said": "More",
+        "reduction": "an empty fold: remove it from its parent"
+      }
+    ]
+  },
+  "verdict": "The artificial viewer is stuck on \"Same name – Item 5 naïve café\" (big › part-1 › part-1): group the list by what its items share, so one level of runs holds it."
+}
