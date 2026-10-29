@@ -1,0 +1,62 @@
+{
+  "nodes": [
+    [
+      "root",
+      {
+        "title": "When",
+        "trail": [],
+        "kids": [
+          {
+            "id": "gap",
+            "title": "Gap",
+            "hint": "A time that is not on the clock."
+          },
+          {
+            "id": "overlap",
+            "title": "Overlap",
+            "hint": "A time the clock shows twice."
+          }
+        ],
+        "updated": "2026-10-27T13:05:00Z",
+        "source": "the writer"
+      }
+    ],
+    [
+      "gap",
+      {
+        "title": "Gap",
+        "trail": [
+          "When"
+        ],
+        "kids": [],
+        "text": [
+          "Data in a gap."
+        ],
+        "updated": "2026-03-08T02:30:00"
+      }
+    ],
+    [
+      "overlap",
+      {
+        "title": "Overlap",
+        "trail": [
+          "When"
+        ],
+        "kids": [],
+        "text": [
+          "Data in an overlap."
+        ],
+        "updated": "2026-11-01T01:30:00"
+      }
+    ]
+  ],
+  "opts": {
+    "budgets": [
+      {
+        "id": "view.words",
+        "value": 220
+      }
+    ],
+    "localTimeZone": "America/New_York"
+  }
+}

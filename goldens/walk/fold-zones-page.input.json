@@ -1,0 +1,94 @@
+{
+  "nodes": [
+    [
+      "root",
+      {
+        "title": "A page in its own zone",
+        "trail": [],
+        "kids": [
+          {
+            "id": "times",
+            "title": "Times"
+          }
+        ],
+        "source": "test"
+      }
+    ],
+    [
+      "times",
+      {
+        "title": "Times",
+        "trail": [
+          "A page in its own zone"
+        ],
+        "kids": [
+          {
+            "id": "no-offset",
+            "title": "No offset",
+            "hint": "idle, last progress Sun 08:00"
+          },
+          {
+            "id": "utc",
+            "title": "UTC"
+          },
+          {
+            "id": "chatham",
+            "title": "Chatham"
+          }
+        ]
+      }
+    ],
+    [
+      "times~no-offset",
+      {
+        "title": "No offset",
+        "trail": [
+          "A page in its own zone",
+          "Times"
+        ],
+        "kids": [],
+        "text": [
+          "Status: idle",
+          "Last progress: Sun 08:00"
+        ]
+      }
+    ],
+    [
+      "times~utc",
+      {
+        "title": "UTC",
+        "trail": [
+          "A page in its own zone",
+          "Times"
+        ],
+        "kids": [],
+        "text": [
+          "Fri 01:30"
+        ]
+      }
+    ],
+    [
+      "times~chatham",
+      {
+        "title": "Chatham",
+        "trail": [
+          "A page in its own zone",
+          "Times"
+        ],
+        "kids": [],
+        "text": [
+          "Sun 16:45"
+        ]
+      }
+    ]
+  ],
+  "opts": {
+    "budgets": [
+      {
+        "id": "view.words",
+        "value": 220
+      }
+    ],
+    "localTimeZone": "Europe/London"
+  }
+}

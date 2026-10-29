@@ -10,15 +10,16 @@
     in
     {
       packages = each (pkgs: rec {
-        # the core as WebAssembly with a plain C ABI (src/wasm.rs), loaded by js/fold-core.ts
+        # the core as WebAssembly with a plain C ABI (src/wasm.rs), loaded by js/fold-core.ts. No tzdb: the host gives the zone rules
+        # (src/tz.rs), which keeps the module under its size budget (checks.wasm-size); wasm-opt -Oz after cargo.
         wasm = default.overrideAttrs (old: {
           pname = "fold-core-wasm";
-          nativeBuildInputs = old.nativeBuildInputs ++ [ pkgs.lld ];
+          nativeBuildInputs = old.nativeBuildInputs ++ [ pkgs.lld pkgs.binaryen ];
           # the build dir is random per build (/nix/var/nix/builds/nix-<pid>-<n>) and panic paths name it: remapped, the bytes are the same
           # on every build, so a consumer can pin their digest (home checks.fold-core-parity)
-          buildPhase = "RUSTFLAGS=\"--remap-path-prefix=$NIX_BUILD_TOP=/build\" cargo build --offline --release --lib --target wasm32-unknown-unknown";
+          buildPhase = "RUSTFLAGS=\"--remap-path-prefix=$NIX_BUILD_TOP=/build\" cargo build --offline --release --lib --no-default-features --target wasm32-unknown-unknown && wasm-opt -Oz --enable-bulk-memory --enable-sign-ext --enable-nontrapping-float-to-int --enable-mutable-globals target/wasm32-unknown-unknown/release/fold_core.wasm -o fold_core.wasm";
           doCheck = false;
-          installPhase = "mkdir -p $out/lib && cp target/wasm32-unknown-unknown/release/fold_core.wasm $out/lib/ && cp js/fold-core.ts $out/lib/";
+          installPhase = "mkdir -p $out/lib && cp fold_core.wasm js/fold-core.ts $out/lib/";
           dontFixup = true;
         });
         default = pkgs.rustPlatform.buildRustPackage {
@@ -37,6 +38,14 @@
         wasm-parity = pkgs.runCommand "fold-core-wasm-parity" { nativeBuildInputs = [ pkgs.bun ]; } ''
           cp -r ${self}/js ${self}/goldens .
           HOME=$TMPDIR FOLD_CORE_WASM=${self.packages.${pkgs.stdenv.hostPlatform.system}.wasm}/lib/fold_core.wasm bun test ./js/parity.test.ts
+          touch $out
+        '';
+        # the size budget (scratch-main-79 10-29, for the fleet page's iPad first load): at most 200 KB gzipped. At 926ac44 it was 2,183,512 bytes, 539,305 gzipped.
+        wasm-size = pkgs.runCommand "fold-core-wasm-size" { nativeBuildInputs = [ pkgs.gzip ]; } ''
+          w=${self.packages.${pkgs.stdenv.hostPlatform.system}.wasm}/lib/fold_core.wasm
+          raw=$(wc -c < $w); gz=$(gzip -9c $w | wc -c); budget=$((200 * 1024))
+          echo "fold_core.wasm: $raw bytes, $gz gzipped (budget $budget gzipped)"
+          [ "$gz" -le "$budget" ] || { echo "over the size budget by $((gz - budget)) bytes"; exit 1; }
           touch $out
         '';
         clippy = self.packages.${pkgs.stdenv.hostPlatform.system}.default.overrideAttrs (old: {

@@ -1,0 +1,34 @@
+{
+  "root": {
+    "title": "A page in its own zone",
+    "meta": {
+      "timeZone": "Asia/Kolkata"
+    },
+    "sections": [
+      {
+        "id": "times",
+        "title": "Times",
+        "items": [
+          {
+            "name": "No offset",
+            "state": "idle",
+            "last": "2026-03-08T02:30:00"
+          },
+          {
+            "name": "UTC",
+            "at": "2026-12-31T20:00:00Z"
+          },
+          {
+            "name": "Chatham",
+            "at": "2026-06-01T00:00:00+12:45"
+          }
+        ]
+      }
+    ]
+  },
+  "files": {},
+  "opts": {
+    "source": "test",
+    "localTimeZone": "Europe/London"
+  }
+}

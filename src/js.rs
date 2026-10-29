@@ -2,14 +2,9 @@
 //! set, `.` stopping at line terminators, and `toLocaleString("en-US", {weekday: "short", hour: "2-digit", minute: "2-digit",
 //! hour12: false})` as bun (JavaScriptCore) prints it ("Wed 00:05": midnight is 00, not 24).
 
-use std::sync::OnceLock;
+use chrono::{Datelike, Duration, NaiveDate, NaiveDateTime, NaiveTime, Timelike};
 
-use chrono::{DateTime, Duration, NaiveDate, NaiveDateTime, NaiveTime, TimeZone, Utc};
-use chrono_tz::Tz;
-use regex::Regex;
-
-/// JS `\s` (WhiteSpace and LineTerminator), as a regex class.
-const WS: &str = r"[\t\n\x0B\x0C\r \x{A0}\x{1680}\x{2000}-\x{200A}\x{2028}\x{2029}\x{202F}\x{205F}\x{3000}\x{FEFF}]";
+use crate::tz::Zone;
 
 pub fn is_ws_char(c: char) -> bool {
     matches!(
@@ -73,93 +68,127 @@ pub fn strip_quotes(s: &str) -> String {
     t.strip_suffix('"').unwrap_or(t).to_string()
 }
 
-fn re(cell: &'static OnceLock<Regex>, src: impl FnOnce() -> String) -> &'static Regex {
-    cell.get_or_init(|| Regex::new(&src()).expect("valid regex"))
+/// The ASCII digits at the start of `s`.
+fn digits(s: &str) -> &str {
+    &s[..s.bytes().take_while(u8::is_ascii_digit).count()]
 }
 
-/// `/^(#{1,6})\s+(.*)$/` on one line: the level and the heading's words.
+/// JS `\s+` at the start of `s`, greedy: the rest after it.
+fn skip_ws(s: &str) -> &str {
+    s.trim_start_matches(is_ws_char)
+}
+
+/// `/^(#{1,6})\s+(.*)$/` on one line: the level and the heading's words (`.` stops at line terminators, so a line with one
+/// after its words is no heading).
 pub fn heading(line: &str) -> Option<(usize, &str)> {
-    static R: OnceLock<Regex> = OnceLock::new();
-    let c = re(&R, || format!(r"^(#{{1,6}}){WS}+([^\n\r\x{{2028}}\x{{2029}}]*)$")).captures(line)?;
-    Some((c.get(1)?.as_str().len(), c.get(2)?.as_str()))
+    let n = line.bytes().take_while(|&b| b == b'#').count();
+    let rest = &line[n..];
+    let words = skip_ws(rest);
+    let ok = (1..=6).contains(&n) && words.len() < rest.len() && !words.contains(['\n', '\r', '\u{2028}', '\u{2029}']);
+    ok.then_some((n, words))
 }
 
 /// `/^\s*([-*]|\d+\.)\s+/`: a list item's words after its marker.
 pub fn list_item(line: &str) -> Option<&str> {
-    static R: OnceLock<Regex> = OnceLock::new();
-    let m = re(&R, || format!(r"^{WS}*(?:[-*]|[0-9]+\.){WS}+")).find(line)?;
-    Some(&line[m.end()..])
+    let s = skip_ws(line);
+    let after = match s.as_bytes().first()? {
+        b'-' | b'*' => &s[1..],
+        _ => s[digits(s).len()..].strip_prefix('.').filter(|_| !digits(s).is_empty())?,
+    };
+    let words = skip_ws(after);
+    (words.len() < after.len()).then_some(words)
 }
 
-/// `.replace(/\s*\([^)]*\)$/, "")`: a trailing parenthetical off.
+/// `.replace(/\s*\([^)]*\)$/, "")`: a trailing parenthetical off. The leftmost match: the first `(` after the last `)` but one,
+/// with the whitespace run before it.
 pub fn drop_paren(s: &str) -> String {
-    static R: OnceLock<Regex> = OnceLock::new();
-    re(&R, || format!(r"{WS}*\([^)]*\)$")).replace(s, "").into_owned()
+    let Some(body) = s.strip_suffix(')') else { return s.to_string() };
+    let from = body.rfind(')').map_or(0, |i| i + 1);
+    let Some(open) = body[from..].find('(').map(|i| from + i) else { return s.to_string() };
+    s[..open].trim_end_matches(is_ws_char).to_string()
 }
 
-/// `new RegExp(`/a/${self}(?:[/?#]|$)`).test(href)` (self is not escaped in fold.ts either).
+/// `new RegExp(`/a/${self}(?:[/?#]|$)`).test(href)`. fold.ts does not escape `self` either; here it is literal, which is the same
+/// for an artifact id (letters and digits).
 pub fn self_link(me: &str, href: &str) -> bool {
-    Regex::new(&format!(r"/a/{me}(?:[/?#]|$)")).is_ok_and(|r| r.is_match(href))
+    let at = format!("/a/{me}");
+    href.match_indices(&at).any(|(i, m)| href[i + m.len()..].chars().next().is_none_or(|c| matches!(c, '/' | '?' | '#')))
 }
 
-/// The zones `when` reads in: the page's `meta.timeZone`, else the machine's (the caller's `local_time_zone`), else UTC.
+/// The zones `when` reads in: the page's `meta.timeZone`, else the machine's (the caller's `local_time_zone`), else UTC. A zone
+/// the build does not know reads as UTC.
 pub struct Clock {
-    show: Tz,
-    local: Tz,
+    show: Zone,
+    local: Zone,
 }
 
 impl Clock {
     pub fn new(page: Option<&str>, local: Option<&str>) -> Clock {
-        let local = local.and_then(|z| z.parse().ok()).unwrap_or(Tz::UTC);
-        Clock { show: page.and_then(|z| z.parse().ok()).unwrap_or(local), local }
+        let local = local.and_then(Zone::named).unwrap_or(Zone::Utc);
+        Clock { show: page.and_then(Zone::named).unwrap_or_else(|| local.clone()), local }
     }
 }
 
 /// `new Date(iso)` for the ISO-like forms JavaScriptCore reads: `YYYY[-MM[-DD]]` (UTC) and a date with a time after `T`, `t` or
-/// a space, with seconds and a fraction optional, then `Z`, `±HH:MM` or `±HHMM` (no offset: the local zone).
-fn parse(iso: &str) -> Option<DateTime<Utc>> {
-    static R: OnceLock<Regex> = OnceLock::new();
-    let r = re(&R, || {
-        r"^(\d{4})(?:-(\d{2})(?:-(\d{2}))?)?(?:[Tt ](\d{2}):(\d{2})(?::(\d{2})(?:\.\d+)?)?(Z|z|[+-]\d{2}:?\d{2})?)?$".to_string()
-    });
-    let c = r.captures(iso)?;
-    let n = |i: usize, d: u32| c.get(i).map_or(Some(d), |m| m.as_str().parse().ok());
-    let (y, mo, d) = (c.get(1)?.as_str().parse::<i32>().ok()?, n(2, 1)?, n(3, 1)?);
-    let date = NaiveDate::from_ymd_opt(y, mo, d)?;
-    let Some(h) = c.get(4) else {
-        return Some(Utc.from_utc_datetime(&date.and_time(NaiveTime::MIN)));
+/// a space, with seconds and a fraction optional, then `Z`, `±HH:MM` or `±HHMM` (no offset: the local zone):
+/// `/^(\d{4})(?:-(\d{2})(?:-(\d{2}))?)?(?:[Tt ](\d{2}):(\d{2})(?::(\d{2})(?:\.\d+)?)?(Z|z|[+-]\d{2}:?\d{2})?)?$/`.
+fn parse(iso: &str) -> Option<NaiveDateTime> {
+    // `n` ASCII digits, as a number, and what follows them
+    fn num(s: &str, n: usize) -> Option<(u32, &str)> {
+        (digits(s).len() >= n).then(|| (s[..n].parse().ok(), &s[n..])).and_then(|(v, r)| Some((v?, r)))
+    }
+    let (y, mut s) = num(iso, 4)?;
+    let (mut mo, mut d) = (1, 1);
+    if let Some(r) = s.strip_prefix('-') {
+        (mo, s) = num(r, 2)?;
+        if let Some(r) = s.strip_prefix('-') {
+            (d, s) = num(r, 2)?;
+        }
+    }
+    let date = NaiveDate::from_ymd_opt(y as i32, mo, d)?;
+    let Some(r) = s.strip_prefix(['T', 't', ' ']) else {
+        return s.is_empty().then(|| date.and_time(NaiveTime::MIN));
     };
-    let (h, mi, se) = (h.as_str().parse::<u32>().ok()?, n(5, 0)?, n(6, 0)?);
+    let (h, r) = num(r, 2)?;
+    let (mi, mut s) = num(r.strip_prefix(':')?, 2)?;
+    let mut se = 0;
+    if let Some(r) = s.strip_prefix(':') {
+        (se, s) = num(r, 2)?;
+        if let Some(r) = s.strip_prefix('.') {
+            let f = digits(r);
+            if f.is_empty() {
+                return None;
+            }
+            s = &r[f.len()..];
+        }
+    }
     let at = if h == 24 && mi == 0 && se == 0 {
         NaiveDateTime::new(date, NaiveTime::MIN) + Duration::days(1)
     } else {
         NaiveDateTime::new(date, NaiveTime::from_hms_opt(h, mi, se)?)
     };
-    match c.get(7).map(|m| m.as_str()) {
-        Some("Z" | "z") => Some(Utc.from_utc_datetime(&at)),
-        Some(off) => {
-            let sign = if off.starts_with('-') { -1 } else { 1 };
-            let digits: String = off[1..].chars().filter(char::is_ascii_digit).collect();
-            let (oh, om): (i64, i64) = (digits[..2].parse().ok()?, digits[2..].parse().ok()?);
-            if oh > 23 || om > 59 {
+    let off = match s {
+        // No offset: read as UTC here; parse_in moves it into the local zone.
+        "" | "Z" | "z" => 0,
+        _ => {
+            let sign = if s.starts_with('-') { -1 } else { 1 };
+            let (oh, r) = num(s.strip_prefix(['+', '-'])?, 2)?;
+            let (om, r) = num(r.strip_prefix(':').unwrap_or(r), 2)?;
+            if !r.is_empty() || oh > 23 || om > 59 {
                 return None;
             }
-            Some(Utc.from_utc_datetime(&(at - Duration::minutes(sign * (oh * 60 + om)))))
+            sign * (oh as i64 * 60 + om as i64)
         }
-        // No offset: read as UTC here; parse_in moves it into the local zone.
-        None => Some(Utc.from_utc_datetime(&at)),
-    }
+    };
+    Some(at - Duration::minutes(off))
 }
 
-fn parse_in(iso: &str, clock: &Clock) -> Option<DateTime<Utc>> {
+/// `new Date(iso)` as a UTC time.
+fn parse_in(iso: &str, clock: &Clock) -> Option<NaiveDateTime> {
     let utc = parse(iso)?;
     // Without an offset, a date with a time is local time.
     let zoned = iso.len() > 10 && !iso.ends_with(['Z', 'z']) && !has_offset(iso);
-    if zoned {
-        let naive = utc.naive_utc();
-        return clock.local.from_local_datetime(&naive).earliest().map(|d| d.with_timezone(&Utc));
-    }
-    Some(utc)
+    Some(if zoned { clock.local.to_utc(&utc) } else { utc })
 }
 
 fn has_offset(iso: &str) -> bool {
@@ -170,7 +199,15 @@ fn has_offset(iso: &str) -> bool {
 /// fold.ts `when`: an ISO time as "Tue 14:44" in the page's zone; anything else as it is.
 pub fn when(iso: &str, clock: &Clock) -> String {
     match parse_in(iso, clock) {
-        Some(d) => d.with_timezone(&clock.show).format("%a %H:%M").to_string(),
+        Some(d) => {
+            let d = clock.show.local(&d);
+            format!(
+                "{} {:02}:{:02}",
+                ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"][d.weekday().num_days_from_monday() as usize],
+                d.hour(),
+                d.minute()
+            )
+        }
         None => iso.to_string(),
     }
 }
@@ -183,14 +220,21 @@ pub fn is_run_id(id: &str) -> bool {
 /// `new Date(iso).toLocaleString([], {dateStyle: "medium", timeStyle: "short"})` in en-US as bun prints it ("Oct 27, 2026 at
 /// 9:05 AM"), in the machine's zone (the clock's local zone); what `new Date` cannot read is "Invalid Date".
 pub fn medium(iso: &str, clock: &Clock) -> String {
-    use chrono::{Datelike, Timelike};
+    const MONTHS: [&str; 12] = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
     let Some(d) = parse_in(iso, clock) else { return "Invalid Date".into() };
-    let d = d.with_timezone(&clock.local);
+    let d = clock.local.local(&d);
     let h = match d.hour() % 12 {
         0 => 12,
         h => h,
     };
-    format!("{} {}, {} at {h}:{:02} {}", d.format("%b"), d.day(), d.year(), d.minute(), if d.hour() < 12 { "AM" } else { "PM" })
+    format!(
+        "{} {}, {} at {h}:{:02} {}",
+        MONTHS[d.month0() as usize],
+        d.day(),
+        d.year(),
+        d.minute(),
+        if d.hour() < 12 { "AM" } else { "PM" }
+    )
 }
 
 /// JS `String(v)` for a JSON value (`undefined` when missing): what `"…" + v` writes.

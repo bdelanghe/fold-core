@@ -1,4 +1,5 @@
-// fold-core's WebAssembly module, loaded with no generated glue. Runs in bun, deno and browsers.
+// fold-core's WebAssembly module, loaded with no generated glue. Runs in bun, deno and browsers. The module carries no zone data:
+// it asks this loader for a zone's offset (fold_core.tz_offset), answered from Intl, the zone rules fold.ts itself reads.
 //   fold({root, files, opts}) -> the fold list ([[id, node], ...], insertion order), exactly as goldens/<case>.folds.json holds it
 //   walk({nodes, opts, facto?}) -> {walk, verdict, facto?}, exactly as goldens/walk/<case>.walk.json holds it
 export type Folds = [string, Record<string, unknown>][];
@@ -11,10 +12,34 @@ export type WalkInput = {
 };
 export type WalkOutput = { walk: { folds: number; reached: number; findings: Finding[] }; verdict: string; facto?: { vertices: unknown[]; edges: unknown[] } };
 
+/** Seconds east of UTC in `zone` at `ms`, from Intl; null for a zone Intl does not know. */
+const formats = new Map<string, Intl.DateTimeFormat | null>();
+export function offset(zone: string, ms: number): number | null {
+  let f = formats.get(zone);
+  if (f === undefined) {
+    try {
+      f = new Intl.DateTimeFormat("en-US", { timeZone: zone, hourCycle: "h23", era: "short", year: "numeric", month: "numeric", day: "numeric", hour: "numeric", minute: "numeric", second: "numeric" });
+    } catch {
+      f = null;
+    }
+    formats.set(zone, f);
+  }
+  if (!f) return null;
+  const t = Math.floor(ms / 1000) * 1000;
+  const p = Object.fromEntries(f.formatToParts(t).map((x) => [x.type, x.value]));
+  const year = p.era === "BC" || p.era === "B" ? 1 - Number(p.year) : Number(p.year);
+  const local = new Date(0);
+  local.setUTCFullYear(year, Number(p.month) - 1, Number(p.day));
+  local.setUTCHours(Number(p.hour), Number(p.minute), Number(p.second), 0);
+  return (local.getTime() - t) / 1000;
+}
+
 export async function core(wasm: BufferSource): Promise<{ fold: (input: FoldInput) => Folds; walk: (input: WalkInput) => WalkOutput }> {
-  const { instance } = await WebAssembly.instantiate(wasm, {});
   type Call = (p: number, n: number) => bigint;
-  const x = instance.exports as unknown as { memory: WebAssembly.Memory; alloc(n: number): number; dealloc(p: number, n: number): void; fold_json: Call; walk_json: Call };
+  let x: { memory: WebAssembly.Memory; alloc(n: number): number; dealloc(p: number, n: number): void; fold_json: Call; walk_json: Call };
+  const tz_offset = (p: number, n: number, ms: number) => offset(new TextDecoder().decode(new Uint8Array(x.memory.buffer, p, n)), ms) ?? -2147483648;
+  const { instance } = await WebAssembly.instantiate(wasm, { fold_core: { tz_offset } });
+  x = instance.exports as unknown as typeof x;
   const call = (f: Call, input: unknown) => {
     const bytes = new TextEncoder().encode(JSON.stringify(input));
     const p = x.alloc(bytes.length);

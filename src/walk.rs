@@ -4,9 +4,7 @@
 //! Byte-identical to walk.ts at the rev in `goldens/REV`; the budgets come in as budgets.json holds them, so the core reads no file.
 
 use std::collections::{HashMap, HashSet};
-use std::sync::OnceLock;
 
-use regex::Regex;
 use serde::{Deserialize, Serialize};
 use serde_json::{json, Number, Value};
 use sha2::{Digest, Sha256};
@@ -74,28 +72,37 @@ fn truthy(v: Option<&Value>) -> bool {
     }
 }
 
-fn re(cell: &'static OnceLock<Regex>, src: &str) -> &'static Regex {
-    cell.get_or_init(|| Regex::new(src).expect("valid regex"))
+/// JS `\w` (no u flag): ASCII letters, digits and `_`.
+fn word(c: u8) -> bool {
+    c.is_ascii_alphanumeric() || c == b'_'
 }
 
 /// Words Bobby ruled off the page (10-27): `[/\bwork in progress\b/i, /\bbeing worked on\b/i]`, the first one that matches.
 fn banned(line: &str) -> Option<&str> {
-    static A: OnceLock<Regex> = OnceLock::new();
-    static B: OnceLock<Regex> = OnceLock::new();
-    [re(&A, r"(?i-u)\bwork in progress\b"), re(&B, r"(?i-u)\bbeing worked on\b")].into_iter().find_map(|r| r.find(line)).map(|m| m.as_str())
+    let b = line.as_bytes();
+    ["work in progress", "being worked on"].into_iter().find_map(|w| {
+        (0..=b.len().checked_sub(w.len())?)
+            .find(|&i| {
+                b[i..i + w.len()].eq_ignore_ascii_case(w.as_bytes())
+                    && (i == 0 || !word(b[i - 1]))
+                    && b.get(i + w.len()).is_none_or(|&c| !word(c))
+            })
+            .map(|i| &line[i..i + w.len()])
+    })
 }
 
 /// A line that names a state and nothing more ("Stuck.", "Down"): `/^\W*(stuck|…|waiting)\W*$/i`.
 fn bare_state(t: &str) -> bool {
-    static R: OnceLock<Regex> = OnceLock::new();
-    re(&R, r"^[^A-Za-z0-9_]*(?i-u:stuck|blocked|down|failing|failed|broken|stale|error|offline|degraded|unknown|waiting)[^A-Za-z0-9_]*$")
-        .is_match(t)
+    const STATES: [&str; 12] =
+        ["stuck", "blocked", "down", "failing", "failed", "broken", "stale", "error", "offline", "degraded", "unknown", "waiting"];
+    let w = t.trim_matches(|c: char| !(c.is_ascii_alphanumeric() || c == '_'));
+    STATES.iter().any(|s| w.eq_ignore_ascii_case(s))
 }
 
 /// `/(^|~)part-\d+~part-\d+$/`: a named run holding named runs.
 fn nested_runs(id: &str) -> bool {
-    static R: OnceLock<Regex> = OnceLock::new();
-    re(&R, r"(^|~)part-[0-9]+~part-[0-9]+$").is_match(id)
+    let mut p = id.rsplit('~');
+    p.next().is_some_and(js::is_run_id) && p.next().is_some_and(js::is_run_id)
 }
 
 /// `/(^|~)artifacts~./`: a kept page read inline, whose findings are reported and never block.
