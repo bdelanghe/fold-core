@@ -2,6 +2,7 @@
 // it asks this loader for a zone's offset (fold_core.tz_offset), answered from Intl, the zone rules fold.ts itself reads.
 //   fold({root, files, opts}) -> the fold list ([[id, node], ...], insertion order), exactly as goldens/<case>.folds.json holds it
 //   walk({nodes, opts, facto?}) -> {walk, verdict, facto?}, exactly as goldens/walk/<case>.walk.json holds it
+//   ax({node, path, mode, href, localTimeZone?}) -> one fold's accessibility tree (fold-ax.js axOf), as goldens/ax/<case>.ax.json holds it
 export type Folds = [string, Record<string, unknown>][];
 export type FoldInput = { root: unknown; files?: Record<string, string>; opts?: Record<string, unknown> };
 export type Finding = { fold: string; check: string; kind: "remove" | "rename" | "restructure"; blocks: boolean; said: string; reduction: string };
@@ -34,9 +35,12 @@ export function offset(zone: string, ms: number): number | null {
   return (local.getTime() - t) / 1000;
 }
 
-export async function core(wasm: BufferSource): Promise<{ fold: (input: FoldInput) => Folds; walk: (input: WalkInput) => WalkOutput }> {
+export type AxInput = { node: unknown; path: string[]; mode: "folds" | "slides"; href: "walk" | "viewer"; localTimeZone?: string };
+export type Ax = { role: string; name?: string; children?: Ax[]; [k: string]: unknown };
+
+export async function core(wasm: BufferSource): Promise<{ fold: (input: FoldInput) => Folds; walk: (input: WalkInput) => WalkOutput; ax: (input: AxInput) => Ax }> {
   type Call = (p: number, n: number) => bigint;
-  let x: { memory: WebAssembly.Memory; alloc(n: number): number; dealloc(p: number, n: number): void; fold_json: Call; walk_json: Call };
+  let x: { memory: WebAssembly.Memory; alloc(n: number): number; dealloc(p: number, n: number): void; fold_json: Call; walk_json: Call; ax_json: Call };
   const tz_offset = (p: number, n: number, ms: number) => offset(new TextDecoder().decode(new Uint8Array(x.memory.buffer, p, n)), ms) ?? -2147483648;
   const { instance } = await WebAssembly.instantiate(wasm, { fold_core: { tz_offset } });
   x = instance.exports as unknown as typeof x;
@@ -53,7 +57,7 @@ export async function core(wasm: BufferSource): Promise<{ fold: (input: FoldInpu
     if (out && !Array.isArray(out) && "error" in out) throw new Error(`fold-core: ${out.error}`);
     return out;
   };
-  return { fold: (input) => call(x.fold_json, input), walk: (input) => call(x.walk_json, input) };
+  return { fold: (input) => call(x.fold_json, input), walk: (input) => call(x.walk_json, input), ax: (input) => call(x.ax_json, input) };
 }
 
 /** The fold alone, as before `core`. */

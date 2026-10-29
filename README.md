@@ -15,7 +15,8 @@ text.
 `nix build .#wasm` gives `lib/fold_core.wasm` (a plain C ABI, src/wasm.rs) and `lib/fold-core.ts`, its loader:
 `const {fold, walk} = await core(bytes)`: `fold({root, files, opts})` returns the fold list exactly as a golden holds it (`files` maps
 each `from` path to its text); `walk({nodes, opts, facto?})` returns `{walk, verdict, facto?}` as a walk golden holds it, where
-`opts.budgets` is budgets.json's `budgets` (the walk reads `view.words`) and `opts.localTimeZone` the machine's zone. `nix flake check` runs js/parity.test.ts against every golden with the built module.
+`opts.budgets` is budgets.json's `budgets` (the walk reads `view.words`) and `opts.localTimeZone` the machine's zone; `ax({node, path, mode, href, localTimeZone?})` returns one fold's accessibility tree
+(fold-ax.js `axOf`), `href` naming the links it is given: `"walk"` (`#/a/b`) or `"viewer"` (each id through `encodeURIComponent`). `nix flake check` runs js/parity.test.ts against every golden with the built module.
 
 The module carries no zone data. It imports `fold_core.tz_offset(zone_ptr, zone_len, epoch_ms) -> seconds` (`i32::MIN` for an
 unknown zone), and the loader answers it from `Intl`, the same zone rules fold.ts reads. A host that loads the module without
@@ -36,13 +37,14 @@ gives the CUE definitions.
     nix develop -c cargo test     # or: nix flake check
 
 `tests/parity.rs` folds every `goldens/<case>.input.json` and requires `serde_json::to_string` of the result to equal that of
-`goldens/<case>.folds.json`; `tests/walk.rs` does the same for `goldens/walk/<case>.input.json` against `<case>.walk.json`.
+`goldens/<case>.folds.json`; `tests/ax.rs` builds every tree in `goldens/ax/<case>.ax.json` from that case's walk input; `tests/walk.rs` does the same for `goldens/walk/<case>.input.json` against `<case>.walk.json`.
 
 ## Goldens
 
 Every input is synthetic (`goldens/fixtures/*.json`, `goldens/walk/fixtures/*.json`). The expected folds and walks come from the fold
 viewer's own `fold.ts` and `walk.ts` at the rev in `goldens/REV`, by `TZ=UTC FOLD_SRC=<its source tree> FOLD_REV=<rev> bun goldens/gen.ts`.
-Every fold case's folds are walked too (`walk/fold-<case>`). Regenerate them only on purpose: a diff in them
+Every fold case's folds are walked too (`walk/fold-<case>`), and every walk case's folds go through `axOf` as folds and (when they
+present) as slides, with both links, plus a fold with no data (`ax/<case>.ax.json`, one `[id, mode, href, tree]` a line). Regenerate them only on purpose: a diff in them
 is a change in behaviour.
 
 | case | exercises |
@@ -62,6 +64,7 @@ is a change in behaviour.
 | walk `slides` | folds that `present`: slide words over budget, prev/next that exist and that dangle; every property row (stale, act with and without a label, href and hrefLabel, health, checked, "Data from" with and without a source, times with offsets, no offset, a date alone and a non-time) |
 | walk `order` | no root, every fold unreachable, ranked by id as `localeCompare` orders it (punctuation, digits, case) |
 | `zones`, `zones-page` | times in the machine's zone (`opts.localTimeZone`): a DST gap (moves forward) and overlap (the earlier), offsets, `Z`, a date alone, `24:00`, 1883; a page in its own zone with a +12:45 offset |
+| walk `encoded` | ids the viewer's links encode: a space, past ASCII, emoji, URL delimiters, the marks `encodeURIComponent` keeps |
 | walk `zones` | "Data from" times in a gap and an overlap, in the machine's zone |
 | walk `repeats` | a repeated id (first place, last node) and a cycle back to a fold already walked |
 

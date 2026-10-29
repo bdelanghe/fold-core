@@ -5,12 +5,16 @@
 //!   fold_json(ptr, len) -> u64  folds `{root, files, opts}` (the shape of goldens/<case>.input.json) and returns
 //!                               (out_ptr << 32) | out_len: `[[id, node], ...]` in insertion order, or `{"error": "..."}`
 //!   walk_json(ptr, len) -> u64  walks `{nodes, opts, facto?}` (goldens/walk/<case>.input.json): `{walk, verdict, facto?}`
+//!   ax_json(ptr, len) -> u64    one fold's accessibility tree (fold-ax.js axOf) from `{node, path, mode, href, localTimeZone?}`
+//!                               (`href` "walk" or "viewer", the links axOf is given in home; `node` null for a fold with no data)
 //!   dealloc(ptr, len)           frees either buffer
 //!
 //! `files` maps each `from` path to its text; a path not in it reads as missing, with fold.ts's ENOENT note.
 
 use serde_json::{json, Value};
 
+use crate::ax::{ax_of, link};
+use crate::js::Clock;
 use crate::walk::{facto_body, verdict, walk, WalkOpts};
 use crate::{fold, with_sources, FoldOpts};
 
@@ -70,6 +74,19 @@ pub fn walk_text(input: &str) -> String {
     })
 }
 
+/// One fold's accessibility tree, from `{node, path, mode, href, localTimeZone?}`.
+pub fn ax_text(input: &str) -> String {
+    json_call(input, |case| {
+        let path: Vec<String> = serde_json::from_value(case.get("path").cloned().unwrap_or(json!([]))).map_err(|e| format!("path: {e}"))?;
+        let mode = case.get("mode").and_then(Value::as_str).unwrap_or("folds");
+        let style = case.get("href").and_then(Value::as_str).unwrap_or("walk");
+        let href = link(style).ok_or_else(|| format!("href: {style} is not walk or viewer"))?;
+        let clock = Clock::new(None, case.get("localTimeZone").and_then(Value::as_str));
+        let tree = ax_of(case.get("node"), &path, &href, mode, &clock);
+        serde_json::to_string(&tree).map_err(|e| e.to_string())
+    })
+}
+
 unsafe fn call(ptr: *const u8, len: usize, f: fn(&str) -> String) -> u64 {
     let input = std::str::from_utf8(std::slice::from_raw_parts(ptr, len)).unwrap_or("");
     let out = f(input).into_bytes().into_boxed_slice();
@@ -89,4 +106,11 @@ pub unsafe extern "C" fn fold_json(ptr: *const u8, len: usize) -> u64 {
 #[no_mangle]
 pub unsafe extern "C" fn walk_json(ptr: *const u8, len: usize) -> u64 {
     call(ptr, len, walk_text)
+}
+
+/// # Safety
+/// `ptr` and `len` are UTF-8 the host wrote into a buffer from `alloc(len)`.
+#[no_mangle]
+pub unsafe extern "C" fn ax_json(ptr: *const u8, len: usize) -> u64 {
+    call(ptr, len, ax_text)
 }

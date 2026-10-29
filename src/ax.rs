@@ -9,6 +9,23 @@ use crate::js::{self, Clock};
 /// Where a link goes: `href(path, mode)` (mode "folds" or "slides").
 pub type Href<'a> = &'a dyn Fn(&[String], &str) -> String;
 
+/// The two links axOf is given in home: the walk's (`#/a/b`, `#slides/a/b`: walk.ts, load.ts, coldread.ts) and the viewer's
+/// (viewer.html: the same, each id through `encodeURIComponent`).
+pub fn link(style: &str) -> Option<fn(&[String], &str) -> String> {
+    fn at(m: &str) -> &'static str {
+        if m == "slides" {
+            "#slides/"
+        } else {
+            "#/"
+        }
+    }
+    match style {
+        "walk" => Some(|p, m| format!("{}{}", at(m), p.join("/"))),
+        "viewer" => Some(|p, m| format!("{}{}", at(m), p.iter().map(|x| js::encode_uri_component(x)).collect::<Vec<_>>().join("/"))),
+        _ => None,
+    }
+}
+
 fn get<'a>(o: &'a Value, k: &str) -> Option<&'a Value> {
     o.as_object().and_then(|m| m.get(k))
 }
