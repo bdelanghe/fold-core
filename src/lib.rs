@@ -60,6 +60,9 @@ pub struct Node {
     pub href: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none", default)]
     pub href_label: Option<String>,
+    /// fold.ts `act`: the fold's one action, `{cap, call, args, label}` (the viewer calls `claude.use(cap)[call](args)`).
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub act: Option<Value>,
     #[serde(skip_serializing_if = "Option::is_none", default)]
     pub updated: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none", default)]
@@ -303,6 +306,18 @@ impl Folder<'_> {
         if s(hv).is_some() {
             n.href = Some(raw(hv).to_string());
             n.href_label = s(link.and_then(|l| get(l, "label")));
+        }
+        // fold.ts: cap, call and label non-blank strings, args a truthy object (arrays too, as `typeof` says); cap and call as written
+        let act = get(o, "act");
+        let args = act.and_then(|a| get(a, "args")).filter(|v| v.is_object() || v.is_array());
+        if let (Some(_), Some(_), Some(label), Some(args)) = (s(act.and_then(|a| get(a, "cap"))), s(act.and_then(|a| get(a, "call"))), s(act.and_then(|a| get(a, "label"))), args) {
+            let a = act.expect("act");
+            let mut m = Map::new();
+            m.insert("cap".into(), a["cap"].clone());
+            m.insert("call".into(), a["call"].clone());
+            m.insert("args".into(), args.clone());
+            m.insert("label".into(), Value::String(label));
+            n.act = Some(Value::Object(m));
         }
         if path.is_empty() {
             n.updated = self.opts.updated.clone();

@@ -34,6 +34,7 @@ is a change in behaviour.
 | `markdown` | a `from` Markdown file: headings and nesting, a ~3,000-word section split into screenfuls (list items, paragraphs, then sentences), `p2…` folds, a heading ending in `\r`, a second `#`, `#######`, and a missing file's note |
 | `deck` | a root presenting as folds holding a `from` fold page that presents as slides, which holds a third deck: each sequence starts and ends at its own folds; string `text` from a source; a `{meta, slides}` deck through `from_deck` (kickers, transcript pages, markup stripped) |
 | `md-pages` | a section split at words (a 400-word list item with no full stop), a section long enough that its page size grows to the cap and still pages twice, subsections after the pages, a section that fits one screen |
+| `act` | a fold's one action (`{cap, call, args, label}`): label trimmed, cap and call as written, args an object or array; missing label, null args or a blank cap give none |
 | `fields` | alerts (why, waits and last, neither), labelled fields, times near midnight and with offsets, a non-time in `at`, reference names with and without text, a self row and look-alikes, hints over 90 code units with and without a sentence end and with emoji, duplicate ids, `empty` with and without kids, `stale` |
 
 ## Known limits against JS

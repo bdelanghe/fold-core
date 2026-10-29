@@ -1,0 +1,89 @@
+{
+  "root": {
+    "title": "Needs you",
+    "sections": [
+      {
+        "id": "needs",
+        "title": "Needs you",
+        "purpose": "What waits for you.",
+        "groups": [
+          {
+            "title": "",
+            "items": [
+              {
+                "id": "needs/sign-a",
+                "name": "To a seat",
+                "text": "Ship the fix.",
+                "action": "Approve with your passkey.",
+                "act": {
+                  "cap": "webauthn",
+                  "call": "approve",
+                  "label": "  Approve with passkey ",
+                  "args": {
+                    "challenge": "/approve/v1/challenge/a",
+                    "assertion": "/approve/v1/assertion/a"
+                  }
+                },
+                "link": {
+                  "href": "https://example.test/approve/#i-a",
+                  "label": "Approve on the approval page"
+                }
+              },
+              {
+                "id": "needs/no-label",
+                "name": "No label",
+                "action": "x",
+                "act": {
+                  "cap": "webauthn",
+                  "call": "approve",
+                  "args": {}
+                }
+              },
+              {
+                "id": "needs/null-args",
+                "name": "Null args",
+                "action": "x",
+                "act": {
+                  "cap": "webauthn",
+                  "call": "approve",
+                  "label": "Go",
+                  "args": null
+                }
+              },
+              {
+                "id": "needs/list-args",
+                "name": "List args",
+                "action": "x",
+                "act": {
+                  "cap": " w ",
+                  "call": "c",
+                  "label": "Go",
+                  "args": [
+                    1,
+                    2
+                  ]
+                }
+              },
+              {
+                "id": "needs/blank-cap",
+                "name": "Blank cap",
+                "action": "x",
+                "act": {
+                  "cap": " ",
+                  "call": "c",
+                  "label": "Go",
+                  "args": {}
+                }
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "files": {},
+  "opts": {
+    "updated": "2026-10-29T12:00:00.000Z",
+    "source": "golden"
+  }
+}
