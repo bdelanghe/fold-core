@@ -34,6 +34,7 @@ const KID_KEYS: [&str; 5] = ["sections", "groups", "items", "kids", "children"];
 
 /// A link on a fold: one row.
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, Default)]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 pub struct Kid {
     pub id: String,
     pub title: String,
@@ -45,6 +46,7 @@ pub struct Kid {
 
 /// The fold before or after one in a presenting subtree's reading order.
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, Default)]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 pub struct Step {
     pub id: String,
     pub title: String,
@@ -52,6 +54,7 @@ pub struct Step {
 
 /// One fold. Field order is fold.ts's key order; absent fields are left out, as `JSON.stringify` leaves out `undefined`.
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, Default)]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase")]
 pub struct Node {
     pub title: String,

@@ -23,6 +23,14 @@ unknown zone), and the loader answers it from `Intl`, the same zone rules fold.t
 `checks.wasm-size` holds the module to 200 KB gzipped: it is about 235 KB raw and 104 KB gzipped (it was 2.1 MB raw and 539 KB
 gzipped with chrono-tz and regex built in).
 
+## Schema
+
+`schema/node.schema.json` is the fold node types (`Node`, `Kid`, `Step`) as JSON Schema (draft 2020-12), generated from them by
+`tests/schema.rs`. An absent field is left out, never null, so optional fields are optional, not nullable. The test fails when the types
+change and the file was not regenerated (`FOLD_SCHEMA_WRITE=1 cargo test --test schema`), and every golden's folds must read as the
+types and write back the same. A consumer takes it from here instead of defining its own: `cue import jsonschema: schema/node.schema.json`
+gives the CUE definitions.
+
 ## Tests
 
     nix develop -c cargo test     # or: nix flake check
