@@ -24,6 +24,20 @@ unknown zone), and the loader answers it from `Intl`, the same zone rules fold.t
 `checks.wasm-size` holds the module to 200 KB gzipped: it is about 235 KB raw and 104 KB gzipped (it was 2.1 MB raw and 539 KB
 gzipped with chrono-tz and regex built in).
 
+## Viewer
+
+`nix build .#viewer` gives the fold viewer as a static app (`viewer/`; step 1 of ~/.lobby/ops/decisions/COGNITIVE-BROWSER-SDK-2026-10-30.md):
+`index.html`, `view.js` (routing, the document fetch, the fold), `fold-dom.js` (the DOM from an accessibility tree, from home's
+fold-ax.js), the module, its loader as browser JS (`fold-core.js`) and the one face. It holds no data. It fetches one JSON document,
+the `fold-data` meta's URL (`/fold-data/fleet/page.json`, from a data path the app is not served from), and the files its `from`s
+name relative to it; folds it in the browser with the core; and shows each fold through the core's tree (`ax`, the "viewer" links).
+It reads the document again each minute. Served as is: at `/fold/` on phobos by `tailscale serve`.
+
+`checks.viewer` runs `viewer/viewer.test.ts` on every golden: the document fetched from a data URL folds to the golden folds; every
+location the viewer links to shows the golden tree; every fold derives its DOM with no refusal (the AX gate); the walk over what it
+shows is the golden walk (the load gate). `checks.viewer-browser` (Linux) serves the package at `/fold/` and the `sample` page as its
+data, and loads it in headless Chromium at 390×844 and 1024×1366: each location must show the fold the core folds there.
+
 ## Schema
 
 `schema/node.schema.json` is the fold node types (`Node`, `Kid`, `Step`) as JSON Schema (draft 2020-12), generated from them by
