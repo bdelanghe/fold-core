@@ -1,0 +1,86 @@
+{
+  "$comment": "A small synthetic app read (the collector's dump shape) covering every tree kind: inputs (text field, search field, text area, combo box), buttons (button, menu button, pop-up, checkbox, radio), links, headings, windows (window, sheet, tab group), nested named groups (folds), an input inside the menu bar (never listed), a long row (cut into pieces), and ids (an intent id, a PR number, a commit).",
+  "app": "Fixture",
+  "pid": 4242,
+  "title": "Needs you",
+  "tree": [
+    {
+      "axRole": "AXApplication", "name": "Fixture", "ref": "0",
+      "children": [
+        {
+          "axRole": "AXWindow", "axSubrole": "AXStandardWindow", "name": "Needs you", "ref": "0.0",
+          "children": [
+            { "axRole": "AXHeading", "name": "Needs you", "ref": "0.0.0" },
+            {
+              "axRole": "AXGroup", "name": "Signing", "ref": "0.0.1",
+              "children": [
+                { "axRole": "AXHeading", "name": "Signing", "ref": "0.0.1.0" },
+                { "axRole": "AXStaticText", "name": "intent 7f3a9c2e approve the deploy", "ref": "0.0.1.1" },
+                { "axRole": "AXButton", "name": "Approve", "ref": "0.0.1.2", "actions": ["press"] },
+                { "axRole": "AXLink", "name": "Open approve page", "value": "https://phobos.example/approve/7f3a9c2e", "ref": "0.0.1.3", "actions": ["press"] }
+              ]
+            },
+            {
+              "axRole": "AXGroup", "name": "Decisions", "ref": "0.0.2",
+              "children": [
+                { "axRole": "AXHeading", "name": "Decisions", "ref": "0.0.2.0" },
+                {
+                  "axRole": "AXGroup", "ref": "0.0.2.1",
+                  "children": [
+                    { "axRole": "AXRadioButton", "name": "Ship it", "ref": "0.0.2.1.0", "actions": ["press"] },
+                    { "axRole": "AXRadioButton", "name": "Wait", "ref": "0.0.2.1.1", "actions": ["press"] }
+                  ]
+                },
+                { "axRole": "AXCheckBox", "name": "Remember", "value": "0", "ref": "0.0.2.2", "actions": ["press"] }
+              ]
+            },
+            {
+              "axRole": "AXGroup", "name": "Do", "ref": "0.0.3",
+              "children": [
+                { "axRole": "AXLink", "name": "PR #1234 fold-core rotor in the core", "value": "https://github.com/empathic/fold-core/pull/1234", "ref": "0.0.3.0", "actions": ["press"] },
+                { "axRole": "AXStaticText", "name": "Land the rotor and yank contract first, then let fold-core implement it in Rust, then switch Allie's fold.js to call the core for every move and every copy, keeping the goldens green the whole way through.", "ref": "0.0.3.1" },
+                { "axRole": "AXStaticText", "name": "commit 8a447f0 is the base", "ref": "0.0.3.2" }
+              ]
+            },
+            { "axRole": "AXTextField", "name": "Comment", "value": "", "ref": "0.0.4" },
+            { "axRole": "AXSearchField", "name": "Filter", "value": "", "ref": "0.0.5" },
+            { "axRole": "AXComboBox", "name": "Seat", "value": "personal-allie-lead", "ref": "0.0.6" },
+            { "axRole": "AXPopUpButton", "name": "Sort", "value": "Newest", "ref": "0.0.7", "actions": ["press"] },
+            { "axRole": "AXMenuButton", "name": "More", "ref": "0.0.8", "actions": ["press"] },
+            {
+              "axRole": "AXTabGroup", "name": "Views", "ref": "0.0.9",
+              "children": [
+                { "axRole": "AXRadioButton", "name": "Open", "ref": "0.0.9.0", "actions": ["press"] },
+                { "axRole": "AXRadioButton", "name": "Done", "ref": "0.0.9.1", "actions": ["press"] }
+              ]
+            },
+            {
+              "axRole": "AXSheet", "name": "Confirm", "ref": "0.0.10",
+              "children": [
+                { "axRole": "AXStaticText", "name": "Send the answer?", "ref": "0.0.10.0" },
+                { "axRole": "AXButton", "name": "OK", "ref": "0.0.10.1", "actions": ["press"] }
+              ]
+            }
+          ]
+        },
+        {
+          "axRole": "AXWindow", "axSubrole": "AXStandardWindow", "name": "Log", "ref": "0.1",
+          "children": [
+            { "axRole": "AXTextArea", "name": "log", "value": "first line\nsecond line mentions personal-allie-lead\nthird", "ref": "0.1.0" }
+          ]
+        },
+        {
+          "axRole": "AXMenuBar", "ref": "0.2",
+          "children": [
+            {
+              "axRole": "AXMenuBarItem", "name": "Help", "ref": "0.2.0",
+              "children": [
+                { "axRole": "AXMenu", "ref": "0.2.0.0", "children": [ { "axRole": "AXSearchField", "name": "Search", "ref": "0.2.0.0.0" }, { "axRole": "AXMenuItem", "name": "Fixture Help", "ref": "0.2.0.0.1" } ] }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

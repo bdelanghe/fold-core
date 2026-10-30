@@ -37,10 +37,11 @@ int main(void) {
     size_t len = strlen(tab + 1);
     uint8_t *in = fold_core_alloc(len);
     memcpy(in, tab + 1, len);
-    FoldCoreBuf out = !strcmp(line, "fold")   ? fold_core_fold_json(in, len)
-                      : !strcmp(line, "walk") ? fold_core_walk_json(in, len)
-                      : !strcmp(line, "ax")   ? fold_core_ax_json(in, len)
-                                              : (FoldCoreBuf){0};
+    FoldCoreBuf out = !strcmp(line, "fold")    ? fold_core_fold_json(in, len)
+                      : !strcmp(line, "walk")  ? fold_core_walk_json(in, len)
+                      : !strcmp(line, "ax")    ? fold_core_ax_json(in, len)
+                      : !strcmp(line, "rotor") ? fold_core_rotor_json(in, len)
+                                               : (FoldCoreBuf){0};
     if (!out.ptr) return 2;
     fwrite(out.ptr, 1, out.len, stdout);
     fputc('\n', stdout);

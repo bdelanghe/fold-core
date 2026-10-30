@@ -1,0 +1,58 @@
+{
+  "$comment": "Empty kinds: an app with no inputs, links or headings. See briefs/rotor-yank-core.md.",
+  "tree": "bare",
+  "cases": [
+    {
+      "id":"empty-links","scope":"core","what":"a kind with no matches says the kind, and its one row says none here","start":"Refresh","keys":["⌘6"],
+      "expect": [
+        {"key":"","view":"","mode":"","filter":"","rotor":null,"at":"host[phobos]/application[Bare]/window[Quiet]/button[Refresh]","row":"Refresh, button","said":"","hint":"","copy":[],"focus":"ax-tree"},
+        {"key":"⌘6","view":"links","mode":"normal","filter":"","rotor":null,"at":"","row":"No links here.","said":"links","hint":"","copy":[],"focus":"ax-tree"}
+      ]
+    },
+    {
+      "id":"empty-move","scope":"core","what":"j k in an empty kind stay on the empty row","start":"Refresh","keys":["⌘7","j","k"],
+      "expect": [
+        {"key":"","view":"","mode":"","filter":"","rotor":null,"at":"host[phobos]/application[Bare]/window[Quiet]/button[Refresh]","row":"Refresh, button","said":"","hint":"","copy":[],"focus":"ax-tree"},
+        {"key":"⌘7","view":"headings","mode":"normal","filter":"","rotor":null,"at":"","row":"No headings here.","said":"headings","hint":"","copy":[],"focus":"ax-tree"},
+        {"key":"j","view":"headings","mode":"normal","filter":"","rotor":null,"at":"","row":"No headings here.","said":"","hint":"","copy":[],"focus":"ax-tree"},
+        {"key":"k","view":"headings","mode":"normal","filter":"","rotor":null,"at":"","row":"No headings here.","said":"","hint":"","copy":[],"focus":"ax-tree"}
+      ]
+    },
+    {
+      "id":"empty-leave","scope":"core","what":"h leaves an empty kind back to where you were","start":"Refresh","keys":["⌘4","h"],
+      "expect": [
+        {"key":"","view":"","mode":"","filter":"","rotor":null,"at":"host[phobos]/application[Bare]/window[Quiet]/button[Refresh]","row":"Refresh, button","said":"","hint":"","copy":[],"focus":"ax-tree"},
+        {"key":"⌘4","view":"inputs","mode":"normal","filter":"","rotor":null,"at":"","row":"No inputs here.","said":"inputs","hint":"","copy":[],"focus":"ax-tree"},
+        {"key":"h","view":"","mode":"","filter":"","rotor":null,"at":"host[phobos]/application[Bare]/window[Quiet]/button[Refresh]","row":"Refresh, button","said":"","hint":"","copy":[],"focus":"ax-tree"}
+      ]
+    },
+    {
+      "id":"empty-bracket","scope":"core","what":"] through empty kinds stops on each (none are skipped)","start":"Refresh","keys":["⌘4","]","]","]"],
+      "expect": [
+        {"key":"","view":"","mode":"","filter":"","rotor":null,"at":"host[phobos]/application[Bare]/window[Quiet]/button[Refresh]","row":"Refresh, button","said":"","hint":"","copy":[],"focus":"ax-tree"},
+        {"key":"⌘4","view":"inputs","mode":"normal","filter":"","rotor":null,"at":"","row":"No inputs here.","said":"inputs","hint":"","copy":[],"focus":"ax-tree"},
+        {"key":"]","view":"buttons","mode":"normal","filter":"","rotor":null,"at":"host[phobos]/application[Bare]/window[Quiet]/button[Refresh]","row":"Refresh, button, window","said":"buttons","hint":"","copy":[],"focus":"ax-tree"},
+        {"key":"]","view":"links","mode":"normal","filter":"","rotor":null,"at":"","row":"No links here.","said":"links","hint":"","copy":[],"focus":"ax-tree"},
+        {"key":"]","view":"headings","mode":"normal","filter":"","rotor":null,"at":"","row":"No headings here.","said":"headings","hint":"","copy":[],"focus":"ax-tree"}
+      ]
+    },
+    {
+      "id":"empty-yank","scope":"core","what":"y on the empty row copies nothing","start":"Refresh","keys":["⌘6","y","Y"],
+      "expect": [
+        {"key":"","view":"","mode":"","filter":"","rotor":null,"at":"host[phobos]/application[Bare]/window[Quiet]/button[Refresh]","row":"Refresh, button","said":"","hint":"","copy":[],"focus":"ax-tree"},
+        {"key":"⌘6","view":"links","mode":"normal","filter":"","rotor":null,"at":"","row":"No links here.","said":"links","hint":"","copy":[],"focus":"ax-tree"},
+        {"key":"y","view":"links","mode":"normal","filter":"","rotor":null,"at":"","row":"No links here.","said":"nothing to yank here","hint":"","copy":[],"focus":"ax-tree"},
+        {"key":"Y","view":"links","mode":"normal","filter":"","rotor":null,"at":"","row":"No links here.","said":"nothing to yank here","hint":"","copy":[],"focus":"ax-tree"}
+      ]
+    },
+    {
+      "id":"one-match","scope":"core","what":"a kind with one match: j and k stay on it","start":"Nothing needs you","keys":["⌘5","j","k"],
+      "expect": [
+        {"key":"","view":"","mode":"","filter":"","rotor":null,"at":"host[phobos]/application[Bare]/window[Quiet]/statictext[Nothing needs you]","row":"Nothing needs you, text","said":"","hint":"","copy":[],"focus":"ax-tree"},
+        {"key":"⌘5","view":"buttons","mode":"normal","filter":"","rotor":null,"at":"host[phobos]/application[Bare]/window[Quiet]/button[Refresh]","row":"Refresh, button, window","said":"buttons","hint":"","copy":[],"focus":"ax-tree"},
+        {"key":"j","view":"buttons","mode":"normal","filter":"","rotor":null,"at":"host[phobos]/application[Bare]/window[Quiet]/button[Refresh]","row":"Refresh, button, window","said":"","hint":"","copy":[],"focus":"ax-tree"},
+        {"key":"k","view":"buttons","mode":"normal","filter":"","rotor":null,"at":"host[phobos]/application[Bare]/window[Quiet]/button[Refresh]","row":"Refresh, button, window","said":"","hint":"","copy":[],"focus":"ax-tree"}
+      ]
+    }
+  ]
+}

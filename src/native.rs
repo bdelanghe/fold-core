@@ -6,12 +6,13 @@
 //!   fold_core_fold_json(ptr, len) -> buf        `{root, files, opts}` → `[[id, node], ...]`
 //!   fold_core_walk_json(ptr, len) -> buf        `{nodes, opts, facto?}` → `{walk, verdict, facto?}`
 //!   fold_core_ax_json(ptr, len) -> buf          `{node, path, mode, href, localTimeZone?}` → one fold's accessibility tree
+//!   fold_core_rotor_json(ptr, len) -> buf       the rotor and yank (src/rotor.rs), `{op, tree, state?, at?, key?, opts?}`
 //!   fold_core_free(buf.ptr, buf.len)            frees a returned buffer
 //!
 //! A call takes its input buffer and frees it; the host frees only what comes back. A failure is `{"error": "..."}`, never a crash.
 //! Built without `tzdb` (packages.native), the library imports `fold_core_tz_offset` from the host (src/tz.rs).
 
-use crate::wasm::{ax_text, fold_text, walk_text};
+use crate::wasm::{ax_text, fold_text, rotor_text, walk_text};
 
 /// A buffer the library owns: JSON text, `len` bytes at `ptr`. Free it with `fold_core_free(ptr, len)`.
 #[repr(C)]
@@ -63,4 +64,11 @@ pub unsafe extern "C" fn fold_core_walk_json(ptr: *mut u8, len: usize) -> FoldCo
 #[no_mangle]
 pub unsafe extern "C" fn fold_core_ax_json(ptr: *mut u8, len: usize) -> FoldCoreBuf {
     call(ptr, len, ax_text)
+}
+
+/// # Safety
+/// `ptr` and `len` are UTF-8 the host wrote into a buffer from `fold_core_alloc(len)`; the call frees it.
+#[no_mangle]
+pub unsafe extern "C" fn fold_core_rotor_json(ptr: *mut u8, len: usize) -> FoldCoreBuf {
+    call(ptr, len, rotor_text)
 }

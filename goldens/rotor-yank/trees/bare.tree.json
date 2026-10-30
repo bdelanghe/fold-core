@@ -1,0 +1,20 @@
+{
+  "$comment": "An app with almost nothing: no inputs, links or headings (empty kinds), one button, one window.",
+  "app": "Bare",
+  "pid": 4243,
+  "title": "Bare",
+  "tree": [
+    {
+      "axRole": "AXApplication", "name": "Bare", "ref": "0",
+      "children": [
+        {
+          "axRole": "AXWindow", "axSubrole": "AXStandardWindow", "name": "Quiet", "ref": "0.0",
+          "children": [
+            { "axRole": "AXStaticText", "name": "Nothing needs you", "ref": "0.0.0" },
+            { "axRole": "AXButton", "name": "Refresh", "ref": "0.0.1", "actions": ["press"] }
+          ]
+        }
+      ]
+    }
+  ]
+}
