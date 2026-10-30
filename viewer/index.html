@@ -27,7 +27,8 @@
 :root[data-theme="dark"]{--paper:#16221C;--card:#22302A;--ink:#ECEAE3;--soft:#A9B5AE;--line:#5C6B63;--accent:#8FC3A8;--warn:#FF9C80}
 *{box-sizing:border-box}
 body{margin:0;background:var(--paper);color:var(--ink);font:var(--s0)/1.45 var(--face);font-variant-numeric:tabular-nums}
-main{max-width:42rem;margin:0 auto;padding:16px}
+main,footer{max-width:42rem;margin:0 auto;padding:16px}
+footer p.data{margin:0;color:var(--soft);font-size:var(--s-1);overflow-wrap:anywhere}
 nav ol{list-style:none;margin:0;padding:0;font:var(--s-1)/1.6 var(--face)}
 nav li{display:inline}
 nav a{display:inline-block;max-width:14ch;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;vertical-align:bottom}
@@ -62,6 +63,7 @@ main.slide ol.rows li.prop{font-size:var(--s1)}
 </head>
 <body>
 <main><h1 tabindex="-1">Loading…</h1></main>
+<footer aria-label="Data"><p class="data"></p></footer>
 <script type="module">
 // A fold viewer that holds no data: it fetches one JSON document from the data origin (the fold-data meta), folds it here with the
 // core's WebAssembly module, and shows one fold at a time. The core gives each fold's accessibility tree (ax_json); fold-dom.js
@@ -71,9 +73,16 @@ main.slide ol.rows li.prop{font-size:var(--s1)}
 // the next and previous slide in reading order; l or Enter still goes into the point under the cursor, h back out.
 import { core } from "./fold-core.js";
 import { toDom, liveLine } from "./fold-dom.js";
-import { at, docId, href as link, modeOf, open, pathOf, viewOf } from "./view.js";
+import { at, dataOf, docId, href as link, modeOf, open, pathOf, viewOf } from "./view.js";
 const zone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-const data = document.querySelector('meta[name="fold-data"]');
+const meta = document.querySelector('meta[name="fold-data"]');
+// The document read, always said: the meta's, or one named in the address (?data=/fold-data/demo/page.json), same origin only.
+const data = dataOf(location.search, location.href, { path: meta.content, source: meta.dataset.source });
+{
+  const p = document.querySelector("footer p.data"), a = document.createElement(data.url ? "a" : "span");
+  a.textContent = data.path; if (data.url) a.href = data.url;
+  p.append("Data: ", a, data.error ? ` (not read: ${data.error})` : data.source ? ` from ${data.source}` : ", named in the address");
+}
 let nodes = new Map(), said = "", node = null, cur = 0, cameFrom = null, last = [];
 const href = (p, m = modeOf(location.hash, node)) => link(p, m);
 const rows = () => [...document.querySelectorAll("ol.rows > li.obj")]; // the child objects; property rows are read, not entered
@@ -113,12 +122,13 @@ function show(focus) {
 // The document, folded here. A failed read keeps the folds already shown; with none yet, the root says why.
 async function load() {
   try {
-    const next = await open(fold, new URL(data.content, location.href).href, { opts: (modified) => ({ source: data.dataset.source, updated: modified ?? new Date().toISOString(), localTimeZone: zone }) });
+    if (data.error) throw new Error(data.error);
+    const next = await open(fold, data.url, { opts: (modified) => ({ ...(data.source ? { source: data.source } : {}), updated: modified ?? new Date().toISOString(), localTimeZone: zone }) });
     const text = JSON.stringify([...next]);
     if (text === said) return false;
     nodes = next; said = text; return true;
   } catch (e) {
-    if (!nodes.size) nodes = new Map([["root", { title: "Could not read the data", trail: [], text: [`${data.content}: ${e?.message ?? e}`] }]]);
+    if (!nodes.size) nodes = new Map([["root", { title: "Could not read the data", trail: [], text: [`${data.path}: ${e?.message ?? e}`] }]]);
     return !said;
   }
 }

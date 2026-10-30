@@ -10,12 +10,13 @@ import { at, href } from "./view.js";
 const [name = "sample"] = Bun.argv.slice(2);
 const viewer = process.env.VIEWER!, chromium = process.env.CHROMIUM!;
 const input = JSON.parse(readFileSync(join(import.meta.dir, "..", "goldens", `${name}.input.json`), "utf8"));
-const page = JSON.stringify(input.root);
+const page = JSON.stringify(input.root), demo = JSON.stringify({ ...input.root, title: "Demo" });
 const server = Bun.serve({
   hostname: "127.0.0.1", port: 0,
   fetch(req) {
     const p = new URL(req.url).pathname;
     if (p === "/fold-data/fleet/page.json") return new Response(page, { headers: { "content-type": "application/json" } });
+    if (p === "/fold-data/demo/page.json") return new Response(demo, { headers: { "content-type": "application/json" } });
     // /fold, with no slash, is the page too (as a static server or a proxy may answer it): the page must go on to /fold/
     if (p === "/fold" || p.startsWith("/fold/")) {
       const f = Bun.file(join(viewer, p.slice("/fold/".length) || "index.html"));
@@ -56,19 +57,25 @@ async function inChrome(w: number, h: number, url: string) {
     const { nodes } = await send("Accessibility.getFullAXTree");
     const h1 = nodes.filter((x: any) => !x.ignored && x.role?.value === "heading" && x.properties?.some((q: any) => q.name === "level" && q.value.value === 1)).map((x: any) => x.name?.value ?? "");
     const objs = await value(`document.querySelectorAll("ol.rows > li.obj").length`);
+    // the document read, said on every fold: a "Data" landmark whose link is its path
+    const data = nodes.find((x: any) => !x.ignored && x.role?.value === "contentinfo" && x.name?.value === "Data");
+    const links = nodes.filter((x: any) => !x.ignored && x.role?.value === "link").map((x: any) => x.name?.value);
     s.close();
-    return { ready, h1, objs, err };
+    return { ready, h1, objs, data: !!data, links, err };
   } finally { p.kill(); await p.exited; }
 }
 
 let failed = 0;
 const runs = [[390, 844], [1024, 1366]].flatMap(([w, h]) => places.map(([id, n]) => [w, h, id, n, "/fold/"] as const));
 runs.push([390, 844, places[0][0], places[0][1], "/fold"]);
+// one viewer, another document: ?data= names it by path (the demo's root is retitled, so the heading says which was read)
+runs.push([390, 844, places[0][0], { ...places[0][1], title: "Demo" }, "/fold/?data=/fold-data/demo/page.json"]);
 for (const [w, h, id, n, at0] of runs) {
   const url = `http://127.0.0.1:${server.port}${at0}${href(at(id), "folds")}`;
-  const { ready, h1, objs, err } = await inChrome(w, h, url);
-  const ok = ready && h1.length === 1 && h1[0] === n.title && objs === (n.kids ?? []).length;
-  console.log(`${ok ? "ok  " : "FAIL"} ${w}x${h} ${at0} ${id}: heading ${JSON.stringify(h1)}, ${objs} rows (want ${JSON.stringify(n.title)}, ${(n.kids ?? []).length})`);
+  const { ready, h1, objs, data, links, err } = await inChrome(w, h, url);
+  const path = at0.includes("?data=") ? "/fold-data/demo/page.json" : "/fold-data/fleet/page.json";
+  const ok = ready && h1.length === 1 && h1[0] === n.title && objs === (n.kids ?? []).length && data && links.includes(path);
+  console.log(`${ok ? "ok  " : "FAIL"} ${w}x${h} ${at0} ${id}: heading ${JSON.stringify(h1)}, ${objs} rows, data ${data ? "said" : "missing"} (want ${JSON.stringify(n.title)}, ${(n.kids ?? []).length}, a link ${path})`);
   if (!ok) { failed++; console.log(err.slice(-2000)); }
 }
 server.stop(true);

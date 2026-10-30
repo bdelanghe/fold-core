@@ -7,7 +7,7 @@ import { readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { core } from "../js/fold-core.ts";
 import { toDom } from "./fold-dom.js";
-import { at, href, open, pathOf, viewOf } from "./view.js";
+import { at, dataOf, href, open, pathOf, viewOf } from "./view.js";
 
 const goldens = join(import.meta.dir, "..", "goldens");
 const wasm = process.env.FOLD_CORE_WASM ?? join(import.meta.dir, "..", "target", "wasm32-unknown-unknown", "release", "fold_core.wasm");
@@ -86,4 +86,14 @@ test("a location with no fold, and a document that cannot be read", async () => 
   expect(viewOf(ax, nodes, "#/gone", "UTC").tree.children[0]).toEqual({ role: "heading", name: "Nothing here yet" });
   expect(viewOf(ax, nodes, "", "UTC").mode).toBe("folds");
   await expect(open(fold, "https://data.test/fold-data/none/page.json", { fetch: origin("x", { root: {} }).fetch })).rejects.toThrow("404");
+});
+
+test("the document read: the meta's, or one named by path in the address on the same origin, never another origin's", () => {
+  const meta = { path: "/fold-data/fleet/page.json", source: "fleet-map" }, base = "https://phobos.test/fold/?x#/needs";
+  expect(dataOf("", base, meta)).toEqual({ path: meta.path, url: "https://phobos.test/fold-data/fleet/page.json", source: "fleet-map" });
+  expect(dataOf("?data=", base, meta).url).toBe("https://phobos.test/fold-data/fleet/page.json");
+  expect(dataOf("?data=/fold-data/demo/page.json", base, meta)).toEqual({ path: "/fold-data/demo/page.json", url: "https://phobos.test/fold-data/demo/page.json", source: null });
+  expect(dataOf("?data=../fold-data/demo/page.json", base, meta).path).toBe("/fold-data/demo/page.json");
+  for (const away of ["https://evil.test/page.json", "//evil.test/page.json", "http://phobos.test/fold-data/fleet/page.json"])
+    expect(dataOf(`?data=${encodeURIComponent(away)}`, base, meta)).toEqual({ path: away, error: "only a path on this site is read" });
 });

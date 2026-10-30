@@ -36,6 +36,16 @@ export async function open(fold, url, { fetch = globalThis.fetch, opts = () => (
   return new Map(fold({ root, files, opts: opts(modified && !Number.isNaN(Date.parse(modified)) ? new Date(modified).toISOString() : null) }));
 }
 
+/** The document this viewer reads: the fold-data meta's (`{path, source}`), or one named by path in the address (`?data=<path>`),
+ * same origin only. Another origin is refused, never fetched: `{path, error}`. */
+export function dataOf(search, base, meta) {
+  const named = new URLSearchParams(search).get("data");
+  if (named == null || named === "") return { path: meta.path, url: new URL(meta.path, base).href, source: meta.source };
+  const u = new URL(named, base);
+  if (u.origin !== new URL(base).origin) return { path: named, error: "only a path on this site is read" };
+  return { path: u.pathname + u.search, url: u.href, source: null };
+}
+
 /** What a location shows: its path, its mode, the fold there (undefined when none) and that fold's accessibility tree from the core. */
 export function viewOf(ax, nodes, hash, localTimeZone) {
   const path = pathOf(hash), node = nodes.get(docId(path)), mode = modeOf(hash, node);
