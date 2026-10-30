@@ -27,8 +27,12 @@
 :root[data-theme="dark"]{--paper:#16221C;--card:#22302A;--ink:#ECEAE3;--soft:#A9B5AE;--line:#5C6B63;--accent:#8FC3A8;--warn:#FF9C80}
 *{box-sizing:border-box}
 body{margin:0;background:var(--paper);color:var(--ink);font:var(--s0)/1.45 var(--face);font-variant-numeric:tabular-nums}
-main,footer{max-width:42rem;margin:0 auto;padding:16px}
-footer p.data{margin:0;color:var(--soft);font-size:var(--s-1);overflow-wrap:anywhere}
+main,form.reading{max-width:42rem;margin:0 auto;padding:16px}
+/* The document read, as a search box (Bobby 10-30): its path, editable; Open reads another on this site. */
+form.reading{display:flex;flex-wrap:wrap;gap:.5rem;align-items:center;padding-bottom:0;font-size:var(--s-1)}
+form.reading input{flex:1;min-width:12ch;min-height:44px;font:var(--s-1) ui-monospace,monospace;color:var(--ink);background:var(--card);border:1px solid var(--line);border-radius:.4em;padding:0 .5em}
+form.reading button{font:inherit;min-height:44px;color:var(--paper);background:var(--accent);border:0;border-radius:.4em;padding:0 1em}
+form.reading .note{flex-basis:100%;color:var(--soft);overflow-wrap:anywhere}
 nav ol{list-style:none;margin:0;padding:0;font:var(--s-1)/1.6 var(--face)}
 nav li{display:inline}
 nav a{display:inline-block;max-width:14ch;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;vertical-align:bottom}
@@ -62,8 +66,10 @@ main.slide ol.rows li.prop{font-size:var(--s1)}
 </style>
 </head>
 <body>
+<form class="reading" role="search" aria-label="Reading"><label for="reading">Reading</label>
+<input id="reading" name="data" type="search" spellcheck="false" autocomplete="off" aria-describedby="reading-note">
+<button type="submit">Open</button><span id="reading-note" class="note"></span></form>
 <main><h1 tabindex="-1">Loading…</h1></main>
-<footer aria-label="Data"><p class="data"></p></footer>
 <script type="module">
 // A fold viewer that holds no data: it fetches one JSON document from the data origin (the fold-data meta), folds it here with the
 // core's WebAssembly module, and shows one fold at a time. The core gives each fold's accessibility tree (ax_json); fold-dom.js
@@ -76,13 +82,11 @@ import { toDom, liveLine } from "./fold-dom.js";
 import { at, dataOf, docId, href as link, modeOf, open, pathOf, viewOf } from "./view.js";
 const zone = Intl.DateTimeFormat().resolvedOptions().timeZone;
 const meta = document.querySelector('meta[name="fold-data"]');
-// The document read, always said: the meta's, or one named in the address (?data=/fold-data/demo/page.json), same origin only.
+// The document read, always said in the Reading box: the meta's, or one named in the address by an absolute path on this site
+// (?data=/fold-data/demo/page.json, as Open submits it). The box holds its path; the note says where it is from, or why it was not read.
 const data = dataOf(location.search, location.href, { path: meta.content, source: meta.dataset.source });
-{
-  const p = document.querySelector("footer p.data"), a = document.createElement(data.url ? "a" : "span");
-  a.textContent = data.path; if (data.url) a.href = data.url;
-  p.append("Data: ", a, data.error ? ` (not read: ${data.error})` : data.source ? ` from ${data.source}` : ", named in the address");
-}
+document.getElementById("reading").value = data.path;
+document.getElementById("reading-note").textContent = data.error ? `Not read: ${data.error}` : data.source ? `From ${data.source}` : "Named in the address";
 let nodes = new Map(), said = "", node = null, cur = 0, cameFrom = null, last = [];
 const href = (p, m = modeOf(location.hash, node)) => link(p, m);
 const rows = () => [...document.querySelectorAll("ol.rows > li.obj")]; // the child objects; property rows are read, not entered

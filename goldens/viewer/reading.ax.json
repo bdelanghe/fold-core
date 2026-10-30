@@ -1,0 +1,5 @@
+{
+  "/fold/": [["search", "Reading"], ["searchbox", "Reading", "/fold-data/fleet/page.json", "From fleet-map"], ["button", "Open"]],
+  "/fold/?data=/fold-data/demo/page.json": [["search", "Reading"], ["searchbox", "Reading", "/fold-data/demo/page.json", "Named in the address"], ["button", "Open"]],
+  "/fold/?data=https://evil.test/page.json": [["search", "Reading"], ["searchbox", "Reading", "https://evil.test/page.json", "Not read: only a path on this site, from /, is read"], ["button", "Open"]]
+}
