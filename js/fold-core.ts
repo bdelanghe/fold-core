@@ -60,6 +60,16 @@ export type Rotor = {
   row: (tree: RotorNode, state: RotorState) => { name: string; role: string; fact: string; path: string; address: string } | null;
 };
 
+/** The rotor's four ops over one JSON call: the module's rotor_json, or the native library's (js/native.ts). */
+export function rotorOver(call: (input: unknown) => any): Rotor {
+  return {
+    init: (tree, at) => call({ op: "init", tree, at }),
+    key: (tree, state, key, opts) => call({ op: "key", tree, state, key, opts }),
+    kinds: (tree, state, opts) => call({ op: "kinds", tree, state, opts }),
+    row: (tree, state) => call({ op: "row", tree, state }),
+  };
+}
+
 export async function core(wasm: BufferSource): Promise<{ fold: (input: FoldInput) => Folds; walk: (input: WalkInput) => WalkOutput; ax: (input: AxInput) => Ax; rotor: Rotor }> {
   type Call = (p: number, n: number) => bigint;
   let x: { memory: WebAssembly.Memory; alloc(n: number): number; dealloc(p: number, n: number): void; fold_json: Call; walk_json: Call; ax_json: Call; rotor_json: Call };
@@ -79,12 +89,7 @@ export async function core(wasm: BufferSource): Promise<{ fold: (input: FoldInpu
     if (out && !Array.isArray(out) && "error" in out) throw new Error(`fold-core: ${out.error}`);
     return out;
   };
-  const rotor: Rotor = {
-    init: (tree, at) => call(x.rotor_json, { op: "init", tree, at }),
-    key: (tree, state, key, opts) => call(x.rotor_json, { op: "key", tree, state, key, opts }),
-    kinds: (tree, state, opts) => call(x.rotor_json, { op: "kinds", tree, state, opts }),
-    row: (tree, state) => call(x.rotor_json, { op: "row", tree, state }),
-  };
+  const rotor = rotorOver((input) => call(x.rotor_json, input));
   return { fold: (input) => call(x.fold_json, input), walk: (input) => call(x.walk_json, input), ax: (input) => call(x.ax_json, input), rotor };
 }
 

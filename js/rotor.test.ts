@@ -1,13 +1,14 @@
 // The rotor and yank through the wasm module (core().rotor), on every `core` case of Allie's goldens (goldens/rotor-yank/), as
-// tests/rotor.rs is for the native crate. FOLD_CORE_WASM: the built module.
+// tests/rotor.rs is for the native crate. FOLD_CORE_WASM: the built module; FOLD_CORE_NATIVE instead: the native library (js/native.ts).
 import { expect, test } from "bun:test";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { core, type Kind, type RotorNode } from "./fold-core.ts";
+import { nativeCore } from "./native.ts";
 
 const dir = join(import.meta.dir, "..", "goldens", "rotor-yank");
 const wasm = process.env.FOLD_CORE_WASM ?? join(import.meta.dir, "..", "target", "wasm32-unknown-unknown", "release", "fold_core.wasm");
-const { rotor } = await core(readFileSync(wasm));
+const { rotor } = process.env.FOLD_CORE_NATIVE ? nativeCore(process.env.FOLD_CORE_NATIVE) : await core(readFileSync(wasm));
 const read = (...p: string[]) => JSON.parse(readFileSync(join(dir, ...p), "utf8"));
 
 type Dump = { axRole: string; name?: string; value?: unknown; children?: Dump[] };

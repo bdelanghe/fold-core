@@ -75,7 +75,7 @@
           HOME=$TMPDIR FOLD_CORE_WASM=${self.packages.${pkgs.stdenv.hostPlatform.system}.wasm}/lib/fold_core.wasm bun test ./viewer/viewer.test.ts
           touch $out
         '';
-        # the native library through its C ABI on every golden (js/parity.test.ts with FOLD_CORE_NATIVE): native/roundtrip.c links it as a
+        # the native library through its C ABI on every golden (js/parity.test.ts and js/rotor.test.ts with FOLD_CORE_NATIVE): native/roundtrip.c links it as a
         # host does, zone rules from tzdata, and the error path from C. Its size is printed for the record (no tzdb).
         native = pkgs.runCommand "fold-core-native-parity" { nativeBuildInputs = [ pkgs.bun pkgs.stdenv.cc ]; } ''
           cp -r ${self}/js ${self}/goldens ${self}/native .
@@ -83,7 +83,7 @@
           echo "libfold_core.a: $(wc -c < $n/lib/libfold_core.a) bytes"
           cc -O2 -I$n/include native/roundtrip.c $n/lib/libfold_core.a ${pkgs.lib.optionalString pkgs.stdenv.hostPlatform.isLinux "-lpthread -ldl -lm"} -o roundtrip
           echo "roundtrip (C host + library): $(wc -c < roundtrip) bytes"
-          HOME=$TMPDIR TZDIR=${pkgs.tzdata}/share/zoneinfo FOLD_CORE_NATIVE=$PWD/roundtrip bun test ./js/parity.test.ts
+          HOME=$TMPDIR TZDIR=${pkgs.tzdata}/share/zoneinfo FOLD_CORE_NATIVE=$PWD/roundtrip bun test ./js/parity.test.ts ./js/rotor.test.ts
           touch $out
         '';
         # the C header is what cbindgen makes of src/native.rs today: a changed signature fails here until include/fold_core.h is regenerated
