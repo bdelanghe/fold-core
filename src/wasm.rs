@@ -7,6 +7,8 @@
 //!   walk_json(ptr, len) -> u64  walks `{nodes, opts, facto?}` (goldens/walk/<case>.input.json): `{walk, verdict, facto?}`
 //!   ax_json(ptr, len) -> u64    one fold's accessibility tree (fold-ax.js axOf) from `{node, path, mode, href, localTimeZone?}`
 //!                               (`href` "walk" or "viewer", the links axOf is given in home; `node` null for a fold with no data)
+//!   html_json(ptr, len) -> u64  one fold's HTML (fold-dom.js toDom, as text: src/html.rs) from its accessibility tree
+//!                               (ax_json's output): `{"html": "<main>…"}`, or `{"error": "fold-ax: …"}` where toDom refuses
 //!   dealloc(ptr, len)           frees either buffer
 //!
 //! `files` maps each `from` path to its text; a path not in it reads as missing, with fold.ts's ENOENT note.
@@ -87,6 +89,11 @@ pub fn ax_text(input: &str) -> String {
     })
 }
 
+/// One fold's HTML, from its accessibility tree: `{"html": ...}`.
+pub fn html_text(input: &str) -> String {
+    json_call(input, |ax| Ok(json!({ "html": crate::html::html(&ax)? }).to_string()))
+}
+
 unsafe fn call(ptr: *const u8, len: usize, f: fn(&str) -> String) -> u64 {
     let input = std::str::from_utf8(std::slice::from_raw_parts(ptr, len)).unwrap_or("");
     let out = f(input).into_bytes().into_boxed_slice();
@@ -113,4 +120,11 @@ pub unsafe extern "C" fn walk_json(ptr: *const u8, len: usize) -> u64 {
 #[no_mangle]
 pub unsafe extern "C" fn ax_json(ptr: *const u8, len: usize) -> u64 {
     call(ptr, len, ax_text)
+}
+
+/// # Safety
+/// `ptr` and `len` are UTF-8 the host wrote into a buffer from `alloc(len)`.
+#[no_mangle]
+pub unsafe extern "C" fn html_json(ptr: *const u8, len: usize) -> u64 {
+    call(ptr, len, html_text)
 }
