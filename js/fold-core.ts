@@ -4,6 +4,7 @@
 //   walk({nodes, opts, facto?}) -> {walk, verdict, facto?}, exactly as goldens/walk/<case>.walk.json holds it
 //   ax({node, path, mode, href, localTimeZone?}) -> one fold's accessibility tree (fold-ax.js axOf), as goldens/ax/<case>.ax.json holds it
 //   html(tree) -> that tree's HTML (fold-dom.js toDom, as text: src/html.rs), as goldens/html/<case>.html.json holds it
+//   site({nodes, source, base?, localTimeZone?}) -> every fold as a whole page at its real path (src/page.rs), as goldens/pages holds them
 export type Folds = [string, Record<string, unknown>][];
 export type FoldInput = { root: unknown; files?: Record<string, string>; opts?: Record<string, unknown> };
 export type Finding = { fold: string; check: string; kind: "remove" | "rename" | "restructure"; blocks: boolean; said: string; reduction: string };
@@ -37,11 +38,13 @@ export function offset(zone: string, ms: number): number | null {
 }
 
 export type AxInput = { node: unknown; path: string[]; mode: "folds" | "slides"; href: "walk" | "viewer"; localTimeZone?: string };
+export type SiteInput = { nodes: Folds | Record<string, unknown>; source: string; base?: string; localTimeZone?: string };
+export type Page = { id: string; mode: "folds" | "slides"; href: string; file?: string; html?: string; error?: string };
 export type Ax = { role: string; name?: string; children?: Ax[]; [k: string]: unknown };
 
-export async function core(wasm: BufferSource): Promise<{ fold: (input: FoldInput) => Folds; walk: (input: WalkInput) => WalkOutput; ax: (input: AxInput) => Ax; html: (tree: Ax) => string }> {
+export async function core(wasm: BufferSource): Promise<{ fold: (input: FoldInput) => Folds; walk: (input: WalkInput) => WalkOutput; ax: (input: AxInput) => Ax; html: (tree: Ax) => string; site: (input: SiteInput) => Page[] }> {
   type Call = (p: number, n: number) => bigint;
-  let x: { memory: WebAssembly.Memory; alloc(n: number): number; dealloc(p: number, n: number): void; fold_json: Call; walk_json: Call; ax_json: Call; html_json: Call };
+  let x: { memory: WebAssembly.Memory; alloc(n: number): number; dealloc(p: number, n: number): void; fold_json: Call; walk_json: Call; ax_json: Call; html_json: Call; site_json: Call };
   const tz_offset = (p: number, n: number, ms: number) => offset(new TextDecoder().decode(new Uint8Array(x.memory.buffer, p, n)), ms) ?? -2147483648;
   const { instance } = await WebAssembly.instantiate(wasm, { fold_core: { tz_offset } });
   x = instance.exports as unknown as typeof x;
@@ -58,7 +61,7 @@ export async function core(wasm: BufferSource): Promise<{ fold: (input: FoldInpu
     if (out && !Array.isArray(out) && "error" in out) throw new Error(`fold-core: ${out.error}`);
     return out;
   };
-  return { fold: (input) => call(x.fold_json, input), walk: (input) => call(x.walk_json, input), ax: (input) => call(x.ax_json, input), html: (tree) => call(x.html_json, tree).html };
+  return { fold: (input) => call(x.fold_json, input), walk: (input) => call(x.walk_json, input), ax: (input) => call(x.ax_json, input), html: (tree) => call(x.html_json, tree).html, site: (input) => call(x.site_json, input) };
 }
 
 /** The fold alone, as before `core`. */

@@ -9,6 +9,8 @@
 //!                               (`href` "walk" or "viewer", the links axOf is given in home; `node` null for a fold with no data)
 //!   html_json(ptr, len) -> u64  one fold's HTML (fold-dom.js toDom, as text: src/html.rs) from its accessibility tree
 //!                               (ax_json's output): `{"html": "<main>…"}`, or `{"error": "fold-ax: …"}` where toDom refuses
+//!   site_json(ptr, len) -> u64  every fold of a folded document as a whole page at its real path (src/page.rs), from
+//!                               `{nodes, source, base?, localTimeZone?}`: `[{id, mode, href, file, html | error}, ...]`
 //!   dealloc(ptr, len)           frees either buffer
 //!
 //! `files` maps each `from` path to its text; a path not in it reads as missing, with fold.ts's ENOENT note.
@@ -94,6 +96,25 @@ pub fn html_text(input: &str) -> String {
     json_call(input, |ax| Ok(json!({ "html": crate::html::html(&ax)? }).to_string()))
 }
 
+/// Every fold's page, from `{nodes, source, base?, localTimeZone?}`: `nodes` as walk_json takes them, `source` the document's
+/// name (the root of each haecceity), `base` where the pages are served from (page.rs BASE when not given).
+pub fn site_text(input: &str) -> String {
+    json_call(input, |case| {
+        let nodes: Vec<(String, Value)> = match case.get("nodes") {
+            Some(Value::Array(a)) => serde_json::from_value(Value::Array(a.clone())).map_err(|e| format!("nodes: {e}"))?,
+            Some(Value::Object(m)) => m.iter().map(|(k, v)| (k.clone(), v.clone())).collect(),
+            _ => return Err("no nodes".into()),
+        };
+        let source = case.get("source").and_then(Value::as_str).filter(|s| !s.trim().is_empty()).ok_or("no source: a document is named")?;
+        let base = case.get("base").and_then(Value::as_str).unwrap_or(crate::page::BASE);
+        if !base.starts_with('/') || !base.ends_with('/') {
+            return Err(format!("base: {base} is not a path from / to a /"));
+        }
+        let clock = Clock::new(None, case.get("localTimeZone").and_then(Value::as_str));
+        serde_json::to_string(&crate::page::site(&nodes, source, base, &clock)).map_err(|e| e.to_string())
+    })
+}
+
 unsafe fn call(ptr: *const u8, len: usize, f: fn(&str) -> String) -> u64 {
     let input = std::str::from_utf8(std::slice::from_raw_parts(ptr, len)).unwrap_or("");
     let out = f(input).into_bytes().into_boxed_slice();
@@ -127,4 +148,11 @@ pub unsafe extern "C" fn ax_json(ptr: *const u8, len: usize) -> u64 {
 #[no_mangle]
 pub unsafe extern "C" fn html_json(ptr: *const u8, len: usize) -> u64 {
     call(ptr, len, html_text)
+}
+
+/// # Safety
+/// `ptr` and `len` are UTF-8 the host wrote into a buffer from `alloc(len)`.
+#[no_mangle]
+pub unsafe extern "C" fn site_json(ptr: *const u8, len: usize) -> u64 {
+    call(ptr, len, site_text)
 }

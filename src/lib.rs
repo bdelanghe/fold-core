@@ -11,6 +11,7 @@ pub mod ax;
 pub mod html;
 pub mod id;
 mod js;
+pub mod page;
 mod tz;
 pub mod walk;
 pub mod wasm;

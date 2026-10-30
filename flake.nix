@@ -23,11 +23,11 @@
           dontFixup = true;
         });
         # the fold viewer as a static app (viewer/, COGNITIVE-BROWSER-SDK-2026-10-30 step 1): index.html, its modules, the module and
-        # its loader (js/fold-core.ts as browser JS), and the one face. It holds no data: it fetches a document (its fold-data meta,
+        # its loader (js/fold-core.ts as browser JS), its stylesheet (fold.css, which every pre-rendered page links too), and the one face. It holds no data: it fetches a document (its fold-data meta,
         # /fold-data/fleet/page.json) and folds it in the browser. Served as is, e.g. at /fold/ by tailscale serve.
         viewer = pkgs.runCommand "fold-viewer" { nativeBuildInputs = [ pkgs.bun pkgs.woff2 ]; } ''
           mkdir -p $out/fonts
-          cp ${self}/viewer/index.html ${self}/viewer/view.js ${self}/viewer/fold-dom.js ${wasm}/lib/fold_core.wasm $out/
+          cp ${self}/viewer/index.html ${self}/viewer/fold.css ${self}/viewer/view.js ${self}/viewer/fold-dom.js ${wasm}/lib/fold_core.wasm $out/
           HOME=$TMPDIR bun build ${self}/js/fold-core.ts --target browser --format esm --outfile $out/fold-core.js
           cp ${pkgs.atkinson-hyperlegible-next}/share/fonts/opentype/AtkinsonHyperlegibleNext-Regular.otf face.otf
           woff2_compress face.otf && cp face.woff2 $out/fonts/atkinson-hyperlegible-next.woff2
@@ -62,6 +62,16 @@
           cp -r ${self}/js ${self}/goldens ${self}/viewer .
           export HOME=$TMPDIR FONTCONFIG_FILE=${pkgs.makeFontsConf { fontDirectories = [ ]; }}
           VIEWER=${self.packages.${pkgs.stdenv.hostPlatform.system}.viewer} CHROMIUM=${pkgs.chromium}/bin/chromium bun viewer/browser-check.ts sample
+          touch $out
+        '';
+        # every golden fold's pre-rendered page (goldens/pages, src/page.rs) in headless Chromium with JavaScript off, light and dark:
+        # its title, focus on its h1 when entered by a link, same-tab links that land, and lone's colour contrast over the colours
+        # Chromium computes from fold.css (viewer/pages-check.ts; known findings in goldens/pages/known.json)
+        pages-browser = pkgs.runCommand "fold-core-pages-browser" { nativeBuildInputs = [ pkgs.bun pkgs.chromium ]; } ''
+          cp -r ${self}/goldens ${self}/viewer ${self}/package.json .
+          ln -s ${self.packages.${pkgs.stdenv.hostPlatform.system}.node-modules}/node_modules node_modules
+          export HOME=$TMPDIR FONTCONFIG_FILE=${pkgs.makeFontsConf { fontDirectories = [ ]; }}
+          VIEWER=${self.packages.${pkgs.stdenv.hostPlatform.system}.viewer} CHROMIUM=${pkgs.chromium}/bin/chromium bun viewer/pages-check.ts
           touch $out
         '';
       } // {

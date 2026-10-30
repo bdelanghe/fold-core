@@ -22,7 +22,7 @@ const NEEDS_NAME = new Set(["navigation", "heading", "list", "link", "button"]);
 const MAIN_ROLES = ["navigation", "heading", "list"];
 
 /** Derives the DOM from an accessibility tree; throws on any node that would not be accessible, or that is not part of an object. */
-export function toDom(doc, ax, ids = { n: 0 }) {
+export function toDom(doc, ax, ids = { n: 0 }, row = null) {
   const tag = ELEMENT[ax.role];
   if (!tag) throw new Error(`fold-ax: no element for role "${ax.role}"`);
   if (NEEDS_NAME.has(ax.role) && !(ax.name ?? "").trim()) throw new Error(`fold-ax: a ${ax.role} needs a name`);
@@ -33,6 +33,9 @@ export function toDom(doc, ax, ids = { n: 0 }) {
       throw new Error(`fold-ax: a fold is its heading and one list, not ${roles.join(", ")}`);
   }
   const e = doc.createElement(tag);
+  // A node's own id, as a page writes it (src/page.rs): its path under the document; on a row, the IRI of the thing it is too.
+  if (ax.id) e.id = ax.id;
+  if (ax.haecceity) e.dataset.haecceity = ax.haecceity;
   if (ax.cls) e.className = ax.cls;
   if (ax.role === "decoration") e.setAttribute("aria-hidden", "true");
   if (ax.role === "list" && (ax.children ?? []).some((c) => c.role !== "listitem")) throw new Error(`fold-ax: a list holds rows, not ${(ax.children ?? []).map((c) => c.role).join(", ")}`);
@@ -43,13 +46,14 @@ export function toDom(doc, ax, ids = { n: 0 }) {
   if (ax.role === "button") e.type = "button";
   if (ax.role === "status") e.setAttribute("role", "status");
   // Off-page links open a new tab: clax frames the page without allow-top-navigation, so a plain link there goes nowhere.
-  if (ax.role === "link" && !ax.href.startsWith("#")) { e.target = "_blank"; e.rel = "noopener"; }
+  // A link to another fold's page (`local`, src/page.rs) is a move within the fold, as a `#` one is.
+  if (ax.role === "link" && !ax.href.startsWith("#") && !ax.local) { e.target = "_blank"; e.rel = "noopener"; }
   if (ax.index != null) e.dataset.i = ax.index;
   if (ax.name && !(ax.children ?? []).length && ax.role !== "list" && ax.role !== "navigation") e.textContent = ax.name;
-  for (const c of ax.children ?? []) { const x = toDom(doc, c, ids); e.append(x); if (x._desc) e.append(x._desc); }
+  for (const c of ax.children ?? []) { const x = toDom(doc, c, ids, ax.id || row); e.append(x); if (x._desc) e.append(x._desc); }
   if (ax.role === "link" && ax.description) {
     // The hint is read after the link's name, as its description, and shown under it.
-    const d = doc.createElement("span"); d.className = "hint"; d.id = `d${++ids.n}`; d.textContent = ax.description;
+    const d = doc.createElement("span"); d.className = "hint"; d.id = row ? `${row}:hint` : `d${++ids.n}`; d.textContent = ax.description;
     e.setAttribute("aria-describedby", d.id); e._desc = d;
   }
   return e;
