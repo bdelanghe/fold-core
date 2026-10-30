@@ -4,6 +4,9 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="color-scheme" content="light dark">
+<!-- Its files are beside it (view.js, the module, fonts/): opened as /fold, with no trailing slash, they would resolve one level up.
+     So a directory opened without its slash goes to it with the slash, before anything relative loads. -->
+<script>if (!/\/$|\.[^/]*$/.test(location.pathname)) location.replace(location.pathname + "/" + location.search + location.hash);</script>
 <!-- The data this viewer folds: one JSON document from a data origin the app is not served by (COGNITIVE-BROWSER-SDK-2026-10-30). -->
 <meta name="fold-data" content="/fold-data/fleet/page.json" data-source="fleet-map">
 <meta name="fold-live" content="/live" data-seat="personal-super-human">
