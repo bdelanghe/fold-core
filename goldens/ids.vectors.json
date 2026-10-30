@@ -1,0 +1,301 @@
+{
+  "about": "fold-core one-id vectors (DESIGN-one-id-path-version-component-2026-10-30). Outputs are recomputed from inputs by tests/ids.rs; FOLD_BLESS=1 rewrites them.",
+  "base": "https://ipso.bounded.tools/",
+  "rules": {
+    "slug": "lowercase (Unicode), keep [a-z0-9_.-], each run of anything else becomes one '-', trim '-' from both ends, keep the first 60 chars, 'x' if empty",
+    "quiddity": "the node's own 'kind' (slugged) if a non-blank string, else by the key it is listed under: sections -> section, groups -> group, items/kids/children -> item; the document root is 'page'",
+    "step": "kind[slug(id)] when the node has a non-blank 'id'; else kind[slug(raw name)]~h, h = first 8 hex of sha256(UTF-8 of parent + '\\n' + kind + '\\n' + raw name + '\\n' + distinguishing)",
+    "raw_name": "first non-blank (trimmed) of title, nav, name, action, label, text; '' if none",
+    "distinguishing": "first non-blank (trimmed) of link.href, href, text, summary, purpose, why, action; '' if none",
+    "path": "steps joined by '/'; the root's path is ''; a group with no title is layout only and adds no step",
+    "haecceity": "base + slug(source) for the root; base + slug(source) + '/' + path with '[' -> %5B and ']' -> %5D otherwise",
+    "html_id": "the path as it stands in the haecceity (%5B/%5D); the root's is slug(source)",
+    "unique": "one canonical path per thing: two nodes with the same path fail the build"
+  },
+  "slug": [
+    {
+      "in": "Needs you",
+      "out": "needs-you"
+    },
+    {
+      "in": "needs/ask-0",
+      "out": "needs-ask-0"
+    },
+    {
+      "in": "UPPER-lower_9.v2",
+      "out": "upper-lower_9.v2"
+    },
+    {
+      "in": "  --a  b--  ",
+      "out": "a-b"
+    },
+    {
+      "in": "Café — Ünïcode",
+      "out": "caf-n-code"
+    },
+    {
+      "in": "日本語",
+      "out": "x"
+    },
+    {
+      "in": "",
+      "out": "x"
+    },
+    {
+      "in": "a#3 (draft) [x]",
+      "out": "a-3-draft-x"
+    },
+    {
+      "in": "abcdefghij-abcdefghij-abcdefghij-abcdefghij-abcdefghij-abcdefghij-abcdefghij",
+      "out": "abcdefghij-abcdefghij-abcdefghij-abcdefghij-abcdefghij-abcde"
+    }
+  ],
+  "step": [
+    {
+      "note": "source id wins",
+      "parent": "",
+      "key": "sections",
+      "node": {
+        "id": "needs",
+        "title": "Needs you"
+      },
+      "quiddity": "section",
+      "step": "section[needs]"
+    },
+    {
+      "note": "source id wins over a name",
+      "parent": "section[needs]",
+      "key": "items",
+      "node": {
+        "id": "needs/ask-0",
+        "action": "Merge the policy note"
+      },
+      "quiddity": "item",
+      "step": "item[needs-ask-0]"
+    },
+    {
+      "note": "own kind wins over the key",
+      "parent": "section[goals]",
+      "key": "items",
+      "node": {
+        "id": "port-goal",
+        "kind": "Seat",
+        "title": "port-goal"
+      },
+      "quiddity": "seat",
+      "step": "seat[port-goal]"
+    },
+    {
+      "note": "no id: name plus hash",
+      "parent": "section[needs]",
+      "key": "items",
+      "node": {
+        "text": "Phone approval with your passkey",
+        "action": "Register your passkey once at the desk"
+      },
+      "quiddity": "item",
+      "step": "item[register-your-passkey-once-at-the-desk]~27ab0035",
+      "hashed": "section[needs]\nitem\nRegister your passkey once at the desk\nPhone approval with your passkey"
+    },
+    {
+      "note": "same name, different link: different hash",
+      "parent": "section[prs]",
+      "key": "items",
+      "node": {
+        "title": "Fix the build",
+        "link": {
+          "href": "https://git.example.test/a/b/pull/1"
+        }
+      },
+      "quiddity": "item",
+      "step": "item[fix-the-build]~53fc186d",
+      "hashed": "section[prs]\nitem\nFix the build\nhttps://git.example.test/a/b/pull/1"
+    },
+    {
+      "note": "same name, different link: different hash",
+      "parent": "section[prs]",
+      "key": "items",
+      "node": {
+        "title": "Fix the build",
+        "link": {
+          "href": "https://git.example.test/a/b/pull/2"
+        }
+      },
+      "quiddity": "item",
+      "step": "item[fix-the-build]~45865f7c",
+      "hashed": "section[prs]\nitem\nFix the build\nhttps://git.example.test/a/b/pull/2"
+    },
+    {
+      "note": "same node, other parent: different hash",
+      "parent": "section[done]",
+      "key": "items",
+      "node": {
+        "title": "Fix the build",
+        "link": {
+          "href": "https://git.example.test/a/b/pull/1"
+        }
+      },
+      "quiddity": "item",
+      "step": "item[fix-the-build]~135d9cae",
+      "hashed": "section[done]\nitem\nFix the build\nhttps://git.example.test/a/b/pull/1"
+    },
+    {
+      "note": "no name at all",
+      "parent": "section[x]",
+      "key": "items",
+      "node": {
+        "href": "https://example.test/"
+      },
+      "quiddity": "item",
+      "step": "item[x]~72d4a534",
+      "hashed": "section[x]\nitem\n\nhttps://example.test/"
+    },
+    {
+      "note": "blank id falls back to the name",
+      "parent": "",
+      "key": "sections",
+      "node": {
+        "id": "  ",
+        "title": "Machines"
+      },
+      "quiddity": "section",
+      "step": "section[machines]~ad2cef74",
+      "hashed": "\nsection\nMachines\n"
+    }
+  ],
+  "haecceity": [
+    {
+      "source": "fleet",
+      "path": "",
+      "haecceity": "https://ipso.bounded.tools/fleet",
+      "html_id": "fleet"
+    },
+    {
+      "source": "fleet",
+      "path": "section[needs]/item[needs-ask-0]",
+      "haecceity": "https://ipso.bounded.tools/fleet/section%5Bneeds%5D/item%5Bneeds-ask-0%5D",
+      "html_id": "section%5Bneeds%5D/item%5Bneeds-ask-0%5D"
+    },
+    {
+      "source": "Fleet Map",
+      "path": "section[prs]/item[fix-the-build]~00000000",
+      "haecceity": "https://ipso.bounded.tools/fleet-map/section%5Bprs%5D/item%5Bfix-the-build%5D~00000000",
+      "html_id": "section%5Bprs%5D/item%5Bfix-the-build%5D~00000000"
+    }
+  ],
+  "document": [
+    {
+      "note": "a small fold-data document, a titleless group adding no step",
+      "source": "fleet",
+      "data": {
+        "title": "Agent fleet",
+        "sections": [
+          {
+            "id": "needs",
+            "title": "Needs you",
+            "groups": [
+              {
+                "title": "",
+                "items": [
+                  {
+                    "id": "needs/ask-0",
+                    "action": "Merge the policy note"
+                  },
+                  {
+                    "text": "Phone approval with your passkey"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "title": "Machines",
+            "items": [
+              {
+                "title": "phobos",
+                "kind": "machine"
+              },
+              {
+                "title": "deimos",
+                "kind": "machine"
+              }
+            ]
+          }
+        ]
+      },
+      "paths": [
+        {
+          "path": "",
+          "quiddity": "page",
+          "haecceity": "https://ipso.bounded.tools/fleet"
+        },
+        {
+          "path": "section[needs]",
+          "quiddity": "section",
+          "haecceity": "https://ipso.bounded.tools/fleet/section%5Bneeds%5D"
+        },
+        {
+          "path": "section[needs]/item[needs-ask-0]",
+          "quiddity": "item",
+          "haecceity": "https://ipso.bounded.tools/fleet/section%5Bneeds%5D/item%5Bneeds-ask-0%5D"
+        },
+        {
+          "path": "section[needs]/item[phone-approval-with-your-passkey]~52efe47d",
+          "quiddity": "item",
+          "haecceity": "https://ipso.bounded.tools/fleet/section%5Bneeds%5D/item%5Bphone-approval-with-your-passkey%5D~52efe47d"
+        },
+        {
+          "path": "section[machines]~ad2cef74",
+          "quiddity": "section",
+          "haecceity": "https://ipso.bounded.tools/fleet/section%5Bmachines%5D~ad2cef74"
+        },
+        {
+          "path": "section[machines]~ad2cef74/machine[phobos]~7285d01b",
+          "quiddity": "machine",
+          "haecceity": "https://ipso.bounded.tools/fleet/section%5Bmachines%5D~ad2cef74/machine%5Bphobos%5D~7285d01b"
+        },
+        {
+          "path": "section[machines]~ad2cef74/machine[deimos]~1361b0d8",
+          "quiddity": "machine",
+          "haecceity": "https://ipso.bounded.tools/fleet/section%5Bmachines%5D~ad2cef74/machine%5Bdeimos%5D~1361b0d8"
+        }
+      ],
+      "duplicate": null
+    },
+    {
+      "note": "two siblings that are the same thing twice: refused",
+      "source": "fleet",
+      "data": {
+        "title": "Dupes",
+        "items": [
+          {
+            "title": "Same",
+            "href": "https://example.test/1"
+          },
+          {
+            "title": "Same",
+            "href": "https://example.test/1"
+          }
+        ]
+      },
+      "paths": [
+        {
+          "path": "",
+          "quiddity": "page",
+          "haecceity": "https://ipso.bounded.tools/fleet"
+        },
+        {
+          "path": "item[same]~e837e51a",
+          "quiddity": "item",
+          "haecceity": "https://ipso.bounded.tools/fleet/item%5Bsame%5D~e837e51a"
+        },
+        {
+          "path": "item[same]~e837e51a",
+          "quiddity": "item",
+          "haecceity": "https://ipso.bounded.tools/fleet/item%5Bsame%5D~e837e51a"
+        }
+      ],
+      "duplicate": "item[same]~e837e51a"
+    }
+  ]
+}
