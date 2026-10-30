@@ -9,6 +9,8 @@
 //!                               (`href` "walk" or "viewer", the links axOf is given in home; `node` null for a fold with no data)
 //!   dealloc(ptr, len)           frees either buffer
 //!
+//! The exports are built for wasm32 only (a native build links src/native.rs's instead); the `*_text` entries are for both.
+//!
 //! `files` maps each `from` path to its text; a path not in it reads as missing, with fold.ts's ENOENT note.
 
 use serde_json::{json, Value};
@@ -18,6 +20,7 @@ use crate::js::Clock;
 use crate::walk::{facto_body, verdict, walk, WalkOpts};
 use crate::{fold, with_sources, FoldOpts};
 
+#[cfg(target_arch = "wasm32")]
 #[no_mangle]
 pub extern "C" fn alloc(len: usize) -> *mut u8 {
     let mut b = Vec::<u8>::with_capacity(len.max(1));
@@ -28,6 +31,7 @@ pub extern "C" fn alloc(len: usize) -> *mut u8 {
 
 /// # Safety
 /// `ptr` and `len` are a buffer this module returned (from `alloc`, or packed in a call's result), freed once.
+#[cfg(target_arch = "wasm32")]
 #[no_mangle]
 pub unsafe extern "C" fn dealloc(ptr: *mut u8, len: usize) {
     drop(Vec::from_raw_parts(ptr, 0, len.max(1)));
@@ -87,6 +91,7 @@ pub fn ax_text(input: &str) -> String {
     })
 }
 
+#[cfg(target_arch = "wasm32")]
 unsafe fn call(ptr: *const u8, len: usize, f: fn(&str) -> String) -> u64 {
     let input = std::str::from_utf8(std::slice::from_raw_parts(ptr, len)).unwrap_or("");
     let out = f(input).into_bytes().into_boxed_slice();
@@ -96,6 +101,7 @@ unsafe fn call(ptr: *const u8, len: usize, f: fn(&str) -> String) -> u64 {
 
 /// # Safety
 /// `ptr` and `len` are UTF-8 the host wrote into a buffer from `alloc(len)`.
+#[cfg(target_arch = "wasm32")]
 #[no_mangle]
 pub unsafe extern "C" fn fold_json(ptr: *const u8, len: usize) -> u64 {
     call(ptr, len, fold_text)
@@ -103,6 +109,7 @@ pub unsafe extern "C" fn fold_json(ptr: *const u8, len: usize) -> u64 {
 
 /// # Safety
 /// `ptr` and `len` are UTF-8 the host wrote into a buffer from `alloc(len)`.
+#[cfg(target_arch = "wasm32")]
 #[no_mangle]
 pub unsafe extern "C" fn walk_json(ptr: *const u8, len: usize) -> u64 {
     call(ptr, len, walk_text)
@@ -110,6 +117,7 @@ pub unsafe extern "C" fn walk_json(ptr: *const u8, len: usize) -> u64 {
 
 /// # Safety
 /// `ptr` and `len` are UTF-8 the host wrote into a buffer from `alloc(len)`.
+#[cfg(target_arch = "wasm32")]
 #[no_mangle]
 pub unsafe extern "C" fn ax_json(ptr: *const u8, len: usize) -> u64 {
     call(ptr, len, ax_text)

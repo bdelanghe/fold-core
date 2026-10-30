@@ -1,6 +1,7 @@
-//! Time zones. With the `tzdb` feature (the default, and the native library) the zone rules are chrono-tz's. Without it (the
-//! WebAssembly module) they are the host's: the module imports `fold_core.tz_offset(zone_ptr, zone_len, epoch_ms) -> seconds`,
-//! which js/fold-core.ts answers from `Intl`, the same rules fold.ts reads, so the module carries no zone data (most of its size).
+//! Time zones. With the `tzdb` feature (the default) the zone rules are chrono-tz's. Without it they are the host's: the
+//! WebAssembly module imports `fold_core.tz_offset(zone_ptr, zone_len, epoch_ms) -> seconds`, which js/fold-core.ts answers from
+//! `Intl`, the same rules fold.ts reads; the native static library (packages.native) imports the same as the C symbol
+//! `fold_core_tz_offset`, which its host answers (Allie, from Foundation). Either way the core carries no zone data (most of its size).
 //! `i32::MIN` from the host is a zone it does not know.
 
 use chrono::{Duration, NaiveDateTime};
@@ -14,13 +15,18 @@ pub enum Zone {
     Host(String),
 }
 
-#[cfg(all(not(feature = "tzdb"), not(target_arch = "wasm32")))]
-compile_error!("without the tzdb feature the zone rules come from a WebAssembly host: build for wasm32, or enable tzdb");
-
-#[cfg(all(not(feature = "tzdb"), target_arch = "wasm32"))]
+#[cfg(not(feature = "tzdb"))]
 mod host {
+    #[cfg(target_arch = "wasm32")]
     #[link(wasm_import_module = "fold_core")]
     extern "C" {
+        fn tz_offset(zone: *const u8, len: usize, epoch_ms: f64) -> i32;
+    }
+
+    // the native library (src/native.rs) imports the same hook as a C symbol, which its host defines (Allie, from Foundation)
+    #[cfg(not(target_arch = "wasm32"))]
+    extern "C" {
+        #[link_name = "fold_core_tz_offset"]
         fn tz_offset(zone: *const u8, len: usize, epoch_ms: f64) -> i32;
     }
 

@@ -22,6 +22,15 @@
           installPhase = "mkdir -p $out/lib && cp fold_core.wasm js/fold-core.ts $out/lib/";
           dontFixup = true;
         });
+        # the core as a native static library with a C ABI (src/native.rs, include/fold_core.h) for a host that links it in-process
+        # (Allie's native tree). No tzdb: the host defines fold_core_tz_offset (src/tz.rs), so the zone data (~1.9 MB) stays out.
+        native = default.overrideAttrs (old: {
+          pname = "fold-core-native";
+          buildPhase = "RUSTFLAGS=\"--remap-path-prefix=$NIX_BUILD_TOP=/build\" cargo rustc --offline --release --lib --no-default-features --crate-type staticlib --target ${pkgs.stdenv.hostPlatform.rust.rustcTarget}";
+          doCheck = false;
+          installPhase = "mkdir -p $out/lib $out/include && cp target/${pkgs.stdenv.hostPlatform.rust.rustcTarget}/release/libfold_core.a $out/lib/ && cp include/fold_core.h $out/include/";
+          dontFixup = true;
+        });
         # the fold viewer as a static app (viewer/, COGNITIVE-BROWSER-SDK-2026-10-30 step 1): index.html, its modules, the module and
         # its loader (js/fold-core.ts as browser JS), and the one face. It holds no data: it fetches a document (its fold-data meta,
         # /fold-data/fleet/page.json) and folds it in the browser. Served as is, e.g. at /fold/ by tailscale serve.
@@ -64,6 +73,23 @@
         viewer = pkgs.runCommand "fold-core-viewer" { nativeBuildInputs = [ pkgs.bun ]; } ''
           cp -r ${self}/js ${self}/goldens ${self}/viewer .
           HOME=$TMPDIR FOLD_CORE_WASM=${self.packages.${pkgs.stdenv.hostPlatform.system}.wasm}/lib/fold_core.wasm bun test ./viewer/viewer.test.ts
+          touch $out
+        '';
+        # the native library through its C ABI on every golden (js/parity.test.ts with FOLD_CORE_NATIVE): native/roundtrip.c links it as a
+        # host does, zone rules from tzdata, and the error path from C. Its size is printed for the record (no tzdb).
+        native = pkgs.runCommand "fold-core-native-parity" { nativeBuildInputs = [ pkgs.bun pkgs.stdenv.cc ]; } ''
+          cp -r ${self}/js ${self}/goldens ${self}/native .
+          n=${self.packages.${pkgs.stdenv.hostPlatform.system}.native}
+          echo "libfold_core.a: $(wc -c < $n/lib/libfold_core.a) bytes"
+          cc -O2 -I$n/include native/roundtrip.c $n/lib/libfold_core.a ${pkgs.lib.optionalString pkgs.stdenv.hostPlatform.isLinux "-lpthread -ldl -lm"} -o roundtrip
+          echo "roundtrip (C host + library): $(wc -c < roundtrip) bytes"
+          HOME=$TMPDIR TZDIR=${pkgs.tzdata}/share/zoneinfo FOLD_CORE_NATIVE=$PWD/roundtrip bun test ./js/parity.test.ts
+          touch $out
+        '';
+        # the C header is what cbindgen makes of src/native.rs today: a changed signature fails here until include/fold_core.h is regenerated
+        native-header = pkgs.runCommand "fold-core-native-header" { nativeBuildInputs = [ pkgs.rust-cbindgen ]; } ''
+          cbindgen -q -c ${self}/cbindgen.toml -o fold_core.h ${self}/src/native.rs
+          diff -u ${self}/include/fold_core.h fold_core.h
           touch $out
         '';
         # the size budget (scratch-main-79 10-29, for the fleet page's iPad first load): at most 200 KB gzipped. At 926ac44 it was 2,183,512 bytes, 539,305 gzipped.

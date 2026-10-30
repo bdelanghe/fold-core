@@ -9,6 +9,8 @@
 
 pub mod ax;
 mod js;
+#[cfg(not(target_arch = "wasm32"))]
+pub mod native;
 mod tz;
 pub mod walk;
 pub mod wasm;
