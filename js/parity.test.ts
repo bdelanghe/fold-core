@@ -4,22 +4,13 @@ import { expect, test } from "bun:test";
 import { readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { core } from "./fold-core.ts";
+import { nativeCore } from "./native.ts";
 
 const goldens = join(import.meta.dir, "..", "goldens");
 const wasm = process.env.FOLD_CORE_WASM ?? join(import.meta.dir, "..", "target", "wasm32-unknown-unknown", "release", "fold_core.wasm");
 const native = process.env.FOLD_CORE_NATIVE;
 const via = native ? "native" : "wasm";
-// one C call per run of the host: its input on stdin as `<call>\t<JSON>`, its output one line, read as core() reads the module's
-const run = (name: string, text: string) => {
-  const r = Bun.spawnSync([native!], { stdin: Buffer.from(`${name}\t${text}\n`) });
-  if (r.exitCode !== 0) throw new Error(`${native} exited ${r.exitCode}`);
-  const out = JSON.parse(r.stdout.toString());
-  if (out && !Array.isArray(out) && "error" in out) throw new Error(`fold-core: ${out.error}`);
-  return out;
-};
-const { fold, walk, ax } = native
-  ? { fold: (i: unknown) => run("fold", JSON.stringify(i)), walk: (i: unknown) => run("walk", JSON.stringify(i)), ax: (i: unknown) => run("ax", JSON.stringify(i)) }
-  : await core(readFileSync(wasm));
+const { fold, walk, ax, run } = native ? nativeCore(native) : { ...(await core(readFileSync(wasm))), run: null };
 const cases = (dir: string) => readdirSync(dir).filter((f) => f.endsWith(".input.json")).sort();
 const read = (...p: string[]) => JSON.parse(readFileSync(join(...p), "utf8"));
 for (const f of cases(goldens)) {
@@ -49,5 +40,5 @@ test("a bad input says why", () => {
 });
 if (native)
   test("text that is not JSON says why, from C", () => {
-    for (const call of ["fold", "walk", "ax"]) expect(() => run(call, "{")).toThrow(/fold-core: input is not JSON/);
+    for (const call of ["fold", "walk", "ax"]) expect(() => run!(call, "{")).toThrow(/fold-core: input is not JSON/);
   });
