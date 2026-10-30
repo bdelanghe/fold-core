@@ -62,10 +62,10 @@
         '';
       } // {
         test = self.packages.${pkgs.stdenv.hostPlatform.system}.default;
-        # the wasm module at byte parity on every golden (js/parity.test.ts)
+        # the wasm module at byte parity on every golden (js/parity.test.ts), and its rotor and yank on Allie's (js/rotor.test.ts)
         wasm-parity = pkgs.runCommand "fold-core-wasm-parity" { nativeBuildInputs = [ pkgs.bun ]; } ''
           cp -r ${self}/js ${self}/goldens .
-          HOME=$TMPDIR FOLD_CORE_WASM=${self.packages.${pkgs.stdenv.hostPlatform.system}.wasm}/lib/fold_core.wasm bun test ./js/parity.test.ts
+          HOME=$TMPDIR FOLD_CORE_WASM=${self.packages.${pkgs.stdenv.hostPlatform.system}.wasm}/lib/fold_core.wasm bun test ./js/parity.test.ts ./js/rotor.test.ts
           touch $out
         '';
         # the viewer's own path on every golden (viewer/viewer.test.ts): fetched and folded as in the browser, every location's tree,
