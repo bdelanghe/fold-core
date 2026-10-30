@@ -1,0 +1,169 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<!-- The data this viewer folds: one JSON document from a data origin the app is not served by (COGNITIVE-BROWSER-SDK-2026-10-30). -->
+<meta name="fold-data" content="/fold-data/fleet/page.json" data-source="fleet-map">
+<meta name="fold-live" content="/live" data-seat="personal-super-human">
+<link rel="modulepreload" href="fold-core.js">
+<title>Fold</title>
+<style>
+/* Allie's look (ax-rebuild): the path on top joined by ›, numbered rows each
+   ending in ›, one row under the cursor drawn as a card that says where ⏎
+   goes. Colours are bounded-systems/brand's paper, ink and forest.
+   One face, self-hosted beside the page (fonts/, published with it): Atkinson
+   Hyperlegible Next, drawn for low vision (Bobby 10-27, 01M5ZCV508). One scale:
+   every size is --s0 times a power of --r (1.2); nothing else sets a size. */
+@font-face{font-family:"Atkinson Hyperlegible Next";src:url("fonts/atkinson-hyperlegible-next.woff2") format("woff2");font-display:swap}
+:root{--paper:#EDEAE1;--card:#FFFFFF;--ink:#16221C;--soft:#5C6B63;--line:#888374;--accent:#0C5A42;--warn:#8A2B12;
+  --face:"Atkinson Hyperlegible Next",system-ui,-apple-system,sans-serif;
+  --s0:18px;--r:1.2;--s-1:calc(var(--s0) / var(--r));--s1:calc(var(--s0) * var(--r));--s2:calc(var(--s0) * var(--r) * var(--r));--s3:calc(var(--s2) * var(--r))}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--paper:#16221C;--card:#22302A;--ink:#ECEAE3;--soft:#A9B5AE;--line:#5C6B63;--accent:#8FC3A8;--warn:#FF9C80}}
+:root[data-theme="dark"]{--paper:#16221C;--card:#22302A;--ink:#ECEAE3;--soft:#A9B5AE;--line:#5C6B63;--accent:#8FC3A8;--warn:#FF9C80}
+*{box-sizing:border-box}
+body{margin:0;background:var(--paper);color:var(--ink);font:var(--s0)/1.45 var(--face);font-variant-numeric:tabular-nums}
+main{max-width:42rem;margin:0 auto;padding:16px}
+nav ol{list-style:none;margin:0;padding:0;font:var(--s-1)/1.6 var(--face)}
+nav li{display:inline}
+nav a{display:inline-block;max-width:14ch;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;vertical-align:bottom}
+nav li+li::before{content:" › " / "";color:var(--soft)}
+/* Back is the step just above (Bobby 10-28, on the phone app with no back button: "Once I click on a page how do I get back").
+   The arrow is for the eye only: its alt text is empty, so a screen reader still hears just the fold's name. */
+nav li:last-child a::before{content:"‹" / "";text-decoration:none;display:inline-block;margin-right:.35em}
+nav a{color:var(--ink)}
+h1{font-size:var(--s2);font-weight:400;line-height:1.25;margin:.75rem 0 .25rem}
+h1:focus{outline:none}
+ol.rows{list-style:none;margin:1rem 0 0;padding:0;border-left:3px solid var(--line)}
+ol.rows li{display:grid;grid-template-columns:1.75rem 1fr auto;column-gap:.75rem;padding:.6rem .75rem;min-height:44px;cursor:pointer;border-radius:10px}
+ol.rows .n{grid-column:1;grid-row:1;font:var(--s-1) var(--face);color:var(--soft);align-self:baseline}
+ol.rows a{grid-column:2;grid-row:1;color:var(--ink);text-decoration:none}
+ol.rows .go{grid-column:3;grid-row:1;color:var(--soft)}
+ol.rows .hint{grid-column:2;color:var(--soft);font-size:var(--s-1)}
+ol.rows .enter{grid-column:2;display:none;font:var(--s-1) var(--face);color:var(--soft);margin-top:.25rem}
+body.keys ol.rows li.cur{background:var(--card);outline:2px solid var(--ink);outline-offset:-2px}
+body.keys ol.rows li.cur .enter{display:block}
+/* A property row (the object's own words, its link, when its data is from): read, not entered. */
+ol.rows li.prop{display:block;cursor:default;min-height:0}
+ol.rows li.prop a{color:var(--accent)}
+li.act button{font-family:inherit;font-size:var(--s0);color:var(--bg);background:var(--accent);border:0;border-radius:.4em;padding:.5em 1em;min-height:44px}
+li.act .result{display:block}
+ol.rows li.when,ol.rows li.step{color:var(--soft);font-size:var(--s-1)}
+ol.rows li.stale,ol.rows .hint.alert{color:var(--warn)}
+/* A slide (deck mode): the same fold, set larger, its points under it and the slide before and after at the foot. */
+main.slide{max-width:56rem}
+main.slide h1{font-size:var(--s3);margin-top:1.5rem}
+main.slide ol.rows li.prop{font-size:var(--s1)}
+</style>
+</head>
+<body>
+<main><h1 tabindex="-1">Loading…</h1></main>
+<script type="module">
+// A fold viewer that holds no data: it fetches one JSON document from the data origin (the fold-data meta), folds it here with the
+// core's WebAssembly module, and shows one fold at a time. The core gives each fold's accessibility tree (ax_json); fold-dom.js
+// derives the DOM from that tree alone; this file only routes, follows the data and moves the cursor.
+// Keys are Allie's (vim): j/k move, l or Enter goes in, h goes back out.
+// As a deck (#slides/<path>, or a page whose folds say present "slides" opened with no path) the same fold is a slide: → and ← go to
+// the next and previous slide in reading order; l or Enter still goes into the point under the cursor, h back out.
+import { core } from "./fold-core.js";
+import { toDom, liveLine } from "./fold-dom.js";
+import { at, docId, href as link, modeOf, open, pathOf, viewOf } from "./view.js";
+const zone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+const data = document.querySelector('meta[name="fold-data"]');
+let nodes = new Map(), said = "", node = null, cur = 0, cameFrom = null, last = [];
+const href = (p, m = modeOf(location.hash, node)) => link(p, m);
+const rows = () => [...document.querySelectorAll("ol.rows > li.obj")]; // the child objects; property rows are read, not entered
+function render(focus) {
+  const v = viewOf(ax, nodes, location.hash, zone);
+  node = v.node;
+  const main = toDom(document, v.tree);
+  document.querySelector("main").replaceWith(main);
+  document.title = node?.title ?? "Fold";
+  for (const li of rows()) li.addEventListener("click", e => { if (e.target.tagName !== "A") li.querySelector("a").click(); });
+  // The fold's one action (fold.ts Act), its answer said in the row; no capability here: the fold's link, its fallback.
+  const n = node, a = n?.act, b = main.querySelector("button.act"), say = t => main.querySelector(".result").textContent = t;
+  b?.addEventListener("click", async () => {
+    const c = await window.claude?.use?.(a.cap).catch(() => null);
+    if (!c) return n.href ? window.open(n.href, "_blank") : say("Not available here.");
+    b.disabled = true;
+    try { const r = await c[a.call](a.args); say(r?.ok === false ? "Not done: " + r.reason : "Done. " + (r?.message ?? "")); }
+    catch (e) { say(e?.code === "cancelled" ? "Cancelled." : "Not done: " + (e?.message ?? e?.code)); b.disabled = false; }
+  });
+  // Back out (h, ←, Backspace or the path) lands the cursor on the row you came from, as in Allie.
+  const back = cameFrom == null ? -1 : (node?.kids ?? []).findIndex(k => k.id === cameFrom);
+  if (back >= 0) { cur = back; cameFrom = null; }
+  move(Math.min(cur, Math.max(0, rows().length - 1)));
+  if (focus) main.querySelector("h1").focus();
+}
+function move(i) {
+  const rs = rows(); if (!rs.length) return;
+  cur = Math.max(0, Math.min(rs.length - 1, i));
+  rs.forEach((r, j) => r.classList.toggle("cur", j === cur));
+}
+function show(focus) {
+  const p = pathOf(location.hash); cur = 0;
+  cameFrom = last.length > p.length && p.every((x, i) => x === last[i]) ? last[p.length] : null;
+  last = p;
+  render(focus);
+}
+// The document, folded here. A failed read keeps the folds already shown; with none yet, the root says why.
+async function load() {
+  try {
+    const next = await open(fold, new URL(data.content, location.href).href, { opts: (modified) => ({ source: data.dataset.source, updated: modified ?? new Date().toISOString(), localTimeZone: zone }) });
+    const text = JSON.stringify([...next]);
+    if (text === said) return false;
+    nodes = next; said = text; return true;
+  } catch (e) {
+    if (!nodes.size) nodes = new Map([["root", { title: "Could not read the data", trail: [], text: [`${data.content}: ${e?.message ?? e}`] }]]);
+    return !said;
+  }
+}
+addEventListener("pointerdown", () => document.body.classList.remove("keys"));
+addEventListener("keydown", e => {
+  if (e.metaKey || e.ctrlKey || e.altKey || /input|textarea/i.test(e.target.tagName)) return;
+  const p = pathOf(location.hash), k = node?.kids ?? [], deck = modeOf(location.hash, node) === "slides";
+  if (deck && (e.key === "ArrowRight" || e.key === "ArrowLeft")) { const s = node?.[e.key === "ArrowRight" ? "next" : "prev"]; if (!s) return; location.hash = href(at(s.id)); }
+  else if (e.key === "j" || e.key === "ArrowDown") move(cur + 1);
+  else if (e.key === "k" || e.key === "ArrowUp") move(cur - 1);
+  else if ((e.key === "l" || e.key === "Enter" || e.key === "ArrowRight") && k[cur]) location.hash = href(k[cur].href?.startsWith("#/") ? pathOf(k[cur].href) : [...p, k[cur].id]); // an in-page row ("back to the top") goes where it says, in the mode you are in
+  else if ((e.key === "h" || e.key === "Backspace" || e.key === "ArrowLeft") && p.length) location.hash = href(p.slice(0, -1));
+  else return;
+  document.body.classList.add("keys");
+  e.preventDefault();
+});
+addEventListener("hashchange", () => show(true));
+const { fold, ax } = await core(await (await fetch("fold_core.wasm")).arrayBuffer());
+await load();
+// Allie's keys work on arrival: the first render focuses the title, so the page gets the arrow keys without a click first.
+show(true);
+document.body.dataset.ready = "1";
+// The producer rewrites the document every few minutes: read it again each minute, and show a change in place (focus stays).
+setInterval(async () => { if (await load()) render(false); }, 60_000);
+// The live state (fold-live meta's stream) as the hint of its seat's row, never a line of its own (01M620P439). `snapshot` and
+// `tick` (10 s) carry it all, `seat` one seat; a dropped stream reads as offline since the last tick.
+const liveMeta = document.querySelector('meta[name="fold-live"]');
+if (liveMeta?.content && liveMeta.dataset.seat && typeof EventSource === "function") {
+  let snap = null, lastTick = null, down = null;
+  const paint = () => {
+    const a = [...document.querySelectorAll("ol.rows > li.obj > a")].find(x => x.textContent === liveMeta.dataset.seat);
+    const hint = a && document.getElementById(a.getAttribute("aria-describedby") ?? "");
+    if (!hint) return;
+    const l = liveLine(snap, liveMeta.dataset.seat, Date.now(), down), t = `${l.state} ${l.age}`.trim();
+    if (hint.textContent !== t) hint.textContent = t;
+    hint.classList.toggle("alert", l.alert);
+  };
+  const whole = e => { try { snap = JSON.parse(e.data); lastTick = Date.now(); down = null; } catch {} paint(); };
+  const es = new EventSource(liveMeta.content);
+  es.addEventListener("snapshot", whole);
+  es.addEventListener("tick", whole);
+  es.addEventListener("seat", e => {
+    try { const s = JSON.parse(e.data).state; if (snap && s?.seat) snap.seats = [...snap.seats.filter(x => x.seat !== s.seat), s]; } catch {}
+    paint();
+  });
+  es.addEventListener("error", () => { if (es.readyState !== EventSource.OPEN && lastTick != null) down = lastTick; paint(); });
+  setInterval(paint, 1000);
+}
+</script>
+</body>
+</html>

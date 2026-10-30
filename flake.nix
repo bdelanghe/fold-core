@@ -22,6 +22,16 @@
           installPhase = "mkdir -p $out/lib && cp fold_core.wasm js/fold-core.ts $out/lib/";
           dontFixup = true;
         });
+        # the fold viewer as a static app (viewer/, COGNITIVE-BROWSER-SDK-2026-10-30 step 1): index.html, its modules, the module and
+        # its loader (js/fold-core.ts as browser JS), and the one face. It holds no data: it fetches a document (its fold-data meta,
+        # /fold-data/fleet/page.json) and folds it in the browser. Served as is, e.g. at /fold/ by tailscale serve.
+        viewer = pkgs.runCommand "fold-viewer" { nativeBuildInputs = [ pkgs.bun pkgs.woff2 ]; } ''
+          mkdir -p $out/fonts
+          cp ${self}/viewer/index.html ${self}/viewer/view.js ${self}/viewer/fold-dom.js ${wasm}/lib/fold_core.wasm $out/
+          HOME=$TMPDIR bun build ${self}/js/fold-core.ts --target browser --format esm --outfile $out/fold-core.js
+          cp ${pkgs.atkinson-hyperlegible-next}/share/fonts/opentype/AtkinsonHyperlegibleNext-Regular.otf face.otf
+          woff2_compress face.otf && cp face.woff2 $out/fonts/atkinson-hyperlegible-next.woff2
+        '';
         default = pkgs.rustPlatform.buildRustPackage {
           pname = "fold-core";
           version = "0.1.0";
@@ -32,12 +42,28 @@
         };
       });
 
-      checks = each (pkgs: {
+      checks = each (pkgs: pkgs.lib.optionalAttrs pkgs.stdenv.isLinux {
+        # the built viewer in headless Chromium at the phone's and the iPad's size, over a golden page served as its data (viewer/browser-check.ts);
+        # Linux only, where nixpkgs builds Chromium
+        viewer-browser = pkgs.runCommand "fold-core-viewer-browser" { nativeBuildInputs = [ pkgs.bun pkgs.chromium ]; } ''
+          cp -r ${self}/js ${self}/goldens ${self}/viewer .
+          export HOME=$TMPDIR FONTCONFIG_FILE=${pkgs.makeFontsConf { fontDirectories = [ ]; }}
+          VIEWER=${self.packages.${pkgs.stdenv.hostPlatform.system}.viewer} CHROMIUM=${pkgs.chromium}/bin/chromium bun viewer/browser-check.ts sample
+          touch $out
+        '';
+      } // {
         test = self.packages.${pkgs.stdenv.hostPlatform.system}.default;
         # the wasm module at byte parity on every golden (js/parity.test.ts)
         wasm-parity = pkgs.runCommand "fold-core-wasm-parity" { nativeBuildInputs = [ pkgs.bun ]; } ''
           cp -r ${self}/js ${self}/goldens .
           HOME=$TMPDIR FOLD_CORE_WASM=${self.packages.${pkgs.stdenv.hostPlatform.system}.wasm}/lib/fold_core.wasm bun test ./js/parity.test.ts
+          touch $out
+        '';
+        # the viewer's own path on every golden (viewer/viewer.test.ts): fetched and folded as in the browser, every location's tree,
+        # every fold's DOM without a refusal (the AX gate), and the walk over what it shows (the load gate)
+        viewer = pkgs.runCommand "fold-core-viewer" { nativeBuildInputs = [ pkgs.bun ]; } ''
+          cp -r ${self}/js ${self}/goldens ${self}/viewer .
+          HOME=$TMPDIR FOLD_CORE_WASM=${self.packages.${pkgs.stdenv.hostPlatform.system}.wasm}/lib/fold_core.wasm bun test ./viewer/viewer.test.ts
           touch $out
         '';
         # the size budget (scratch-main-79 10-29, for the fleet page's iPad first load): at most 200 KB gzipped. At 926ac44 it was 2,183,512 bytes, 539,305 gzipped.
