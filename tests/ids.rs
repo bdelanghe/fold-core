@@ -1,4 +1,4 @@
-//! The one-id vectors (goldens/ids.vectors.json): slugs, quiddities, steps, haecceities and a whole document's paths, each
+//! The one-id vectors (goldens/ids.vectors.json): segments, quiddities, steps, haecceities and a whole document's paths, each
 //! case's output recomputed from its input. Other implementations (facto's graphdb-ids, Allie) check against the same file.
 //! `FOLD_BLESS=1 cargo test --test ids` writes the outputs from the inputs.
 
@@ -9,8 +9,12 @@ use fold_core::id;
 use serde_json::{json, Value};
 
 fn outputs(v: &Value) -> Value {
-    let slug: Vec<Value> =
-        v["slug"].as_array().unwrap().iter().map(|c| json!({ "in": c["in"], "out": id::slug_of(c["in"].as_str().unwrap()) })).collect();
+    let segment: Vec<Value> = v["segment"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .map(|c| json!({ "in": c["in"], "out": id::segment_of(c["in"].as_str().unwrap()) }))
+        .collect();
     let step: Vec<Value> = v["step"]
         .as_array()
         .unwrap()
@@ -18,8 +22,9 @@ fn outputs(v: &Value) -> Value {
         .map(|c| {
             let (parent, key, node) = (c["parent"].as_str().unwrap(), c["key"].as_str().unwrap(), &c["node"]);
             let kind = id::quiddity(node, key);
-            let mut o = json!({ "note": c["note"], "parent": parent, "key": key, "node": node, "quiddity": kind, "step": id::step(parent, node, &kind) });
-            if node.get("id").and_then(Value::as_str).is_none_or(|s| s.trim().is_empty()) {
+            let provisional = id::source_id(node).is_none();
+            let mut o = json!({ "note": c["note"], "parent": parent, "key": key, "node": node, "quiddity": kind, "step": id::step(parent, node, &kind), "provisional": provisional });
+            if provisional {
                 o["hashed"] = json!([parent, kind.as_str(), &id::raw_name(node), &id::distinguishing(node)].join("\n"));
             }
             o
@@ -44,12 +49,15 @@ fn outputs(v: &Value) -> Value {
                 Ok(()) => Value::Null,
                 Err(dup) => json!(dup),
             };
-            let rows: Vec<Value> = ps.iter().map(|(p, q, h)| json!({ "path": p, "quiddity": q, "haecceity": h })).collect();
+            let rows: Vec<Value> = ps
+                .iter()
+                .map(|(p, q, h)| json!({ "path": p, "quiddity": q, "haecceity": h, "provisional": p.rsplit('/').next().is_some_and(|s| s.starts_with('~')) }))
+                .collect();
             json!({ "note": c["note"], "source": c["source"], "data": c["data"], "paths": rows, "duplicate": unique })
         })
         .collect();
     let mut out = v.clone();
-    out["slug"] = json!(slug);
+    out["segment"] = json!(segment);
     out["step"] = json!(step);
     out["haecceity"] = json!(haecceity);
     out["document"] = json!(docs);

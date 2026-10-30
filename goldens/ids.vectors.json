@@ -1,53 +1,60 @@
 {
-  "about": "fold-core one-id vectors (DESIGN-one-id-path-version-component-2026-10-30). Outputs are recomputed from inputs by tests/ids.rs; FOLD_BLESS=1 rewrites them.",
+  "about": "fold-core one-id vectors (DESIGN-one-id-path-version-component-2026-10-30). Outputs are recomputed from inputs by tests/ids.rs; FOLD_BLESS=1 rewrites them. Supersedes sha 0779111e (slugged role[name] steps), which must not be pinned.",
   "base": "https://ipso.bounded.tools/",
   "rules": {
-    "slug": "lowercase (Unicode), keep [a-z0-9_.-], each run of anything else becomes one '-', trim '-' from both ends, keep the first 60 chars, 'x' if empty",
-    "quiddity": "the node's own 'kind' (slugged) if a non-blank string, else by the key it is listed under: sections -> section, groups -> group, items/kids/children -> item; the document root is 'page'",
-    "step": "kind[slug(id)] when the node has a non-blank 'id'; else kind[slug(raw name)]~h, h = first 8 hex of sha256(UTF-8 of parent + '\\n' + kind + '\\n' + raw name + '\\n' + distinguishing)",
+    "segment": "a source id as one path segment: its UTF-8 bytes, each byte outside [A-Za-z0-9._-] as %XX (uppercase hex); never slugged or case-folded. '/', '~', '#', '[' and ']' in an id are all encoded",
+    "source_id": "the node's 'id' if a non-blank string (trimmed of whitespace at both ends) or a JSON number (as written); otherwise none",
+    "quiddity": "the node's own 'kind' (slugged) if a non-blank string, else by the key it is listed under: sections -> section, groups -> group, items/kids/children -> item; the document root is 'page'. The quiddity is metadata (data-quiddity), never part of the haecceity",
+    "step": "segment(source id) when the node has one; else the opaque token '~' + first 16 hex of sha256(UTF-8 of parent + '\\n' + kind + '\\n' + raw name + '\\n' + distinguishing), marked provisional",
+    "provisional": "a token hashes a label (the raw name), so a label fix changes it: provisional ids are never published to facto or signed, and the fix is a source id in the data",
     "raw_name": "first non-blank (trimmed) of title, nav, name, action, label, text; '' if none",
     "distinguishing": "first non-blank (trimmed) of link.href, href, text, summary, purpose, why, action; '' if none",
     "path": "steps joined by '/'; the root's path is ''; a group with no title is layout only and adds no step",
-    "haecceity": "base + slug(source) for the root; base + slug(source) + '/' + path with '[' -> %5B and ']' -> %5D otherwise",
-    "html_id": "the path as it stands in the haecceity (%5B/%5D); the root's is slug(source)",
+    "haecceity": "base + segment(source) for the root; base + segment(source) + '/' + path otherwise (segments are already encoded)",
+    "html_id": "the path as it stands in the haecceity; the root's is segment(source)",
+    "selector": "role[name] (Allie's address, the rotor's) is a selector that resolves to a haecceity, never part of one",
     "unique": "one canonical path per thing: two nodes with the same path fail the build"
   },
-  "slug": [
+  "segment": [
+    {
+      "in": "needs",
+      "out": "needs"
+    },
+    {
+      "in": "2fac998588cf",
+      "out": "2fac998588cf"
+    },
+    {
+      "in": "pr/12",
+      "out": "pr%2F12"
+    },
     {
       "in": "Needs you",
-      "out": "needs-you"
-    },
-    {
-      "in": "needs/ask-0",
-      "out": "needs-ask-0"
-    },
-    {
-      "in": "UPPER-lower_9.v2",
-      "out": "upper-lower_9.v2"
-    },
-    {
-      "in": "  --a  b--  ",
-      "out": "a-b"
+      "out": "Needs%20you"
     },
     {
       "in": "Café — Ünïcode",
-      "out": "caf-n-code"
+      "out": "Caf%C3%A9%20%E2%80%94%20%C3%9Cn%C3%AFcode"
     },
     {
       "in": "日本語",
-      "out": "x"
-    },
-    {
-      "in": "",
-      "out": "x"
+      "out": "%E6%97%A5%E6%9C%AC%E8%AA%9E"
     },
     {
       "in": "a#3 (draft) [x]",
-      "out": "a-3-draft-x"
+      "out": "a%233%20%28draft%29%20%5Bx%5D"
     },
     {
-      "in": "abcdefghij-abcdefghij-abcdefghij-abcdefghij-abcdefghij-abcdefghij-abcdefghij",
-      "out": "abcdefghij-abcdefghij-abcdefghij-abcdefghij-abcdefghij-abcde"
+      "in": "~tilde",
+      "out": "%7Etilde"
+    },
+    {
+      "in": "50%",
+      "out": "50%25"
+    },
+    {
+      "in": "UPPER-lower_9.v2",
+      "out": "UPPER-lower_9.v2"
     }
   ],
   "step": [
@@ -60,22 +67,48 @@
         "title": "Needs you"
       },
       "quiddity": "section",
-      "step": "section[needs]"
+      "step": "needs",
+      "provisional": false
     },
     {
-      "note": "source id wins over a name",
-      "parent": "section[needs]",
+      "note": "a request_id is the segment, never the position (no 'ask-0')",
+      "parent": "needs",
       "key": "items",
       "node": {
-        "id": "needs/ask-0",
+        "id": "2fac998588cf",
         "action": "Merge the policy note"
       },
       "quiddity": "item",
-      "step": "item[needs-ask-0]"
+      "step": "2fac998588cf",
+      "provisional": false
     },
     {
-      "note": "own kind wins over the key",
-      "parent": "section[goals]",
+      "note": "a numeric id (a PR number)",
+      "parent": "prs",
+      "key": "items",
+      "node": {
+        "id": 12,
+        "title": "fold-core: one id per thing"
+      },
+      "quiddity": "item",
+      "step": "12",
+      "provisional": false
+    },
+    {
+      "note": "an id with '/' stays one segment",
+      "parent": "prs",
+      "key": "items",
+      "node": {
+        "id": "bdelanghe/fold-core#12",
+        "title": "one id"
+      },
+      "quiddity": "item",
+      "step": "bdelanghe%2Ffold-core%2312",
+      "provisional": false
+    },
+    {
+      "note": "own kind wins over the key, and stays out of the segment",
+      "parent": "goals",
       "key": "items",
       "node": {
         "id": "port-goal",
@@ -83,23 +116,25 @@
         "title": "port-goal"
       },
       "quiddity": "seat",
-      "step": "seat[port-goal]"
+      "step": "port-goal",
+      "provisional": false
     },
     {
-      "note": "no id: name plus hash",
-      "parent": "section[needs]",
+      "note": "no id: provisional token",
+      "parent": "needs",
       "key": "items",
       "node": {
         "text": "Phone approval with your passkey",
         "action": "Register your passkey once at the desk"
       },
       "quiddity": "item",
-      "step": "item[register-your-passkey-once-at-the-desk]~27ab0035",
-      "hashed": "section[needs]\nitem\nRegister your passkey once at the desk\nPhone approval with your passkey"
+      "step": "~311670d98c67e6f7",
+      "provisional": true,
+      "hashed": "needs\nitem\nRegister your passkey once at the desk\nPhone approval with your passkey"
     },
     {
-      "note": "same name, different link: different hash",
-      "parent": "section[prs]",
+      "note": "same name, different link: different token",
+      "parent": "prs",
       "key": "items",
       "node": {
         "title": "Fix the build",
@@ -108,12 +143,13 @@
         }
       },
       "quiddity": "item",
-      "step": "item[fix-the-build]~53fc186d",
-      "hashed": "section[prs]\nitem\nFix the build\nhttps://git.example.test/a/b/pull/1"
+      "step": "~b9af015fa17b88a3",
+      "provisional": true,
+      "hashed": "prs\nitem\nFix the build\nhttps://git.example.test/a/b/pull/1"
     },
     {
-      "note": "same name, different link: different hash",
-      "parent": "section[prs]",
+      "note": "same name, different link: different token",
+      "parent": "prs",
       "key": "items",
       "node": {
         "title": "Fix the build",
@@ -122,12 +158,13 @@
         }
       },
       "quiddity": "item",
-      "step": "item[fix-the-build]~45865f7c",
-      "hashed": "section[prs]\nitem\nFix the build\nhttps://git.example.test/a/b/pull/2"
+      "step": "~4aa01406fb724bf1",
+      "provisional": true,
+      "hashed": "prs\nitem\nFix the build\nhttps://git.example.test/a/b/pull/2"
     },
     {
-      "note": "same node, other parent: different hash",
-      "parent": "section[done]",
+      "note": "same node, other parent: different token",
+      "parent": "done",
       "key": "items",
       "node": {
         "title": "Fix the build",
@@ -136,22 +173,24 @@
         }
       },
       "quiddity": "item",
-      "step": "item[fix-the-build]~135d9cae",
-      "hashed": "section[done]\nitem\nFix the build\nhttps://git.example.test/a/b/pull/1"
+      "step": "~417acd86d824932e",
+      "provisional": true,
+      "hashed": "done\nitem\nFix the build\nhttps://git.example.test/a/b/pull/1"
     },
     {
       "note": "no name at all",
-      "parent": "section[x]",
+      "parent": "x",
       "key": "items",
       "node": {
         "href": "https://example.test/"
       },
       "quiddity": "item",
-      "step": "item[x]~72d4a534",
-      "hashed": "section[x]\nitem\n\nhttps://example.test/"
+      "step": "~fd294c3be54fda19",
+      "provisional": true,
+      "hashed": "x\nitem\n\nhttps://example.test/"
     },
     {
-      "note": "blank id falls back to the name",
+      "note": "blank id falls back to a token",
       "parent": "",
       "key": "sections",
       "node": {
@@ -159,7 +198,8 @@
         "title": "Machines"
       },
       "quiddity": "section",
-      "step": "section[machines]~ad2cef74",
+      "step": "~ad2cef744d2420b2",
+      "provisional": true,
       "hashed": "\nsection\nMachines\n"
     }
   ],
@@ -172,15 +212,15 @@
     },
     {
       "source": "fleet",
-      "path": "section[needs]/item[needs-ask-0]",
-      "haecceity": "https://ipso.bounded.tools/fleet/section%5Bneeds%5D/item%5Bneeds-ask-0%5D",
-      "html_id": "section%5Bneeds%5D/item%5Bneeds-ask-0%5D"
+      "path": "needs/2fac998588cf",
+      "haecceity": "https://ipso.bounded.tools/fleet/needs/2fac998588cf",
+      "html_id": "needs/2fac998588cf"
     },
     {
       "source": "Fleet Map",
-      "path": "section[prs]/item[fix-the-build]~00000000",
-      "haecceity": "https://ipso.bounded.tools/fleet-map/section%5Bprs%5D/item%5Bfix-the-build%5D~00000000",
-      "html_id": "section%5Bprs%5D/item%5Bfix-the-build%5D~00000000"
+      "path": "prs/bdelanghe%2Ffold-core%2312",
+      "haecceity": "https://ipso.bounded.tools/Fleet%20Map/prs/bdelanghe%2Ffold-core%2312",
+      "html_id": "prs/bdelanghe%2Ffold-core%2312"
     }
   ],
   "document": [
@@ -198,7 +238,7 @@
                 "title": "",
                 "items": [
                   {
-                    "id": "needs/ask-0",
+                    "id": "2fac998588cf",
                     "action": "Merge the policy note"
                   },
                   {
@@ -209,13 +249,16 @@
             ]
           },
           {
+            "id": "machines",
             "title": "Machines",
             "items": [
               {
+                "id": "phobos",
                 "title": "phobos",
                 "kind": "machine"
               },
               {
+                "id": "deimos",
                 "title": "deimos",
                 "kind": "machine"
               }
@@ -227,54 +270,61 @@
         {
           "path": "",
           "quiddity": "page",
-          "haecceity": "https://ipso.bounded.tools/fleet"
+          "haecceity": "https://ipso.bounded.tools/fleet",
+          "provisional": false
         },
         {
-          "path": "section[needs]",
+          "path": "needs",
           "quiddity": "section",
-          "haecceity": "https://ipso.bounded.tools/fleet/section%5Bneeds%5D"
+          "haecceity": "https://ipso.bounded.tools/fleet/needs",
+          "provisional": false
         },
         {
-          "path": "section[needs]/item[needs-ask-0]",
+          "path": "needs/2fac998588cf",
           "quiddity": "item",
-          "haecceity": "https://ipso.bounded.tools/fleet/section%5Bneeds%5D/item%5Bneeds-ask-0%5D"
+          "haecceity": "https://ipso.bounded.tools/fleet/needs/2fac998588cf",
+          "provisional": false
         },
         {
-          "path": "section[needs]/item[phone-approval-with-your-passkey]~52efe47d",
+          "path": "needs/~29abeaddb50213f3",
           "quiddity": "item",
-          "haecceity": "https://ipso.bounded.tools/fleet/section%5Bneeds%5D/item%5Bphone-approval-with-your-passkey%5D~52efe47d"
+          "haecceity": "https://ipso.bounded.tools/fleet/needs/~29abeaddb50213f3",
+          "provisional": true
         },
         {
-          "path": "section[machines]~ad2cef74",
+          "path": "machines",
           "quiddity": "section",
-          "haecceity": "https://ipso.bounded.tools/fleet/section%5Bmachines%5D~ad2cef74"
+          "haecceity": "https://ipso.bounded.tools/fleet/machines",
+          "provisional": false
         },
         {
-          "path": "section[machines]~ad2cef74/machine[phobos]~7285d01b",
+          "path": "machines/phobos",
           "quiddity": "machine",
-          "haecceity": "https://ipso.bounded.tools/fleet/section%5Bmachines%5D~ad2cef74/machine%5Bphobos%5D~7285d01b"
+          "haecceity": "https://ipso.bounded.tools/fleet/machines/phobos",
+          "provisional": false
         },
         {
-          "path": "section[machines]~ad2cef74/machine[deimos]~1361b0d8",
+          "path": "machines/deimos",
           "quiddity": "machine",
-          "haecceity": "https://ipso.bounded.tools/fleet/section%5Bmachines%5D~ad2cef74/machine%5Bdeimos%5D~1361b0d8"
+          "haecceity": "https://ipso.bounded.tools/fleet/machines/deimos",
+          "provisional": false
         }
       ],
       "duplicate": null
     },
     {
-      "note": "two siblings that are the same thing twice: refused",
+      "note": "two siblings with one source id are the same thing twice: refused",
       "source": "fleet",
       "data": {
         "title": "Dupes",
         "items": [
           {
-            "title": "Same",
-            "href": "https://example.test/1"
+            "id": "2fac998588cf",
+            "title": "Sign A"
           },
           {
-            "title": "Same",
-            "href": "https://example.test/1"
+            "id": "2fac998588cf",
+            "title": "Sign B"
           }
         ]
       },
@@ -282,20 +332,23 @@
         {
           "path": "",
           "quiddity": "page",
-          "haecceity": "https://ipso.bounded.tools/fleet"
+          "haecceity": "https://ipso.bounded.tools/fleet",
+          "provisional": false
         },
         {
-          "path": "item[same]~e837e51a",
+          "path": "2fac998588cf",
           "quiddity": "item",
-          "haecceity": "https://ipso.bounded.tools/fleet/item%5Bsame%5D~e837e51a"
+          "haecceity": "https://ipso.bounded.tools/fleet/2fac998588cf",
+          "provisional": false
         },
         {
-          "path": "item[same]~e837e51a",
+          "path": "2fac998588cf",
           "quiddity": "item",
-          "haecceity": "https://ipso.bounded.tools/fleet/item%5Bsame%5D~e837e51a"
+          "haecceity": "https://ipso.bounded.tools/fleet/2fac998588cf",
+          "provisional": false
         }
       ],
-      "duplicate": "item[same]~e837e51a"
+      "duplicate": "2fac998588cf"
     }
   ]
 }
