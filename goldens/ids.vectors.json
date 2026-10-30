@@ -6,14 +6,14 @@
     "source_id": "the node's 'id' if a non-blank string (trimmed of whitespace at both ends) or a JSON number (as written); otherwise none",
     "quiddity": "the node's own 'kind' (slugged) if a non-blank string, else by the key it is listed under: sections -> section, groups -> group, items/kids/children -> item; the document root is 'page'. The quiddity is metadata (data-quiddity), never part of the haecceity",
     "step": "segment(source id) when the node has one; else the opaque token '~' + first 16 hex of sha256(UTF-8 of parent + '\\n' + kind + '\\n' + raw name + '\\n' + distinguishing), marked provisional",
-    "provisional": "a token hashes a label (the raw name), so a label fix changes it: provisional ids are never published to facto or signed, and the fix is a source id in the data",
     "raw_name": "first non-blank (trimmed) of title, nav, name, action, label, text; '' if none",
     "distinguishing": "first non-blank (trimmed) of link.href, href, text, summary, purpose, why, action; '' if none",
     "path": "steps joined by '/'; the root's path is ''; a group with no title is layout only and adds no step",
     "haecceity": "base + segment(source) for the root; base + segment(source) + '/' + path otherwise (segments are already encoded)",
     "html_id": "the path as it stands in the haecceity; the root's is segment(source)",
     "selector": "role[name] (Allie's address, the rotor's) is a selector that resolves to a haecceity, never part of one",
-    "unique": "one canonical path per thing: two nodes with the same path fail the build"
+    "unique": "one canonical path per thing: two nodes with the same path fail the build",
+    "named_by": "how a segment was named, never a bare boolean: 'source-id' (the data's own id) or 'provisional-token' (fold-core's stopgap; it hashes a label, so a label fix changes it; never published to facto or signed; the fix is a source id in the data, or a facto-minted id). The root reads 'source-id' (its source)"
   },
   "segment": [
     {
@@ -68,7 +68,7 @@
       },
       "quiddity": "section",
       "step": "needs",
-      "provisional": false
+      "named_by": "source-id"
     },
     {
       "note": "a request_id is the segment, never the position (no 'ask-0')",
@@ -80,7 +80,7 @@
       },
       "quiddity": "item",
       "step": "2fac998588cf",
-      "provisional": false
+      "named_by": "source-id"
     },
     {
       "note": "a numeric id (a PR number)",
@@ -92,7 +92,7 @@
       },
       "quiddity": "item",
       "step": "12",
-      "provisional": false
+      "named_by": "source-id"
     },
     {
       "note": "an id with '/' stays one segment",
@@ -104,7 +104,7 @@
       },
       "quiddity": "item",
       "step": "bdelanghe%2Ffold-core%2312",
-      "provisional": false
+      "named_by": "source-id"
     },
     {
       "note": "own kind wins over the key, and stays out of the segment",
@@ -117,7 +117,7 @@
       },
       "quiddity": "seat",
       "step": "port-goal",
-      "provisional": false
+      "named_by": "source-id"
     },
     {
       "note": "no id: provisional token",
@@ -129,7 +129,7 @@
       },
       "quiddity": "item",
       "step": "~311670d98c67e6f7",
-      "provisional": true,
+      "named_by": "provisional-token",
       "hashed": "needs\nitem\nRegister your passkey once at the desk\nPhone approval with your passkey"
     },
     {
@@ -144,7 +144,7 @@
       },
       "quiddity": "item",
       "step": "~b9af015fa17b88a3",
-      "provisional": true,
+      "named_by": "provisional-token",
       "hashed": "prs\nitem\nFix the build\nhttps://git.example.test/a/b/pull/1"
     },
     {
@@ -159,7 +159,7 @@
       },
       "quiddity": "item",
       "step": "~4aa01406fb724bf1",
-      "provisional": true,
+      "named_by": "provisional-token",
       "hashed": "prs\nitem\nFix the build\nhttps://git.example.test/a/b/pull/2"
     },
     {
@@ -174,7 +174,7 @@
       },
       "quiddity": "item",
       "step": "~417acd86d824932e",
-      "provisional": true,
+      "named_by": "provisional-token",
       "hashed": "done\nitem\nFix the build\nhttps://git.example.test/a/b/pull/1"
     },
     {
@@ -186,7 +186,7 @@
       },
       "quiddity": "item",
       "step": "~fd294c3be54fda19",
-      "provisional": true,
+      "named_by": "provisional-token",
       "hashed": "x\nitem\n\nhttps://example.test/"
     },
     {
@@ -199,7 +199,7 @@
       },
       "quiddity": "section",
       "step": "~ad2cef744d2420b2",
-      "provisional": true,
+      "named_by": "provisional-token",
       "hashed": "\nsection\nMachines\n"
     }
   ],
@@ -271,43 +271,43 @@
           "path": "",
           "quiddity": "page",
           "haecceity": "https://ipso.bounded.tools/fleet",
-          "provisional": false
+          "named_by": "source-id"
         },
         {
           "path": "needs",
           "quiddity": "section",
           "haecceity": "https://ipso.bounded.tools/fleet/needs",
-          "provisional": false
+          "named_by": "source-id"
         },
         {
           "path": "needs/2fac998588cf",
           "quiddity": "item",
           "haecceity": "https://ipso.bounded.tools/fleet/needs/2fac998588cf",
-          "provisional": false
+          "named_by": "source-id"
         },
         {
           "path": "needs/~29abeaddb50213f3",
           "quiddity": "item",
           "haecceity": "https://ipso.bounded.tools/fleet/needs/~29abeaddb50213f3",
-          "provisional": true
+          "named_by": "provisional-token"
         },
         {
           "path": "machines",
           "quiddity": "section",
           "haecceity": "https://ipso.bounded.tools/fleet/machines",
-          "provisional": false
+          "named_by": "source-id"
         },
         {
           "path": "machines/phobos",
           "quiddity": "machine",
           "haecceity": "https://ipso.bounded.tools/fleet/machines/phobos",
-          "provisional": false
+          "named_by": "source-id"
         },
         {
           "path": "machines/deimos",
           "quiddity": "machine",
           "haecceity": "https://ipso.bounded.tools/fleet/machines/deimos",
-          "provisional": false
+          "named_by": "source-id"
         }
       ],
       "duplicate": null
@@ -333,19 +333,19 @@
           "path": "",
           "quiddity": "page",
           "haecceity": "https://ipso.bounded.tools/fleet",
-          "provisional": false
+          "named_by": "source-id"
         },
         {
           "path": "2fac998588cf",
           "quiddity": "item",
           "haecceity": "https://ipso.bounded.tools/fleet/2fac998588cf",
-          "provisional": false
+          "named_by": "source-id"
         },
         {
           "path": "2fac998588cf",
           "quiddity": "item",
           "haecceity": "https://ipso.bounded.tools/fleet/2fac998588cf",
-          "provisional": false
+          "named_by": "source-id"
         }
       ],
       "duplicate": "2fac998588cf"

@@ -23,7 +23,8 @@ fn outputs(v: &Value) -> Value {
             let (parent, key, node) = (c["parent"].as_str().unwrap(), c["key"].as_str().unwrap(), &c["node"]);
             let kind = id::quiddity(node, key);
             let provisional = id::source_id(node).is_none();
-            let mut o = json!({ "note": c["note"], "parent": parent, "key": key, "node": node, "quiddity": kind, "step": id::step(parent, node, &kind), "provisional": provisional });
+            let named_by = if provisional { "provisional-token" } else { "source-id" };
+            let mut o = json!({ "note": c["note"], "parent": parent, "key": key, "node": node, "quiddity": kind, "step": id::step(parent, node, &kind), "named_by": named_by });
             if provisional {
                 o["hashed"] = json!([parent, kind.as_str(), &id::raw_name(node), &id::distinguishing(node)].join("\n"));
             }
@@ -51,7 +52,7 @@ fn outputs(v: &Value) -> Value {
             };
             let rows: Vec<Value> = ps
                 .iter()
-                .map(|(p, q, h)| json!({ "path": p, "quiddity": q, "haecceity": h, "provisional": p.rsplit('/').next().is_some_and(|s| s.starts_with('~')) }))
+                .map(|(p, q, h)| json!({ "path": p, "quiddity": q, "haecceity": h, "named_by": if p.rsplit('/').next().is_some_and(|s| s.starts_with('~')) { "provisional-token" } else { "source-id" } }))
                 .collect();
             json!({ "note": c["note"], "source": c["source"], "data": c["data"], "paths": rows, "duplicate": unique })
         })
