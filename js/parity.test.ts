@@ -6,7 +6,7 @@ import { core } from "./fold-core.ts";
 
 const goldens = join(import.meta.dir, "..", "goldens");
 const wasm = process.env.FOLD_CORE_WASM ?? join(import.meta.dir, "..", "target", "wasm32-unknown-unknown", "release", "fold_core.wasm");
-const { fold, walk, ax } = await core(readFileSync(wasm));
+const { fold, walk, ax, html } = await core(readFileSync(wasm));
 const cases = (dir: string) => readdirSync(dir).filter((f) => f.endsWith(".input.json")).sort();
 const read = (...p: string[]) => JSON.parse(readFileSync(join(...p), "utf8"));
 for (const f of cases(goldens)) {
@@ -27,6 +27,19 @@ for (const f of readdirSync(join(goldens, "ax")).sort()) {
     const input = read(goldens, "walk", `${name}.input.json`), nodes = new Map(input.nodes);
     for (const [id, mode, href, tree] of read(goldens, "ax", f))
       expect(JSON.stringify(ax({ node: nodes.get(id) ?? null, path: id === "root" ? [] : id.split("~"), mode, href, localTimeZone: input.opts.localTimeZone }))).toBe(JSON.stringify(tree));
+  });
+}
+// The same HTML as the native crate writes (tests/html.rs), from the same trees: native and WASM, byte for byte.
+for (const f of readdirSync(join(goldens, "html")).filter((f) => f.endsWith(".html.json")).sort()) {
+  const name = f.replace(/\.html\.json$/, "");
+  test(`html ${name}: wasm writes the native bytes`, () => {
+    const trees = read(goldens, "ax", `${name}.ax.json`), want = read(goldens, "html", f);
+    expect(want.length).toBe(trees.length);
+    trees.forEach(([, , , tree]: unknown[], i: number) => {
+      const w = want[i][3];
+      if (typeof w === "string") expect(html(tree as any)).toBe(w);
+      else expect(() => html(tree as any)).toThrow(`fold-core: ${w.error}`);
+    });
   });
 }
 test("a bad input says why", () => {

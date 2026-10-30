@@ -32,6 +32,19 @@
           cp ${pkgs.atkinson-hyperlegible-next}/share/fonts/opentype/AtkinsonHyperlegibleNext-Regular.otf face.otf
           woff2_compress face.otf && cp face.woff2 $out/fonts/atkinson-hyperlegible-next.woff2
         '';
+        # the JS tests' dependencies (package.json, bun.lock: lone and linkedom), fetched once by their lockfile so checks run offline
+        node-modules = pkgs.stdenvNoCC.mkDerivation {
+          pname = "fold-core-node-modules";
+          version = "0";
+          src = pkgs.lib.fileset.toSource { root = ./.; fileset = pkgs.lib.fileset.unions [ ./package.json ./bun.lock ./.npmrc ]; };
+          nativeBuildInputs = [ pkgs.bun pkgs.cacert ];
+          buildPhase = "HOME=$TMPDIR bun install --frozen-lockfile --ignore-scripts --no-progress";
+          installPhase = "mkdir -p $out && cp -r node_modules $out/";
+          dontFixup = true;
+          outputHashMode = "recursive";
+          outputHashAlgo = "sha256";
+          outputHash = "sha256-KigUJ80A86x4r53tZnHB+4nUzTJ4DZUXbHRU2CzuhP0=";
+        };
         default = pkgs.rustPlatform.buildRustPackage {
           pname = "fold-core";
           version = "0.1.0";
@@ -57,6 +70,14 @@
         wasm-parity = pkgs.runCommand "fold-core-wasm-parity" { nativeBuildInputs = [ pkgs.bun ]; } ''
           cp -r ${self}/js ${self}/goldens .
           HOME=$TMPDIR FOLD_CORE_WASM=${self.packages.${pkgs.stdenv.hostPlatform.system}.wasm}/lib/fold_core.wasm bun test ./js/parity.test.ts
+          touch $out
+        '';
+        # one fold's HTML (src/html.rs, goldens/html) held against fold-dom.js toDom through a DOM, and blessed by lone with no
+        # finding beyond goldens/html/lone.known.json (js/html.test.ts); native and WASM writing the same bytes is tests/html.rs and wasm-parity
+        html-lone = pkgs.runCommand "fold-core-html-lone" { nativeBuildInputs = [ pkgs.bun ]; } ''
+          cp -r ${self}/js ${self}/goldens ${self}/viewer ${self}/package.json .
+          ln -s ${self.packages.${pkgs.stdenv.hostPlatform.system}.node-modules}/node_modules node_modules
+          HOME=$TMPDIR bun test ./js/html.test.ts
           touch $out
         '';
         # the viewer's own path on every golden (viewer/viewer.test.ts): fetched and folded as in the browser, every location's tree,
