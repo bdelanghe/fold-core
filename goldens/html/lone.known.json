@@ -1,0 +1,15 @@
+{
+  "about": "lone findings on golden folds that are not blessed yet, each with why and what clears it. js/html.test.ts fails on any finding not listed here, and on any listed finding that no longer occurs, so this list only shrinks by fixing.",
+  "known": [
+    {
+      "case": "fold-many", "ids": ["root-2"], "code": "LONE_COGA_UNCLEAR_LINK_PURPOSE",
+      "why": "the overflow row is named \"More\" (src/lib.rs, as home's fold.ts names it, which the fold goldens are pinned to)",
+      "clears": "the AX walk fixes (Bobby bdf9f53b): More gets a plain name that states its purpose, and the goldens move with it"
+    },
+    {
+      "case": "inline", "ids": ["artifacts~x", "fat"], "code": "LONE_COGA_CONTENT_DENSITY",
+      "why": "these fixtures are over the word budget on purpose: they are where walk.ts and the walk goldens block",
+      "clears": "nothing: they stay unblessed as the over-budget case (the walk blocks them too)"
+    }
+  ]
+}
