@@ -29,22 +29,47 @@ const nodes = new Map(fold({ root: input.root, files: {}, opts: { localTimeZone:
 const root = nodes.get("root") as { title: string; kids: { id: string }[] };
 const places = [["root", root], ...[root.kids[0]].filter(Boolean).map((k) => [k.id, nodes.get(k.id)])] as [string, { title: string; kids?: unknown[] }][];
 
-const text = (s: string) => s.replace(/<[^>]*>/g, "").replace(/&amp;/g, "&").replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&quot;/g, '"').replace(/&#39;/g, "'");
+// Over the DevTools protocol, not --dump-dom: the page renders after its module's awaits (wasm, then the document), which the load
+// event doesn't wait for, so a snapshot can catch "Loading…". Here the check waits for data-ready and reads Chrome's own
+// accessibility tree (Accessibility.getFullAXTree), the tree VoiceOver gets.
+async function inChrome(w: number, h: number, url: string) {
+  const p = Bun.spawn([chromium, "--headless=new", "--no-sandbox", "--disable-gpu", "--disable-dev-shm-usage", "--no-first-run", `--user-data-dir=${process.env.TMPDIR ?? "/tmp"}/chromium-${w}`,
+    `--window-size=${w},${h}`, "--remote-debugging-port=0", "about:blank"], { stdout: "ignore", stderr: "pipe", timeout: 60_000 });
+  let err = "";
+  try {
+    const rd = p.stderr.getReader();
+    let ws = "";
+    while (!ws) { const { value, done } = await rd.read(); if (done) throw new Error("chromium exited before DevTools listened"); err += new TextDecoder().decode(value); ws = err.match(/ws:\/\/\S+/)?.[0] ?? ""; }
+    const port = new URL(ws).port;
+    const target = (await (await fetch(`http://127.0.0.1:${port}/json/list`)).json()).find((t: { type: string }) => t.type === "page");
+    const s = new WebSocket(target.webSocketDebuggerUrl);
+    await new Promise((r, j) => { s.onopen = r; s.onerror = j; });
+    let n = 0; const pending = new Map<number, (m: any) => void>();
+    s.onmessage = (e) => { const m = JSON.parse(String(e.data)); if (m.id) pending.get(m.id)?.(m); };
+    const send = (method: string, params = {}) => new Promise<any>((r) => { const i = ++n; pending.set(i, (m) => r(m.result)); s.send(JSON.stringify({ id: i, method, params })); });
+    await send("Page.enable");
+    await send("Page.navigate", { url });
+    const value = async (expression: string) => (await send("Runtime.evaluate", { expression, returnByValue: true }))?.result?.value;
+    const until = Date.now() + 20_000;
+    while ((await value("document.body?.dataset.ready")) !== "1" && Date.now() < until) await Bun.sleep(100);
+    const ready = (await value("document.body?.dataset.ready")) === "1";
+    const { nodes } = await send("Accessibility.getFullAXTree");
+    const h1 = nodes.filter((x: any) => !x.ignored && x.role?.value === "heading" && x.properties?.some((q: any) => q.name === "level" && q.value.value === 1)).map((x: any) => x.name?.value ?? "");
+    const objs = await value(`document.querySelectorAll("ol.rows > li.obj").length`);
+    s.close();
+    return { ready, h1, objs, err };
+  } finally { p.kill(); await p.exited; }
+}
+
 let failed = 0;
 const runs = [[390, 844], [1024, 1366]].flatMap(([w, h]) => places.map(([id, n]) => [w, h, id, n, "/fold/"] as const));
 runs.push([390, 844, places[0][0], places[0][1], "/fold"]);
 for (const [w, h, id, n, at0] of runs) {
   const url = `http://127.0.0.1:${server.port}${at0}${href(at(id), "folds")}`;
-  // async, so this process's server answers the page while Chromium runs; a run past 60 s is killed and fails
-  const p = Bun.spawn([chromium, "--headless=new", "--no-sandbox", "--disable-gpu", "--disable-dev-shm-usage", "--no-first-run", `--user-data-dir=${process.env.TMPDIR ?? "/tmp"}/chromium-${w}`,
-    `--window-size=${w},${h}`, "--virtual-time-budget=10000", "--dump-dom", url], { stdout: "pipe", stderr: "pipe", timeout: 60_000 });
-  const [dom, err] = await Promise.all([new Response(p.stdout).text(), new Response(p.stderr).text()]);
-  await p.exited;
-  const h1 = [...dom.matchAll(/<h1[^>]*>([\s\S]*?)<\/h1>/g)].map((m) => text(m[1]));
-  const objs = (dom.match(/<li class="obj[ "]/g) ?? []).length;
-  const ok = /data-ready="1"/.test(dom) && h1.length === 1 && h1[0] === n.title && objs === (n.kids ?? []).length;
+  const { ready, h1, objs, err } = await inChrome(w, h, url);
+  const ok = ready && h1.length === 1 && h1[0] === n.title && objs === (n.kids ?? []).length;
   console.log(`${ok ? "ok  " : "FAIL"} ${w}x${h} ${at0} ${id}: heading ${JSON.stringify(h1)}, ${objs} rows (want ${JSON.stringify(n.title)}, ${(n.kids ?? []).length})`);
-  if (!ok) { failed++; console.log(dom.slice(0, 2000), err.slice(-2000)); }
+  if (!ok) { failed++; console.log(err.slice(-2000)); }
 }
 server.stop(true);
 process.exit(failed ? 1 : 0);
