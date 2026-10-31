@@ -153,6 +153,8 @@ pub const ACT_BODY: usize = 4096;
 pub fn limit(method: &str, target: &str) -> usize {
     if method == "POST" && act(target).is_some() {
         ACT_BODY
+    } else if method == "POST" && target.split(['?', '#']).next() == Some(REPORT_TOKEN) {
+        REPORT_BODY
     } else {
         0
     }
@@ -177,6 +179,9 @@ pub fn answer(site: &Site, req: &Request, now: i64) -> (Response, Option<Value>)
     let path = req.target.split(['?', '#']).next().unwrap_or("");
     if path == REPORT_TOKEN {
         return reporter_token(site, req, now);
+    }
+    if path == OVERLAY {
+        return (overlay(site, req), None);
     }
     let to_act = path.starts_with("/act/");
     match (req.method.as_str(), &site.acting) {
@@ -298,8 +303,21 @@ fn front<'r>(req: &'r Request, login: &str, host: &str) -> Result<&'r str, &'sta
 /// The reporter-token route's path (report.rs): what the Clax overlay on a fold page posts to, under the mount.
 pub const REPORT_TOKEN: &str = "/report-token";
 
-/// `POST report-token`: a Clax reporter token for the one login this server reports for, same-origin only (report.rs). The answer
-/// is JSON, `{token, exp, clax, queue, owner}`, never stored; each mint and refusal leaves a log line naming no token.
+/// The overlay's path under the mount: the Clax instance's `/_clax/overlay.js`, served from this origin (report.rs).
+pub const OVERLAY: &str = "/clax/overlay.js";
+
+/// The most a report-token request's body may be: `{"public_key": …}`.
+pub const REPORT_BODY: usize = 1024;
+
+fn json_answer(status: u16, v: &Value) -> Response {
+    let mut r = Response::new(status).with("Content-Type", "application/json").with("Cache-Control", "no-store");
+    r.body = (v.to_string() + "\n").into_bytes();
+    r
+}
+
+/// `POST report-token`, for the one login this server reports for, same-origin only (report.rs): with no body, what the page mounts
+/// the overlay with, `{instance, queue, owner}`; with `{"public_key"}` (JSON), a reporter token for that key minted by the Clax
+/// instance, `{token, expires_at}`. Never stored; each answer leaves a log line naming no token and no key.
 fn reporter_token(site: &Site, req: &Request, now: i64) -> (Response, Option<Value>) {
     let Some(r) = &site.reporting else {
         return (Response::text(404, "reporting to Clax isn't on here"), None);
@@ -312,11 +330,42 @@ fn reporter_token(site: &Site, req: &Request, now: i64) -> (Response, Option<Val
         Ok(who) => who,
         Err(why) => return (Response::text(403, why), line("refused:403".into())),
     };
-    let token = report::mint(&r.key, &r.queue, &r.owner, who, now);
-    let body = json!({ "token": token, "exp": now + report::TTL, "clax": r.clax, "queue": r.queue, "owner": r.owner });
-    let mut res = Response::new(200).with("Content-Type", "application/json").with("Cache-Control", "no-store");
-    res.body = (body.to_string() + "\n").into_bytes();
-    (res, line("minted".into()))
+    if req.body.is_empty() {
+        let v = json!({ "instance": r.clax, "queue": r.queue, "owner": r.owner });
+        return (json_answer(200, &v), line("mount".into()));
+    }
+    // JSON only: a page's fetch can send it, a cross-site form cannot.
+    if req.media_type() != Some("application/json") {
+        return (Response::text(415, "send the key as application/json"), line("refused:415".into()));
+    }
+    let key = serde_json::from_slice::<Value>(&req.body).ok().and_then(|v| v["public_key"].as_str().map(str::to_string));
+    let Some(key) = key.filter(|k| report::public_key_ok(k)) else {
+        return (Response::text(400, "no public_key, or not one"), line("refused:400".into()));
+    };
+    // The token is for this page's origin (the one front() let through) and for the one login, as Clax's reporter.
+    match r.minter.mint(&key, &format!("https://{}", r.host), who) {
+        Ok(m) => (json_answer(200, &json!({ "token": m.token, "expires_at": m.expires_at })), line("minted".into())),
+        Err(e) => (Response::text(502, &format!("clax did not mint: {e}")), line("clax:failed".into())),
+    }
+}
+
+/// `GET clax/overlay.js`: the Clax instance's overlay, fetched over loopback each time and served from this origin, so a page can
+/// load it pinned by its SRI digest with no CORS on the instance. Revalidated always; the page's digest is what pins its bytes.
+fn overlay(site: &Site, req: &Request) -> Response {
+    let Some(r) = &site.reporting else {
+        return Response::text(404, "reporting to Clax isn't on here");
+    };
+    if req.method != "GET" && req.method != "HEAD" {
+        return Response::text(405, "read-only: GET or HEAD").with("Allow", "GET, HEAD");
+    }
+    match r.overlay() {
+        Ok(b) => {
+            let mut res = Response::new(200).with("Content-Type", "text/javascript; charset=utf-8").with("Cache-Control", "no-cache");
+            res.body = b;
+            res
+        }
+        Err(e) => Response::text(502, &format!("the Clax overlay could not be read: {e}")),
+    }
 }
 
 /// `POST act/<id>` for the person this server acts for: every check, then at most one ack state move (S2 brief §2).

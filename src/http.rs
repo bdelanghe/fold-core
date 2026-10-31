@@ -127,6 +127,74 @@ pub fn parse_with(rd: &mut impl BufRead, limit: &dyn Fn(&str, &str) -> usize) ->
     Ok(req)
 }
 
+/// The most a loopback call's answer may be (the overlay is about 140 KB).
+pub const MAX_ANSWER: usize = 4 << 20;
+
+/// An `http://` origin on loopback (`127.0.0.1`, `localhost` or `[::1]`, with a port) as its host and port; None for anything else,
+/// so a call ([`call`]) can only ever reach this machine, in the clear only where nothing leaves it.
+pub fn loopback(origin: &str) -> Option<(String, u16)> {
+    let rest = origin.trim_end_matches('/').strip_prefix("http://")?;
+    let (host, port) = rest.rsplit_once(':')?;
+    if !["127.0.0.1", "localhost", "[::1]"].contains(&host) {
+        return None;
+    }
+    let port: u16 = port.parse().ok().filter(|p| *p > 0)?;
+    Some((host.trim_matches(['[', ']']).to_string(), port))
+}
+
+/// One HTTP/1.1 request to a loopback origin ([`loopback`]), `Connection: close`: its status, headers and body (a Content-Length or
+/// chunked one, or to the close), or why not. For fold serve's calls to the Clax instance beside it (report.rs).
+pub fn call(origin: &str, method: &str, path: &str, headers: &[(&str, &str)], body: &[u8]) -> Result<Response, String> {
+    use std::io::Read;
+    let (host, port) = loopback(origin).ok_or_else(|| format!("{origin}: not an http origin on loopback"))?;
+    let mut s = TcpStream::connect((host.as_str(), port)).map_err(|e| format!("{origin}: {e}"))?;
+    let _ = s.set_read_timeout(Some(std::time::Duration::from_secs(10)));
+    let authority = if host.contains(':') { format!("[{host}]:{port}") } else { format!("{host}:{port}") };
+    let mut o = format!("{method} {path} HTTP/1.1\r\nHost: {authority}\r\nConnection: close\r\nContent-Length: {}\r\n", body.len());
+    for (k, v) in headers {
+        o += &format!("{k}: {v}\r\n");
+    }
+    o += "\r\n";
+    s.write_all(o.as_bytes()).and_then(|_| s.write_all(body)).map_err(|e| format!("{origin}: {e}"))?;
+    let mut raw = vec![];
+    s.take(MAX_ANSWER as u64 + 64 * 1024).read_to_end(&mut raw).map_err(|e| format!("{origin}: {e}"))?;
+    answer_of(&raw).ok_or_else(|| format!("{origin}: not an HTTP answer"))
+}
+
+/// An HTTP/1.1 answer's bytes as a [`Response`]: None when its head, its length or its chunks do not hold.
+pub fn answer_of(raw: &[u8]) -> Option<Response> {
+    let end = raw.windows(4).position(|w| w == b"\r\n\r\n")?;
+    let head = std::str::from_utf8(&raw[..end]).ok()?;
+    let mut lines = head.split("\r\n");
+    let status: u16 = lines.next()?.split_whitespace().nth(1)?.parse().ok()?;
+    let headers: Vec<(String, String)> =
+        lines.filter_map(|l| l.split_once(':')).map(|(k, v)| (k.trim().to_string(), v.trim().to_string())).collect();
+    let r = Response { status, headers, body: vec![] };
+    let rest = &raw[end + 4..];
+    let body = if r.header("Transfer-Encoding").is_some_and(|t| t.eq_ignore_ascii_case("chunked")) {
+        let (mut out, mut at) = (vec![], 0);
+        loop {
+            let nl = rest[at..].windows(2).position(|w| w == b"\r\n")? + at;
+            let size = std::str::from_utf8(&rest[at..nl]).ok()?.split(';').next()?.trim();
+            let n = usize::from_str_radix(size, 16).ok()?;
+            if n == 0 {
+                break;
+            }
+            out.extend_from_slice(rest.get(nl + 2..nl + 2 + n)?);
+            at = nl + 2 + n + 2;
+            if out.len() > MAX_ANSWER {
+                return None;
+            }
+        }
+        out
+    } else if let Some(n) = r.header("Content-Length") {
+        rest.get(..n.parse::<usize>().ok()?)?.to_vec()
+    } else {
+        rest.to_vec()
+    };
+    (body.len() <= MAX_ANSWER).then_some(Response { body, ..r })
+}
+
 fn write(s: &mut TcpStream, r: &Response, head: bool) -> std::io::Result<()> {
     let mut o = format!("HTTP/1.1 {} {}\r\n", r.status, status_text(r.status));
     for (k, v) in &r.headers {

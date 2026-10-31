@@ -1,38 +1,21 @@
 // Clax in Basis (basis-clax goal): a comment on any fold reaches the fold's owner through a Clax queue. Basis embeds Clax through
-// `@empathic/clax-sdk` only, loaded by the clax-sdk meta in index.html (a pinned URL with its SRI digest), never from Clax's own
-// shell or bridge. This file is Basis's half: which thing a report is about, the reporter token fold serve mints, the theme, and
-// the rows no report can name. The overlay is the one script the page needs for this. (With JS off, a page's "Comment in Clax"
-// link is close condition 4, not yet written: it waits on the queue's URL in Clax.)
+// @empathic/clax-sdk only: the overlay is the instance's own `/_clax/overlay.js` (the classic-script build of the SDK's ./overlay
+// entry, global `Clax`), which fold serve passes through from the instance beside it (src/report.rs) so that it is same-origin and
+// can be pinned by its SRI digest. It is never copied into this repo (break-glass fc88923c). This file is Basis's half: the pin, the
+// mount, the reporter token from fold serve, and which thing a report is about.
 //
-// A report's target follows the one target rule (ANALYSIS-identity-in-fold-core-and-clax-loci-2026-10-31 §4):
-// `{about, locus, situs, fixity}`. `about` is the row's haecceity (its RDFa schema:about, src/html.rs and fold-dom.js), the key a
-// thread is filed under; `locus` is where it was seen (this page, at this fold); `situs` is the position there; `fixity` is what was
-// seen, when the overlay gives it. A row with no haecceity still gets a report, flagged, with no `about` (§3: "the inspector should
-// flag those rows").
+// Clax main d7812795's overlay has no per-report target hook (its own picker chooses the element, range or area), so a report says
+// which thing it is about through what the overlay does take (ANALYSIS-identity-in-fold-core-and-clax-loci-2026-10-31 §3-4):
+// - `externalId`: the fold's haecceity. Reports on one fold fold into one Clax artifact, keyed on the thing, not on the URL.
+// - `metadata`: `{about, owner, rows}`, the fold's haecceity and each row's (by its index, the `data-i` an element anchor's selector
+//   lands on), with the rows that have none listed as `unnamed`, never guessed.
+// The overlay is reopened on each move to another fold, so both always say the fold in view.
 
 /** The thing a node shows: the haecceity of the row it is in (its schema:about), or null when it is in no row or its row has none. */
 export function aboutOf(node) {
   const row = node?.closest?.('[typeof~="schema:WebPageElement"]');
   const about = row && [...row.children].find((c) => c.getAttribute("property") === "schema:about");
   return about?.getAttribute("resource") || null;
-}
-
-/** Where a node sits in the fold: the row's index among the fold's rows (data-i) and its element id where it has one. */
-function situsOf(node) {
-  const row = node?.closest?.("li.obj, li.prop");
-  const s = [];
-  if (row?.id) s.push({ type: "FragmentSelector", value: row.id });
-  if (row?.dataset?.i != null) s.push({ type: "CssSelector", value: `ol.rows > li.obj[data-i="${row.dataset.i}"]` });
-  return s;
-}
-
-/** A report's target, by the one target rule: `about` when the node's row names its thing, else `flag: "no-haecceity"`. `locus` is
- * the page as seen (its URL, hash and all); `quote` is the text the reader picked, as a TextQuoteSelector. */
-export function targetOf(node, { locus, quote = null, fixity = null } = {}) {
-  const about = aboutOf(node);
-  const situs = situsOf(node);
-  if (quote) situs.push({ type: "TextQuoteSelector", exact: quote });
-  return { ...(about ? { about } : { flag: "no-haecceity" }), locus, situs, ...(fixity ? { fixity } : {}) };
 }
 
 /** The rows on the page whose thing has no name: each marked `data-clax-flag="no-haecceity"` for the overlay (and the inspector) to
@@ -43,63 +26,46 @@ export function flagUnnamed(root) {
   return rows;
 }
 
-/** A reporter token from fold serve (POST report-token, src/report.rs): `{token, exp, clax, queue, owner}`, or null when this server
- * does not report (404) or will not mint for this reader (403). Same-origin only: the request carries no credentials elsewhere. */
-export async function reporterToken(base, { fetch = globalThis.fetch } = {}) {
+/** What the overlay is told about the fold in view: `{externalId, metadata}`. `fold` is the fold's haecceity (null when the
+ * document has no source), `rows` the page's child rows. */
+export function contextOf(fold, rows, owner) {
+  const named = {}, unnamed = [];
+  for (const r of rows) {
+    const i = r?.dataset?.i, about = aboutOf(r);
+    if (i == null) continue;
+    if (about) named[i] = about; else unnamed.push(Number(i));
+  }
+  return { ...(fold ? { externalId: fold } : {}), metadata: { about: fold ?? null, owner, rows: named, ...(unnamed.length ? { unnamed } : {}) } };
+}
+
+/** fold serve's report-token route (src/serve.rs): with no body, `{instance, queue, owner}`; with a public key, `{token, expires_at}`.
+ * Null when this server does not report (404), will not answer this reader (403), or did not mint (502). Same-origin only. */
+export async function reportToken(base, publicKey = null, { fetch = globalThis.fetch } = {}) {
   try {
-    const r = await fetch(new URL("report-token", base).href, { method: "POST", credentials: "same-origin", cache: "no-store" });
+    const init = { method: "POST", credentials: "same-origin", cache: "no-store" };
+    if (publicKey != null) Object.assign(init, { headers: { "Content-Type": "application/json" }, body: JSON.stringify({ public_key: publicKey }) });
+    const r = await fetch(new URL("report-token", base).href, init);
     return r.ok ? await r.json() : null;
   } catch {
     return null;
   }
 }
 
-/** The SDK's overlay script as the clax-sdk meta pins it: its path on Bobby's self-hosted Clax (the origin fold serve names with the
- * token), its version and its SRI digest. The SDK is never copied into this repo (break-glass fc88923c: self-hosting is allowed,
- * redistribution is not); it is loaded at run time from that Clax, and only these bytes run. None missing: nothing loads unpinned.
- * `{src, integrity}`, or `{error}` saying why nothing is loaded. */
-export function pinOf(meta, origin) {
+/** The overlay as the clax-sdk meta pins it: a path on this origin (fold serve's pass-through of the instance's overlay), the SDK
+ * version and the SRI digest of the instance's bytes. None missing: nothing loads unpinned. `{src, integrity}`, or `{error}`. */
+export function pinOf(meta, base) {
   const path = meta?.content?.trim(), version = meta?.dataset?.version?.trim(), integrity = meta?.dataset?.integrity?.trim();
   if (!path) return { error: "no clax-sdk overlay is pinned yet" };
   if (!/^\d+\.\d+\.\d+$/.test(version ?? "")) return { error: `the overlay ${path} names no version` };
   if (!/^sha(256|384|512)-[A-Za-z0-9+/]+=*$/.test(integrity ?? "")) return { error: `the overlay ${path} has no SRI digest` };
-  if (!/^\//.test(path) || /^\/\//.test(path)) return { error: `the overlay ${path} is not a path on the Clax origin` };
-  const src = new URL(path, origin);
+  const src = new URL(path, base);
+  if (src.origin !== new URL(base).origin || /^[a-z][a-z0-9+.-]*:|^\/\//i.test(path)) return { error: `the overlay ${path} is not a path on this origin` };
   src.searchParams.set("v", version);
   return { src: src.href, integrity };
 }
 
-/** Load the pinned overlay (one module script, with its SRI digest) and mount it with Basis's hooks: its target from the row's
- * haecceity, its token from fold serve, its look from theme.tokens.json. Resolves to what was done, for the caller to say. */
-export async function embed({ doc = document, base = doc.baseURI, fetch = globalThis.fetch, load = importPinned } = {}) {
-  const meta = doc.querySelector('meta[name="clax-sdk"]');
-  if (pinOf(meta, base).error) return { mounted: false, why: pinOf(meta, base).error };
-  const grant = await reporterToken(base, { fetch });
-  if (!grant) return { mounted: false, why: "fold serve does not report to Clax here" };
-  // The overlay comes from the Clax the reports go to (fold serve's config names it: localhost on the Mac, its tailnet URL elsewhere).
-  const pin = pinOf(meta, grant.clax);
-  const sdk = await load(doc, pin);
-  // The SDK's overlay entry (@empathic/clax-sdk/overlay). ASSUMED, not read: `mountOverlay` and its options are this side's
-  // guess, since the SDK's source was out of reach when this was written; the first pinned build settles them (viewer/.qual).
-  // Its host token set is clax-sdk-kit-goal's close condition 4: until the overlay takes `tokens`, it keeps its own look.
-  const tokens = await fetch(new URL("theme.tokens.json", base).href).then((r) => (r.ok ? r.json() : null)).catch(() => null);
-  const overlay = sdk.mountOverlay ?? sdk.default?.mountOverlay;
-  if (typeof overlay !== "function") return { mounted: false, why: "the pinned SDK has no mountOverlay" };
-  overlay({
-    endpoint: grant.clax,
-    queue: grant.queue,
-    owner: grant.owner,
-    token: grant.token,
-    refreshToken: async () => (await reporterToken(base, { fetch }))?.token ?? null,
-    target: (node, seen = {}) => targetOf(node, { locus: doc.location?.href ?? base, ...seen }),
-    tokens,
-  });
-  return { mounted: true, unnamed: flagUnnamed(doc).length };
-}
-
-/** The overlay as a Clax instance serves it: `/_clax/overlay.js`, a classic script that defines the global `Clax` (the same source as
- * the SDK's `./overlay` entry, work-clax-sdk-kit-goal via personal-assistant 8c6b5d22), loaded with its SRI digest. */
-function importPinned(doc, { src, integrity }) {
+/** The overlay script, loaded with its SRI digest: a classic script that defines the global `Clax`. */
+function loadPinned(doc, { src, integrity }) {
   return new Promise((resolve, reject) => {
     const s = doc.createElement("script");
     s.src = src; s.integrity = integrity; s.crossOrigin = "anonymous";
@@ -107,4 +73,31 @@ function importPinned(doc, { src, integrity }) {
     s.addEventListener("error", () => reject(new Error(`the overlay ${src} did not load (or its digest did not match)`)));
     doc.head.append(s);
   });
+}
+
+/** Load the pinned overlay and mount it for the fold in view (`at()` gives `{fold, rows}`): `Clax.overlay({instance, queue, auth,
+ * externalId, metadata})`, `auth` asking fold serve for each reporter token. Resolves to `{mounted, why?, reopen()}`: call reopen()
+ * after each move to another fold. Nothing is fetched or loaded until the pin holds. */
+export async function embed({ doc = document, base = doc.baseURI, fetch = globalThis.fetch, load = loadPinned, at = () => ({ fold: null, rows: [] }) } = {}) {
+  const off = (why) => ({ mounted: false, why, reopen() {} });
+  const pin = pinOf(doc.querySelector('meta[name="clax-sdk"]'), base);
+  if (pin.error) return off(pin.error);
+  const mount = await reportToken(base, null, { fetch });
+  if (!mount?.instance || !mount?.queue) return off("fold serve does not report to Clax here");
+  const Clax = await load(doc, pin);
+  if (typeof Clax?.overlay !== "function") return off("the pinned overlay has no Clax.overlay");
+  const auth = async (publicKey) => {
+    const t = await reportToken(base, publicKey, { fetch });
+    if (!t?.token || !t?.expires_at) throw new Error("fold serve did not mint a reporter token");
+    return { token: t.token, expires_at: t.expires_at };
+  };
+  let handle = null;
+  const reopen = () => {
+    handle?.close();
+    const { fold, rows } = at();
+    flagUnnamed(doc);
+    handle = Clax.overlay({ instance: mount.instance, queue: mount.queue, auth, ...contextOf(fold, rows ?? [], mount.owner) }, doc);
+  };
+  reopen();
+  return { mounted: true, reopen };
 }

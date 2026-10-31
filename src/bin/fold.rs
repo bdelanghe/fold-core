@@ -5,7 +5,8 @@
 //!   <bin> [--act-seat <seat>] [--act-log <file>]`, an act's form may ack, defer or decline a chitin message for that one login
 //!   (S2: allie-s2-fold-act-write): the key is made if missing (0600), the seat is `fold-act` unless named, and each act's line goes
 //!   to `--act-log`, by default `acts.jsonl` beside the key. With `--report-config <file>` (src/report.rs), `POST report-token`
-//!   mints Clax reporter tokens for the config's one login: the queue's grant is read at start by the config's `grant_cmd` and
+//!   gets Clax reporter tokens for the config's one login from the instance beside it, and `GET clax/overlay.js` passes its
+//!   overlay through: the queue's grant (token and key) is read at start by the config's `grant_cmd` and `grant_key_cmd` and
 //!   kept in memory only, and a config inside `--root` is refused (it would be served).
 //! - `fold sink --port <n> --log <signals.jsonl> [--per-minute <n>]`: the pings and reports, append-only (src/sink.rs), put at
 //!   `<mount>/_sink`.
