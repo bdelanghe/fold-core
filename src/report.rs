@@ -85,6 +85,9 @@ pub struct Config {
     pub grant_cmd: Vec<String>,
 }
 
+/// What reads a service grant: given `grant_cmd`'s argv, the key's bytes (its stdout), or why not. [`run_grant`] runs it; tests stub it.
+pub type Grant = dyn Fn(&[String]) -> Result<Vec<u8>, String>;
+
 /// Fields a config may never hold: a key in a file is the one thing this design rules out.
 const SECRET: [&str; 5] = ["key", "grant", "secret", "token", "password"];
 
@@ -119,7 +122,7 @@ impl Config {
     }
 
     /// The config with its grant: `grant` runs `grant_cmd` and gives its stdout; one trailing newline is not part of the key.
-    pub fn with_grant(self, grant: &dyn Fn(&[String]) -> Result<Vec<u8>, String>) -> Result<Reporting, String> {
+    pub fn with_grant(self, grant: &Grant) -> Result<Reporting, String> {
         let mut key = grant(&self.grant_cmd)?;
         while key.last().is_some_and(|b| *b == b'\n' || *b == b'\r') {
             key.pop();
