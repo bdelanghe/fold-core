@@ -11,6 +11,11 @@
 <meta name="fold-data" content="/fold-data/fleet/page.json" data-source="fleet-map">
 <meta name="fold-live" content="/live" data-seat="personal-super-human">
 <link rel="modulepreload" href="fold-core.js">
+<!-- On the Home Screen (manifest.webmanifest, sw.js). No icon until the icon panel picks one (Bobby c1bd20fe). -->
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="apple-mobile-web-app-title" content="Fold">
+<meta name="theme-color" content="#EDEAE1" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#16221C" media="(prefers-color-scheme: dark)">
 <title>Fold</title>
 <!-- Its look, one stylesheet shared with every fold's pre-rendered page (src/page.rs links it as <base>fold.css). -->
 <link rel="stylesheet" href="fold.css">
@@ -19,6 +24,8 @@
 <form class="reading" role="search" aria-label="Reading"><label for="reading">Reading</label>
 <input id="reading" name="data" type="search" spellcheck="false" autocomplete="off" aria-describedby="reading-note">
 <button type="submit">Open</button><span id="reading-note" class="note"></span></form>
+<!-- Said when the fold shown is a kept copy (its host did not answer): read with the fold's heading, which describes itself by it. -->
+<p id="stale" class="stale" hidden></p>
 <main><h1 tabindex="-1">Loading…</h1></main>
 <script type="module">
 // A fold viewer that holds no data: it fetches one JSON document from the data origin (the fold-data meta), folds it here with the
@@ -29,7 +36,7 @@
 // the next and previous slide in reading order; l or Enter still goes into the point under the cursor, h back out.
 import { core } from "./fold-core.js";
 import { toDom, liveLine } from "./fold-dom.js";
-import { at, dataOf, docId, href as link, modeOf, open, pathOf, viewOf } from "./view.js";
+import { at, dataOf, docId, href as link, modeOf, open, pathOf, since, viewOf } from "./view.js";
 const zone = Intl.DateTimeFormat().resolvedOptions().timeZone;
 const meta = document.querySelector('meta[name="fold-data"]');
 // The document read, always said in the Reading box: the meta's, or one named in the address by an absolute path on this site
@@ -37,7 +44,14 @@ const meta = document.querySelector('meta[name="fold-data"]');
 const data = dataOf(location.search, location.href, { path: meta.content, source: meta.dataset.source });
 document.getElementById("reading").value = data.path;
 document.getElementById("reading-note").textContent = data.error ? `Not read: ${data.error}` : data.source ? `From ${data.source}` : "Named in the address";
-let nodes = new Map(), said = "", node = null, cur = 0, cameFrom = null, last = [];
+let nodes = new Map(), said = "", node = null, cur = 0, cameFrom = null, last = [], kept = null;
+// Kept (sw.js answered from its copy): the note says since when and how long ago, and the heading is described by it, so a screen
+// reader hears it with the title as the page opens. Fresh again, it goes.
+function stale() {
+  const p = document.getElementById("stale"), h = document.querySelector("main h1");
+  p.hidden = !kept; p.textContent = kept ? since(kept, new Date(), zone) : "";
+  if (kept) h?.setAttribute("aria-describedby", "stale"); else h?.removeAttribute("aria-describedby");
+}
 const href = (p, m = modeOf(location.hash, node)) => link(p, m);
 const rows = () => [...document.querySelectorAll("ol.rows > li.obj")]; // the child objects; property rows are read, not entered
 function render(focus) {
@@ -60,6 +74,7 @@ function render(focus) {
   const back = cameFrom == null ? -1 : (node?.kids ?? []).findIndex(k => k.id === cameFrom);
   if (back >= 0) { cur = back; cameFrom = null; }
   move(Math.min(cur, Math.max(0, rows().length - 1)));
+  stale();
   if (focus) main.querySelector("h1").focus();
 }
 function move(i) {
@@ -77,9 +92,9 @@ function show(focus) {
 async function load() {
   try {
     if (data.error) throw new Error(data.error);
-    const next = await open(fold, data.url, { opts: (modified) => ({ ...(data.source ? { source: data.source } : {}), updated: modified ?? new Date().toISOString(), localTimeZone: zone }) });
+    const next = await open(fold, data.url, { opts: (modified) => ({ ...(data.source ? { source: data.source } : {}), updated: modified ?? new Date().toISOString(), localTimeZone: zone }), stored: (at) => { kept = at; } });
     const text = JSON.stringify([...next]);
-    if (text === said) return false;
+    if (text === said) { stale(); return false; }
     nodes = next; said = text; return true;
   } catch (e) {
     if (!nodes.size) nodes = new Map([["root", { title: "Could not read the data", trail: [], text: [`${data.path}: ${e?.message ?? e}`] }]]);
@@ -100,6 +115,8 @@ addEventListener("keydown", e => {
   e.preventDefault();
 });
 addEventListener("hashchange", () => show(true));
+// Offline: the shell and the last document read are kept (sw.js), so with the host asleep this page still opens on its last fold.
+navigator.serviceWorker?.register("sw.js").catch(() => {});
 const { fold, ax } = await core(await (await fetch("fold_core.wasm")).arrayBuffer());
 await load();
 // Allie's keys work on arrival: the first render focuses the title, so the page gets the arrow keys without a click first.

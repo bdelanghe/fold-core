@@ -27,6 +27,9 @@ form.reading{display:flex;flex-wrap:wrap;gap:.5rem;align-items:center;padding-bo
 form.reading input{flex:1;min-width:12ch;min-height:44px;font:var(--s-1) ui-monospace,monospace;color:var(--ink);background:var(--card);border:1px solid var(--line);border-radius:.4em;padding:0 .5em}
 form.reading button{font:inherit;min-height:44px;color:var(--paper);background:var(--accent);border:1px solid var(--accent);border-radius:.4em;padding:0 1em}
 form.reading .note{flex-basis:100%;color:var(--soft);overflow-wrap:anywhere}
+/* A kept copy shown, its host asleep (sw.js): said above the fold, in ink, not soft. */
+p.stale{max-width:42rem;margin:16px auto 0;padding:.5em 16px;color:var(--ink);background:var(--card);border-left:4px solid var(--accent)}
+p.stale[hidden]{display:none}
 nav ol{list-style:none;margin:0;padding:0;font:var(--s-1)/1.6 var(--face)}
 nav li{display:inline}
 nav a{display:inline-block;max-width:14ch;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;vertical-align:bottom}

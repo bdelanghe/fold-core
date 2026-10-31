@@ -22,11 +22,13 @@ export const froms = (o) =>
 /**
  * The document at `url` (absolute), folded: its `from` files are fetched relative to it, and one that cannot be fetched is left out,
  * so the core notes it as fold.ts does. `opts(modified)` gives the fold's options from the document's Last-Modified (an ISO time, or
- * null when it has none).
+ * null when it has none). `stored(at)` is told when the copy read was kept (sw.js's Fold-Stored, an ISO time), or null for a fresh one.
  */
-export async function open(fold, url, { fetch = globalThis.fetch, opts = () => ({}) } = {}) {
+export async function open(fold, url, { fetch = globalThis.fetch, opts = () => ({}), stored = () => {} } = {}) {
   const r = await fetch(url, { cache: "no-cache" });
   if (!r.ok) throw new Error(`${url}: ${r.status} ${r.statusText ?? ""}`.trim());
+  const kept = r.headers?.get?.("fold-stored");
+  stored(kept && !Number.isNaN(Date.parse(kept)) ? new Date(kept).toISOString() : null);
   const root = await r.json();
   const files = {};
   await Promise.all(froms(root).map(async (p) => {
@@ -50,4 +52,17 @@ export function dataOf(search, base, meta) {
 export function viewOf(ax, nodes, hash, localTimeZone) {
   const path = pathOf(hash), node = nodes.get(docId(path)), mode = modeOf(hash, node);
   return { path, mode, node, tree: ax({ node: node ?? null, path, mode, href: "viewer", localTimeZone }) };
+}
+
+/** What the viewer says over a fold read from the copy kept at `at` (an ISO time) when its host did not answer: the time it is
+ * from, in the reader's zone (with the day once it is not today), and its age in words. "Not updated since 14:05, 3 hours ago." */
+export function since(at, now, timeZone) {
+  // built from parts, so it reads the same under every ICU (each words a date and time joined its own way)
+  const parts = (d) => Object.fromEntries(new Intl.DateTimeFormat("en-GB", { timeZone, weekday: "short", year: "numeric", month: "short", day: "numeric",
+    hour: "2-digit", minute: "2-digit", hourCycle: "h23" }).formatToParts(d).map((p) => [p.type, p.value]));
+  const t = new Date(at), p = parts(t), n = parts(now), time = `${p.hour}:${p.minute}`;
+  const when = p.year === n.year && p.month === n.month && p.day === n.day ? time : `${p.weekday} ${p.day} ${p.month} at ${time}`;
+  const m = Math.max(0, Math.floor((now - t) / 60_000)), rel = new Intl.RelativeTimeFormat("en", { numeric: "always" });
+  const age = m < 1 ? "less than a minute ago" : m < 60 ? rel.format(-m, "minute") : m < 48 * 60 ? rel.format(-Math.floor(m / 60), "hour") : rel.format(-Math.floor(m / 1440), "day");
+  return `Not updated since ${when}, ${age}.`;
 }

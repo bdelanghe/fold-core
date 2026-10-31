@@ -14,9 +14,12 @@ const input = JSON.parse(readFileSync(join(import.meta.dir, "..", "goldens", `${
 // The Reading box's accessibility tree at each address: [role, name, value, description] for the landmark and its controls.
 const reading: Record<string, string[][]> = JSON.parse(readFileSync(join(import.meta.dir, "..", "goldens", "viewer", "reading.ax.json"), "utf8"));
 const page = JSON.stringify(input.root), demo = JSON.stringify({ ...input.root, title: "Demo" });
+// Asleep, the host answers nothing, as phobos asleep: no refusal, no reply.
+let asleep = false;
 const server = Bun.serve({
   hostname: "127.0.0.1", port: 0,
   fetch(req) {
+    if (asleep) return new Promise<Response>(() => {});
     const p = new URL(req.url).pathname;
     if (p === "/fold-data/fleet/page.json") return new Response(page, { headers: { "content-type": "application/json" } });
     if (p === "/fold-data/demo/page.json") return new Response(demo, { headers: { "content-type": "application/json" } });
@@ -78,6 +81,35 @@ for (const [w, h, id, n, at0, submit] of [...runs, typed] as (readonly [number, 
   const want = reading[landed];
   const ok = ready && h1.length === 1 && h1[0] === n.title && objs === (n.kids ?? []).length && !!want && JSON.stringify(box) === JSON.stringify(want);
   console.log(`${ok ? "ok  " : "FAIL"} ${w}x${h} ${at0}${submit ? ` opened ${submit}` : ""} ${id}: heading ${JSON.stringify(h1)}, ${objs} rows, reading ${JSON.stringify(box)} at ${landed} (want ${JSON.stringify(n.title)}, ${(n.kids ?? []).length}, ${JSON.stringify(want)})`);
+  if (!ok) { failed++; console.log(err.slice(-2000)); }
+}
+// The host asleep (brief items 10 and 22): /fold opened once through its service worker (sw.js), then its host answers nothing.
+// Opened again, it shows the last fold it read, its rows, and a note of since when and how long ago, which is the heading's
+// description in Chrome's accessibility tree, so VoiceOver hears it with the title as the page opens.
+async function whileAsleep(w: number, h: number) {
+  const c = await chrome(chromium, w, h, `chromium-asleep-${w}`), { send, value } = c;
+  const until = Date.now() + 60_000, wait = async (e: string) => { while (!(await value(e)) && Date.now() < until) await Bun.sleep(100); return !!(await value(e)); };
+  // a fresh document each time: the old one's marker gone and the new one rendered
+  const opened = async () => { await value("window.__was = 1"); await send("Page.navigate", { url: `http://127.0.0.1:${server.port}/fold/` }); return wait(`!window.__was && document.body?.dataset.ready === "1"`); };
+  try {
+    await send("Page.enable");
+    const first = (await opened()) && (await wait("!!navigator.serviceWorker.controller"));
+    const kept = await opened(); // read through the worker, so the page and the document are kept
+    asleep = true;
+    const again = await opened();
+    const note = await value(`document.getElementById("stale").hidden ? null : document.getElementById("stale").textContent`);
+    const { nodes } = await send("Accessibility.getFullAXTree");
+    const h1 = nodes.filter((x: any) => !x.ignored && x.role?.value === "heading" && x.properties?.some((q: any) => q.name === "level" && q.value.value === 1))
+      .map((x: any) => [x.name?.value ?? "", x.description?.value ?? ""]);
+    const objs = await value(`document.querySelectorAll("ol.rows > li.obj").length`);
+    return { first, kept, again, note, h1, objs, err: c.err() };
+  } finally { asleep = false; await c.close(); }
+}
+for (const [w, h] of [[390, 844], [1024, 1366]]) {
+  const { first, kept, again, note, h1, objs, err } = await whileAsleep(w, h);
+  const said = /^Not updated since \d\d:\d\d, less than a minute ago\.$/.test(note ?? "");
+  const ok = first && kept && again && said && h1.length === 1 && h1[0][0] === root.title && h1[0][1] === note && objs === root.kids.length;
+  console.log(`${ok ? "ok  " : "FAIL"} ${w}x${h} /fold/ with its host asleep: opened ${[first, kept, again]}, heading ${JSON.stringify(h1)}, ${objs} rows, note ${JSON.stringify(note)} (want ${JSON.stringify(root.title)}, ${root.kids.length})`);
   if (!ok) { failed++; console.log(err.slice(-2000)); }
 }
 server.stop(true);

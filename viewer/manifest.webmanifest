@@ -1,0 +1,11 @@
+{
+  "name": "Fold",
+  "short_name": "Fold",
+  "description": "One fold at a time: what needs you now, and a path to anything.",
+  "lang": "en",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#EDEAE1",
+  "theme_color": "#0C5A42"
+}
