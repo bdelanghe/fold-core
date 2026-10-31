@@ -7,7 +7,15 @@
 //!   to `--act-log`, by default `acts.jsonl` beside the key. With `--report-config <file>` (src/report.rs), `POST report-token`
 //!   gets Clax reporter tokens for the config's one login from the instance beside it, and `GET clax/overlay.js` passes its
 //!   overlay through: the queue's grant (token and key) is read at start by the config's `grant_cmd` and `grant_key_cmd` and
-//!   kept in memory only, and a config inside `--root` is refused (it would be served).
+//!   kept in memory only, and a config inside `--root` is refused (it would be served). For Basis (queue `basis`, its grant in
+//!   the Fleet vault as `basis-clax-queue`, break-glass 4ce29c19), with no secret in it:
+//!
+//!   ```json
+//!   {"login": "<tailnet login>", "host": "phobos.tail556f5b.ts.net", "clax": "<the instance as the page reaches it>",
+//!    "upstream": "http://127.0.0.1:7480", "queue": "01M69KNBQYTNYKGAH3W15EGY5J", "owner": "personal-allie-lead",
+//!    "source": "fleet-map", "grant_cmd": ["op", "read", "op://Fleet/basis-clax-queue/credential"],
+//!    "grant_key_cmd": ["op", "read", "op://Fleet/basis-clax-queue/private key"]}
+//!   ```
 //! - `fold sink --port <n> --log <signals.jsonl> [--per-minute <n>]`: the pings and reports, append-only (src/sink.rs), put at
 //!   `<mount>/_sink`.
 

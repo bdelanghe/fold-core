@@ -47,8 +47,8 @@ pub struct Reporting {
     pub minter: Box<dyn Minter>,
     /// The document's source, as the pages' haecceities name it (id.rs `haecceity`): a comment's artifact is its fold's IRI.
     pub source: String,
-    /// What files a comment made with JS off (serve.rs's comment page) as a Clax report, if anything: none yet, so that page says
-    /// comments from it are not on (a server-side reporter waits on Bobby's answer on the grant).
+    /// What files a comment made with JS off (serve.rs's comment page) as a Clax report ([`ClaxFiler`] on the queue's grant), if
+    /// anything: without one, that page says comments from it are not on.
     pub filer: Option<Box<dyn Filer>>,
 }
 
@@ -175,6 +175,13 @@ impl Config {
         let key = one(&self.grant_key_cmd, "key")?;
         // The signer is made now, so a key that is not one fails fold serve's start, not a reader's first report.
         let signer = Ed25519::from_pkcs8_b64url(&key)?;
+        let filer_signer = Ed25519::from_pkcs8_b64url(&key)?;
+        let origin = format!("https://{}", self.host);
+        // The no-JS comment page's reporter mints through its own minter on the same grant (break-glass 4ce29c19: the queue and
+        // grant exist, read at start through the read-only op service account, memory only).
+        let filer_minter =
+            ClaxMinter::new(self.upstream.clone(), self.queue.clone(), token.clone(), key.clone()).with_signer(Box::new(filer_signer));
+        let filer = ClaxFiler::new(self.upstream.clone(), self.queue.clone(), origin, self.login.clone(), Box::new(filer_minter));
         let minter = ClaxMinter::new(self.upstream.clone(), self.queue.clone(), token, key).with_signer(Box::new(signer));
         Ok(Reporting {
             login: self.login,
@@ -185,7 +192,7 @@ impl Config {
             owner: self.owner,
             minter: Box::new(minter),
             source: self.source,
-            filer: None,
+            filer: Some(Box::new(filer)),
         })
     }
 }
@@ -300,7 +307,7 @@ pub fn multipart(boundary: &str, fields: &[(&str, &str)]) -> Vec<u8> {
 /// A server-side reporter (option A of close condition 4, work-clax-sdk-kit-goal 78183de6 and 56b30077): for each comment a fresh
 /// Ed25519 key, a reporter token minted for it, and a signed `POST /api/queues/<q>/reporter/reports` with `Authorization:
 /// Clax-Reporter <cxr_…>`, the `Origin` the token was minted for, and the fields `external_id`, `url`, `title`, `anchor` (the
-/// artifact anchor) and `body`. Not wired into `fold serve` until Bobby answers on the grant: [`Config::with_grant`] gives no filer.
+/// artifact anchor) and `body`. [`Config::with_grant`] makes one on the same grant as the minter.
 pub struct ClaxFiler {
     pub upstream: String,
     pub queue: String,
