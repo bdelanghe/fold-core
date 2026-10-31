@@ -66,13 +66,15 @@ fn under(path: &[String]) -> String {
     path.iter().map(|p| segment_of(p)).collect::<Vec<_>>().join("/")
 }
 
-/// The tree as a page shows it: links into the fold are `local` (same tab), the heading has the fold's id, and each child row
-/// carries its id and haecceity.
+/// The tree as a page shows it: links into the fold are `local` (same tab) and `ping` `<base>_sink/v` (fold sink, brief items 24
+/// and 27: the browser itself says which row was followed), the heading has the fold's id, and each child row carries its id and
+/// haecceity.
 fn mark(ax: &mut Value, base: &str, own: &str, rows: &[(String, String)]) {
     let Some(o) = ax.as_object_mut() else { return };
     let role = o.get("role").and_then(Value::as_str).unwrap_or("").to_string();
     if role == "link" && o.get("href").and_then(Value::as_str).is_some_and(|h| h.starts_with(base)) {
         o.insert("local".into(), true.into());
+        o.insert("ping".into(), format!("{base}_sink/v").into());
     }
     if role == "heading" {
         o.insert("id".into(), own.into());

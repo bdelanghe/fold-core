@@ -1,0 +1,302 @@
+[
+  {
+    "what": "a ping: the row followed, from and to; no body",
+    "request": {
+      "method": "POST",
+      "target": "/v",
+      "headers": [
+        [
+          "Tailscale-User-Login",
+          "bobby@example.com"
+        ],
+        [
+          "Content-Type",
+          "text/ping"
+        ],
+        [
+          "Ping-From",
+          "https://phobos/fold/"
+        ],
+        [
+          "Ping-To",
+          "https://phobos/fold/a%20b/#a%20b"
+        ]
+      ]
+    },
+    "status": 204,
+    "headers": [
+      [
+        "Cache-Control",
+        "no-store"
+      ]
+    ],
+    "record": {
+      "at": "2026-10-31T01:00:15Z",
+      "kind": "ping",
+      "viewer": "bobby@example.com",
+      "from": "https://phobos/fold/",
+      "to": "https://phobos/fold/a%20b/#a%20b"
+    }
+  },
+  {
+    "what": "reports from the Reporting API",
+    "request": {
+      "method": "POST",
+      "target": "/report",
+      "headers": [
+        [
+          "Tailscale-User-Login",
+          "bobby@example.com"
+        ],
+        [
+          "Content-Type",
+          "application/reports+json"
+        ]
+      ]
+    },
+    "status": 204,
+    "headers": [
+      [
+        "Cache-Control",
+        "no-store"
+      ]
+    ],
+    "record": {
+      "at": "2026-10-31T01:00:15Z",
+      "kind": "report",
+      "viewer": "bobby@example.com",
+      "reports": [
+        {
+          "type": "csp-violation",
+          "age": 0,
+          "url": "https://phobos/fold/",
+          "body": {
+            "effectiveDirective": "script-src"
+          }
+        }
+      ]
+    }
+  },
+  {
+    "what": "no tailnet identity: refused, nothing logged",
+    "request": {
+      "method": "POST",
+      "target": "/v",
+      "headers": [
+        [
+          "Content-Type",
+          "text/ping"
+        ],
+        [
+          "Ping-From",
+          "https://phobos/fold/"
+        ],
+        [
+          "Ping-To",
+          "https://phobos/fold/a%20b/#a%20b"
+        ]
+      ]
+    },
+    "status": 403,
+    "headers": [
+      [
+        "Content-Type",
+        "text/plain; charset=utf-8"
+      ],
+      [
+        "Cache-Control",
+        "no-store"
+      ]
+    ],
+    "record": null
+  },
+  {
+    "what": "an empty identity is none",
+    "request": {
+      "method": "POST",
+      "target": "/v",
+      "headers": [
+        [
+          "Tailscale-User-Login",
+          ""
+        ],
+        [
+          "Content-Type",
+          "text/ping"
+        ]
+      ]
+    },
+    "status": 403,
+    "headers": [
+      [
+        "Content-Type",
+        "text/plain; charset=utf-8"
+      ],
+      [
+        "Cache-Control",
+        "no-store"
+      ]
+    ],
+    "record": null
+  },
+  {
+    "what": "not a ping",
+    "request": {
+      "method": "POST",
+      "target": "/v",
+      "headers": [
+        [
+          "Tailscale-User-Login",
+          "bobby@example.com"
+        ],
+        [
+          "Content-Type",
+          "application/json"
+        ]
+      ]
+    },
+    "status": 415,
+    "headers": [
+      [
+        "Content-Type",
+        "text/plain; charset=utf-8"
+      ],
+      [
+        "Cache-Control",
+        "no-store"
+      ]
+    ],
+    "record": null
+  },
+  {
+    "what": "reports that are not a JSON array",
+    "request": {
+      "method": "POST",
+      "target": "/report",
+      "headers": [
+        [
+          "Tailscale-User-Login",
+          "bobby@example.com"
+        ],
+        [
+          "Content-Type",
+          "application/reports+json"
+        ]
+      ]
+    },
+    "status": 400,
+    "headers": [
+      [
+        "Content-Type",
+        "text/plain; charset=utf-8"
+      ],
+      [
+        "Cache-Control",
+        "no-store"
+      ]
+    ],
+    "record": null
+  },
+  {
+    "what": "reports that are not JSON",
+    "request": {
+      "method": "POST",
+      "target": "/report",
+      "headers": [
+        [
+          "Tailscale-User-Login",
+          "bobby@example.com"
+        ],
+        [
+          "Content-Type",
+          "application/reports+json"
+        ]
+      ]
+    },
+    "status": 400,
+    "headers": [
+      [
+        "Content-Type",
+        "text/plain; charset=utf-8"
+      ],
+      [
+        "Cache-Control",
+        "no-store"
+      ]
+    ],
+    "record": null
+  },
+  {
+    "what": "nothing else to post to",
+    "request": {
+      "method": "POST",
+      "target": "/approve",
+      "headers": [
+        [
+          "Tailscale-User-Login",
+          "bobby@example.com"
+        ]
+      ]
+    },
+    "status": 404,
+    "headers": [
+      [
+        "Content-Type",
+        "text/plain; charset=utf-8"
+      ],
+      [
+        "Cache-Control",
+        "no-store"
+      ]
+    ],
+    "record": null
+  },
+  {
+    "what": "nothing to read: append-only",
+    "request": {
+      "method": "GET",
+      "target": "/v",
+      "headers": [
+        [
+          "Tailscale-User-Login",
+          "bobby@example.com"
+        ]
+      ]
+    },
+    "status": 405,
+    "headers": [
+      [
+        "Content-Type",
+        "text/plain; charset=utf-8"
+      ],
+      [
+        "Cache-Control",
+        "no-store"
+      ],
+      [
+        "Allow",
+        "POST"
+      ]
+    ],
+    "record": null
+  },
+  {
+    "what": "the 62nd ping in a minute: refused, nothing logged",
+    "status": 429,
+    "headers": [
+      [
+        "Content-Type",
+        "text/plain; charset=utf-8"
+      ],
+      [
+        "Cache-Control",
+        "no-store"
+      ],
+      [
+        "Retry-After",
+        "45"
+      ]
+    ],
+    "record": null
+  }
+]

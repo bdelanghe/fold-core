@@ -1,0 +1,556 @@
+[
+  {
+    "what": "a fold page at its bare path: always revalidated, its file digest the ETag",
+    "request": {
+      "method": "GET",
+      "target": "/",
+      "headers": [
+        [
+          "Tailscale-User-Login",
+          "bobby@example.com"
+        ],
+        [
+          "Referer",
+          "https://phobos/fold/a%20b/"
+        ]
+      ]
+    },
+    "status": 200,
+    "headers": [
+      [
+        "Content-Type",
+        "text/html; charset=utf-8"
+      ],
+      [
+        "Cache-Control",
+        "no-cache"
+      ],
+      [
+        "ETag",
+        "\"sha-256:b63bfb63c8492b82f4979244a67e7eb019bff74ea74c97ca4d2a8b23319d064b\""
+      ],
+      [
+        "Last-Modified",
+        "Fri, 30 Oct 2026 12:00:00 GMT"
+      ],
+      [
+        "Content-Digest",
+        "sha-256=:tjv7Y8hJK4L0l5JEpn5+sBm/906nTJfKTSqLIzGdBks=:"
+      ],
+      [
+        "Server-Timing",
+        "digest;desc=\"sha-256:b63bfb63c8492b82f4979244a67e7eb019bff74ea74c97ca4d2a8b23319d064b\", asof;desc=\"2026-10-30T12:00:00Z\""
+      ],
+      [
+        "Reporting-Endpoints",
+        "default=\"/fold/_sink/report\""
+      ],
+      [
+        "Content-Security-Policy-Report-Only",
+        "default-src 'self'; script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval'; style-src 'self'; img-src 'self' data:; report-to default"
+      ]
+    ],
+    "body_bytes": 63
+  },
+  {
+    "what": "a fold page under it, its segment percent-decoded as the file names are",
+    "request": {
+      "method": "GET",
+      "target": "/a%20b/",
+      "headers": [
+        [
+          "Tailscale-User-Login",
+          "bobby@example.com"
+        ]
+      ]
+    },
+    "status": 200,
+    "headers": [
+      [
+        "Content-Type",
+        "text/html; charset=utf-8"
+      ],
+      [
+        "Cache-Control",
+        "no-cache"
+      ],
+      [
+        "ETag",
+        "\"sha-256:166ce3069aa64783d6acfcd07d779d05309a0d6e6f6fcbf743a44f069b51a72f\""
+      ],
+      [
+        "Last-Modified",
+        "Fri, 30 Oct 2026 12:00:00 GMT"
+      ],
+      [
+        "Content-Digest",
+        "sha-256=:FmzjBpqmR4PWrPzQfXedBTCaDW5vb8v3Q6RPBptRpy8=:"
+      ],
+      [
+        "Server-Timing",
+        "digest;desc=\"sha-256:166ce3069aa64783d6acfcd07d779d05309a0d6e6f6fcbf743a44f069b51a72f\", asof;desc=\"2026-10-30T12:00:00Z\""
+      ],
+      [
+        "Reporting-Endpoints",
+        "default=\"/fold/_sink/report\""
+      ],
+      [
+        "Content-Security-Policy-Report-Only",
+        "default-src 'self'; script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval'; style-src 'self'; img-src 'self' data:; report-to default"
+      ]
+    ],
+    "body_bytes": 71
+  },
+  {
+    "what": "a directory without its slash moves to it, under the mount",
+    "request": {
+      "method": "GET",
+      "target": "/a%20b",
+      "headers": []
+    },
+    "status": 301,
+    "headers": [
+      [
+        "Location",
+        "/fold/a%20b/"
+      ],
+      [
+        "Cache-Control",
+        "no-store"
+      ]
+    ],
+    "body_bytes": 0
+  },
+  {
+    "what": "revalidated and unchanged: 304, no body",
+    "request": {
+      "method": "GET",
+      "target": "/",
+      "headers": [
+        [
+          "Tailscale-User-Login",
+          "bobby@example.com"
+        ],
+        [
+          "If-None-Match",
+          "\"sha-256:b63bfb63c8492b82f4979244a67e7eb019bff74ea74c97ca4d2a8b23319d064b\""
+        ]
+      ]
+    },
+    "status": 304,
+    "headers": [
+      [
+        "Cache-Control",
+        "no-cache"
+      ],
+      [
+        "ETag",
+        "\"sha-256:b63bfb63c8492b82f4979244a67e7eb019bff74ea74c97ca4d2a8b23319d064b\""
+      ],
+      [
+        "Last-Modified",
+        "Fri, 30 Oct 2026 12:00:00 GMT"
+      ],
+      [
+        "Server-Timing",
+        "digest;desc=\"sha-256:b63bfb63c8492b82f4979244a67e7eb019bff74ea74c97ca4d2a8b23319d064b\", asof;desc=\"2026-10-30T12:00:00Z\""
+      ],
+      [
+        "Reporting-Endpoints",
+        "default=\"/fold/_sink/report\""
+      ],
+      [
+        "Content-Security-Policy-Report-Only",
+        "default-src 'self'; script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval'; style-src 'self'; img-src 'self' data:; report-to default"
+      ]
+    ],
+    "body_bytes": 0
+  },
+  {
+    "what": "a prefetch: served the same (and, never pinging, never a view)",
+    "request": {
+      "method": "GET",
+      "target": "/a%20b/",
+      "headers": [
+        [
+          "Tailscale-User-Login",
+          "bobby@example.com"
+        ],
+        [
+          "Sec-Purpose",
+          "prefetch"
+        ]
+      ]
+    },
+    "status": 200,
+    "headers": [
+      [
+        "Content-Type",
+        "text/html; charset=utf-8"
+      ],
+      [
+        "Cache-Control",
+        "no-cache"
+      ],
+      [
+        "ETag",
+        "\"sha-256:166ce3069aa64783d6acfcd07d779d05309a0d6e6f6fcbf743a44f069b51a72f\""
+      ],
+      [
+        "Last-Modified",
+        "Fri, 30 Oct 2026 12:00:00 GMT"
+      ],
+      [
+        "Content-Digest",
+        "sha-256=:FmzjBpqmR4PWrPzQfXedBTCaDW5vb8v3Q6RPBptRpy8=:"
+      ],
+      [
+        "Server-Timing",
+        "digest;desc=\"sha-256:166ce3069aa64783d6acfcd07d779d05309a0d6e6f6fcbf743a44f069b51a72f\", asof;desc=\"2026-10-30T12:00:00Z\""
+      ],
+      [
+        "Reporting-Endpoints",
+        "default=\"/fold/_sink/report\""
+      ],
+      [
+        "Content-Security-Policy-Report-Only",
+        "default-src 'self'; script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval'; style-src 'self'; img-src 'self' data:; report-to default"
+      ]
+    ],
+    "body_bytes": 71
+  },
+  {
+    "what": "a data document: a minute fresh, four more stale while revalidating, a day stale on error",
+    "request": {
+      "method": "GET",
+      "target": "/fleet/page.json",
+      "headers": []
+    },
+    "status": 200,
+    "headers": [
+      [
+        "Content-Type",
+        "application/json"
+      ],
+      [
+        "Cache-Control",
+        "max-age=60, stale-while-revalidate=240, stale-if-error=86400"
+      ],
+      [
+        "ETag",
+        "\"sha-256:4c06ef0fa22be77427a6e1d2e02c7f8890c23e6dc40cee29ebe1205dcf3f190c\""
+      ],
+      [
+        "Last-Modified",
+        "Fri, 30 Oct 2026 12:00:00 GMT"
+      ],
+      [
+        "Content-Digest",
+        "sha-256=:TAbvD6Ir53QnpuHS4Cx/iJDCPm3EDO4p6+EgXc8/GQw=:"
+      ],
+      [
+        "Server-Timing",
+        "digest;desc=\"sha-256:4c06ef0fa22be77427a6e1d2e02c7f8890c23e6dc40cee29ebe1205dcf3f190c\", asof;desc=\"2026-10-30T12:00:00Z\""
+      ]
+    ],
+    "body_bytes": 18
+  },
+  {
+    "what": "a HEAD: the GET's headers, its length too",
+    "request": {
+      "method": "HEAD",
+      "target": "/fleet/page.json",
+      "headers": []
+    },
+    "status": 200,
+    "headers": [
+      [
+        "Content-Type",
+        "application/json"
+      ],
+      [
+        "Cache-Control",
+        "max-age=60, stale-while-revalidate=240, stale-if-error=86400"
+      ],
+      [
+        "ETag",
+        "\"sha-256:4c06ef0fa22be77427a6e1d2e02c7f8890c23e6dc40cee29ebe1205dcf3f190c\""
+      ],
+      [
+        "Last-Modified",
+        "Fri, 30 Oct 2026 12:00:00 GMT"
+      ],
+      [
+        "Content-Digest",
+        "sha-256=:TAbvD6Ir53QnpuHS4Cx/iJDCPm3EDO4p6+EgXc8/GQw=:"
+      ],
+      [
+        "Server-Timing",
+        "digest;desc=\"sha-256:4c06ef0fa22be77427a6e1d2e02c7f8890c23e6dc40cee29ebe1205dcf3f190c\", asof;desc=\"2026-10-30T12:00:00Z\""
+      ]
+    ],
+    "body_bytes": 18
+  },
+  {
+    "what": "a viewer file not addressed by digest: always revalidated",
+    "request": {
+      "method": "GET",
+      "target": "/view.js",
+      "headers": []
+    },
+    "status": 200,
+    "headers": [
+      [
+        "Content-Type",
+        "text/javascript; charset=utf-8"
+      ],
+      [
+        "Cache-Control",
+        "no-cache"
+      ],
+      [
+        "ETag",
+        "\"sha-256:8e609bb71c20b858c77f0e9f90bb1319db8477b13f9f965f1a1e18524bf50881\""
+      ],
+      [
+        "Last-Modified",
+        "Fri, 30 Oct 2026 12:00:00 GMT"
+      ],
+      [
+        "Content-Digest",
+        "sha-256=:jmCbtxwguFjHfw6fkLsTGduEd7E/n5ZfGh4YUkv1CIE=:"
+      ],
+      [
+        "Server-Timing",
+        "digest;desc=\"sha-256:8e609bb71c20b858c77f0e9f90bb1319db8477b13f9f965f1a1e18524bf50881\", asof;desc=\"2026-10-30T12:00:00Z\""
+      ]
+    ],
+    "body_bytes": 11
+  },
+  {
+    "what": "the service worker: always revalidated",
+    "request": {
+      "method": "GET",
+      "target": "/sw.js",
+      "headers": []
+    },
+    "status": 200,
+    "headers": [
+      [
+        "Content-Type",
+        "text/javascript; charset=utf-8"
+      ],
+      [
+        "Cache-Control",
+        "no-cache"
+      ],
+      [
+        "ETag",
+        "\"sha-256:33fd7fab5b4a662360609a36962644a573b92237782b4a890d2cde2e280d282d\""
+      ],
+      [
+        "Last-Modified",
+        "Fri, 30 Oct 2026 12:00:00 GMT"
+      ],
+      [
+        "Content-Digest",
+        "sha-256=:M/1/q1tKZiNgYJo2liZEpXO5Ijd4K0qJDSzeLigNKC0=:"
+      ],
+      [
+        "Server-Timing",
+        "digest;desc=\"sha-256:33fd7fab5b4a662360609a36962644a573b92237782b4a890d2cde2e280d282d\", asof;desc=\"2026-10-30T12:00:00Z\""
+      ]
+    ],
+    "body_bytes": 42
+  },
+  {
+    "what": "addressed by digest: immutable",
+    "request": {
+      "method": "GET",
+      "target": "/fold@sha256:5e1f.css",
+      "headers": []
+    },
+    "status": 200,
+    "headers": [
+      [
+        "Content-Type",
+        "text/css; charset=utf-8"
+      ],
+      [
+        "Cache-Control",
+        "public, max-age=31536000, immutable"
+      ],
+      [
+        "ETag",
+        "\"sha-256:be495095eb120d3e58e567b51f3a91889b8819805704b5417949e748bcdd0288\""
+      ],
+      [
+        "Last-Modified",
+        "Fri, 30 Oct 2026 12:00:00 GMT"
+      ],
+      [
+        "Content-Digest",
+        "sha-256=:vklQlesSDT5Y5We1HzqRiJuIGYBXBLVBeUnnSLzdAog=:"
+      ],
+      [
+        "Server-Timing",
+        "digest;desc=\"sha-256:be495095eb120d3e58e567b51f3a91889b8819805704b5417949e748bcdd0288\", asof;desc=\"2026-10-30T12:00:00Z\""
+      ]
+    ],
+    "body_bytes": 7
+  },
+  {
+    "what": "live state (--no-store sign/): never stored, no validator",
+    "request": {
+      "method": "GET",
+      "target": "/sign/pending.json",
+      "headers": [
+        [
+          "If-None-Match",
+          "*"
+        ]
+      ]
+    },
+    "status": 200,
+    "headers": [
+      [
+        "Content-Type",
+        "application/json"
+      ],
+      [
+        "Cache-Control",
+        "no-store"
+      ],
+      [
+        "Content-Digest",
+        "sha-256=:N1F+Xz3GaBn2H1p7uKzhkhKCQV8QVR0t76XD6wmFtXA=:"
+      ],
+      [
+        "Server-Timing",
+        "digest;desc=\"sha-256:37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570\", asof;desc=\"2026-10-30T12:00:00Z\""
+      ]
+    ],
+    "body_bytes": 3
+  },
+  {
+    "what": "a ping sent here, not to the sink: read-only",
+    "request": {
+      "method": "POST",
+      "target": "/_v",
+      "headers": [
+        [
+          "Tailscale-User-Login",
+          "bobby@example.com"
+        ],
+        [
+          "Content-Type",
+          "text/ping"
+        ]
+      ]
+    },
+    "status": 405,
+    "headers": [
+      [
+        "Content-Type",
+        "text/plain; charset=utf-8"
+      ],
+      [
+        "Cache-Control",
+        "no-store"
+      ],
+      [
+        "Allow",
+        "GET, HEAD"
+      ]
+    ],
+    "body_bytes": 23
+  },
+  {
+    "what": "no PUT",
+    "request": {
+      "method": "PUT",
+      "target": "/index.html",
+      "headers": []
+    },
+    "status": 405,
+    "headers": [
+      [
+        "Content-Type",
+        "text/plain; charset=utf-8"
+      ],
+      [
+        "Cache-Control",
+        "no-store"
+      ],
+      [
+        "Allow",
+        "GET, HEAD"
+      ]
+    ],
+    "body_bytes": 23
+  },
+  {
+    "what": "a .. segment, even encoded",
+    "request": {
+      "method": "GET",
+      "target": "/%2e%2e/etc/passwd",
+      "headers": []
+    },
+    "status": 400,
+    "headers": [
+      [
+        "Content-Type",
+        "text/plain; charset=utf-8"
+      ],
+      [
+        "Cache-Control",
+        "no-store"
+      ]
+    ],
+    "body_bytes": 20
+  },
+  {
+    "what": "nothing there",
+    "request": {
+      "method": "GET",
+      "target": "/missing/",
+      "headers": []
+    },
+    "status": 404,
+    "headers": [
+      [
+        "Content-Type",
+        "text/plain; charset=utf-8"
+      ],
+      [
+        "Cache-Control",
+        "no-store"
+      ]
+    ],
+    "body_bytes": 21
+  },
+  {
+    "what": "no other method",
+    "request": {
+      "method": "DELETE",
+      "target": "/",
+      "headers": []
+    },
+    "status": 405,
+    "headers": [
+      [
+        "Content-Type",
+        "text/plain; charset=utf-8"
+      ],
+      [
+        "Cache-Control",
+        "no-store"
+      ],
+      [
+        "Allow",
+        "GET, HEAD"
+      ]
+    ],
+    "body_bytes": 23
+  }
+]

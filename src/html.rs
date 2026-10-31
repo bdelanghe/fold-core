@@ -142,6 +142,9 @@ fn node(ax: &Value, n: &mut usize, row: Option<&str>) -> Result<(El, Option<Stri
     if r == "link" {
         e.attrs.push(("href", href.ok_or("fold-ax: a link needs an href")?.to_string()));
     }
+    if r == "link" && truthy(get(ax, "ping")) {
+        e.attrs.push(("ping", js::string(get(ax, "ping"))));
+    }
     if r == "button" {
         e.attrs.push(("type", "button".into()));
     }
