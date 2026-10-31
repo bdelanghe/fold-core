@@ -47,8 +47,8 @@ presents as slides also has `…/@slides/`.
 
 - **Title:** each page's `<title>` names the fold and the path it is in.
 - **Links:** moves between folds are plain links in the same tab. Each ends in `#<id>`: going in, the fold's `<h1>`, which a browser
-  focuses as it loads; going back up the path, the row you came from. No `autofocus`, which lone flags as focus theft. Each has `ping="<base>_sink/v"`, so the
-  browser itself tells `fold sink` which row was followed (no JS).
+  focuses as it loads; going back up the path, the row you came from. No `autofocus`, which lone flags as focus theft. No `ping`: with no
+  `fold sink` deployed, every followed link would POST into a 405; it comes back only when a sink is deployed for a real write.
 - **Ids:** the h1 and each child row have the HTML id of their path under the document; a row is an RDFa `schema:WebPageElement` (`resource="#<id>"`) whose `schema:about` (an empty span's `resource`) is the IRI of the thing it shows (id.rs, brief item 20). The id is the element's; the IRI is the data's; the row is never the data.
 - **Stylesheet:** every page links `viewer/fold.css`, the viewer's own.
 - **Refusals:** an id no file name can hold (empty, `.`, `..`, or holding `/`) is refused, as is a tree toDom refuses.

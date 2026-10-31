@@ -84,10 +84,10 @@ test("toDom writes a page's row as src/page.rs does (tests/pages.rs holds the sa
   const tree = { role: "main", children: [
     { role: "heading", name: "Fleet", focus: true, id: "doc" },
     { role: "list", name: "Fleet", cls: "rows", children: [{ role: "listitem", index: 0, cls: "obj", id: "a%20b", haecceity: "https://ipso.bounded.tools/doc/a%20b", children: [
-      { role: "decoration", cls: "n", name: "1" }, { role: "link", name: "Desk", href: "/fold/a%20b/#a%20b", description: "4 open", local: true, ping: "/fold/_sink/v" },
+      { role: "decoration", cls: "n", name: "1" }, { role: "link", name: "Desk", href: "/fold/a%20b/#a%20b", description: "4 open", local: true },
     ] }] },
   ] };
   expect(parsed(toDom(dom, tree).outerHTML)).toEqual(parsed('<main><h1 id="doc" tabindex="-1">Fleet</h1><ol class="rows" role="list" aria-label="Fleet">' +
     '<li id="a%20b" resource="#a%20b" typeof="schema:WebPageElement" class="obj" data-i="0"><span property="schema:about" resource="https://ipso.bounded.tools/doc/a%20b"></span><span class="n" aria-hidden="true">1</span>' +
-    '<a href="/fold/a%20b/#a%20b" ping="/fold/_sink/v" aria-describedby="a%20b:hint">Desk</a><span class="hint" id="a%20b:hint">4 open</span></li></ol></main>'));
+    '<a href="/fold/a%20b/#a%20b" aria-describedby="a%20b:hint">Desk</a><span class="hint" id="a%20b:hint">4 open</span></li></ol></main>'));
 });
