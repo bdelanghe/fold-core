@@ -11,8 +11,9 @@
 <meta name="fold-data" content="/fold-data/fleet/page.json" data-source="fleet-map">
 <meta name="fold-live" content="/live" data-seat="personal-super-human">
 <!-- Clax, through @empathic/clax-sdk only (basis-clax goal): its overlay's path on Bobby's self-hosted Clax (the origin fold serve
-     names with the reporter token), its version and its SRI digest. Never copied here. Left empty, no overlay loads (clax.js pinOf). -->
-<meta name="clax-sdk" content="" data-version="" data-integrity="">
+     names with the reporter token), its version and its SRI digest. Never copied here. Without the digest, no overlay loads (clax.js
+     pinOf). The version is the SDK's (clax Cargo.toml [workspace.package], 0.6.0); the digest waits on a hash of the served bytes. -->
+<meta name="clax-sdk" content="/_clax/overlay.js" data-version="0.6.0" data-integrity="">
 <link rel="modulepreload" href="fold-core.js">
 <!-- On the Home Screen (manifest.webmanifest, sw.js): the approved Basis mark, from ~/.lobby/ops/basis-icons (Bobby 910d8009). -->
 <link rel="manifest" href="manifest.webmanifest">

@@ -97,13 +97,13 @@ export async function embed({ doc = document, base = doc.baseURI, fetch = global
   return { mounted: true, unnamed: flagUnnamed(doc).length };
 }
 
-/** The overlay module, loaded with its SRI digest: a module script element (import() takes no integrity), whose module puts its
- * exports where this can read them. */
+/** The overlay as a Clax instance serves it: `/_clax/overlay.js`, a classic script that defines the global `Clax` (the same source as
+ * the SDK's `./overlay` entry, work-clax-sdk-kit-goal via personal-assistant 8c6b5d22), loaded with its SRI digest. */
 function importPinned(doc, { src, integrity }) {
   return new Promise((resolve, reject) => {
     const s = doc.createElement("script");
-    s.type = "module"; s.src = src; s.integrity = integrity; s.crossOrigin = "anonymous";
-    s.addEventListener("load", () => (globalThis.ClaxSDK ? resolve(globalThis.ClaxSDK) : reject(new Error("the overlay loaded but exposed no ClaxSDK"))));
+    s.src = src; s.integrity = integrity; s.crossOrigin = "anonymous";
+    s.addEventListener("load", () => (globalThis.Clax ? resolve(globalThis.Clax) : reject(new Error("the overlay loaded but defined no global Clax"))));
     s.addEventListener("error", () => reject(new Error(`the overlay ${src} did not load (or its digest did not match)`)));
     doc.head.append(s);
   });
