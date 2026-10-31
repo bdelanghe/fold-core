@@ -1,0 +1,399 @@
+{
+  "baobab": "@bounded-systems/baobab@0.2.2",
+  "tokens": {
+    "primitive.paper": "#EDEAE1",
+    "primitive.white": "#FFFFFF",
+    "primitive.ink": "#16221C",
+    "primitive.ink-raised": "#22302A",
+    "primitive.bone": "#ECEAE3",
+    "primitive.slate": "#5C6B63",
+    "primitive.mist": "#A9B5AE",
+    "primitive.stone": "#888374",
+    "primitive.forest": "#0C5A42",
+    "primitive.sage": "#8FC3A8",
+    "primitive.rust": "#8A2B12",
+    "primitive.coral": "#FF9C80",
+    "light.paper": "#EDEAE1",
+    "light.card": "#FFFFFF",
+    "light.ink": "#16221C",
+    "light.soft": "#5C6B63",
+    "light.line": "#888374",
+    "light.accent": "#0C5A42",
+    "light.warn": "#8A2B12",
+    "dark.paper": "#16221C",
+    "dark.card": "#22302A",
+    "dark.ink": "#ECEAE3",
+    "dark.soft": "#A9B5AE",
+    "dark.line": "#888374",
+    "dark.accent": "#8FC3A8",
+    "dark.warn": "#FF9C80"
+  },
+  "pairs": [
+    {
+      "fg": "light.ink",
+      "bg": "light.paper",
+      "min": 4.5,
+      "label": "text on the page (light)"
+    },
+    {
+      "fg": "light.ink",
+      "bg": "light.card",
+      "min": 4.5,
+      "label": "text in the current row and the search box (light)"
+    },
+    {
+      "fg": "light.soft",
+      "bg": "light.paper",
+      "min": 4.5,
+      "label": "row numbers, hints, notes, the crumb separator (light)"
+    },
+    {
+      "fg": "light.soft",
+      "bg": "light.card",
+      "min": 4.5,
+      "label": "hints in the current row (light)"
+    },
+    {
+      "fg": "light.accent",
+      "bg": "light.paper",
+      "min": 4.5,
+      "label": "a property row's link (light)"
+    },
+    {
+      "fg": "light.accent",
+      "bg": "light.card",
+      "min": 4.5,
+      "label": "a property row's link under the cursor (light)"
+    },
+    {
+      "fg": "light.warn",
+      "bg": "light.paper",
+      "min": 4.5,
+      "label": "stale rows and alert hints (light)"
+    },
+    {
+      "fg": "light.warn",
+      "bg": "light.card",
+      "min": 4.5,
+      "label": "stale rows and alert hints under the cursor (light)"
+    },
+    {
+      "fg": "light.paper",
+      "bg": "light.accent",
+      "min": 4.5,
+      "label": "button text on its fill (light)"
+    },
+    {
+      "fg": "light.accent",
+      "bg": "light.paper",
+      "min": 3.0,
+      "label": "a button's fill against the page (light)"
+    },
+    {
+      "fg": "light.ink",
+      "bg": "light.card",
+      "min": 3.0,
+      "label": "the current row's outline (light)"
+    },
+    {
+      "fg": "light.line",
+      "bg": "light.card",
+      "min": 3.0,
+      "label": "the search box's border (light)"
+    },
+    {
+      "fg": "light.line",
+      "bg": "light.paper",
+      "min": 3.0,
+      "label": "the rows' rule (light)"
+    },
+    {
+      "fg": "dark.ink",
+      "bg": "dark.paper",
+      "min": 4.5,
+      "label": "text on the page (dark)"
+    },
+    {
+      "fg": "dark.ink",
+      "bg": "dark.card",
+      "min": 4.5,
+      "label": "text in the current row and the search box (dark)"
+    },
+    {
+      "fg": "dark.soft",
+      "bg": "dark.paper",
+      "min": 4.5,
+      "label": "row numbers, hints, notes, the crumb separator (dark)"
+    },
+    {
+      "fg": "dark.soft",
+      "bg": "dark.card",
+      "min": 4.5,
+      "label": "hints in the current row (dark)"
+    },
+    {
+      "fg": "dark.accent",
+      "bg": "dark.paper",
+      "min": 4.5,
+      "label": "a property row's link (dark)"
+    },
+    {
+      "fg": "dark.accent",
+      "bg": "dark.card",
+      "min": 4.5,
+      "label": "a property row's link under the cursor (dark)"
+    },
+    {
+      "fg": "dark.warn",
+      "bg": "dark.paper",
+      "min": 4.5,
+      "label": "stale rows and alert hints (dark)"
+    },
+    {
+      "fg": "dark.warn",
+      "bg": "dark.card",
+      "min": 4.5,
+      "label": "stale rows and alert hints under the cursor (dark)"
+    },
+    {
+      "fg": "dark.paper",
+      "bg": "dark.accent",
+      "min": 4.5,
+      "label": "button text on its fill (dark)"
+    },
+    {
+      "fg": "dark.accent",
+      "bg": "dark.paper",
+      "min": 3.0,
+      "label": "a button's fill against the page (dark)"
+    },
+    {
+      "fg": "dark.ink",
+      "bg": "dark.card",
+      "min": 3.0,
+      "label": "the current row's outline (dark)"
+    },
+    {
+      "fg": "dark.line",
+      "bg": "dark.card",
+      "min": 3.0,
+      "label": "the search box's border (dark)"
+    },
+    {
+      "fg": "dark.line",
+      "bg": "dark.paper",
+      "min": 3.0,
+      "label": "the rows' rule (dark)"
+    }
+  ],
+  "results": [
+    {
+      "fg": "light.ink",
+      "bg": "light.paper",
+      "min": 4.5,
+      "label": "text on the page (light)",
+      "ratio": 13.641765416164787,
+      "pass": true
+    },
+    {
+      "fg": "light.ink",
+      "bg": "light.card",
+      "min": 4.5,
+      "label": "text in the current row and the search box (light)",
+      "ratio": 16.410177174452468,
+      "pass": true
+    },
+    {
+      "fg": "light.soft",
+      "bg": "light.paper",
+      "min": 4.5,
+      "label": "row numbers, hints, notes, the crumb separator (light)",
+      "ratio": 4.669831402605432,
+      "pass": true
+    },
+    {
+      "fg": "light.soft",
+      "bg": "light.card",
+      "min": 4.5,
+      "label": "hints in the current row (light)",
+      "ratio": 5.617510516693913,
+      "pass": true
+    },
+    {
+      "fg": "light.accent",
+      "bg": "light.paper",
+      "min": 4.5,
+      "label": "a property row's link (light)",
+      "ratio": 6.827871158129958,
+      "pass": true
+    },
+    {
+      "fg": "light.accent",
+      "bg": "light.card",
+      "min": 4.5,
+      "label": "a property row's link under the cursor (light)",
+      "ratio": 8.213495248677797,
+      "pass": true
+    },
+    {
+      "fg": "light.warn",
+      "bg": "light.paper",
+      "min": 4.5,
+      "label": "stale rows and alert hints (light)",
+      "ratio": 7.169491244776318,
+      "pass": true
+    },
+    {
+      "fg": "light.warn",
+      "bg": "light.card",
+      "min": 4.5,
+      "label": "stale rows and alert hints under the cursor (light)",
+      "ratio": 8.624442510795038,
+      "pass": true
+    },
+    {
+      "fg": "light.paper",
+      "bg": "light.accent",
+      "min": 4.5,
+      "label": "button text on its fill (light)",
+      "ratio": 6.827871158129958,
+      "pass": true
+    },
+    {
+      "fg": "light.accent",
+      "bg": "light.paper",
+      "min": 3.0,
+      "label": "a button's fill against the page (light)",
+      "ratio": 6.827871158129958,
+      "pass": true
+    },
+    {
+      "fg": "light.ink",
+      "bg": "light.card",
+      "min": 3.0,
+      "label": "the current row's outline (light)",
+      "ratio": 16.410177174452468,
+      "pass": true
+    },
+    {
+      "fg": "light.line",
+      "bg": "light.card",
+      "min": 3.0,
+      "label": "the search box's border (light)",
+      "ratio": 3.786814090173929,
+      "pass": true
+    },
+    {
+      "fg": "light.line",
+      "bg": "light.paper",
+      "min": 3.0,
+      "label": "the rows' rule (light)",
+      "ratio": 3.1479751219994885,
+      "pass": true
+    },
+    {
+      "fg": "dark.ink",
+      "bg": "dark.paper",
+      "min": 4.5,
+      "label": "text on the page (dark)",
+      "ratio": 13.632099128785725,
+      "pass": true
+    },
+    {
+      "fg": "dark.ink",
+      "bg": "dark.card",
+      "min": 4.5,
+      "label": "text in the current row and the search box (dark)",
+      "ratio": 11.445059821855649,
+      "pass": true
+    },
+    {
+      "fg": "dark.soft",
+      "bg": "dark.paper",
+      "min": 4.5,
+      "label": "row numbers, hints, notes, the crumb separator (dark)",
+      "ratio": 7.742283425180834,
+      "pass": true
+    },
+    {
+      "fg": "dark.soft",
+      "bg": "dark.card",
+      "min": 4.5,
+      "label": "hints in the current row (dark)",
+      "ratio": 6.500165243945749,
+      "pass": true
+    },
+    {
+      "fg": "dark.accent",
+      "bg": "dark.paper",
+      "min": 4.5,
+      "label": "a property row's link (dark)",
+      "ratio": 8.235878208867526,
+      "pass": true
+    },
+    {
+      "fg": "dark.accent",
+      "bg": "dark.card",
+      "min": 4.5,
+      "label": "a property row's link under the cursor (dark)",
+      "ratio": 6.914571108639111,
+      "pass": true
+    },
+    {
+      "fg": "dark.warn",
+      "bg": "dark.paper",
+      "min": 4.5,
+      "label": "stale rows and alert hints (dark)",
+      "ratio": 8.063718300789127,
+      "pass": true
+    },
+    {
+      "fg": "dark.warn",
+      "bg": "dark.card",
+      "min": 4.5,
+      "label": "stale rows and alert hints under the cursor (dark)",
+      "ratio": 6.7700313405323955,
+      "pass": true
+    },
+    {
+      "fg": "dark.paper",
+      "bg": "dark.accent",
+      "min": 4.5,
+      "label": "button text on its fill (dark)",
+      "ratio": 8.235878208867526,
+      "pass": true
+    },
+    {
+      "fg": "dark.accent",
+      "bg": "dark.paper",
+      "min": 3.0,
+      "label": "a button's fill against the page (dark)",
+      "ratio": 8.235878208867526,
+      "pass": true
+    },
+    {
+      "fg": "dark.ink",
+      "bg": "dark.card",
+      "min": 3.0,
+      "label": "the current row's outline (dark)",
+      "ratio": 11.445059821855649,
+      "pass": true
+    },
+    {
+      "fg": "dark.line",
+      "bg": "dark.card",
+      "min": 3.0,
+      "label": "the search box's border (dark)",
+      "ratio": 3.638267417420688,
+      "pass": true
+    },
+    {
+      "fg": "dark.line",
+      "bg": "dark.paper",
+      "min": 3.0,
+      "label": "the rows' rule (dark)",
+      "ratio": 4.333504836435935,
+      "pass": true
+    }
+  ]
+}

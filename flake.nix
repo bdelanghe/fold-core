@@ -43,7 +43,7 @@
           dontFixup = true;
           outputHashMode = "recursive";
           outputHashAlgo = "sha256";
-          outputHash = "sha256-KigUJ80A86x4r53tZnHB+4nUzTJ4DZUXbHRU2CzuhP0=";
+          outputHash = "sha256-TMmFhYWDkfai4T0nk2WXpD3E0B3cbdgRQgxNK2FJ6IE=";
         };
         default = pkgs.rustPlatform.buildRustPackage {
           pname = "fold-core";
@@ -88,6 +88,14 @@
           cp -r ${self}/js ${self}/goldens ${self}/viewer ${self}/package.json .
           ln -s ${self.packages.${pkgs.stdenv.hostPlatform.system}.node-modules}/node_modules node_modules
           HOME=$TMPDIR bun test ./js/html.test.ts
+          touch $out
+        '';
+        # contrast proven from tokens (brief item 17): Baobab 0.2.2's own TS over viewer/theme.tokens.json agrees with the Rust port's
+        # goldens/contrast.json bit for bit (js/contrast.test.ts); the proof itself and fold.css's colours are tests/contrast.rs
+        contrast-baobab = pkgs.runCommand "fold-core-contrast-baobab" { nativeBuildInputs = [ pkgs.bun ]; } ''
+          cp -r ${self}/js ${self}/goldens ${self}/viewer ${self}/package.json .
+          ln -s ${self.packages.${pkgs.stdenv.hostPlatform.system}.node-modules}/node_modules node_modules
+          HOME=$TMPDIR bun test ./js/contrast.test.ts
           touch $out
         '';
         # the viewer's own path on every golden (viewer/viewer.test.ts): fetched and folded as in the browser, every location's tree,

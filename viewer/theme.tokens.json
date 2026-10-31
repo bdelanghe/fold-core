@@ -1,0 +1,53 @@
+{
+  "$description": "The fold viewer's theme, a Baobab 0.2.2 pinning (src/baobab.rs): bounded-systems/brand's colours as primitives, a light and a dark set of the same roles, and the contrast each role pair must clear. fold.css's custom properties are written from it (tests/contrast.rs).",
+  "$contrast": [
+    { "fg": "ink", "bg": "paper", "min": 4.5, "label": "text on the page" },
+    { "fg": "ink", "bg": "card", "min": 4.5, "label": "text in the current row and the search box" },
+    { "fg": "soft", "bg": "paper", "min": 4.5, "label": "row numbers, hints, notes, the crumb separator" },
+    { "fg": "soft", "bg": "card", "min": 4.5, "label": "hints in the current row" },
+    { "fg": "accent", "bg": "paper", "min": 4.5, "label": "a property row's link" },
+    { "fg": "accent", "bg": "card", "min": 4.5, "label": "a property row's link under the cursor" },
+    { "fg": "warn", "bg": "paper", "min": 4.5, "label": "stale rows and alert hints" },
+    { "fg": "warn", "bg": "card", "min": 4.5, "label": "stale rows and alert hints under the cursor" },
+    { "fg": "paper", "bg": "accent", "min": 4.5, "label": "button text on its fill" },
+    { "fg": "accent", "bg": "paper", "min": 3, "label": "a button's fill against the page" },
+    { "fg": "ink", "bg": "card", "min": 3, "label": "the current row's outline" },
+    { "fg": "line", "bg": "card", "min": 3, "label": "the search box's border" },
+    { "fg": "line", "bg": "paper", "min": 3, "label": "the rows' rule" }
+  ],
+  "primitive": {
+    "$type": "color",
+    "paper": { "$value": "#EDEAE1" },
+    "white": { "$value": "#FFFFFF" },
+    "ink": { "$value": "#16221C" },
+    "ink-raised": { "$value": "#22302A" },
+    "bone": { "$value": "#ECEAE3" },
+    "slate": { "$value": "#5C6B63" },
+    "mist": { "$value": "#A9B5AE" },
+    "stone": { "$value": "#888374" },
+    "forest": { "$value": "#0C5A42" },
+    "sage": { "$value": "#8FC3A8" },
+    "rust": { "$value": "#8A2B12" },
+    "coral": { "$value": "#FF9C80" }
+  },
+  "light": {
+    "$type": "color",
+    "paper": { "$value": "{primitive.paper}" },
+    "card": { "$value": "{primitive.white}" },
+    "ink": { "$value": "{primitive.ink}" },
+    "soft": { "$value": "{primitive.slate}" },
+    "line": { "$value": "{primitive.stone}" },
+    "accent": { "$value": "{primitive.forest}" },
+    "warn": { "$value": "{primitive.rust}" }
+  },
+  "dark": {
+    "$type": "color",
+    "paper": { "$value": "{primitive.ink}" },
+    "card": { "$value": "{primitive.ink-raised}" },
+    "ink": { "$value": "{primitive.bone}" },
+    "soft": { "$value": "{primitive.mist}" },
+    "line": { "$value": "{primitive.stone}" },
+    "accent": { "$value": "{primitive.sage}" },
+    "warn": { "$value": "{primitive.coral}" }
+  }
+}
