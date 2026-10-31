@@ -156,14 +156,19 @@ test("a report is about the row's haecceity; a row with none is flagged, never g
 });
 
 test("the overlay loads only pinned by version and SRI, and only where fold serve mints a token", async () => {
-  const meta = (content: string, integrity: string) => ({ content, dataset: { integrity } });
-  expect(pinOf(null).error).toBe("no clax-sdk overlay is pinned yet");
-  expect(pinOf(meta("", "")).error).toBe("no clax-sdk overlay is pinned yet");
-  expect(pinOf(meta("https://cdn.test/clax-sdk/overlay.js", "sha384-AAAA")).error).toContain("names no version");
-  expect(pinOf(meta("vendor/clax-sdk@0.3.1/overlay.js", "")).error).toContain("no SRI digest");
-  expect(pinOf(meta("vendor/clax-sdk@0.3.1/overlay.js", "md5-xyz")).error).toContain("no SRI digest");
-  expect(pinOf(meta("vendor/clax-sdk@0.3.1/overlay.js", "sha384-oqVuAfXRKap7fdgcCY5uykM6+R9GqQ8K/uxy9rx7HNQlGYl1kPzQho1wx4JwY8wC")))
-    .toEqual({ src: "vendor/clax-sdk@0.3.1/overlay.js", integrity: "sha384-oqVuAfXRKap7fdgcCY5uykM6+R9GqQ8K/uxy9rx7HNQlGYl1kPzQho1wx4JwY8wC" });
+  const meta = (content: string, version: string, integrity: string) => ({ content, dataset: { version, integrity } });
+  const clax = "http://localhost:7480", sri = "sha384-oqVuAfXRKap7fdgcCY5uykM6+R9GqQ8K/uxy9rx7HNQlGYl1kPzQho1wx4JwY8wC";
+  expect(pinOf(null, clax).error).toBe("no clax-sdk overlay is pinned yet");
+  expect(pinOf(meta("", "", ""), clax).error).toBe("no clax-sdk overlay is pinned yet");
+  expect(pinOf(meta("/sdk/overlay.js", "", sri), clax).error).toContain("names no version");
+  expect(pinOf(meta("/sdk/overlay.js", "latest", sri), clax).error).toContain("names no version");
+  expect(pinOf(meta("/sdk/overlay.js", "0.3.1", ""), clax).error).toContain("no SRI digest");
+  expect(pinOf(meta("/sdk/overlay.js", "0.3.1", "md5-xyz"), clax).error).toContain("no SRI digest");
+  // a path on the Clax origin only: never another host, and never a copy beside the viewer
+  for (const away of ["https://cdn.test/overlay.js", "//cdn.test/overlay.js", "vendor/overlay.js"])
+    expect(pinOf(meta(away, "0.3.1", sri), clax).error).toContain("not a path on the Clax origin");
+  expect(pinOf(meta("/sdk/overlay.js", "0.3.1", sri), clax)).toEqual({ src: "http://localhost:7480/sdk/overlay.js?v=0.3.1", integrity: sri });
+  expect(pinOf(meta("/sdk/overlay.js", "0.3.1", sri), "https://clax.tail.test").src).toBe("https://clax.tail.test/sdk/overlay.js?v=0.3.1");
 
   const grant = { token: "r1.1.x", exp: 1, clax: "http://localhost:7480", queue: "basis", owner: "personal-allie-lead" };
   const calls: string[] = [];
@@ -175,7 +180,7 @@ test("the overlay loads only pinned by version and SRI, and only where fold serv
   const row = fakeRow(0, "https://ipso.bounded.tools/fleet/needs");
   const doc = (pinned: boolean) => ({
     baseURI: "https://phobos.test/fold/", location: { href: "https://phobos.test/fold/#/" },
-    querySelector: () => (pinned ? meta("vendor/clax-sdk@0.3.1/overlay.js", "sha384-AAAA") : meta("", "")),
+    querySelector: () => (pinned ? meta("/sdk/overlay.js", "0.3.1", "sha384-AAAA") : meta("", "", "")),
     querySelectorAll: () => [row],
   });
   const fail = async () => { throw new Error("not to be loaded"); };
@@ -188,8 +193,9 @@ test("the overlay loads only pinned by version and SRI, and only where fold serv
   expect(calls).toEqual(["POST https://phobos.test/fold/report-token"]);
   expect(await reporterToken("https://phobos.test/fold/", { fetch: (async () => { throw new Error("offline"); }) as any })).toBeNull();
   // pinned and minted: mounted with the token, the queue and the row's haecceity as its target
-  let opts: any = null;
-  const r = await embed({ doc: doc(true) as any, fetch: fetchWith(200), load: async () => ({ mountOverlay: (o: any) => { opts = o; } }) });
+  let opts: any = null, loaded: any = null;
+  const r = await embed({ doc: doc(true) as any, fetch: fetchWith(200), load: async (_d: unknown, pin: any) => { loaded = pin; return { mountOverlay: (o: any) => { opts = o; } }; } });
+  expect(loaded).toEqual({ src: "http://localhost:7480/sdk/overlay.js?v=0.3.1", integrity: "sha384-AAAA" }); // from the Clax fold serve names
   expect(r).toEqual({ mounted: true, unnamed: 0 });
   expect([opts.endpoint, opts.queue, opts.owner, opts.token]).toEqual([grant.clax, grant.queue, grant.owner, grant.token]);
   expect(opts.target(row).about).toBe("https://ipso.bounded.tools/fleet/needs");

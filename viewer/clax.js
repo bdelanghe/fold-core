@@ -54,23 +54,30 @@ export async function reporterToken(base, { fetch = globalThis.fetch } = {}) {
   }
 }
 
-/** The SDK's overlay script, as the clax-sdk meta pins it: its URL (versioned) and SRI digest. Neither missing: no overlay is loaded
- * unpinned. `{src, integrity}`, or `{error}` saying why nothing is loaded. */
-export function pinOf(meta) {
-  const src = meta?.content?.trim(), integrity = meta?.dataset?.integrity?.trim();
-  if (!src) return { error: "no clax-sdk overlay is pinned yet" };
-  if (!/@\d+\.\d+\.\d+/.test(src)) return { error: `the overlay ${src} names no version` };
-  if (!/^sha(256|384|512)-[A-Za-z0-9+/]+=*$/.test(integrity ?? "")) return { error: `the overlay ${src} has no SRI digest` };
-  return { src, integrity };
+/** The SDK's overlay script as the clax-sdk meta pins it: its path on Bobby's self-hosted Clax (the origin fold serve names with the
+ * token), its version and its SRI digest. The SDK is never copied into this repo (break-glass fc88923c: self-hosting is allowed,
+ * redistribution is not); it is loaded at run time from that Clax, and only these bytes run. None missing: nothing loads unpinned.
+ * `{src, integrity}`, or `{error}` saying why nothing is loaded. */
+export function pinOf(meta, origin) {
+  const path = meta?.content?.trim(), version = meta?.dataset?.version?.trim(), integrity = meta?.dataset?.integrity?.trim();
+  if (!path) return { error: "no clax-sdk overlay is pinned yet" };
+  if (!/^\d+\.\d+\.\d+$/.test(version ?? "")) return { error: `the overlay ${path} names no version` };
+  if (!/^sha(256|384|512)-[A-Za-z0-9+/]+=*$/.test(integrity ?? "")) return { error: `the overlay ${path} has no SRI digest` };
+  if (!/^\//.test(path) || /^\/\//.test(path)) return { error: `the overlay ${path} is not a path on the Clax origin` };
+  const src = new URL(path, origin);
+  src.searchParams.set("v", version);
+  return { src: src.href, integrity };
 }
 
 /** Load the pinned overlay (one module script, with its SRI digest) and mount it with Basis's hooks: its target from the row's
  * haecceity, its token from fold serve, its look from theme.tokens.json. Resolves to what was done, for the caller to say. */
 export async function embed({ doc = document, base = doc.baseURI, fetch = globalThis.fetch, load = importPinned } = {}) {
-  const pin = pinOf(doc.querySelector('meta[name="clax-sdk"]'));
-  if (pin.error) return { mounted: false, why: pin.error };
+  const meta = doc.querySelector('meta[name="clax-sdk"]');
+  if (pinOf(meta, base).error) return { mounted: false, why: pinOf(meta, base).error };
   const grant = await reporterToken(base, { fetch });
   if (!grant) return { mounted: false, why: "fold serve does not report to Clax here" };
+  // The overlay comes from the Clax the reports go to (fold serve's config names it: localhost on the Mac, its tailnet URL elsewhere).
+  const pin = pinOf(meta, grant.clax);
   const sdk = await load(doc, pin);
   // The SDK's overlay entry (@empathic/clax-sdk/overlay). ASSUMED, not read: `mountOverlay` and its options are this side's
   // guess, since the SDK's source was out of reach when this was written; the first pinned build settles them (viewer/.qual).
