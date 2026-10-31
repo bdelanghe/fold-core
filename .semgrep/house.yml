@@ -1,0 +1,74 @@
+# fold-core's house rules: the fold work's decisions, as Semgrep checks. Findings go to code scanning and, through
+# tools/sarif-to-qual.jq, to qualifier records (.github/workflows/sarif.yml). Severity never gates a merge; check.yml does.
+# Tests: .semgrep/house.test.* (semgrep --test .semgrep).
+rules:
+  - id: fold-colour-literal-outside-tokens
+    message: >-
+      A colour literal outside the token block. Colours come from viewer/theme.tokens.json, written into fold.css between
+      the baobab marks and proven by tests/contrast.rs; draw with a role (var(--ink), var(--accent), ...) instead.
+    severity: WARNING
+    languages: [generic]
+    paths:
+      include: ["*.css", "*.html", "*.js", "*.ts", "*.rs"]
+      exclude: ["goldens/", "native/", "tests/", "*.test.ts", "viewer/*-check.ts", "src/baobab.rs"]
+    patterns:
+      - pattern-regex: (#[0-9A-Fa-f]{6}\b|#[0-9A-Fa-f]{3}\b|\brgba?\(|\bhsla?\(|\boklch\(|\bcolor-mix\()
+      - pattern-not-inside: |
+          /* baobab:begin */
+          ...
+          /* baobab:end */
+      - pattern-not-regex: (?m)^\s*(//|/\*|\*|<!--).*$
+
+  - id: fold-row-about
+    message: >-
+      `about=` on a row makes every RDFa statement on the row the data's. A row is resource="#<id>"
+      typeof="schema:WebPageElement" with an empty <span property="schema:about" resource="<IRI>"> (src/html.rs).
+    severity: ERROR
+    languages: [generic]
+    paths:
+      include: ["*.html", "*.js", "*.ts", "*.rs"]
+      exclude: ["goldens/"]
+    pattern-regex: <li\b[^>]*\sabout=|setAttribute\(\s*["']about["']
+
+  - id: fold-no-unload
+    message: >-
+      An unload handler. It blocks the back/forward cache and does not fire reliably on mobile; use pagehide or
+      visibilitychange.
+    severity: ERROR
+    languages: [javascript, typescript]
+    pattern-either:
+      - pattern: $E.addEventListener("unload", ...)
+      - pattern: $E.addEventListener("beforeunload", ...)
+      - pattern: $E.onunload = $F
+      - pattern: $E.onbeforeunload = $F
+
+  - id: fold-click-for-link
+    message: >-
+      A click handler that navigates is a link with none of a link's behaviour (open in new tab, copy, ping, focus,
+      JS off). Write an <a href>.
+    severity: ERROR
+    languages: [javascript, typescript]
+    patterns:
+      - pattern-either:
+          - pattern-inside: $E.addEventListener("click", ...)
+          - pattern-inside: $E.onclick = $F
+      - pattern-either:
+          - pattern: location.href = $U
+          - pattern: window.location.href = $U
+          - pattern: location = $U
+          - pattern: window.location = $U
+          - pattern: location.assign($U)
+          - pattern: window.location.assign($U)
+          - pattern: location.replace($U)
+          - pattern: window.location.replace($U)
+          - pattern: window.open(...)
+
+  - id: fold-no-shadow-dom
+    message: >-
+      Shadow DOM for content hides it from find-in-page, reader modes, RDFa and lone. Content is light DOM.
+    severity: ERROR
+    languages: [generic]
+    paths:
+      include: ["*.html", "*.js", "*.ts", "*.rs"]
+      exclude: ["goldens/"]
+    pattern-regex: \.attachShadow\(|\bshadowrootmode=

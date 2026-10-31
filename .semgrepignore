@@ -1,0 +1,6 @@
+# The house rules' own fixtures (semgrep --test .semgrep) and generated or vendored trees.
+.semgrep/
+goldens/
+node_modules/
+target/
+result*

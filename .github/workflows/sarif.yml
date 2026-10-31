@@ -1,0 +1,90 @@
+# fold-core's analyzers, each writing SARIF: CodeQL (Rust, JS/TS) and Semgrep with the house rules (.semgrep/house.yml).
+# Every result goes to GitHub code scanning and, through tools/sarif-to-qual.jq, into qualifier records, uploaded as the
+# qual-from-sarif artifact for a seat to land on main (.qual changes land on their own, never in a PR's diff).
+# A finding is a claim, not a gate: nothing here fails on a finding. check.yml stays the merge gate; only a broken house
+# rule (semgrep --test) or a broken analyzer fails this workflow.
+name: sarif
+on:
+  pull_request:
+  push:
+    branches: [main]
+permissions:
+  contents: read
+jobs:
+  codeql:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write
+    strategy:
+      fail-fast: false
+      matrix:
+        language: [rust, javascript-typescript]
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          persist-credentials: false
+      - uses: github/codeql-action/init@4bfa242aa49c5f7c6770b98670d354a7dfac05f8 # v3.39.1
+        with:
+          languages: ${{ matrix.language }}
+          build-mode: none
+      - uses: github/codeql-action/analyze@4bfa242aa49c5f7c6770b98670d354a7dfac05f8 # v3.39.1
+        with:
+          category: codeql-${{ matrix.language }}
+          output: sarif
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: sarif-codeql-${{ matrix.language }}
+          path: sarif/
+  semgrep:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write
+    container: semgrep/semgrep:1.182.1@sha256:451b3d875c00dac7ed5db5293e584a07de11449a409c10b3c2d2652f429630b6
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          persist-credentials: false
+      - run: semgrep --test .
+        working-directory: .semgrep
+      - run: semgrep scan --config .semgrep/house.yml --metrics off --sarif --output semgrep-house.sarif .
+      - uses: github/codeql-action/upload-sarif@4bfa242aa49c5f7c6770b98670d354a7dfac05f8 # v3.39.1
+        with:
+          sarif_file: semgrep-house.sarif
+          category: semgrep-house
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: sarif-semgrep-house
+          path: semgrep-house.sarif
+  qualifier:
+    needs: [codeql, semgrep]
+    runs-on: ubuntu-latest
+    env:
+      # empathic/qualifier at the rev bdelanghe/home pins (pins/empathic/qualifier.json).
+      QUALIFIER_REV: ee6f8d57c5e3b6dd5b43fc577aa082dd1ba1433e
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          persist-credentials: false
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        with:
+          pattern: sarif-*
+          path: sarif-in
+      - uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
+        with:
+          path: ~/.cargo/bin/qualifier
+          key: qualifier-${{ env.QUALIFIER_REV }}
+      - run: command -v qualifier || cargo install --locked --git https://github.com/empathic/qualifier --rev "$QUALIFIER_REV" qualifier
+      - run: |
+          find sarif-in -name '*.sarif' -print0 | xargs -0 -r -n1 jq -c -f tools/sarif-to-qual.jq > from-sarif.jsonl
+          wc -l < from-sarif.jsonl
+          if [ -s from-sarif.jsonl ]; then qualifier record --stdin --continue-on-error < from-sarif.jsonl || echo "::warning::some SARIF results did not become records (see above)"; fi
+          git add -N -- ':(glob)**/.qual'
+          git diff -- ':(glob)**/.qual' > qual-from-sarif.patch
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: qual-from-sarif
+          path: |
+            from-sarif.jsonl
+            qual-from-sarif.patch
