@@ -31,6 +31,11 @@
           HOME=$TMPDIR bun build ${self}/js/fold-core.ts --target browser --format esm --outfile $out/fold-core.js
           cp ${pkgs.atkinson-hyperlegible-next}/share/fonts/opentype/AtkinsonHyperlegibleNext-Regular.otf face.otf
           woff2_compress face.otf && cp face.woff2 $out/fonts/atkinson-hyperlegible-next.woff2
+          # the Home Screen app (brief items 10 and 22): its manifest, Basis's icons (allie-lead's) and the service worker, whose shell
+          # cache is named by the digest of every other file here, so each build replaces the last one's copy
+          cp ${self}/viewer/manifest.webmanifest $out/ && cp -r ${self}/viewer/icons $out/icons
+          v=$(cd $out && find . -type f | LC_ALL=C sort | xargs sha256sum | sha256sum | cut -c1-16)
+          substitute ${self}/viewer/sw.js $out/sw.js --replace-fail @VERSION@ "$v"
         '';
         # the JS tests' dependencies (package.json, bun.lock: lone and linkedom), fetched once by their lockfile so checks run offline
         node-modules = pkgs.stdenvNoCC.mkDerivation {

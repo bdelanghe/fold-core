@@ -1,6 +1,6 @@
 // Headless Chromium over the DevTools protocol, for the checks that read what a browser makes of a page (browser-check.ts,
 // pages-check.ts): one browser at one window size, its first tab, and `send` (a protocol call) and `value` (an expression's
-// value) on it. `close` ends the browser; `err` is what it said on stderr, for a failure's log.
+// value) on it, in its own profile (by default one per width). `close` ends the browser; `err` is what it said on stderr, for a failure's log.
 export type Chrome = {
   send: (method: string, params?: unknown) => Promise<any>;
   value: (expression: string) => Promise<any>;
@@ -8,8 +8,8 @@ export type Chrome = {
   close: () => Promise<void>;
 };
 
-export async function chrome(chromium: string, w: number, h: number): Promise<Chrome> {
-  const p = Bun.spawn([chromium, "--headless=new", "--no-sandbox", "--disable-gpu", "--disable-dev-shm-usage", "--no-first-run", `--user-data-dir=${process.env.TMPDIR ?? "/tmp"}/chromium-${w}`,
+export async function chrome(chromium: string, w: number, h: number, profile = `chromium-${w}`): Promise<Chrome> {
+  const p = Bun.spawn([chromium, "--headless=new", "--no-sandbox", "--disable-gpu", "--disable-dev-shm-usage", "--no-first-run", `--user-data-dir=${process.env.TMPDIR ?? "/tmp"}/${profile}`,
     `--window-size=${w},${h}`, "--remote-debugging-port=0", "about:blank"], { stdout: "ignore", stderr: "pipe", timeout: 600_000 });
   let err = "";
   try {

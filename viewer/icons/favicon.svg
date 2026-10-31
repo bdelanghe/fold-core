@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024">
+  <!-- Basis favicon: the same #mark on a rounded tile, light or dark by the browser's colour scheme. -->
+  <style>.bg{fill:#EDEAE1}#mark{fill:#0C5A42}@media (prefers-color-scheme:dark){.bg{fill:#16221C}#mark{fill:#8FC3A8}}</style>
+  <rect class="bg" width="1024" height="1024" rx="230"/>
+  <g id="mark">
+    <rect x="256" y="256" width="320" height="128"/>
+    <rect x="384" y="448" width="320" height="128"/>
+    <rect x="256" y="640" width="512" height="128"/>
+  </g>
+</svg>
