@@ -8,8 +8,8 @@
 //! body, of the token, and of the agent headers' record (`-\n` for each absent one; a queue request carries none). The header is
 //! `t=<t>, n=<nonce>, s=<signature>`, the 64-byte Ed25519 signature in unpadded base64url.
 //!
-//! The Ed25519 signing itself is a [`Signer`]: fold-core has no Ed25519 crate yet (adding one regenerates Cargo.lock, which needs
-//! cargo), so there is no real signer here and report.rs refuses to mint without one.
+//! The Ed25519 signing itself is a [`Signer`]; the real one, [`Ed25519`], is ed25519-dalek 2.2 (BSD-3-Clause, native only; added by
+//! personal-fold-core-goal in 37b51be), made from the grant's PKCS#8 key, and held to the vector's `s` in tests/sig.rs.
 
 use sha2::{Digest, Sha256};
 
@@ -90,6 +90,50 @@ pub trait Signer: Send + Sync {
 pub fn header(signer: &dyn Signer, input: &SignInput<'_>) -> Result<String, String> {
     let sig = signer.sign(input.canonical()?.as_bytes())?;
     Ok(format!("t={}, n={}, s={}", input.t, input.nonce, b64url(&sig)))
+}
+
+/// Unpadded (or padded) base64url, decoded; None for anything else.
+pub fn unb64url(s: &str) -> Option<Vec<u8>> {
+    const A: &[u8] = b"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_";
+    let (mut out, mut acc, mut bits) = (vec![], 0u32, 0u32);
+    for c in s.trim_end_matches('=').bytes() {
+        acc = (acc << 6 | A.iter().position(|a| *a == c)? as u32) & 0xFFFF;
+        bits += 6;
+        if bits >= 8 {
+            bits -= 8;
+            out.push((acc >> bits) as u8);
+        }
+    }
+    Some(out)
+}
+
+/// The real signer: the grant's Ed25519 key (ed25519-dalek, BSD-3-Clause). No Debug, so it cannot be printed.
+pub struct Ed25519(ed25519_dalek::SigningKey);
+
+impl Ed25519 {
+    /// From the grant's private key as Clax gives it: PKCS#8 DER, unpadded base64url. Why not, without the key in it.
+    pub fn from_pkcs8_b64url(key: &str) -> Result<Ed25519, String> {
+        use ed25519_dalek::pkcs8::DecodePrivateKey;
+        let der = unb64url(key.trim()).ok_or("the grant's key is not base64url")?;
+        ed25519_dalek::SigningKey::from_pkcs8_der(&der).map(Ed25519).map_err(|_| "the grant's key is not a PKCS#8 Ed25519 key".to_string())
+    }
+
+    /// From a 32-byte seed (Clax's test vector uses [0x42; 32]).
+    pub fn from_seed(seed: &[u8; 32]) -> Ed25519 {
+        Ed25519(ed25519_dalek::SigningKey::from_bytes(seed))
+    }
+
+    /// The public key, unpadded base64url, as Clax writes one.
+    pub fn public_b64url(&self) -> String {
+        b64url(&self.0.verifying_key().to_bytes())
+    }
+}
+
+impl Signer for Ed25519 {
+    fn sign(&self, msg: &[u8]) -> Result<[u8; 64], String> {
+        use ed25519_dalek::Signer as _;
+        Ok(self.0.sign(msg).to_bytes())
+    }
 }
 
 /// A fresh nonce: 16 bytes from the system's random source, unpadded base64url (22 characters).

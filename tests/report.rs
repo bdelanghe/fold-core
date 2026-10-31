@@ -18,15 +18,36 @@ const QUEUE: &str = "basis";
 const OWNER: &str = "personal-allie-lead";
 const PK: &str = "MCowBQYDK2VwAyEAGb9ECWmEzf6FQbrBZ9w7lshQhqowtrbLDFw4rXAxZuE";
 
+// The upstream is port 9 (discard), where no Clax ever listens: a test never reaches Bobby's own instance on 7480.
 const CONFIG: &str = r#"{"login":"bobby@example.com","host":"phobos.example.ts.net","clax":"https://clax.example.ts.net/",
-  "upstream":"http://127.0.0.1:7480","queue":"basis","owner":"personal-allie-lead",
+  "upstream":"http://127.0.0.1:9","queue":"basis","owner":"personal-allie-lead",
   "grant_cmd":["op","read","op://Fleet/clax basis grant/token"],"grant_key_cmd":["op","read","op://Fleet/clax basis grant/key"]}"#;
+
+/// Unpadded base64url.
+fn b64url(b: &[u8]) -> String {
+    const A: &[u8] = b"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_";
+    let mut o = String::new();
+    for c in b.chunks(3) {
+        let n = (c[0] as u32) << 16 | (*c.get(1).unwrap_or(&0) as u32) << 8 | *c.get(2).unwrap_or(&0) as u32;
+        for k in 0..=c.len() {
+            o.push(A[(n >> (18 - 6 * k) & 63) as usize] as char);
+        }
+    }
+    o
+}
+
+/// A PKCS#8 Ed25519 key for Clax's test seed [0x42; 32], as Clax gives a grant's key: DER, unpadded base64url. Never a real one.
+fn test_key() -> String {
+    let mut der = vec![0x30, 0x2e, 0x02, 0x01, 0x00, 0x30, 0x05, 0x06, 0x03, 0x2b, 0x65, 0x70, 0x04, 0x22, 0x04, 0x20];
+    der.extend([0x42; 32]);
+    b64url(&der)
+}
 
 /// The grant as the vault would print it, by which field is asked for (never a real one).
 fn vault(argv: &[String]) -> Result<Vec<u8>, String> {
     match argv.last().map(String::as_str) {
         Some(p) if p.ends_with("/token") => Ok(b"cxq_TESTONLY\n".to_vec()),
-        Some(p) if p.ends_with("/key") => Ok(b"MC4CAQAwBQYDK2VwBCIEIA-test-only-key\n".to_vec()),
+        Some(p) if p.ends_with("/key") => Ok(format!("{}\n", test_key()).into_bytes()),
         _ => Err("op: no such item".into()),
     }
 }
@@ -34,7 +55,7 @@ fn vault(argv: &[String]) -> Result<Vec<u8>, String> {
 #[test]
 fn the_config_names_its_grant_commands_and_never_holds_a_key() {
     let c = Config::parse(CONFIG).unwrap();
-    assert_eq!((c.clax.as_str(), c.upstream.as_str(), c.queue.as_str()), ("https://clax.example.ts.net", "http://127.0.0.1:7480", QUEUE));
+    assert_eq!((c.clax.as_str(), c.upstream.as_str(), c.queue.as_str()), ("https://clax.example.ts.net", "http://127.0.0.1:9", QUEUE));
     assert_eq!(c.grant_cmd, ["op", "read", "op://Fleet/clax basis grant/token"]);
     let seen = Mutex::new(vec![]);
     let r = Config::parse(CONFIG)
@@ -52,6 +73,11 @@ fn the_config_names_its_grant_commands_and_never_holds_a_key() {
     assert!(with(&|_: &[String]| -> Result<Vec<u8>, String> { Ok(b"\n".to_vec()) }).contains("empty or not one printable token"));
     assert!(with(&|_: &[String]| -> Result<Vec<u8>, String> { Ok(b"cxr_x".to_vec()) }).contains("not a cxq_ token"));
     assert!(with(&|_: &[String]| -> Result<Vec<u8>, String> { Ok(b"cxq_a b".to_vec()) }).contains("not one printable token"));
+    // a key that is not a PKCS#8 Ed25519 key fails at start, and the error does not hold it
+    let bad_key = with(&|a: &[String]| -> Result<Vec<u8>, String> {
+        if a.last().is_some_and(|p| p.ends_with("/key")) { Ok(b"MC4CAQAwBQYDK2VwBCIEIAnotakey".to_vec()) } else { vault(a) }
+    });
+    assert_eq!(bad_key, "the grant's key is not a PKCS#8 Ed25519 key");
     // a key kept in the file is refused, whatever its case
     for k in ["key", "Grant", "secret", "token", "PASSWORD"] {
         let bad = CONFIG.replacen('{', &format!("{{\"{k}\":\"abc\","), 1);
@@ -86,10 +112,10 @@ fn the_config_names_its_grant_commands_and_never_holds_a_key() {
 #[test]
 fn the_real_minter_makes_the_clax_request_and_sends_nothing_unsigned() {
     let r = Config::parse(CONFIG).unwrap().with_grant(&vault).unwrap();
-    // nothing listens on the upstream in this test: the refusal comes before any connection
+    // signed, then sent to port 9, where nothing listens: it fails, and says so without either secret
     let e = r.minter.mint(PK, "https://phobos.example.ts.net", ME).unwrap_err();
-    assert!(e.contains("signing is not built"), "{e}");
-    assert!(!e.contains("cxq_") && !e.contains("test-only-key"), "no secret in an error: {e}");
+    assert!(e.contains("127.0.0.1:9"), "{e}");
+    assert!(!e.contains("cxq_") && !e.contains(&test_key()), "no secret in an error: {e}");
     let minter = ClaxMinter::new("http://127.0.0.1:7480".into(), QUEUE.into(), "cxq_TESTONLY".into(), "test-only-key".into());
     let m = minter.request(PK, "https://phobos.example.ts.net", ME);
     assert_eq!(m.0, "/api/queues/basis/reporter-tokens");
@@ -267,7 +293,7 @@ fn the_overlay_is_the_instances_bytes_served_from_this_origin() {
     let gone = site(true, "http://127.0.0.1:9".into(), &stub);
     assert_eq!(answer(&gone, &from_me("GET", OVERLAY, "", &[]), NOW).0.status, 502);
     // the client itself: never off loopback
-    assert!(call("http://example.com:80", "GET", "/", &[], b"").unwrap_err().contains("not an http origin on loopback"));
+    assert!(call("http://example.com:80", "GET", "/", &[], b"").err().unwrap_or_default().contains("not an http origin on loopback"));
 }
 
 #[test]

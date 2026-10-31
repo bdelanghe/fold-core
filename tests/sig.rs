@@ -1,10 +1,10 @@
 //! `clax-ed25519 v2` (src/sig.rs) held to Clax's own vector (clax main d7812795 crates/clax-core/src/sig.rs `sdk_vector_is_fixed`,
 //! mirrored by web/sdk/src/sign.test.ts; via work-clax-sdk-kit-goal 0bd728cb): the canonical string's lines, the agent record and
-//! the header. The Ed25519 signature itself is the vector's (a stub signer gives its bytes): fold-core signs nothing until it has an
-//! Ed25519 crate, and then this vector's `s` is what that signer must reproduce from seed [0x42; 32].
+//! the header, first with a stub that gives the vector's signature, then with the real signer (sig.rs `Ed25519`), which must give
+//! the vector's `s` from seed [0x42; 32], and from that seed as a PKCS#8 key.
 
 use fold_core::report::{ClaxMinter, Minter};
-use fold_core::sig::{agent_record, header, sha256_hex, SignInput, Signer, VERSION};
+use fold_core::sig::{agent_record, header, sha256_hex, Ed25519, SignInput, Signer, VERSION};
 
 const BODY: &[u8] = br#"{"body":"hi"}"#;
 const NONCE: &str = "AAECAwQFBgcICQoLDA0ODw";
@@ -85,6 +85,39 @@ fn the_canonical_string_is_the_vectors() {
 fn the_header_is_the_vectors() {
     assert_eq!(unb64url(S).len(), 64);
     assert_eq!(header(&Vector, &vector()).unwrap(), format!("t=1760000000, n={NONCE}, s={S}"));
+}
+
+#[test]
+fn the_real_signer_gives_the_vectors_signature() {
+    let want = format!("t=1760000000, n={NONCE}, s={S}");
+    // from the seed: the vector's public key and its signature, byte for byte
+    let k = Ed25519::from_seed(&[0x42; 32]);
+    assert_eq!(k.public_b64url(), "IVL40Zt5HSRFMkLhXy6rbLfP-ntqXtMAl5YOBpiB2xI");
+    assert_eq!(header(&k, &vector()).unwrap(), want);
+    // and from the same key as Clax gives a grant's: PKCS#8 DER, unpadded base64url
+    let mut der = vec![0x30, 0x2e, 0x02, 0x01, 0x00, 0x30, 0x05, 0x06, 0x03, 0x2b, 0x65, 0x70, 0x04, 0x22, 0x04, 0x20];
+    der.extend([0x42; 32]);
+    let k = Ed25519::from_pkcs8_b64url(&b64url(&der)).unwrap_or_else(|e| panic!("{e}"));
+    assert_eq!(header(&k, &vector()).unwrap(), want);
+    assert!(Ed25519::from_pkcs8_b64url("not base64url!").is_err());
+    assert!(Ed25519::from_pkcs8_b64url(&b64url(&der[..40])).is_err(), "a cut key");
+    // the decoder the key goes through
+    assert_eq!(fold_core::sig::unb64url(&b64url(b"any bytes \xff\x00")).unwrap(), b"any bytes \xff\x00");
+    assert_eq!(fold_core::sig::unb64url("YQ=="), Some(b"a".to_vec()));
+    assert_eq!(fold_core::sig::unb64url("a b"), None);
+}
+
+/// Unpadded base64url.
+fn b64url(b: &[u8]) -> String {
+    const A: &[u8] = b"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_";
+    let mut o = String::new();
+    for c in b.chunks(3) {
+        let n = (c[0] as u32) << 16 | (*c.get(1).unwrap_or(&0) as u32) << 8 | *c.get(2).unwrap_or(&0) as u32;
+        for k in 0..=c.len() {
+            o.push(A[(n >> (18 - 6 * k) & 63) as usize] as char);
+        }
+    }
+    o
 }
 
 #[test]

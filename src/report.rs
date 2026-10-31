@@ -19,17 +19,15 @@
 //!   `POST /api/queues/<q>/reporter-tokens`, body `{reporter_id, origin, public_key}`, `Authorization: Clax-Queue <cxq_…>` and
 //!   `Clax-Signature: t=…, n=…, s=…` (`clax-ed25519 v2`, Ed25519 over canonical lines). The answer is `{token, expires_at}` (a
 //!   `cxr_` secret, 900 s), the overlay's `auth` result as is. A service call never carries Origin or a cookie.
-//! - **Not built yet:** the `clax-ed25519 v2` signature. fold-core has no Ed25519 dependency (its Cargo.lock is regenerated where
-//!   cargo runs), and the canonical lines are to be read from clax_core::sig with its test vectors. Until then [`ClaxMinter`]
-//!   refuses, so `fold serve` answers 502 and mints nothing; the route, its checks and the request are built and tested through
-//!   [`Minter`].
+//! - **Signed** with the grant's key (sig.rs: `clax-ed25519 v2`, held to Clax's own vector), the signer made at start so a bad key
+//!   fails `fold serve`'s start. A [`ClaxMinter`] with no signer refuses before any connection, so nothing unsigned is ever sent.
 
 use std::process::Command;
 
 use serde_json::{json, Value};
 
 use crate::http::{authority, call, loopback};
-use crate::sig::{header, nonce, SignInput, Signer};
+use crate::sig::{header, nonce, Ed25519, SignInput, Signer};
 
 /// What `fold serve` reports with: whom for, which Clax, which queue, and the grant that lets it mint.
 pub struct Reporting {
@@ -152,7 +150,9 @@ impl Config {
             return Err("report config: the grant's token is not a cxq_ token".into());
         }
         let key = one(&self.grant_key_cmd, "key")?;
-        let minter = ClaxMinter::new(self.upstream.clone(), self.queue.clone(), token, key);
+        // The signer is made now, so a key that is not one fails fold serve's start, not a reader's first report.
+        let signer = Ed25519::from_pkcs8_b64url(&key)?;
+        let minter = ClaxMinter::new(self.upstream.clone(), self.queue.clone(), token, key).with_signer(Box::new(signer));
         Ok(Reporting {
             login: self.login,
             host: self.host,
