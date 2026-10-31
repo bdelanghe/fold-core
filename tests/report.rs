@@ -8,7 +8,7 @@ use std::net::TcpListener;
 use std::sync::{Arc, Mutex};
 
 use fold_core::http::{answer_of, call, loopback, parse};
-use fold_core::report::{ClaxMinter, Comment, Config, Filer, Grant, Minted, Minter, Reporting};
+use fold_core::report::{ClaxFiler, ClaxMinter, Comment, Config, Filer, Grant, Minted, Minter, Reporting};
 use fold_core::serve::{answer, limit, Request, Site, OVERLAY, REPORT_BODY, REPORT_TOKEN};
 use serde_json::Value;
 
@@ -403,6 +403,85 @@ fn the_overlay_is_the_instances_bytes_served_from_this_origin() {
     assert_eq!(answer(&gone, &from_me("GET", OVERLAY, "", &[]), NOW).0.status, 502);
     // the client itself: never off loopback
     assert!(call("http://example.com:80", "GET", "/", &[], b"").err().unwrap_or_default().contains("not an http origin on loopback"));
+}
+
+/// A fake Clax instance's reports route: it records each request whole and answers `status`. The port.
+fn reports(status: u16, seen: Arc<Mutex<Vec<Request>>>) -> u16 {
+    let l = TcpListener::bind("127.0.0.1:0").unwrap();
+    let port = l.local_addr().unwrap().port();
+    std::thread::spawn(move || {
+        for s in l.incoming() {
+            let Ok(mut s) = s else { continue };
+            let Ok(req) = parse(&mut BufReader::new(s.try_clone().unwrap()), 1 << 20) else { continue };
+            seen.lock().unwrap().push(req);
+            let body = if status < 300 { r#"{"thread":{"id":"t1"}}"# } else { r#"{"error":"wrong_origin","echo":"cxr_minted"}"# };
+            let _ = s.write_all(format!("HTTP/1.1 {status} X\r\nContent-Type: application/json\r\nContent-Length: {}\r\n\r\n{body}", body.len()).as_bytes());
+        }
+    });
+    port
+}
+
+#[test]
+fn the_server_side_reporter_files_a_signed_report_about_the_fold() {
+    use ed25519_dalek::{Signature, Verifier, VerifyingKey};
+    let seen = Arc::new(Mutex::new(vec![]));
+    let up = format!("http://127.0.0.1:{}", reports(201, seen.clone()));
+    let stub = Stub::default();
+    let filer = ClaxFiler::new(up.clone(), QUEUE.into(), "https://phobos.example.ts.net".into(), ME.into(), Box::new(stub.clone()));
+    let c = Comment {
+        external_id: "https://ipso.bounded.tools/fleet-map/needs".into(),
+        url: "https://phobos.example.ts.net/fold/needs/".into(),
+        title: "Needs & you".into(),
+        body: "Ship it, please.".into(),
+    };
+    filer.file_with(&c, &[0x42; 32], 1_760_000_000, "AAECAwQFBgcICQoLDA0ODw", "fold-b").unwrap();
+
+    // the token was minted for the reporter key's public half, this origin and this login
+    let pk = "IVL40Zt5HSRFMkLhXy6rbLfP-ntqXtMAl5YOBpiB2xI";
+    assert_eq!(*stub.0.lock().unwrap(), [format!("{pk} https://phobos.example.ts.net {ME}")]);
+    // the report: the route, the reporter's token, the token's origin, a multipart body with the artifact anchor
+    let reqs = seen.lock().unwrap();
+    let r = &reqs[0];
+    assert_eq!((r.method.as_str(), r.target.as_str()), ("POST", "/api/queues/basis/reporter/reports"));
+    assert_eq!(r.header("Authorization"), Some("Clax-Reporter cxr_minted"));
+    assert_eq!(r.header("Origin"), Some("https://phobos.example.ts.net"));
+    assert_eq!(r.header("Content-Type"), Some("multipart/form-data; boundary=fold-b"));
+    let body = String::from_utf8(r.body.clone()).unwrap();
+    for (k, v) in [("external_id", c.external_id.as_str()), ("url", c.url.as_str()), ("title", "Needs & you"), ("anchor", r#"{"kind":"artifact","file":""}"#), ("body", "Ship it, please.")] {
+        assert!(body.contains(&format!("--fold-b\r\nContent-Disposition: form-data; name=\"{k}\"\r\n\r\n{v}\r\n")), "{k}: {body}");
+    }
+    assert!(body.ends_with("--fold-b--\r\n"));
+    // the signature verifies, by the reporter's public key, over the request as it arrived (not as the sender thought it)
+    let sig = r.header("Clax-Signature").unwrap();
+    let (t, n, s) = {
+        let p: std::collections::HashMap<&str, &str> = sig.split(", ").filter_map(|kv| kv.split_once('=')).collect();
+        (p["t"].parse::<u64>().unwrap(), p["n"], p["s"])
+    };
+    let host = r.header("Host").unwrap().to_string();
+    let input = fold_core::sig::SignInput { method: &r.method, target: &r.target, host: &host, t, nonce: n, body: &r.body, token: "cxr_minted", agent: &[] };
+    let vk = VerifyingKey::from_bytes(&fold_core::sig::unb64url(pk).unwrap().try_into().unwrap()).unwrap();
+    let sig = Signature::from_slice(&fold_core::sig::unb64url(s).unwrap()).unwrap();
+    assert!(vk.verify(input.canonical().unwrap().as_bytes(), &sig).is_ok(), "the instance can verify it");
+    drop(reqs);
+
+    // the instance refuses: said, without the reporter's token
+    let refused = ClaxFiler::new(format!("http://127.0.0.1:{}", reports(403, Arc::new(Mutex::new(vec![])))), QUEUE.into(), "https://phobos.example.ts.net".into(), ME.into(), Box::new(Stub::default()));
+    let e = refused.file_with(&c, &[0x42; 32], 1_760_000_000, "AAECAwQFBgcICQoLDA0ODw", "fold-b").unwrap_err();
+    assert!(e.starts_with("clax answered 403") && !e.contains("cxr_minted"), "{e}");
+    // a mint that fails files nothing
+    let none = Arc::new(Mutex::new(vec![]));
+    let downs = ClaxFiler::new(format!("http://127.0.0.1:{}", reports(201, none.clone())), QUEUE.into(), "https://x".into(), ME.into(), Box::new(Down));
+    assert!(downs.file(&c).is_err());
+    assert!(none.lock().unwrap().is_empty());
+}
+
+/// A minter whose instance never mints.
+struct Down;
+
+impl Minter for Down {
+    fn mint(&self, _: &str, _: &str, _: &str) -> Result<Minted, String> {
+        Err("clax answered 503: busy".into())
+    }
 }
 
 #[test]

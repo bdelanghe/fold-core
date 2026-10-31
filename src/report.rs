@@ -283,6 +283,85 @@ fn said(body: &[u8], secrets: &[&str]) -> String {
     }
 }
 
+/// The anchor a comment about a whole fold carries: Clax's artifact anchor, exactly (clax-core anchor.rs, via work-clax-sdk-kit-goal
+/// 78183de6: any other field is invalid_anchor).
+pub const ARTIFACT_ANCHOR: &str = r#"{"kind":"artifact","file":""}"#;
+
+/// A `multipart/form-data` body of text fields, with `boundary`: each part its name and value, as a browser's FormData sends text.
+pub fn multipart(boundary: &str, fields: &[(&str, &str)]) -> Vec<u8> {
+    let mut o = String::new();
+    for (k, v) in fields {
+        o.push_str(&format!("--{boundary}\r\nContent-Disposition: form-data; name=\"{k}\"\r\n\r\n{v}\r\n"));
+    }
+    o.push_str(&format!("--{boundary}--\r\n"));
+    o.into_bytes()
+}
+
+/// A server-side reporter (option A of close condition 4, work-clax-sdk-kit-goal 78183de6 and 56b30077): for each comment a fresh
+/// Ed25519 key, a reporter token minted for it, and a signed `POST /api/queues/<q>/reporter/reports` with `Authorization:
+/// Clax-Reporter <cxr_…>`, the `Origin` the token was minted for, and the fields `external_id`, `url`, `title`, `anchor` (the
+/// artifact anchor) and `body`. Not wired into `fold serve` until Bobby answers on the grant: [`Config::with_grant`] gives no filer.
+pub struct ClaxFiler {
+    pub upstream: String,
+    pub queue: String,
+    /// The page origin reports come from (`https://<host>`), one of the queue's origins.
+    pub origin: String,
+    /// Who the reports are by (the login this server reports for).
+    pub reporter_id: String,
+    minter: Box<dyn Minter>,
+}
+
+impl ClaxFiler {
+    pub fn new(upstream: String, queue: String, origin: String, reporter_id: String, minter: Box<dyn Minter>) -> ClaxFiler {
+        ClaxFiler { upstream, queue, origin, reporter_id, minter }
+    }
+
+    /// File `c` with the reporter key from `seed`, signed at `t` with `nonce`, its body parted by `boundary` (tests fix them all).
+    pub fn file_with(&self, c: &Comment, seed: &[u8; 32], t: u64, nonce: &str, boundary: &str) -> Result<(), String> {
+        let key = Ed25519::from_seed(seed);
+        let minted = self.minter.mint(&key.public_b64url(), &self.origin, &self.reporter_id)?;
+        let path = format!("/api/queues/{}/reporter/reports", self.queue);
+        let fields = [
+            ("external_id", c.external_id.as_str()),
+            ("url", c.url.as_str()),
+            ("title", c.title.as_str()),
+            ("anchor", ARTIFACT_ANCHOR),
+            ("body", c.body.as_str()),
+        ];
+        let body = multipart(boundary, &fields);
+        let host = authority(&self.upstream).ok_or("the upstream is not on loopback")?;
+        let input = SignInput { method: "POST", target: &path, host: &host, t, nonce, body: &body, token: &minted.token, agent: &[] };
+        let sig = header(&key, &input)?;
+        let auth = format!("Clax-Reporter {}", minted.token);
+        let ctype = format!("multipart/form-data; boundary={boundary}");
+        let headers = [
+            ("Authorization", auth.as_str()),
+            ("Origin", self.origin.as_str()),
+            ("Content-Type", ctype.as_str()),
+            ("Clax-Signature", sig.as_str()),
+            ("Accept", "application/json"),
+        ];
+        let r = call(&self.upstream, "POST", &path, &headers, &body)?;
+        if !(200..300).contains(&r.status) {
+            return Err(format!("clax answered {}: {}", r.status, said(&r.body, &[minted.token.as_str()])));
+        }
+        Ok(())
+    }
+}
+
+impl Filer for ClaxFiler {
+    fn file(&self, c: &Comment) -> Result<(), String> {
+        let mut seed = [0u8; 32];
+        {
+            use std::io::Read;
+            std::fs::File::open("/dev/urandom").and_then(|mut f| f.read_exact(&mut seed)).map_err(|e| format!("no random source: {e}"))?;
+        }
+        let t = std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH).map_err(|e| e.to_string())?.as_secs();
+        let boundary = format!("fold-{}", nonce()?);
+        self.file_with(c, &seed, t, &nonce()?, &boundary)
+    }
+}
+
 impl Reporting {
     /// The overlay script as the instance serves it (`/_clax/overlay.js`), its bytes as they are.
     pub fn overlay(&self) -> Result<Vec<u8>, String> {
