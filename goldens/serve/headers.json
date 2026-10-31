@@ -40,14 +40,6 @@
       [
         "Server-Timing",
         "digest;desc=\"sha-256:b63bfb63c8492b82f4979244a67e7eb019bff74ea74c97ca4d2a8b23319d064b\", asof;desc=\"2026-10-30T12:00:00Z\""
-      ],
-      [
-        "Reporting-Endpoints",
-        "default=\"/fold/_sink/report\""
-      ],
-      [
-        "Content-Security-Policy-Report-Only",
-        "default-src 'self'; script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval'; style-src 'self'; img-src 'self' data:; report-to default"
       ]
     ],
     "body_bytes": 63
@@ -89,14 +81,6 @@
       [
         "Server-Timing",
         "digest;desc=\"sha-256:166ce3069aa64783d6acfcd07d779d05309a0d6e6f6fcbf743a44f069b51a72f\", asof;desc=\"2026-10-30T12:00:00Z\""
-      ],
-      [
-        "Reporting-Endpoints",
-        "default=\"/fold/_sink/report\""
-      ],
-      [
-        "Content-Security-Policy-Report-Only",
-        "default-src 'self'; script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval'; style-src 'self'; img-src 'self' data:; report-to default"
       ]
     ],
     "body_bytes": 71
@@ -154,14 +138,6 @@
       [
         "Server-Timing",
         "digest;desc=\"sha-256:b63bfb63c8492b82f4979244a67e7eb019bff74ea74c97ca4d2a8b23319d064b\", asof;desc=\"2026-10-30T12:00:00Z\""
-      ],
-      [
-        "Reporting-Endpoints",
-        "default=\"/fold/_sink/report\""
-      ],
-      [
-        "Content-Security-Policy-Report-Only",
-        "default-src 'self'; script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval'; style-src 'self'; img-src 'self' data:; report-to default"
       ]
     ],
     "body_bytes": 0
@@ -207,14 +183,6 @@
       [
         "Server-Timing",
         "digest;desc=\"sha-256:166ce3069aa64783d6acfcd07d779d05309a0d6e6f6fcbf743a44f069b51a72f\", asof;desc=\"2026-10-30T12:00:00Z\""
-      ],
-      [
-        "Reporting-Endpoints",
-        "default=\"/fold/_sink/report\""
-      ],
-      [
-        "Content-Security-Policy-Report-Only",
-        "default-src 'self'; script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval'; style-src 'self'; img-src 'self' data:; report-to default"
       ]
     ],
     "body_bytes": 71

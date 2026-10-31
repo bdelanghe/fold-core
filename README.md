@@ -47,8 +47,8 @@ presents as slides also has `…/@slides/`.
 
 - **Title:** each page's `<title>` names the fold and the path it is in.
 - **Links:** moves between folds are plain links in the same tab. Each ends in `#<id>`: going in, the fold's `<h1>`, which a browser
-  focuses as it loads; going back up the path, the row you came from. No `autofocus`, which lone flags as focus theft. Each has `ping="<base>_sink/v"`, so the
-  browser itself tells `fold sink` which row was followed (no JS).
+  focuses as it loads; going back up the path, the row you came from. No `autofocus`, which lone flags as focus theft. No `ping`: with no
+  `fold sink` deployed, every followed link would POST into a 405; it comes back only when a sink is deployed for a real write.
 - **Ids:** the h1 and each child row have the HTML id of their path under the document; a row is an RDFa `schema:WebPageElement` (`resource="#<id>"`) whose `schema:about` (an empty span's `resource`) is the IRI of the thing it shows (id.rs, brief item 20). The id is the element's; the IRI is the data's; the row is never the data.
 - **Stylesheet:** every page links `viewer/fold.css`, the viewer's own.
 - **Refusals:** an id no file name can hold (empty, `.`, `..`, or holding `/`) is refused, as is a tree toDom refuses.
@@ -87,7 +87,7 @@ fold-serve's darkhttpd agents (brief items 23-24), which send no ETag, no per-fi
 | a `--no-store` prefix (the Sign fold, pending, presence), every error | `no-store` | none |
 
 - Every file also gets `Content-Digest` (the same digest) and `Server-Timing: digest;desc="sha-256:…", asof;desc="…", serve;dur=…`.
-- Every page gets `Reporting-Endpoints: default="<mount>/_sink/report"` and a report-only CSP that reports to it.
+- No page names a reporting endpoint or a report-only CSP: nothing is deployed to take them.
 - `tests/serve.rs` holds every class's headers in `goldens/serve/headers.json`.
 
 `fold sink --port <n> --log <signals.jsonl> [--per-minute 60]` (src/sink.rs) is append-only, put at `<mount>/_sink`:

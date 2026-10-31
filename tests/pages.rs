@@ -70,20 +70,20 @@ fn a_fold_is_a_page_at_its_real_path() {
     assert!(root.contains("<title>Fleet</title>"), "{root}");
     // The heading: the fold's id (the root's, its document's), where a link in lands; no autofocus.
     assert!(root.contains(r#"<h1 id="doc" tabindex="-1">Fleet</h1>"#), "{root}");
-    // The row: its path as its id, its IRI, a same-tab link to its page's heading that pings fold sink, and its hint named by
+    // The row: its path as its id, its IRI, a same-tab link to its page's heading (no ping), and its hint named by
     // its id.
     assert!(root.contains(r##"<li id="a%20b" resource="#a%20b" typeof="schema:WebPageElement" class="obj" data-i="0"><span property="schema:about" resource="https://ipso.bounded.tools/doc/a%20b"></span>"##), "{root}");
     assert!(
         root.contains(
-            r#"<a href="/fold/a%20b/#a%20b" ping="/fold/_sink/v" aria-describedby="a%20b:hint">Desk</a><span class="hint" id="a%20b:hint">4 open</span>"#
+            r#"<a href="/fold/a%20b/#a%20b" aria-describedby="a%20b:hint">Desk</a><span class="hint" id="a%20b:hint">4 open</span>"#
         ),
         "{root}"
     );
     assert!(!root.contains("target="), "{root}");
     let desk = pages[1]["html"].as_str().unwrap();
     assert!(desk.contains("<title>Desk — Fleet</title>"), "{desk}");
-    // Back up the path, at the row it was left by; a move like any other, so fold sink hears it as a ping.
-    assert!(desk.contains(r#"<a href="/fold/#a%20b" ping="/fold/_sink/v">Fleet</a>"#), "{desk}");
+    // Back up the path, at the row it was left by; a move like any other.
+    assert!(desk.contains(r#"<a href="/fold/#a%20b">Fleet</a>"#), "{desk}");
     assert!(desk.contains(r#"<h1 id="a%20b" tabindex="-1">Desk</h1>"#), "{desk}");
 }
 
