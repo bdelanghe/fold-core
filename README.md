@@ -21,7 +21,7 @@ each `from` path to its text); `walk({nodes, opts, facto?})` returns `{walk, ver
 The module carries no zone data. It imports `fold_core.tz_offset(zone_ptr, zone_len, epoch_ms) -> seconds` (`i32::MIN` for an
 unknown zone), and the loader answers it from `Intl`, the same zone rules fold.ts reads. A host that loads the module without
 `core()` has to provide that import. The native library builds the rules in instead (the default `tzdb` feature, chrono-tz).
-`checks.wasm-size` holds the module to 200 KB gzipped: it is about 235 KB raw and 104 KB gzipped (it was 2.1 MB raw and 539 KB
+`checks.wasm-size` holds the module to 200 KB gzipped: it is about 262 KB raw and 115 KB gzipped (it was 2.1 MB raw and 539 KB
 gzipped with chrono-tz and regex built in).
 
 ## Viewer
@@ -37,6 +37,26 @@ It reads the document again each minute. Served as is: at `/fold/` on phobos by 
 location the viewer links to shows the golden tree; every fold derives its DOM with no refusal (the AX gate); the walk over what it
 shows is the golden walk (the load gate). `checks.viewer-browser` (Linux) serves the package at `/fold/` and the `sample` page as its
 data, and loads it in headless Chromium at 390×844 and 1024×1366: each location must show the fold the core folds there.
+
+## Pages at real paths
+
+`site({nodes, source, base?, localTimeZone?})` (src/page.rs, `site_json` in the module) writes every fold of a folded document as a
+whole page of its own, for a host to serve as static files (BRIEF-fold-render-anywhere-2026-10-30, slice 2). The pages work with JS
+off. A fold is at `/fold/<id>/<id>/` (each id one segment, id.rs `segment_of`) in the file `<id>/<id>/index.html`, and a fold that
+presents as slides also has `…/@slides/`.
+
+- **Title:** each page's `<title>` names the fold and the path it is in.
+- **Links:** moves between folds are plain links in the same tab. Each ends in `#<id>`: going in, the fold's `<h1>`, which a browser
+  focuses as it loads; going back up the path, the row you came from. No `autofocus`, which lone flags as focus theft.
+- **Ids:** the h1 and each child row have the HTML id of their path under the document; a row's `data-haecceity` is its IRI (id.rs).
+- **Stylesheet:** every page links `viewer/fold.css`, the viewer's own.
+- **Refusals:** an id no file name can hold (empty, `.`, `..`, or holding `/`) is refused, as is a tree toDom refuses.
+
+`tests/pages.rs` holds every walk case's pages to `goldens/pages/<case>.pages.json`, and `js/parity.test.ts` holds the WASM build to
+them. `js/html.test.ts` has lone bless each page's `<main>`. `checks.pages-browser` (Linux, `viewer/pages-check.ts`) loads every page
+in headless Chromium with JS off, in light and dark. Each page must have the right title, focus its h1 when entered by a link, and
+have links that land. It must also pass lone's colour contrast over the colours Chromium computes from fold.css. Known findings are
+in `goldens/pages/known.json`.
 
 ## Schema
 

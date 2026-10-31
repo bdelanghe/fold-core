@@ -73,7 +73,7 @@ fn said(name: Value) -> Value {
     prop(vec![json!({ "role": "text", "name": name })], "prop")
 }
 
-fn at(id: &str) -> Vec<String> {
+pub(crate) fn at(id: &str) -> Vec<String> {
     if id == "root" {
         vec![]
     } else {

@@ -5,6 +5,7 @@
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { core } from "../js/fold-core.ts";
+import { chrome } from "./chrome.ts";
 import { at, href } from "./view.js";
 
 const [name = "sample"] = Bun.argv.slice(2);
@@ -36,23 +37,10 @@ const places = [["root", root], ...[root.kids[0]].filter(Boolean).map((k) => [k.
 // event doesn't wait for, so a snapshot can catch "Loading…". Here the check waits for data-ready and reads Chrome's own
 // accessibility tree (Accessibility.getFullAXTree), the tree VoiceOver gets.
 async function inChrome(w: number, h: number, url: string, submit?: string) {
-  const p = Bun.spawn([chromium, "--headless=new", "--no-sandbox", "--disable-gpu", "--disable-dev-shm-usage", "--no-first-run", `--user-data-dir=${process.env.TMPDIR ?? "/tmp"}/chromium-${w}`,
-    `--window-size=${w},${h}`, "--remote-debugging-port=0", "about:blank"], { stdout: "ignore", stderr: "pipe", timeout: 60_000 });
-  let err = "";
+  const c = await chrome(chromium, w, h), { send, value } = c;
   try {
-    const rd = p.stderr.getReader();
-    let ws = "";
-    while (!ws) { const { value, done } = await rd.read(); if (done) throw new Error("chromium exited before DevTools listened"); err += new TextDecoder().decode(value); ws = err.match(/ws:\/\/\S+/)?.[0] ?? ""; }
-    const port = new URL(ws).port;
-    const target = (await (await fetch(`http://127.0.0.1:${port}/json/list`)).json()).find((t: { type: string }) => t.type === "page");
-    const s = new WebSocket(target.webSocketDebuggerUrl);
-    await new Promise((r, j) => { s.onopen = r; s.onerror = j; });
-    let n = 0; const pending = new Map<number, (m: any) => void>();
-    s.onmessage = (e) => { const m = JSON.parse(String(e.data)); if (m.id) pending.get(m.id)?.(m); };
-    const send = (method: string, params = {}) => new Promise<any>((r) => { const i = ++n; pending.set(i, (m) => r(m.result)); s.send(JSON.stringify({ id: i, method, params })); });
     await send("Page.enable");
     await send("Page.navigate", { url });
-    const value = async (expression: string) => (await send("Runtime.evaluate", { expression, returnByValue: true }))?.result?.value;
     const until = Date.now() + 20_000;
     while ((await value("document.body?.dataset.ready")) !== "1" && Date.now() < until) await Bun.sleep(100);
     // typed into the Reading box and opened, as a person would: the page goes to ?data=<path> and reads that
@@ -71,9 +59,8 @@ async function inChrome(w: number, h: number, url: string, submit?: string) {
     const box = (search ? under(search) : []).filter((x: any) => !x.ignored && ["search", "searchbox", "button"].includes(x.role?.value))
       .map((x: any) => [x.role.value, x.name?.value ?? "", x.value?.value, x.description?.value].filter((v) => v != null && v !== ""));
     const href = await value("location.pathname + decodeURIComponent(location.search)"); // Open submits the path %2F-encoded
-    s.close();
-    return { ready, h1, objs, box, href, err };
-  } finally { p.kill(); await p.exited; }
+    return { ready, h1, objs, box, href, err: c.err() };
+  } finally { await c.close(); }
 }
 
 let failed = 0;

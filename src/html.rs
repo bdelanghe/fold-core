@@ -54,7 +54,7 @@ fn children(ax: &Value) -> &[Value] {
     get(ax, "children").and_then(Value::as_array).map_or(&[], Vec::as_slice)
 }
 
-fn text(s: &str) -> String {
+pub(crate) fn text(s: &str) -> String {
     let mut o = String::with_capacity(s.len());
     for c in s.chars() {
         match c {
@@ -68,7 +68,7 @@ fn text(s: &str) -> String {
     o
 }
 
-fn attr(s: &str) -> String {
+pub(crate) fn attr(s: &str) -> String {
     text(s).replace('"', "&quot;")
 }
 
@@ -86,7 +86,7 @@ impl El {
 }
 
 /// One node and what its parent appends after it (a link's hint).
-fn node(ax: &Value, n: &mut usize) -> Result<(El, Option<String>), String> {
+fn node(ax: &Value, n: &mut usize, row: Option<&str>) -> Result<(El, Option<String>), String> {
     let r = role(ax);
     let tag = element(&r).ok_or_else(|| format!("fold-ax: no element for role \"{r}\""))?;
     let name = get(ax, "name").filter(|v| !v.is_null()).map(|v| js::string(Some(v)));
@@ -102,6 +102,14 @@ fn node(ax: &Value, n: &mut usize) -> Result<(El, Option<String>), String> {
         }
     }
     let mut e = El { tag, attrs: vec![], body: String::new() };
+    // A node's own id, as a page writes it (page.rs): its path under the document; on a row, the IRI of the thing it is too.
+    let id = get(ax, "id").and_then(Value::as_str).filter(|x| !x.is_empty());
+    if let Some(id) = id {
+        e.attrs.push(("id", id.to_string()));
+    }
+    if truthy(get(ax, "haecceity")) {
+        e.attrs.push(("data-haecceity", js::string(get(ax, "haecceity"))));
+    }
     if truthy(get(ax, "cls")) {
         e.attrs.push(("class", js::string(get(ax, "cls"))));
     }
@@ -134,7 +142,8 @@ fn node(ax: &Value, n: &mut usize) -> Result<(El, Option<String>), String> {
         e.attrs.push(("role", "status".into()));
     }
     // Off-page links open a new tab: clax frames the page without allow-top-navigation, so a plain link there goes nowhere.
-    if r == "link" && !href.unwrap_or("").starts_with('#') {
+    // A link to another fold's page (`local`, page.rs) is a move within the fold, as a `#` one is.
+    if r == "link" && !href.unwrap_or("").starts_with('#') && !truthy(get(ax, "local")) {
         e.attrs.push(("target", "_blank".into()));
         e.attrs.push(("rel", "noopener".into()));
     }
@@ -145,22 +154,29 @@ fn node(ax: &Value, n: &mut usize) -> Result<(El, Option<String>), String> {
         e.body.push_str(&text(&named));
     }
     for c in kids {
-        let (x, hint) = node(c, n)?;
+        let (x, hint) = node(c, n, id.or(row))?;
         e.body.push_str(&x.write());
         e.body.extend(hint);
     }
     let mut hint = None;
     if r == "link" && truthy(get(ax, "description")) {
         // The hint is read after the link's name, as its description, and shown under it.
-        *n += 1;
-        e.attrs.push(("aria-describedby", format!("d{n}")));
-        hint = Some(format!("<span class=\"hint\" id=\"d{n}\">{}</span>", text(&js::string(get(ax, "description")))));
+        // In a row with an id, the hint's is that id's (`:` is escaped in every segment, so no row's id is one); else counted.
+        let d = match row {
+            Some(r) => format!("{r}:hint"),
+            None => {
+                *n += 1;
+                format!("d{n}")
+            }
+        };
+        hint = Some(format!("<span class=\"hint\" id=\"{}\">{}</span>", attr(&d), text(&js::string(get(ax, "description")))));
+        e.attrs.push(("aria-describedby", d));
     }
     Ok((e, hint))
 }
 
 /// One fold's tree as its HTML, or why toDom would refuse it.
 pub fn html(ax: &Value) -> Result<String, String> {
-    let (e, hint) = node(ax, &mut 0)?;
+    let (e, hint) = node(ax, &mut 0, None)?;
     Ok(e.write() + &hint.unwrap_or_default())
 }

@@ -1,0 +1,50 @@
+/* Allie's look (ax-rebuild): the path on top joined by ›, numbered rows each
+   ending in ›, one row under the cursor drawn as a card that says where ⏎
+   goes. Colours are bounded-systems/brand's paper, ink and forest.
+   One face, self-hosted beside the page (fonts/, published with it): Atkinson
+   Hyperlegible Next, drawn for low vision (Bobby 10-27, 01M5ZCV508). One scale:
+   every size is --s0 times a power of --r (1.2); nothing else sets a size. */
+@font-face{font-family:"Atkinson Hyperlegible Next";src:url("fonts/atkinson-hyperlegible-next.woff2") format("woff2");font-display:swap}
+:root{--paper:#EDEAE1;--card:#FFFFFF;--ink:#16221C;--soft:#5C6B63;--line:#888374;--accent:#0C5A42;--warn:#8A2B12;
+  --face:"Atkinson Hyperlegible Next",system-ui,-apple-system,sans-serif;
+  --s0:18px;--r:1.2;--s-1:calc(var(--s0) / var(--r));--s1:calc(var(--s0) * var(--r));--s2:calc(var(--s0) * var(--r) * var(--r));--s3:calc(var(--s2) * var(--r))}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--paper:#16221C;--card:#22302A;--ink:#ECEAE3;--soft:#A9B5AE;--line:#5C6B63;--accent:#8FC3A8;--warn:#FF9C80}}
+:root[data-theme="dark"]{--paper:#16221C;--card:#22302A;--ink:#ECEAE3;--soft:#A9B5AE;--line:#5C6B63;--accent:#8FC3A8;--warn:#FF9C80}
+*{box-sizing:border-box}
+body{margin:0;background:var(--paper);color:var(--ink);font:var(--s0)/1.45 var(--face);font-variant-numeric:tabular-nums}
+main,form.reading{max-width:42rem;margin:0 auto;padding:16px}
+/* The document read, as a search box (Bobby 10-30): its path, editable; Open reads another on this site. */
+form.reading{display:flex;flex-wrap:wrap;gap:.5rem;align-items:center;padding-bottom:0;font-size:var(--s-1)}
+form.reading input{flex:1;min-width:12ch;min-height:44px;font:var(--s-1) ui-monospace,monospace;color:var(--ink);background:var(--card);border:1px solid var(--line);border-radius:.4em;padding:0 .5em}
+form.reading button{font:inherit;min-height:44px;color:var(--paper);background:var(--accent);border:0;border-radius:.4em;padding:0 1em}
+form.reading .note{flex-basis:100%;color:var(--soft);overflow-wrap:anywhere}
+nav ol{list-style:none;margin:0;padding:0;font:var(--s-1)/1.6 var(--face)}
+nav li{display:inline}
+nav a{display:inline-block;max-width:14ch;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;vertical-align:bottom}
+nav li+li::before{content:" › " / "";color:var(--soft)}
+/* Back is the step just above (Bobby 10-28, on the phone app with no back button: "Once I click on a page how do I get back").
+   The arrow is for the eye only: its alt text is empty, so a screen reader still hears just the fold's name. */
+nav li:last-child a::before{content:"‹" / "";text-decoration:none;display:inline-block;margin-right:.35em}
+nav a{color:var(--ink)}
+h1{font-size:var(--s2);font-weight:400;line-height:1.25;margin:.75rem 0 .25rem}
+h1:focus{outline:none}
+ol.rows{list-style:none;margin:1rem 0 0;padding:0;border-left:3px solid var(--line)}
+ol.rows li{display:grid;grid-template-columns:1.75rem 1fr auto;column-gap:.75rem;padding:.6rem .75rem;min-height:44px;cursor:pointer;border-radius:10px}
+ol.rows .n{grid-column:1;grid-row:1;font:var(--s-1) var(--face);color:var(--soft);align-self:baseline}
+ol.rows a{grid-column:2;grid-row:1;color:var(--ink);text-decoration:none}
+ol.rows .go{grid-column:3;grid-row:1;color:var(--soft)}
+ol.rows .hint{grid-column:2;color:var(--soft);font-size:var(--s-1)}
+ol.rows .enter{grid-column:2;display:none;font:var(--s-1) var(--face);color:var(--soft);margin-top:.25rem}
+body.keys ol.rows li.cur{background:var(--card);outline:2px solid var(--ink);outline-offset:-2px}
+body.keys ol.rows li.cur .enter{display:block}
+/* A property row (the object's own words, its link, when its data is from): read, not entered. */
+ol.rows li.prop{display:block;cursor:default;min-height:0}
+ol.rows li.prop a{color:var(--accent)}
+li.act button{font-family:inherit;font-size:var(--s0);color:var(--paper);background:var(--accent);border:0;border-radius:.4em;padding:.5em 1em;min-height:44px}
+li.act .result{display:block}
+ol.rows li.when,ol.rows li.step{color:var(--soft);font-size:var(--s-1)}
+ol.rows li.stale,ol.rows .hint.alert{color:var(--warn)}
+/* A slide (deck mode): the same fold, set larger, its points under it and the slide before and after at the foot. */
+main.slide{max-width:56rem}
+main.slide h1{font-size:var(--s3);margin-top:1.5rem}
+main.slide ol.rows li.prop{font-size:var(--s1)}

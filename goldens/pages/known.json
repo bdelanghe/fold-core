@@ -1,0 +1,10 @@
+{
+  "about": "viewer/pages-check.ts findings on golden pages that are known, each with why and what clears it. The check fails on any finding not listed here, and on any listed one that no longer occurs, so this list only shrinks by fixing.",
+  "known": [
+    {
+      "case": "encoded", "page": "/fold/", "finding": "/fold/100%25%26%27%28%29%2A%21%7E/ goes nowhere",
+      "why": "the fold's id ends in ~, the path joiner of fold()'s document ids, so its document id reads back as two steps (one empty): its page is refused as /fold/100%25%26%27%28%29%2A%21//",
+      "clears": "#12 wired into fold(): the joiner moves from ~ to / and every step is an encoded segment, so no id can hold it"
+    }
+  ]
+}
