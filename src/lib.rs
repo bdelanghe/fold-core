@@ -9,6 +9,7 @@
 
 pub mod ax;
 pub mod html;
+pub mod id;
 mod js;
 mod tz;
 pub mod walk;
