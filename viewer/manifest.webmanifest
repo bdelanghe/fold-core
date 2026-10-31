@@ -1,11 +1,37 @@
 {
-  "name": "Fold",
-  "short_name": "Fold",
+  "name": "Basis",
+  "short_name": "Basis",
   "description": "One fold at a time: what needs you now, and a path to anything.",
   "lang": "en",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
-  "background_color": "#EDEAE1",
-  "theme_color": "#0C5A42"
+  "background_color": "#050806",
+  "theme_color": "#050806",
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icon-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
 }
