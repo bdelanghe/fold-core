@@ -57,9 +57,11 @@ export function viewOf(ax, nodes, hash, localTimeZone) {
 /** What the viewer says over a fold read from the copy kept at `at` (an ISO time) when its host did not answer: the time it is
  * from, in the reader's zone (with the day once it is not today), and its age in words. "Not updated since 14:05, 3 hours ago." */
 export function since(at, now, timeZone) {
-  const t = new Date(at), day = (d) => new Intl.DateTimeFormat("en-CA", { timeZone, dateStyle: "short" }).format(d);
-  const when = new Intl.DateTimeFormat("en-GB", { timeZone, hour: "2-digit", minute: "2-digit", hourCycle: "h23",
-    ...(day(t) === day(now) ? {} : { weekday: "short", day: "numeric", month: "short" }) }).format(t);
+  // built from parts, so it reads the same under every ICU (each words a date and time joined its own way)
+  const parts = (d) => Object.fromEntries(new Intl.DateTimeFormat("en-GB", { timeZone, weekday: "short", year: "numeric", month: "short", day: "numeric",
+    hour: "2-digit", minute: "2-digit", hourCycle: "h23" }).formatToParts(d).map((p) => [p.type, p.value]));
+  const t = new Date(at), p = parts(t), n = parts(now), time = `${p.hour}:${p.minute}`;
+  const when = p.year === n.year && p.month === n.month && p.day === n.day ? time : `${p.weekday} ${p.day} ${p.month} at ${time}`;
   const m = Math.max(0, Math.floor((now - t) / 60_000)), rel = new Intl.RelativeTimeFormat("en", { numeric: "always" });
   const age = m < 1 ? "less than a minute ago" : m < 60 ? rel.format(-m, "minute") : m < 48 * 60 ? rel.format(-Math.floor(m / 60), "hour") : rel.format(-Math.floor(m / 1440), "day");
   return `Not updated since ${when}, ${age}.`;
