@@ -1,0 +1,354 @@
+{
+  "about": "fold-core one-id vectors (DESIGN-one-id-path-version-component-2026-10-30). Outputs are recomputed from inputs by tests/ids.rs; FOLD_BLESS=1 rewrites them. Supersedes sha 0779111e (slugged role[name] steps), which must not be pinned.",
+  "base": "https://ipso.bounded.tools/",
+  "rules": {
+    "segment": "a source id as one path segment: its UTF-8 bytes, each byte outside [A-Za-z0-9._-] as %XX (uppercase hex); never slugged or case-folded. '/', '~', '#', '[' and ']' in an id are all encoded",
+    "source_id": "the node's 'id' if a non-blank string (trimmed of whitespace at both ends) or a JSON number (as written); otherwise none",
+    "quiddity": "the node's own 'kind' (slugged) if a non-blank string, else by the key it is listed under: sections -> section, groups -> group, items/kids/children -> item; the document root is 'page'. The quiddity is metadata (data-quiddity), never part of the haecceity",
+    "step": "segment(source id) when the node has one; else the opaque token '~' + first 16 hex of sha256(UTF-8 of parent + '\\n' + kind + '\\n' + raw name + '\\n' + distinguishing), marked provisional",
+    "raw_name": "first non-blank (trimmed) of title, nav, name, action, label, text; '' if none",
+    "distinguishing": "first non-blank (trimmed) of link.href, href, text, summary, purpose, why, action; '' if none",
+    "path": "steps joined by '/'; the root's path is ''; a group with no title is layout only and adds no step",
+    "haecceity": "base + segment(source) for the root; base + segment(source) + '/' + path otherwise (segments are already encoded)",
+    "html_id": "the path as it stands in the haecceity; the root's is segment(source)",
+    "selector": "role[name] (Allie's address, the rotor's) is a selector that resolves to a haecceity, never part of one",
+    "unique": "one canonical path per thing: two nodes with the same path fail the build",
+    "named_by": "how a segment was named, never a bare boolean: 'source-id' (the data's own id) or 'provisional-token' (fold-core's stopgap; it hashes a label, so a label fix changes it; never published to facto or signed; the fix is a source id in the data, or a facto-minted id). The root reads 'source-id' (its source)"
+  },
+  "segment": [
+    {
+      "in": "needs",
+      "out": "needs"
+    },
+    {
+      "in": "2fac998588cf",
+      "out": "2fac998588cf"
+    },
+    {
+      "in": "pr/12",
+      "out": "pr%2F12"
+    },
+    {
+      "in": "Needs you",
+      "out": "Needs%20you"
+    },
+    {
+      "in": "Café — Ünïcode",
+      "out": "Caf%C3%A9%20%E2%80%94%20%C3%9Cn%C3%AFcode"
+    },
+    {
+      "in": "日本語",
+      "out": "%E6%97%A5%E6%9C%AC%E8%AA%9E"
+    },
+    {
+      "in": "a#3 (draft) [x]",
+      "out": "a%233%20%28draft%29%20%5Bx%5D"
+    },
+    {
+      "in": "~tilde",
+      "out": "%7Etilde"
+    },
+    {
+      "in": "50%",
+      "out": "50%25"
+    },
+    {
+      "in": "UPPER-lower_9.v2",
+      "out": "UPPER-lower_9.v2"
+    }
+  ],
+  "step": [
+    {
+      "note": "source id wins",
+      "parent": "",
+      "key": "sections",
+      "node": {
+        "id": "needs",
+        "title": "Needs you"
+      },
+      "quiddity": "section",
+      "step": "needs",
+      "named_by": "source-id"
+    },
+    {
+      "note": "a request_id is the segment, never the position (no 'ask-0')",
+      "parent": "needs",
+      "key": "items",
+      "node": {
+        "id": "2fac998588cf",
+        "action": "Merge the policy note"
+      },
+      "quiddity": "item",
+      "step": "2fac998588cf",
+      "named_by": "source-id"
+    },
+    {
+      "note": "a numeric id (a PR number)",
+      "parent": "prs",
+      "key": "items",
+      "node": {
+        "id": 12,
+        "title": "fold-core: one id per thing"
+      },
+      "quiddity": "item",
+      "step": "12",
+      "named_by": "source-id"
+    },
+    {
+      "note": "an id with '/' stays one segment",
+      "parent": "prs",
+      "key": "items",
+      "node": {
+        "id": "bdelanghe/fold-core#12",
+        "title": "one id"
+      },
+      "quiddity": "item",
+      "step": "bdelanghe%2Ffold-core%2312",
+      "named_by": "source-id"
+    },
+    {
+      "note": "own kind wins over the key, and stays out of the segment",
+      "parent": "goals",
+      "key": "items",
+      "node": {
+        "id": "port-goal",
+        "kind": "Seat",
+        "title": "port-goal"
+      },
+      "quiddity": "seat",
+      "step": "port-goal",
+      "named_by": "source-id"
+    },
+    {
+      "note": "no id: provisional token",
+      "parent": "needs",
+      "key": "items",
+      "node": {
+        "text": "Phone approval with your passkey",
+        "action": "Register your passkey once at the desk"
+      },
+      "quiddity": "item",
+      "step": "~311670d98c67e6f7",
+      "named_by": "provisional-token",
+      "hashed": "needs\nitem\nRegister your passkey once at the desk\nPhone approval with your passkey"
+    },
+    {
+      "note": "same name, different link: different token",
+      "parent": "prs",
+      "key": "items",
+      "node": {
+        "title": "Fix the build",
+        "link": {
+          "href": "https://git.example.test/a/b/pull/1"
+        }
+      },
+      "quiddity": "item",
+      "step": "~b9af015fa17b88a3",
+      "named_by": "provisional-token",
+      "hashed": "prs\nitem\nFix the build\nhttps://git.example.test/a/b/pull/1"
+    },
+    {
+      "note": "same name, different link: different token",
+      "parent": "prs",
+      "key": "items",
+      "node": {
+        "title": "Fix the build",
+        "link": {
+          "href": "https://git.example.test/a/b/pull/2"
+        }
+      },
+      "quiddity": "item",
+      "step": "~4aa01406fb724bf1",
+      "named_by": "provisional-token",
+      "hashed": "prs\nitem\nFix the build\nhttps://git.example.test/a/b/pull/2"
+    },
+    {
+      "note": "same node, other parent: different token",
+      "parent": "done",
+      "key": "items",
+      "node": {
+        "title": "Fix the build",
+        "link": {
+          "href": "https://git.example.test/a/b/pull/1"
+        }
+      },
+      "quiddity": "item",
+      "step": "~417acd86d824932e",
+      "named_by": "provisional-token",
+      "hashed": "done\nitem\nFix the build\nhttps://git.example.test/a/b/pull/1"
+    },
+    {
+      "note": "no name at all",
+      "parent": "x",
+      "key": "items",
+      "node": {
+        "href": "https://example.test/"
+      },
+      "quiddity": "item",
+      "step": "~fd294c3be54fda19",
+      "named_by": "provisional-token",
+      "hashed": "x\nitem\n\nhttps://example.test/"
+    },
+    {
+      "note": "blank id falls back to a token",
+      "parent": "",
+      "key": "sections",
+      "node": {
+        "id": "  ",
+        "title": "Machines"
+      },
+      "quiddity": "section",
+      "step": "~ad2cef744d2420b2",
+      "named_by": "provisional-token",
+      "hashed": "\nsection\nMachines\n"
+    }
+  ],
+  "haecceity": [
+    {
+      "source": "fleet",
+      "path": "",
+      "haecceity": "https://ipso.bounded.tools/fleet",
+      "html_id": "fleet"
+    },
+    {
+      "source": "fleet",
+      "path": "needs/2fac998588cf",
+      "haecceity": "https://ipso.bounded.tools/fleet/needs/2fac998588cf",
+      "html_id": "needs/2fac998588cf"
+    },
+    {
+      "source": "Fleet Map",
+      "path": "prs/bdelanghe%2Ffold-core%2312",
+      "haecceity": "https://ipso.bounded.tools/Fleet%20Map/prs/bdelanghe%2Ffold-core%2312",
+      "html_id": "prs/bdelanghe%2Ffold-core%2312"
+    }
+  ],
+  "document": [
+    {
+      "note": "a small fold-data document, a titleless group adding no step",
+      "source": "fleet",
+      "data": {
+        "title": "Agent fleet",
+        "sections": [
+          {
+            "id": "needs",
+            "title": "Needs you",
+            "groups": [
+              {
+                "title": "",
+                "items": [
+                  {
+                    "id": "2fac998588cf",
+                    "action": "Merge the policy note"
+                  },
+                  {
+                    "text": "Phone approval with your passkey"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": "machines",
+            "title": "Machines",
+            "items": [
+              {
+                "id": "phobos",
+                "title": "phobos",
+                "kind": "machine"
+              },
+              {
+                "id": "deimos",
+                "title": "deimos",
+                "kind": "machine"
+              }
+            ]
+          }
+        ]
+      },
+      "paths": [
+        {
+          "path": "",
+          "quiddity": "page",
+          "haecceity": "https://ipso.bounded.tools/fleet",
+          "named_by": "source-id"
+        },
+        {
+          "path": "needs",
+          "quiddity": "section",
+          "haecceity": "https://ipso.bounded.tools/fleet/needs",
+          "named_by": "source-id"
+        },
+        {
+          "path": "needs/2fac998588cf",
+          "quiddity": "item",
+          "haecceity": "https://ipso.bounded.tools/fleet/needs/2fac998588cf",
+          "named_by": "source-id"
+        },
+        {
+          "path": "needs/~29abeaddb50213f3",
+          "quiddity": "item",
+          "haecceity": "https://ipso.bounded.tools/fleet/needs/~29abeaddb50213f3",
+          "named_by": "provisional-token"
+        },
+        {
+          "path": "machines",
+          "quiddity": "section",
+          "haecceity": "https://ipso.bounded.tools/fleet/machines",
+          "named_by": "source-id"
+        },
+        {
+          "path": "machines/phobos",
+          "quiddity": "machine",
+          "haecceity": "https://ipso.bounded.tools/fleet/machines/phobos",
+          "named_by": "source-id"
+        },
+        {
+          "path": "machines/deimos",
+          "quiddity": "machine",
+          "haecceity": "https://ipso.bounded.tools/fleet/machines/deimos",
+          "named_by": "source-id"
+        }
+      ],
+      "duplicate": null
+    },
+    {
+      "note": "two siblings with one source id are the same thing twice: refused",
+      "source": "fleet",
+      "data": {
+        "title": "Dupes",
+        "items": [
+          {
+            "id": "2fac998588cf",
+            "title": "Sign A"
+          },
+          {
+            "id": "2fac998588cf",
+            "title": "Sign B"
+          }
+        ]
+      },
+      "paths": [
+        {
+          "path": "",
+          "quiddity": "page",
+          "haecceity": "https://ipso.bounded.tools/fleet",
+          "named_by": "source-id"
+        },
+        {
+          "path": "2fac998588cf",
+          "quiddity": "item",
+          "haecceity": "https://ipso.bounded.tools/fleet/2fac998588cf",
+          "named_by": "source-id"
+        },
+        {
+          "path": "2fac998588cf",
+          "quiddity": "item",
+          "haecceity": "https://ipso.bounded.tools/fleet/2fac998588cf",
+          "named_by": "source-id"
+        }
+      ],
+      "duplicate": "2fac998588cf"
+    }
+  ]
+}
