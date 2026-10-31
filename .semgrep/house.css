@@ -1,0 +1,9 @@
+/* baobab:begin */
+:root{--paper:#EDEAE1;--ink:#16221C;}
+/* baobab:end */
+// ok: fold-colour-literal-outside-tokens
+body{color:var(--ink)}
+// ruleid: fold-colour-literal-outside-tokens
+a{color:#0C5A42}
+// ruleid: fold-colour-literal-outside-tokens
+b{background:rgb(0 0 0)}
