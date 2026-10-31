@@ -87,7 +87,7 @@ fold-serve's darkhttpd agents (brief items 23-24), which send no ETag, no per-fi
 | a `--no-store` prefix (the Sign fold, pending, presence), every error | `no-store` | none |
 
 - Every file also gets `Content-Digest` (the same digest) and `Server-Timing: digest;desc="sha-256:…", asof;desc="…", serve;dur=…`.
-- Every page gets `Reporting-Endpoints: default="<mount>/_sink/report"` and a report-only CSP that reports to it.
+- No page names a reporting endpoint or a report-only CSP: nothing is deployed to take them.
 - `tests/serve.rs` holds every class's headers in `goldens/serve/headers.json`.
 
 `fold sink --port <n> --log <signals.jsonl> [--per-minute 60]` (src/sink.rs) is append-only, put at `<mount>/_sink`:

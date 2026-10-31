@@ -1,7 +1,6 @@
 //! `fold serve` (brief items 23-24, split by item 27): the fold viewer and its data over HTTP, read-only. GET and HEAD of static
 //! files, with the headers darkhttpd cannot send (ETag, Cache-Control, Server-Timing), and nothing else: it writes nothing, takes
-//! no body, and every other method is 405. The no-JS signals it names (`<a ping>`, the Reporting API) go to `fold sink`
-//! (sink.rs), a separate process at `<mount>/_sink`. Approvals go through neither; they stay chitin's `/approve`. [`respond`] is
+//! no body, and every other method is 405. It names no `fold sink` (sink.rs): the sink is kept but not deployed. Approvals go through neither; they stay chitin's `/approve`. [`respond`] is
 //! pure (a request and a directory in, a response out), so tests/serve.rs holds every resource class's headers as goldens without
 //! a socket; [`run`] is the loopback loop around it (http.rs, src/bin/fold.rs).
 //!
@@ -14,8 +13,7 @@
 //!   one file here, so nothing varies by `Accept` and no `Vary` is sent.
 //! - **`Server-Timing`:** `digest;desc="sha-256:…"` and `asof;desc="<Last-Modified, ISO>"`; [`run`] adds `serve;dur=<ms>`.
 //!   Nothing is rendered per request (the pages are rendered at publish time, page.rs), so there is no `render` entry.
-//! - **Reporting:** every page names `Reporting-Endpoints: default="<mount>/_sink/report"` and a report-only CSP that reports
-//!   to it; the sink takes them.
+//! - **No Reporting:** no `Reporting-Endpoints` and no report-only CSP, since no sink is deployed to take them (Bobby f2717c12).
 //! - **Paths:** percent-decoded, as darkhttpd does; a `.` or `..` segment, a NUL or a backslash is refused (400). No listings.
 
 use std::fs;
@@ -168,14 +166,6 @@ fn file(site: &Site, req: &Request, path: &str) -> Response {
     r = r
         .with("Content-Digest", format!("sha-256=:{}:", base64(&hash)))
         .with("Server-Timing", format!("digest;desc=\"sha-256:{hex}\", asof;desc=\"{}\"", iso(asof)));
-    if page {
-        // Deprecation, intervention and crash reports go to `default` whatever the CSP. The CSP only reports: it lets the viewer's
-        // inline module (viewer/index.html) run, so what it reports is a load from somewhere other than this origin.
-        r = r.with("Reporting-Endpoints", format!("default=\"{}/_sink/report\"", site.mount)).with(
-            "Content-Security-Policy-Report-Only",
-            "default-src 'self'; script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval'; style-src 'self'; img-src 'self' data:; report-to default",
-        );
-    }
     let fresh = class != Class::NoStore && req.header("If-None-Match").is_some_and(|v| matches(v, &etag));
     if fresh {
         r.status = 304;
