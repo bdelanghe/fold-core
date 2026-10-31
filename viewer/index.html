@@ -18,7 +18,7 @@
 <meta name="apple-mobile-web-app-title" content="Basis">
 <meta name="theme-color" content="#EDEAE1" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#16221C" media="(prefers-color-scheme: dark)">
-<title>Fold</title>
+<title>Basis</title>
 <!-- Its look, one stylesheet shared with every fold's pre-rendered page (src/page.rs links it as <base>fold.css). -->
 <link rel="stylesheet" href="fold.css">
 </head>
@@ -61,7 +61,7 @@ function render(focus) {
   node = v.node;
   const main = toDom(document, v.tree);
   document.querySelector("main").replaceWith(main);
-  document.title = node?.title ?? "Fold";
+  document.title = node?.title ?? "Basis";
   for (const li of rows()) li.addEventListener("click", e => { if (e.target.tagName !== "A") li.querySelector("a").click(); });
   // The fold's one action (fold.ts Act), its answer said in the row; no capability here: the fold's link, its fallback.
   const n = node, a = n?.act, b = main.querySelector("button.act"), say = t => main.querySelector(".result").textContent = t;
