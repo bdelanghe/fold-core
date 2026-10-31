@@ -20,13 +20,14 @@ pub fn element(role: &str) -> Option<&'static str> {
         "listitem" => "li",
         "link" => "a",
         "button" => "button",
+        "form" => "form",
         "status" | "text" | "decoration" => "span",
         _ => return None,
     })
 }
 
 /// The roles that refuse to render without a name (fold-dom.js NEEDS_NAME).
-pub const NEEDS_NAME: [&str; 5] = ["navigation", "heading", "list", "link", "button"];
+pub const NEEDS_NAME: [&str; 6] = ["navigation", "heading", "list", "link", "button", "form"];
 
 /// What a fold's main may hold, in order: the path (its scope, as links), its heading, its one list.
 pub const MAIN_ROLES: [&str; 3] = ["navigation", "heading", "list"];
@@ -135,6 +136,16 @@ fn node(ax: &Value, n: &mut usize, row: Option<&str>) -> Result<(El, Option<Stri
     if r == "navigation" {
         e.attrs.push(("aria-label", named.clone()));
     }
+    // An act (ax.rs act_form): named, so it is a form landmark; its cap, call and args ride as hidden fields, ahead of its button.
+    if r == "form" {
+        e.attrs.push(("aria-label", named.clone()));
+        e.attrs.push(("method", js::string(get(ax, "method"))));
+        e.attrs.push(("action", js::string(get(ax, "action"))));
+        for f in get(ax, "fields").and_then(Value::as_array).into_iter().flatten() {
+            let (k, v) = (js::string(f.get(0)), js::string(f.get(1)));
+            e.body.push_str(&format!("<input type=\"hidden\" name=\"{}\" value=\"{}\">", attr(&k), attr(&v)));
+        }
+    }
     if r == "heading" && truthy(get(ax, "focus")) {
         e.attrs.push(("tabindex", "-1".into()));
     }
@@ -146,7 +157,8 @@ fn node(ax: &Value, n: &mut usize, row: Option<&str>) -> Result<(El, Option<Stri
         e.attrs.push(("ping", js::string(get(ax, "ping"))));
     }
     if r == "button" {
-        e.attrs.push(("type", "button".into()));
+        // A button is only ever an act's, and submits its form.
+        e.attrs.push(("type", "submit".into()));
     }
     if r == "status" {
         e.attrs.push(("role", "status".into()));

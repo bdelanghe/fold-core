@@ -9,7 +9,8 @@
 //   - passes lone's colour contrast over every piece of visible text, with the colours Chromium computed from fold.css
 //     (lone reads colours off its nodes; here they are the browser's own, so the stylesheet is what is checked), and under
 //     prefers-contrast:more every run clears 7:1 too (Baobab's contrastRatio; lone holds AA only);
-//   - draws a visible border on every button and field, so each edge survives forced-colors, where fills are the user's Canvas.
+//   - draws a visible border on every button and field, so each edge survives forced-colors, where fills are the user's Canvas
+//     (an act's hidden fields are not drawn at all, so they have no edge to keep).
 //   CHROMIUM=<chromium binary> [VIEWER=<packages.viewer>, for its fonts] bun viewer/pages-check.ts [<golden case>…]
 import { readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
@@ -47,7 +48,7 @@ const look = `(() => {
   return { title: document.title, h1: [...document.querySelectorAll("h1")].map((h) => h.textContent), focused: document.activeElement?.localName ?? null,
     scripts: document.scripts.length, crumbs: [...document.querySelectorAll("nav a")].map((a) => a.textContent),
     links: [...document.querySelectorAll("a")].map((a) => [a.getAttribute("href"), a.getAttribute("target")]), text,
-    edgeless: [...document.querySelectorAll("button, input")].filter((e) => { const s = getComputedStyle(e); return s.borderTopStyle === "none" || parseFloat(s.borderTopWidth) === 0; }).map((e) => e.localName + " " + JSON.stringify((e.textContent || e.getAttribute("aria-label") || "").slice(0, 40))) };
+    edgeless: [...document.querySelectorAll("button, input:not([type=hidden])")].filter((e) => { const s = getComputedStyle(e); return s.borderTopStyle === "none" || parseFloat(s.borderTopWidth) === 0; }).map((e) => e.localName + " " + JSON.stringify((e.textContent || e.getAttribute("aria-label") || "").slice(0, 40))) };
 })()`;
 
 const off = { name: "prefers-contrast", value: "no-preference" }, more = { name: "prefers-contrast", value: "more" };
@@ -71,6 +72,8 @@ try {
     site = new Map(all.filter((p) => p.file).map((p) => [p.file!, p]));
     const refused = new Set(all.filter((p) => p.error).map((p) => p.href)), ids = new Set(all.map((p) => p.id)), gaps = new Set<string>();
     for (const [scheme, features] of modes) {
+      // A case that ends on the page the next starts on (/fold/, its fragment aside) would be a same-document move: start fresh.
+      await c.send("Page.navigate", { url: "about:blank" });
       await c.send("Emulation.setEmulatedMedia", { features });
       for (const p of all.filter((p) => p.html)) {
         const h1 = p.html!.match(/<h1 id="([^"]*)"/)?.[1];

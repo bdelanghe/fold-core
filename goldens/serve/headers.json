@@ -434,6 +434,63 @@
     "body_bytes": 23
   },
   {
+    "what": "an act's form with no script to take it: nothing done, a page that says so and the way back",
+    "request": {
+      "method": "POST",
+      "target": "/act/needs/a%2Fb/0",
+      "headers": [
+        [
+          "Tailscale-User-Login",
+          "bobby@example.com"
+        ],
+        [
+          "Content-Type",
+          "application/x-www-form-urlencoded"
+        ]
+      ]
+    },
+    "status": 405,
+    "headers": [
+      [
+        "Allow",
+        "GET, HEAD"
+      ],
+      [
+        "Cache-Control",
+        "no-store"
+      ],
+      [
+        "Content-Type",
+        "text/html; charset=utf-8"
+      ]
+    ],
+    "body_bytes": 944
+  },
+  {
+    "what": "a POST under act/ that names no act: read-only",
+    "request": {
+      "method": "POST",
+      "target": "/act/needs",
+      "headers": []
+    },
+    "status": 405,
+    "headers": [
+      [
+        "Content-Type",
+        "text/plain; charset=utf-8"
+      ],
+      [
+        "Cache-Control",
+        "no-store"
+      ],
+      [
+        "Allow",
+        "GET, HEAD"
+      ]
+    ],
+    "body_bytes": 23
+  },
+  {
     "what": "no PUT",
     "request": {
       "method": "PUT",

@@ -15,9 +15,9 @@
 // the object's properties (its own words, its link, when its data is from: plain rows, read in order) and then its child objects
 // (numbered rows you go into). No paragraph, footer, status line or banner exists outside it: toDom refuses them.
 const ELEMENT = {
-  main: "main", navigation: "nav", heading: "h1", list: "ol", listitem: "li", link: "a", button: "button", status: "span", text: "span", decoration: "span",
+  main: "main", navigation: "nav", heading: "h1", list: "ol", listitem: "li", link: "a", button: "button", form: "form", status: "span", text: "span", decoration: "span",
 };
-const NEEDS_NAME = new Set(["navigation", "heading", "list", "link", "button"]);
+const NEEDS_NAME = new Set(["navigation", "heading", "list", "link", "button", "form"]);
 // What a fold's main may hold, in order: the path (its scope, as links), its heading, its one list.
 const MAIN_ROLES = ["navigation", "heading", "list"];
 
@@ -48,10 +48,15 @@ export function toDom(doc, ax, ids = { n: 0 }, row = null) {
   if (ax.role === "list" && (ax.children ?? []).some((c) => c.role !== "listitem")) throw new Error(`fold-ax: a list holds rows, not ${(ax.children ?? []).map((c) => c.role).join(", ")}`);
   if (ax.role === "list") { e.setAttribute("role", "list"); e.setAttribute("aria-label", ax.name); } // WebKit drops list semantics under list-style:none without it
   if (ax.role === "navigation") e.setAttribute("aria-label", ax.name);
+  // An act (src/ax.rs act_form): named, so it is a form landmark; its cap, call and args ride as hidden fields, ahead of its button.
+  if (ax.role === "form") {
+    e.setAttribute("aria-label", ax.name); e.setAttribute("method", String(ax.method)); e.setAttribute("action", String(ax.action));
+    for (const [k, v] of ax.fields ?? []) { const i = doc.createElement("input"); i.setAttribute("type", "hidden"); i.setAttribute("name", k); i.setAttribute("value", v); e.append(i); }
+  }
   if (ax.role === "heading" && ax.focus) e.tabIndex = -1;
   if (ax.role === "link") e.href = ax.href;
   if (ax.role === "link" && ax.ping) e.setAttribute("ping", ax.ping);
-  if (ax.role === "button") e.type = "button";
+  if (ax.role === "button") e.type = "submit"; // a button is only ever an act's, and submits its form
   if (ax.role === "status") e.setAttribute("role", "status");
   // Off-page links open a new tab: clax frames the page without allow-top-navigation, so a plain link there goes nowhere.
   // A link to another fold's page (`local`, src/page.rs) is a move within the fold, as a `#` one is.

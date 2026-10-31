@@ -67,6 +67,11 @@ fn every_resource_class_has_its_headers() {
         ("addressed by digest: immutable", req("GET", "/fold@sha256:5e1f.css", &[], "")),
         ("live state (--no-store sign/): never stored, no validator", req("GET", "/sign/pending.json", &[("If-None-Match", "*")], "")),
         ("a ping sent here, not to the sink: read-only", req("POST", "/_v", &[me, ("Content-Type", "text/ping")], "PING")),
+        (
+            "an act's form with no script to take it: nothing done, a page that says so and the way back",
+            req("POST", "/act/needs/a%2Fb/0", &[me, ("Content-Type", "application/x-www-form-urlencoded")], "cap=chitin.ack&call=ack"),
+        ),
+        ("a POST under act/ that names no act: read-only", req("POST", "/act/needs", &[], "")),
         ("no PUT", req("PUT", "/index.html", &[], "x")),
         ("a .. segment, even encoded", req("GET", "/%2e%2e/etc/passwd", &[], "")),
         ("nothing there", req("GET", "/missing/", &[], "")),
@@ -95,6 +100,13 @@ fn every_resource_class_has_its_headers() {
         text == fs::read_to_string(&path).unwrap_or_default(),
         "goldens/serve/headers.json is stale (FOLD_BLESS=1 cargo test --test serve)"
     );
+    // The page an act's form gets, byte for byte.
+    let page = respond(&s, &req("POST", "/act/needs/a%2Fb/0", &[], "cap=chitin.ack")).body;
+    let path = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("goldens/serve/act.html");
+    if std::env::var("FOLD_BLESS").is_ok() {
+        fs::write(&path, &page).unwrap();
+    }
+    assert!(page == fs::read(&path).unwrap_or_default(), "goldens/serve/act.html is stale (FOLD_BLESS=1 cargo test --test serve)");
     let _ = fs::remove_dir_all(&s.root);
 }
 
@@ -119,6 +131,11 @@ fn the_loop_times_each_answer_and_takes_no_body() {
     assert!(out.lines().any(|l| l.starts_with("Server-Timing: digest;desc=\"sha-256:") && l.contains(", serve;dur=")), "{out}");
     assert!(out.ends_with("<h1>Desk</h1></main>\n"), "{out}");
     let out = over_the_wire(port, b"POST /_v HTTP/1.1\r\nContent-Type: text/ping\r\nContent-Length: 4\r\n\r\nPING");
+    assert!(out.starts_with("HTTP/1.1 413 "), "{out}");
+    // an act's form is the one body taken, read only to be dropped, and answered by a page; one too big is refused unread
+    let out = over_the_wire(port, b"POST /act/needs/0 HTTP/1.1\r\nContent-Type: application/x-www-form-urlencoded\r\nContent-Length: 8\r\n\r\ncap=x&c=");
+    assert!(out.starts_with("HTTP/1.1 405 ") && out.contains("<h1 tabindex=\"-1\">Acting from here isn't on yet</h1>"), "{out}");
+    let out = over_the_wire(port, b"POST /act/needs/0 HTTP/1.1\r\nContent-Length: 9000\r\n\r\n");
     assert!(out.starts_with("HTTP/1.1 413 "), "{out}");
     // it wrote nothing: the directory is the one site() made
     let mut names: Vec<String> = fs::read_dir(&root).unwrap().map(|e| e.unwrap().file_name().into_string().unwrap()).collect();

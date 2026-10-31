@@ -1,0 +1,17 @@
+{
+  "walk": {
+    "folds": 1,
+    "reached": 1,
+    "findings": [
+      {
+        "fold": "root",
+        "check": "no-intent",
+        "kind": "remove",
+        "blocks": false,
+        "said": "Everything",
+        "reduction": "an empty fold: remove it from its parent"
+      }
+    ]
+  },
+  "verdict": "Checked by the artificial viewer: every fold reached, nothing blocking."
+}

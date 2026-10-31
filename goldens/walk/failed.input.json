@@ -1,0 +1,32 @@
+{
+  "nodes": [
+    [
+      "root",
+      {
+        "title": "Could not read the data",
+        "trail": [],
+        "failed": "Could not read /fold-data/fleet/page.json: 502 Bad Gateway."
+      }
+    ],
+    [
+      "needs",
+      {
+        "title": "Needs you",
+        "trail": [
+          "Everything"
+        ],
+        "kids": [],
+        "failed": "Could not read needs.json: it is not JSON."
+      }
+    ]
+  ],
+  "opts": {
+    "budgets": [
+      {
+        "id": "view.words",
+        "value": 220
+      }
+    ],
+    "localTimeZone": "UTC"
+  }
+}

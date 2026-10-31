@@ -91,3 +91,9 @@ test("toDom writes a page's row as src/page.rs does (tests/pages.rs holds the sa
     '<li id="a%20b" resource="#a%20b" typeof="schema:WebPageElement" class="obj" data-i="0"><span property="schema:about" resource="https://ipso.bounded.tools/doc/a%20b"></span><span class="n" aria-hidden="true">1</span>' +
     '<a href="/fold/a%20b/#a%20b" aria-describedby="a%20b:hint">Desk</a><span class="hint" id="a%20b:hint">4 open</span></li></ol></main>'));
 });
+
+// The page fold serve answers an act's form with while acting is off (src/serve.rs not_yet; goldens/serve/act.html): lone blesses it.
+test("serve act.html: lone blesses the page an act's form gets, with zero findings", async () => {
+  const d = parseHTML(readFileSync(join(goldens, "serve", "act.html"), "utf8")).document;
+  expect((await bless(d.querySelector("main") as any)).findings.map((x: any) => x.code)).toEqual([]);
+});

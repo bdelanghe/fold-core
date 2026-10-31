@@ -1,0 +1,21 @@
+{
+  "nodes": [
+    [
+      "root",
+      {
+        "title": "Everything",
+        "trail": [],
+        "kids": []
+      }
+    ]
+  ],
+  "opts": {
+    "budgets": [
+      {
+        "id": "view.words",
+        "value": 220
+      }
+    ],
+    "localTimeZone": "UTC"
+  }
+}

@@ -75,6 +75,13 @@ fn mark(ax: &mut Value, base: &str, own: &str, rows: &[(String, String)]) {
     if role == "link" && o.get("href").and_then(Value::as_str).is_some_and(|h| h.starts_with(base)) {
         o.insert("local".into(), true.into());
     }
+    // An act's form posts under the viewer's mount, wherever the page sits below it.
+    if role == "form" {
+        if let Some(a) = o.get("action").and_then(Value::as_str).filter(|a| a.starts_with("act/")) {
+            let a = format!("{base}{a}");
+            o.insert("action".into(), a.into());
+        }
+    }
     if role == "heading" {
         o.insert("id".into(), own.into());
     }
@@ -165,7 +172,8 @@ pub fn site(nodes: &[(String, Value)], source: &str, base: &str, clock: &Clock) 
             // Back up the path, each step lands on the row it was left by, where that fold lists it; else on its heading.
             let nav = tree.pointer("/children/0/role").is_some_and(|r| r == "navigation");
             if let Some(Value::Array(steps)) = tree.pointer_mut("/children/0/children/0/children").filter(|_| nav) {
-                for (i, li) in steps.iter_mut().enumerate() {
+                // (An empty root's one step is the root itself: its link stays, to the root's heading.)
+                for (i, li) in steps.iter_mut().enumerate().take(path.len()) {
                     if let Some(a) = li.pointer_mut("/children/0").filter(|a| a["role"] == "link") {
                         let up = &path[..i];
                         let lists = folds.get(up).is_some_and(|n| n["kids"].as_array().into_iter().flatten().any(|k| k["id"] == path[i]));

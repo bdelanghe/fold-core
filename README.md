@@ -49,6 +49,11 @@ presents as slides also has `…/@slides/`.
 - **Links:** moves between folds are plain links in the same tab. Each ends in `#<id>`: going in, the fold's `<h1>`, which a browser
   focuses as it loads; going back up the path, the row you came from. No `autofocus`, which lone flags as focus theft. No `ping`: with no
   `fold sink` deployed, every followed link would POST into a 405; it comes back only when a sink is deployed for a real write.
+- **Acts:** a fold's act is a `<form>` named by the fold, posting its cap, call and args as hidden fields to `<base>act/<path>/<index>`
+  with a native submit button, and no script (BRIEF-basis-forms-push-signing-2026-10-31 §1). The passkey (`webauthn`, `approve`)
+  GETs the fold's sign page instead, which runs the ceremony.
+- **A way back:** a missing fold, one whose data failed to load (`failed`), and a root with nothing in it each show the path (to the
+  root at least), one line saying what was asked for and why there is nothing, and, off the root, a link back to it (§5).
 - **Ids:** the h1 and each child row have the HTML id of their path under the document; a row is an RDFa `schema:WebPageElement` (`resource="#<id>"`) whose `schema:about` (an empty span's `resource`) is the IRI of the thing it shows (id.rs, brief item 20). The id is the element's; the IRI is the data's; the row is never the data.
 - **Stylesheet:** every page links `viewer/fold.css`, the viewer's own.
 - **Refusals:** an id no file name can hold (empty, `.`, `..`, or holding `/`) is refused, as is a tree toDom refuses.
@@ -75,7 +80,9 @@ Two processes (src/bin/fold.rs), each on 127.0.0.1 for `tailscale serve` to put 
 binary holding every read and write was the riskiest call). Approvals go through neither; they stay chitin's `/approve`.
 
 `fold serve --root <dir> --mount /fold --port <n> [--no-store <prefix>]...` (src/serve.rs) is read-only: GET and HEAD of one
-directory's files, and nothing else. It writes nothing, takes no body (413), and answers every other method 405. It replaces
+directory's files, and nothing else. It writes nothing, takes no body (413), and answers every other method 405. The one body it
+takes is an act's form (`POST <mount>/act/<path>/<index>`, at most 8 KiB), read only to be dropped and answered by a page that says
+acting from here isn't on yet, with the way back (goldens/serve/act.html). It replaces
 fold-serve's darkhttpd agents (brief items 23-24), which send no ETag, no per-file Cache-Control and no custom headers.
 
 | Resource | Cache-Control | Validator |
