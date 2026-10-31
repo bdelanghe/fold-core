@@ -10,6 +10,9 @@
 <!-- The data this viewer folds: one JSON document from a data origin the app is not served by (COGNITIVE-BROWSER-SDK-2026-10-30). -->
 <meta name="fold-data" content="/fold-data/fleet/page.json" data-source="fleet-map">
 <meta name="fold-live" content="/live" data-seat="personal-super-human">
+<!-- Clax, through @empathic/clax-sdk only (basis-clax goal): its overlay's URL, with its version in it, and its SRI digest. Left empty,
+     no overlay loads (clax.js pinOf): nothing unpinned ever runs here. -->
+<meta name="clax-sdk" content="" data-integrity="">
 <link rel="modulepreload" href="fold-core.js">
 <!-- On the Home Screen (manifest.webmanifest, sw.js): the approved Basis mark, from ~/.lobby/ops/basis-icons (Bobby 910d8009). -->
 <link rel="manifest" href="manifest.webmanifest">
@@ -39,6 +42,7 @@
 import { core } from "./fold-core.js";
 import { toDom, liveLine } from "./fold-dom.js";
 import { at, dataOf, docId, href as link, modeOf, open, pathOf, since, viewOf } from "./view.js";
+import { embed, flagUnnamed } from "./clax.js";
 const zone = Intl.DateTimeFormat().resolvedOptions().timeZone;
 const meta = document.querySelector('meta[name="fold-data"]');
 // The document read, always said in the Reading box: the meta's, or one named in the address by an absolute path on this site
@@ -46,7 +50,7 @@ const meta = document.querySelector('meta[name="fold-data"]');
 const data = dataOf(location.search, location.href, { path: meta.content, source: meta.dataset.source });
 document.getElementById("reading").value = data.path;
 document.getElementById("reading-note").textContent = data.error ? `Not read: ${data.error}` : data.source ? `From ${data.source}` : "Named in the address";
-let nodes = new Map(), said = "", node = null, cur = 0, cameFrom = null, last = [], kept = null;
+let nodes = new Map(), said = "", node = null, cur = 0, cameFrom = null, last = [], kept = null, clax = null;
 // Kept (sw.js answered from its copy): the note says since when and how long ago, and the heading is described by it, so a screen
 // reader hears it with the title as the page opens. Fresh again, it goes.
 function stale() {
@@ -57,10 +61,12 @@ function stale() {
 const href = (p, m = modeOf(location.hash, node)) => link(p, m);
 const rows = () => [...document.querySelectorAll("ol.rows > li.obj")]; // the child objects; property rows are read, not entered
 function render(focus) {
-  const v = viewOf(ax, nodes, location.hash, zone);
+  // Each row carries its thing's haecceity (schema:about), from the document's source: what a Clax report is about.
+  const v = viewOf(ax, nodes, location.hash, zone, data.source);
   node = v.node;
   const main = toDom(document, v.tree);
   document.querySelector("main").replaceWith(main);
+  if (clax?.mounted) flagUnnamed(main);
   document.title = node?.title ?? "Basis";
   for (const li of rows()) li.addEventListener("click", e => { if (e.target.tagName !== "A") li.querySelector("a").click(); });
   // A fold's acts are forms (src/ax.rs act_form) and submit as forms, natively, in every host, Allie's too: no script takes
@@ -117,6 +123,8 @@ await load();
 // Allie's keys work on arrival: the first render focuses the title, so the page gets the arrow keys without a click first.
 show(true);
 document.body.dataset.ready = "1";
+// Clax, once the fold is up and never ahead of it: the pinned overlay, mounted only where fold serve mints this reader a token.
+embed().then((r) => { clax = r; document.body.dataset.clax = r.mounted ? "on" : r.why; }).catch((e) => { document.body.dataset.clax = `failed: ${e?.message ?? e}`; });
 // The producer rewrites the document every few minutes: read it again each minute, and show a change in place (focus stays).
 setInterval(async () => { if (await load()) render(false); }, 60_000);
 // The live state (fold-live meta's stream) as the hint of its seat's row, never a line of its own (01M620P439). `snapshot` and

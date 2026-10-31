@@ -89,9 +89,10 @@ pub fn hmac(key: &[u8], msg: &[u8]) -> [u8; 32] {
     Sha256::new().chain_update(pad(0x5c)).chain_update(inner).finalize().into()
 }
 
-const B64URL: &[u8; 64] = b"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_";
+pub(crate) const B64URL: &[u8; 64] = b"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_";
 
-fn b64url(b: &[u8]) -> String {
+/// base64url with no padding (RFC 4648 §5): a token's MAC, here and in report.rs.
+pub(crate) fn b64url(b: &[u8]) -> String {
     let mut o = String::new();
     for c in b.chunks(3) {
         let n = (c[0] as u32) << 16 | (*c.get(1).unwrap_or(&0) as u32) << 8 | *c.get(2).unwrap_or(&0) as u32;

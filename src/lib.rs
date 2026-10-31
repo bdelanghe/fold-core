@@ -17,6 +17,8 @@ pub mod id;
 mod js;
 pub mod page;
 #[cfg(not(target_arch = "wasm32"))]
+pub mod report;
+#[cfg(not(target_arch = "wasm32"))]
 pub mod serve;
 #[cfg(not(target_arch = "wasm32"))]
 pub mod sink;

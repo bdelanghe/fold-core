@@ -37,6 +37,7 @@ use sha2::{Digest, Sha256};
 
 use crate::act::{self, Actor, Bad, Done};
 use crate::html::text;
+use crate::report::{self, Reporting};
 use crate::{ax, page};
 
 pub use crate::http::{Request, Response};
@@ -50,6 +51,8 @@ pub struct Site {
     pub no_store: Vec<String>,
     /// Whom an act's POST acts for, if anyone: without it, the server only reads.
     pub acting: Option<Acting>,
+    /// Whom `POST report-token` mints Clax reporter tokens for (report.rs), if anyone: without it, the route says reporting is off.
+    pub reporting: Option<Reporting>,
 }
 
 /// The one person this server may act for, and how (`fold serve --act-as --act-host --act-key --chitin`).
@@ -172,6 +175,9 @@ pub fn respond(site: &Site, req: &Request) -> Response {
 /// One request's answer at `now` (unix seconds), and the line it leaves in the act log, if it reached the act route.
 pub fn answer(site: &Site, req: &Request, now: i64) -> (Response, Option<Value>) {
     let path = req.target.split(['?', '#']).next().unwrap_or("");
+    if path == REPORT_TOKEN {
+        return reporter_token(site, req, now);
+    }
     let to_act = path.starts_with("/act/");
     match (req.method.as_str(), &site.acting) {
         ("POST", Some(a)) if to_act => post(site, a, req, now),
@@ -261,34 +267,68 @@ fn again(site: &Site, a: &Acting, path: &[String], login: &str, now: i64, status
     r
 }
 
-/// `POST act/<id>` for the person this server acts for: every check, then at most one ack state move (S2 brief §2).
-fn post(site: &Site, a: &Acting, req: &Request, now: i64) -> (Response, Option<Value>) {
-    let login = req.header("Tailscale-User-Login");
-    let line = |cc: Option<(&str, &str)>, act: Option<&str>, item: Option<&str>, msg: Option<&str>, result: String| json!({ "ts": now, "login": login, "peer": req.header("X-Forwarded-For"), "cap": cc.map(|c| c.0), "call": cc.map(|c| c.1), "act": act, "item": item, "msg_id": msg, "result": result });
-    let no = |status: u16, why: &str| (Response::text(status, why), Some(line(None, None, None, None, format!("refused:{status}"))));
-    // Who is asking, and through what: all before the form is read.
+/// Who is asking, and through what, before anything is read: loopback (tailscale serve's front), the one `login` this server is
+/// for, through serve to `host`, and same-origin. The login on success; the refusal (always 403) and why, otherwise.
+fn front<'r>(req: &'r Request, login: &str, host: &str) -> Result<&'r str, &'static str> {
     if !req.peer.is_some_and(|p| p.is_loopback()) {
-        return no(403, "not from the tailnet front");
+        return Err("not from the tailnet front");
     }
-    let Some(login) = login else { return no(403, "not who this server acts for") };
-    if login.starts_with("=?") || !login.is_ascii() {
-        return no(403, "unexpected login encoding");
+    let Some(who) = req.header("Tailscale-User-Login") else { return Err("not who this server acts for") };
+    if who.starts_with("=?") || !who.is_ascii() {
+        return Err("unexpected login encoding");
     }
-    if login != a.login {
-        return no(403, "not who this server acts for");
+    if who != login {
+        return Err("not who this server acts for");
     }
-    if req.header("X-Forwarded-Proto") != Some("https") || req.header("X-Forwarded-Host") != Some(a.host.as_str()) {
-        return no(403, "not through tailscale serve");
+    if req.header("X-Forwarded-Proto") != Some("https") || req.header("X-Forwarded-Host") != Some(host) {
+        return Err("not through tailscale serve");
     }
-    let origin = format!("https://{}", a.host);
+    let origin = format!("https://{host}");
     let same = match (req.header("Sec-Fetch-Site"), req.header("Origin")) {
         (Some("same-origin"), o) => o.is_none_or(|o| o == origin),
         (None, Some(o)) => o == origin,
         _ => false,
     };
     if !same {
-        return no(403, "cross-site");
+        return Err("cross-site");
     }
+    Ok(who)
+}
+
+/// The reporter-token route's path (report.rs): what the Clax overlay on a fold page posts to, under the mount.
+pub const REPORT_TOKEN: &str = "/report-token";
+
+/// `POST report-token`: a Clax reporter token for the one login this server reports for, same-origin only (report.rs). The answer
+/// is JSON, `{token, exp, clax, queue, owner}`, never stored; each mint and refusal leaves a log line naming no token.
+fn reporter_token(site: &Site, req: &Request, now: i64) -> (Response, Option<Value>) {
+    let Some(r) = &site.reporting else {
+        return (Response::text(404, "reporting to Clax isn't on here"), None);
+    };
+    if req.method != "POST" {
+        return (Response::text(405, "a reporter token is posted for: POST").with("Allow", "POST"), None);
+    }
+    let line = |result: String| Some(json!({ "ts": now, "login": req.header("Tailscale-User-Login"), "peer": req.header("X-Forwarded-For"), "report": r.queue, "result": result }));
+    let who = match front(req, &r.login, &r.host) {
+        Ok(who) => who,
+        Err(why) => return (Response::text(403, why), line("refused:403".into())),
+    };
+    let token = report::mint(&r.key, &r.queue, &r.owner, who, now);
+    let body = json!({ "token": token, "exp": now + report::TTL, "clax": r.clax, "queue": r.queue, "owner": r.owner });
+    let mut res = Response::new(200).with("Content-Type", "application/json").with("Cache-Control", "no-store");
+    res.body = (body.to_string() + "\n").into_bytes();
+    (res, line("minted".into()))
+}
+
+/// `POST act/<id>` for the person this server acts for: every check, then at most one ack state move (S2 brief §2).
+fn post(site: &Site, a: &Acting, req: &Request, now: i64) -> (Response, Option<Value>) {
+    let login = req.header("Tailscale-User-Login");
+    let line = |cc: Option<(&str, &str)>, act: Option<&str>, item: Option<&str>, msg: Option<&str>, result: String| json!({ "ts": now, "login": login, "peer": req.header("X-Forwarded-For"), "cap": cc.map(|c| c.0), "call": cc.map(|c| c.1), "act": act, "item": item, "msg_id": msg, "result": result });
+    let no = |status: u16, why: &str| (Response::text(status, why), Some(line(None, None, None, None, format!("refused:{status}"))));
+    // Who is asking, and through what: all before the form is read.
+    let login = match front(req, &a.login, &a.host) {
+        Ok(login) => login,
+        Err(why) => return no(403, why),
+    };
     // The form.
     if req.media_type() != Some("application/x-www-form-urlencoded") {
         return no(400, "not a form: send application/x-www-form-urlencoded");

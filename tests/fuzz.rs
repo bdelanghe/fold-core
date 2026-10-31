@@ -138,7 +138,7 @@ fn serve_answers_anything_and_never_leaves_its_root() {
     }
     fs::write(base.join("secret"), "SECRET").unwrap();
     let inside: HashSet<Vec<u8>> = ["root", "ab", "live", "css"].iter().map(|s| s.as_bytes().to_vec()).collect();
-    let site = Site { root: root.clone(), mount: "/fold".into(), no_store: vec!["sign/".into()], acting: None };
+    let site = Site { root: root.clone(), mount: "/fold".into(), no_store: vec!["sign/".into()], acting: None, reporting: None };
     let listing = |p: &std::path::Path| {
         let mut v: Vec<_> = fs::read_dir(p).unwrap().map(|e| e.unwrap().file_name()).collect();
         v.sort();
@@ -255,7 +255,7 @@ fn the_act_route_never_acts_without_every_check() {
     let calls = Arc::new(AtomicUsize::new(0));
     let acting =
         Acting { login: "bobby@example.com".into(), host: "phobos.ts.net".into(), key: vec![3; 32], actor: Box::new(Count(calls.clone())) };
-    let site = Site { root: root.clone(), mount: "/fold".into(), no_store: vec![], acting: Some(acting) };
+    let site = Site { root: root.clone(), mount: "/fold".into(), no_store: vec![], acting: Some(acting), reporting: None };
     let listing = |p: &std::path::Path| {
         let mut v: Vec<_> = fs::read_dir(p).unwrap().map(|e| e.unwrap().file_name()).collect();
         v.sort();

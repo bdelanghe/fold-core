@@ -4,7 +4,9 @@
 //!   It replaces fold-serve's darkhttpd agents (brief item 24). With `--act-as <login> --act-host <host> --act-key <file> --chitin
 //!   <bin> [--act-seat <seat>] [--act-log <file>]`, an act's form may ack, defer or decline a chitin message for that one login
 //!   (S2: allie-s2-fold-act-write): the key is made if missing (0600), the seat is `fold-act` unless named, and each act's line goes
-//!   to `--act-log`, by default `acts.jsonl` beside the key.
+//!   to `--act-log`, by default `acts.jsonl` beside the key. With `--report-config <file>` (src/report.rs), `POST report-token`
+//!   mints Clax reporter tokens for the config's one login: the queue's grant is read at start by the config's `grant_cmd` and
+//!   kept in memory only, and a config inside `--root` is refused (it would be served).
 //! - `fold sink --port <n> --log <signals.jsonl> [--per-minute <n>]`: the pings and reports, append-only (src/sink.rs), put at
 //!   `<mount>/_sink`.
 
@@ -12,9 +14,9 @@ use std::net::TcpListener;
 use std::path::PathBuf;
 use std::process::exit;
 
-use fold_core::{act, serve, sink};
+use fold_core::{act, report, serve, sink};
 
-const USAGE: &str = "usage: fold serve --root <dir> --mount </fold> --port <n> [--no-store <prefix>]...\n                  [--act-as <login> --act-host <host> --act-key <file> --chitin <bin> [--act-seat <seat>] [--act-log <file>]]\n       fold sink --port <n> --log <file> [--per-minute <n>]";
+const USAGE: &str = "usage: fold serve --root <dir> --mount </fold> --port <n> [--no-store <prefix>]...\n                  [--act-as <login> --act-host <host> --act-key <file> --chitin <bin> [--act-seat <seat>] [--act-log <file>]]\n                  [--report-config <file>]\n       fold sink --port <n> --log <file> [--per-minute <n>]";
 
 extern "C" {
     fn geteuid() -> u32;
@@ -42,6 +44,7 @@ fn main() {
     let (mut root, mut mount, mut port, mut log, mut no_store, mut per_minute) = (None, String::new(), 0u16, None, vec![], 60u32);
     let (mut act_as, mut act_host, mut act_key, mut chitin, mut act_seat, mut act_log) =
         (None, None, None, None, "fold-act".to_string(), None);
+    let mut report_config: Option<PathBuf> = None;
     let mut it = args[1..].iter();
     while let Some(a) = it.next() {
         let v = it.next().unwrap_or_else(|| die(&format!("fold {cmd}: {a} needs a value"), 2));
@@ -55,6 +58,7 @@ fn main() {
             ("serve", "--chitin") => chitin = Some(v.clone()),
             ("serve", "--act-seat") => act_seat = v.clone(),
             ("serve", "--act-log") => act_log = Some(PathBuf::from(v)),
+            ("serve", "--report-config") => report_config = Some(PathBuf::from(v)),
             ("sink", "--log") => log = Some(PathBuf::from(v)),
             ("sink", "--per-minute") => per_minute = num(cmd, a, v),
             (_, "--port") => port = num(cmd, a, v),
@@ -79,9 +83,30 @@ fn main() {
             }
             _ => die("fold serve: --act-as, --act-host, --act-key and --chitin go together", 2),
         };
+        let reporting = report_config.map(|f| {
+            if let (Ok(c), Ok(r)) = (f.canonicalize(), root.canonicalize()) {
+                if c.starts_with(&r) {
+                    die(&format!("fold serve: --report-config {}: inside --root, so it would be served", f.display()), 2);
+                }
+            }
+            let text = std::fs::read_to_string(&f).unwrap_or_else(|e| die(&format!("fold serve: --report-config {}: {e}", f.display()), 1));
+            let r = report::Config::parse(&text)
+                .and_then(|c| c.with_grant(&report::run_grant))
+                .unwrap_or_else(|e| die(&format!("fold serve: {e}"), 1));
+            eprintln!(
+                "fold serve: reporter tokens for {} at https://{}{mount}{}, to Clax queue {} for {} at {}",
+                r.login,
+                r.host,
+                serve::REPORT_TOKEN,
+                r.queue,
+                r.owner,
+                r.clax
+            );
+            r
+        });
         let how = if acting.is_some() { "acting for one login" } else { "read-only" };
         eprintln!("fold serve: {} at {mount}/ on {at}, {how}", root.display());
-        serve::run(listener, serve::Site { root, mount, no_store, acting }, log)
+        serve::run(listener, serve::Site { root, mount, no_store, acting, reporting }, log)
     } else {
         let log = log.unwrap_or_else(|| die("fold sink: --log is needed", 2));
         eprintln!("fold sink: appending to {} on {at}, {per_minute} a minute a viewer", log.display());
