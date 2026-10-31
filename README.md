@@ -47,7 +47,8 @@ presents as slides also has `…/@slides/`.
 
 - **Title:** each page's `<title>` names the fold and the path it is in.
 - **Links:** moves between folds are plain links in the same tab. Each ends in `#<id>`: going in, the fold's `<h1>`, which a browser
-  focuses as it loads; going back up the path, the row you came from. No `autofocus`, which lone flags as focus theft.
+  focuses as it loads; going back up the path, the row you came from. No `autofocus`, which lone flags as focus theft. Each has `ping="<base>_sink/v"`, so the
+  browser itself tells `fold sink` which row was followed (no JS).
 - **Ids:** the h1 and each child row have the HTML id of their path under the document; a row is an RDFa `schema:WebPageElement` (`resource="#<id>"`) whose `schema:about` (an empty span's `resource`) is the IRI of the thing it shows (id.rs, brief item 20). The id is the element's; the IRI is the data's; the row is never the data.
 - **Stylesheet:** every page links `viewer/fold.css`, the viewer's own.
 - **Refusals:** an id no file name can hold (empty, `.`, `..`, or holding `/`) is refused, as is a tree toDom refuses.
@@ -67,6 +68,38 @@ pinning, through `src/baobab.rs`:
 
 The same test writes the fold.css block and `native/Colors.xcassets` (any, dark and Increase Contrast, for Apple hosts).
 `js/contrast.test.ts` runs Baobab's own TS over the same pairs, and it must agree.
+
+## fold serve and fold sink
+
+Two processes (src/bin/fold.rs), each on 127.0.0.1 for `tailscale serve` to put at a mount, neither run as root (brief item 27: one
+binary holding every read and write was the riskiest call). Approvals go through neither; they stay chitin's `/approve`.
+
+`fold serve --root <dir> --mount /fold --port <n> [--no-store <prefix>]...` (src/serve.rs) is read-only: GET and HEAD of one
+directory's files, and nothing else. It writes nothing, takes no body (413), and answers every other method 405. It replaces
+fold-serve's darkhttpd agents (brief items 23-24), which send no ETag, no per-file Cache-Control and no custom headers.
+
+| Resource | Cache-Control | Validator |
+|---|---|---|
+| a path holding `@sha256:` | `public, max-age=31536000, immutable` | strong ETag |
+| a page (`.html`, a directory's `index.html`) | `no-cache` | strong ETag `"sha-256:<hex>"`, the file digest (304 on `If-None-Match`), `Last-Modified` |
+| a data document (`.json`) | `max-age=60, stale-while-revalidate=240, stale-if-error=86400` | the same |
+| any other file (viewer JS, CSS, WASM, fonts, `sw.js`) | `no-cache` | the same |
+| a `--no-store` prefix (the Sign fold, pending, presence), every error | `no-store` | none |
+
+- Every file also gets `Content-Digest` (the same digest) and `Server-Timing: digest;desc="sha-256:…", asof;desc="…", serve;dur=…`.
+- Every page gets `Reporting-Endpoints: default="<mount>/_sink/report"` and a report-only CSP that reports to it.
+- `tests/serve.rs` holds every class's headers in `goldens/serve/headers.json`.
+
+`fold sink --port <n> --log <signals.jsonl> [--per-minute 60]` (src/sink.rs) is append-only, put at `<mount>/_sink`:
+
+- `POST /v` (`text/ping`, from `<a ping>`) logs a ping, with `Ping-From` and `Ping-To`: a view. A prefetch never pings, so it is
+  never a view. `POST /report` (`application/reports+json`) logs the reports.
+- A request with no `Tailscale-User-Login` is refused (403); each viewer gets `--per-minute` a clock minute, then 429.
+- Each record is one JSON line appended to `--log`; nothing is read back or served. `tests/sink.rs` holds its answers and records in
+  `goldens/sink/answers.json`.
+
+`tests/fuzz.rs` throws request-shaped bytes at both (`FOLD_FUZZ=<n>` cases a side): neither panics or answers outside its statuses,
+serve never serves a byte from outside its root nor writes into it, and the sink logs only what it accepted from an identity.
 
 ## Schema
 

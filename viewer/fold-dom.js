@@ -50,6 +50,7 @@ export function toDom(doc, ax, ids = { n: 0 }, row = null) {
   if (ax.role === "navigation") e.setAttribute("aria-label", ax.name);
   if (ax.role === "heading" && ax.focus) e.tabIndex = -1;
   if (ax.role === "link") e.href = ax.href;
+  if (ax.role === "link" && ax.ping) e.setAttribute("ping", ax.ping);
   if (ax.role === "button") e.type = "button";
   if (ax.role === "status") e.setAttribute("role", "status");
   // Off-page links open a new tab: clax frames the page without allow-top-navigation, so a plain link there goes nowhere.

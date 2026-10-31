@@ -10,9 +10,15 @@
 pub mod ax;
 pub mod baobab;
 pub mod html;
+#[cfg(not(target_arch = "wasm32"))]
+pub mod http;
 pub mod id;
 mod js;
 pub mod page;
+#[cfg(not(target_arch = "wasm32"))]
+pub mod serve;
+#[cfg(not(target_arch = "wasm32"))]
+pub mod sink;
 mod tz;
 pub mod walk;
 pub mod wasm;
