@@ -158,8 +158,8 @@ fn the_loop_times_each_answer_and_takes_no_body() {
 struct Stub(Arc<Mutex<Vec<String>>>);
 
 impl Actor for Stub {
-    fn ack(&self, msg_id: &str, state: &str, to: &str, why: Option<&str>) -> Result<Done, String> {
-        let call = format!("{msg_id} {state} to={to}{}", why.map(|w| format!(" why={w}")).unwrap_or_default());
+    fn ack(&self, msg_id: &str, state: &str, to: &str, why: Option<&str>, act: &str) -> Result<Done, String> {
+        let call = format!("{msg_id} {state} to={to} ref=fold:{act}{}", why.map(|w| format!(" why={w}")).unwrap_or_default());
         let mut seen = self.0.lock().unwrap();
         let before = seen.contains(&call);
         seen.push(call);
@@ -177,19 +177,22 @@ const ME: &str = "bobby@example.com";
 const HOST: &str = "phobos.example.ts.net";
 
 /// A site as `site()` writes it (page.rs), acting for ME at HOST through `stub`: a Needs-you item with its three acts, a passkey
-/// act and an act with no cap this server runs, an act naming no message, and one whose seat is down.
+/// act, chitin's `say` (a pair this server never runs) and the legacy `{cap: "ack", call: "status"}` shape, an act naming no
+/// message, and one whose seat is down. Each act is `{cap, call}` as Allie's cap host names them (personal-allie-lead 4f93c11f).
 fn acting_site(name: &str, stub: &Stub) -> Site {
     let root = std::env::temp_dir().join(format!("fold-serve-{name}-{}", std::process::id()));
     let _ = fs::remove_dir_all(&root);
-    let a = |cap: &str, msg: &str| json!({ "cap": cap, "call": "status", "label": cap, "args": { "msg_id": msg, "from": "seat-a" } });
+    let a = |call: &str, msg: &str| json!({ "cap": "chitin", "call": call, "label": call, "args": { "msg_id": msg, "from": "seat-a" } });
+    let passkey = json!({ "cap": "approve", "call": "sign", "label": "Sign", "args": { "msg_id": "m-1", "from": "seat-a" } });
+    let legacy = json!({ "cap": "ack", "call": "status", "label": "Ack", "args": { "msg_id": "m-1", "from": "seat-a" } });
     let kid = |id: &str| json!({ "id": id, "title": id });
     let nodes = json!([
         ["root", { "title": "Everything", "trail": [], "kids": [kid("needs")] }],
         ["needs", { "title": "Needs you", "trail": ["Everything"], "kids": [kid("m 1"), kid("bare"), kid("down")] }],
         ["needs~m 1", { "title": "From seat-a", "trail": ["Everything", "Needs you"], "kids": [], "text": ["Ship the fix?"],
-            "acts": [a("ack", "m-1"), a("defer", "m-1"), a("decline", "m-1"), a("webauthn", "m-1"), a("archive", "m-1")] }],
+            "acts": [a("ack", "m-1"), a("defer", "m-1"), a("decline", "m-1"), passkey, a("say", "m-1"), legacy] }],
         ["needs~bare", { "title": "No message", "trail": ["Everything", "Needs you"], "kids": [],
-            "acts": [{ "cap": "ack", "call": "status", "label": "Ack", "args": {} }] }],
+            "acts": [{ "cap": "chitin", "call": "ack", "label": "Ack", "args": {} }] }],
         ["needs~down", { "title": "Seat down", "trail": ["Everything", "Needs you"], "kids": [], "acts": [a("ack", "m-down")] }]
     ]);
     let pages: Value =
@@ -249,7 +252,7 @@ fn every_act_refusal_and_success() {
     let page = "/needs/m%201/";
     let ack = "/act/needs/m%201/ack";
     let good = act::mint(&KEY, "needs/m%201/ack", &fixity(&s, "needs/m%201/ack"), ME, NOW);
-    let body = |t: &str| format!("token={t}&cap=ack&call=status&args.msg_id=m-1&args.from=seat-a");
+    let body = |t: &str| format!("token={t}&cap=chitin&call=ack&args.msg_id=m-1&args.from=seat-a");
     let gb = body(&good);
     let mut far = from_me("POST", ack, &gb, &[]);
     far.peer = Some("10.0.0.9".parse().unwrap());
@@ -286,14 +289,16 @@ fn every_act_refusal_and_success() {
         ("same-origin, but an Origin that is not", from_me("POST", ack, &gb, &[("Origin", Some("https://evil.example"))])),
         ("not a form", from_me("POST", ack, &gb, &[("Content-Type", Some("application/json"))])),
         ("no body", from_me("POST", ack, "", &[])),
-        ("no token", from_me("POST", ack, "cap=ack", &[])),
+        ("no token", from_me("POST", ack, "cap=chitin&call=ack", &[])),
         ("a token of the wrong shape", from_me("POST", ack, &body("v2.1.2.3"), &[])),
         ("a token of the wrong length", from_me("POST", ack, &body(&good[..good.len() - 1]), &[])),
-        ("the form's cap is not the fold's: a tripwire", from_me("POST", ack, &gb.replace("cap=ack", "cap=decline"), &[])),
+        ("the form's call is not the fold's: a tripwire", from_me("POST", ack, &gb.replace("call=ack", "call=decline"), &[])),
+        ("nor is the form's cap", from_me("POST", ack, &gb.replace("cap=chitin", "cap=approve"), &[])),
         ("an act id that is not one", from_me("POST", "/act/needs/%zz/ack", &gb, &[])),
         ("no such act", from_me("POST", "/act/needs/m%201/nudge", &gb, &[])),
-        ("the passkey is never run here", from_me("POST", "/act/needs/m%201/webauthn", &gb, &[])),
-        ("nor a cap this server does not know", from_me("POST", "/act/needs/m%201/archive", &gb, &[])),
+        ("the passkey (approve/sign) is never run here", from_me("POST", "/act/needs/m%201/sign", &gb, &[])),
+        ("nor chitin/say: only chitin's ack, defer and decline", from_me("POST", "/act/needs/m%201/say", &gb, &[])),
+        ("nor the legacy {cap: ack, call: status}", from_me("POST", "/act/needs/m%201/status", &gb, &[])),
         ("a token minted by another key", from_me("POST", ack, &body(&other_key), &[])),
         ("an expired token: the page again, a fresh token, nothing done", from_me("POST", ack, &body(&expired), &[])),
         ("a form no server filled: the same", from_me("POST", ack, &body(""), &[])),
@@ -319,7 +324,7 @@ fn every_act_refusal_and_success() {
             from_me(
                 "POST",
                 "/act/needs/m%201/defer",
-                &body(&act::mint(&KEY, "needs/m%201/defer", &fixity(&s, "needs/m%201/defer"), ME, NOW)).replace("cap=ack", "cap=defer"),
+                &body(&act::mint(&KEY, "needs/m%201/defer", &fixity(&s, "needs/m%201/defer"), ME, NOW)).replace("call=ack", "call=defer"),
                 &[],
             ),
         ),
@@ -329,7 +334,7 @@ fn every_act_refusal_and_success() {
                 "POST",
                 "/act/needs/m%201/decline",
                 &body(&act::mint(&KEY, "needs/m%201/decline", &fixity(&s, "needs/m%201/decline"), ME, NOW))
-                    .replace("cap=ack", "cap=decline"),
+                    .replace("call=ack", "call=decline"),
                 &[("Sec-Fetch-Site", None), ("Origin", Some("https://phobos.example.ts.net"))],
             ),
         ),
@@ -363,11 +368,11 @@ fn every_act_refusal_and_success() {
     assert_eq!(
         *stub.0.lock().unwrap(),
         [
-            "m-down acting to=seat-a",
-            "m-1 acting to=seat-a",
-            "m-1 acting to=seat-a",
-            "m-1 deferred to=seat-a why=Deferred from Basis",
-            "m-1 declined to=seat-a why=Declined from Basis"
+            "m-down acting to=seat-a ref=fold:needs/down/ack",
+            "m-1 acting to=seat-a ref=fold:needs/m%201/ack",
+            "m-1 acting to=seat-a ref=fold:needs/m%201/ack",
+            "m-1 deferred to=seat-a ref=fold:needs/m%201/defer why=Deferred from Basis",
+            "m-1 declined to=seat-a ref=fold:needs/m%201/decline why=Declined from Basis"
         ]
     );
     // A token the GET filled is one the POST takes.
@@ -392,7 +397,7 @@ fn every_act_refusal_and_success() {
 /// The site tools/act-e2e.sh serves (goldens/serve/act-site): one Needs-you item with its acts, as `site()` writes it.
 #[test]
 fn the_e2e_site_is_what_site_writes() {
-    let a = |cap: &str| json!({ "cap": cap, "call": "status", "label": cap, "args": { "msg_id": "m-1", "from": "seat-a" } });
+    let a = |call: &str| json!({ "cap": "chitin", "call": call, "label": call, "args": { "msg_id": "m-1", "from": "seat-a" } });
     let nodes = json!([
         ["root", { "title": "Everything", "trail": [], "kids": [{ "id": "m1", "title": "From seat-a" }] }],
         ["m1", { "title": "From seat-a", "trail": ["Everything"], "kids": [], "text": ["Ship the fix?"], "acts": [a("ack"), a("defer"), a("decline")] }]

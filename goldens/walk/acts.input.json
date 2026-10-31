@@ -31,8 +31,8 @@
         ],
         "acts": [
           {
-            "cap": "ack",
-            "call": "status",
+            "cap": "chitin",
+            "call": "ack",
             "label": "Ack",
             "args": {
               "msg_id": "m-1",
@@ -40,8 +40,8 @@
             }
           },
           {
-            "cap": "defer",
-            "call": "status",
+            "cap": "chitin",
+            "call": "defer",
             "label": "Defer",
             "args": {
               "msg_id": "m-1",
@@ -49,8 +49,8 @@
             }
           },
           {
-            "cap": "decline",
-            "call": "status",
+            "cap": "chitin",
+            "call": "decline",
             "label": "Decline",
             "args": {
               "msg_id": "m-1",
@@ -73,8 +73,8 @@
         ],
         "acts": [
           {
-            "cap": "ack",
-            "call": "status",
+            "cap": "chitin",
+            "call": "ack",
             "label": "Ack",
             "args": {
               "msg_id": "m-1",
@@ -82,8 +82,8 @@
             }
           },
           {
-            "cap": "ack",
-            "call": "status",
+            "cap": "chitin",
+            "call": "ack",
             "label": "Ack again",
             "args": {
               "msg_id": "m-1",

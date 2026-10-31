@@ -82,7 +82,8 @@ pub struct Node {
     pub act: Option<Value>,
     /// The fold's other acts (S2, allie-s2-fold-act-write §7 step 0: a Needs-you item's ack, defer and decline), each `{id?, cap,
     /// call, args, label}` as `act` is, plus its own `id` where it names one. fold-core's own field (not fold.ts's): an act's own id
-    /// (ax.rs `act_key`) is its `id`, else its `cap`, so reordering an item's acts moves no act's id.
+    /// (ax.rs `acts_of`) is its `id`, else its `call`, so reordering an item's acts moves no act's id. A Needs-you act is
+    /// `{cap: "chitin", call: "ack"|"defer"|"decline", args: {msg_id, from}, label}` (personal-allie-lead 4f93c11f).
     #[serde(skip_serializing_if = "Option::is_none", default)]
     pub acts: Option<Vec<Value>>,
     #[serde(skip_serializing_if = "Option::is_none", default)]

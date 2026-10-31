@@ -36,13 +36,13 @@ fail() { echo "act-e2e: $*"; cat "$work/serve.log"; exit 1; }
 token() {
   curl -fsS "${serve[@]}" "$base/m1/" | grep -o 'action="/fold/act/m1/ack"><input type="hidden" name="token" value="[^"]*"' | cut -d'"' -f8
 }
-post() { curl -sS -o /dev/null -w '%{http_code} %{redirect_url}' "${serve[@]}" --data-urlencode "token=$1" --data "cap=ack" "$base/act/m1/ack"; }
+post() { curl -sS -o /dev/null -w '%{http_code} %{redirect_url}' "${serve[@]}" --data-urlencode "token=$1" --data "cap=chitin&call=ack" "$base/act/m1/ack"; }
 
 tok=$(token)
 [ -n "$tok" ] || fail "the page carried no token"
 got=$(post "$tok")
 [ "$got" = "303 $base/fold/m1/?did=ack&as=ok" ] || fail "first POST: $got"
-[ "$(cat "$STUB_RECORD")" = "ack m-1 acting --to seat-a --as fold-act" ] || fail "chitin saw: $(cat "$STUB_RECORD")"
+[ "$(cat "$STUB_RECORD")" = "ack m-1 acting --to seat-a --as fold-act --ref fold:m1/ack" ] || fail "chitin saw: $(cat "$STUB_RECORD")"
 curl -fsS "${serve[@]}" "$base/m1/?did=ack&as=ok" | grep -q 'role="status">Acknowledged.</span>' || fail "the fold did not say Acknowledged."
 
 got=$(post "$tok")

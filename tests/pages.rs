@@ -103,7 +103,7 @@ fn a_step_no_file_can_hold_is_refused() {
 /// id, its cap, call and args as the data has them, and the fixity a token is bound to, which changes only with that act's item.
 #[test]
 fn the_act_map_is_written_beside_the_pages() {
-    let a = |cap: &str| json!({ "cap": cap, "call": "status", "label": cap, "args": { "msg_id": "m1", "from": "seat-a" } });
+    let a = |call: &str| json!({ "cap": "chitin", "call": call, "label": call, "args": { "msg_id": "m1", "from": "seat-a" } });
     let nodes = |text: &str| {
         json!([
             ["root", { "title": "Needs you", "trail": [], "kids": [{ "id": "m 1", "title": "From seat-a" }, { "id": "m2", "title": "Other" }] }],
@@ -116,7 +116,8 @@ fn the_act_map_is_written_beside_the_pages() {
     let keys: Vec<&String> = m.as_object().unwrap().keys().collect();
     assert_eq!(keys, ["m%201/ack", "m%201/defer", "m2/ack"]);
     assert_eq!(m["m%201/defer"]["item"], "m 1");
-    assert_eq!(m["m%201/defer"]["cap"], "defer");
+    assert_eq!(m["m%201/defer"]["cap"], "chitin");
+    assert_eq!(m["m%201/defer"]["call"], "defer");
     assert_eq!(m["m%201/defer"]["args"], json!({ "msg_id": "m1", "from": "seat-a" }));
     assert_eq!(m["m%201/ack"]["fixity"], fold_core::act::fixity("m 1", &a("ack")).as_str());
     // The page posts where the map says.

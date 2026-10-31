@@ -118,7 +118,7 @@ pub fn act_id(path: &[String], key: &str) -> String {
 }
 
 /// A fold's acts with their keys, in order: its one `act` (fold.ts's), then its `acts` (lib.rs `Node::acts`). An act's key is its
-/// own `id`, else its `cap` (`ack`, `defer`, `decline`, `webauthn`). Two acts on one fold with the same key are a schema error:
+/// own `id`, else its `call`, the verb (`ack`, `defer`, `decline`, `sign`; personal-allie-lead 4f93c11f). Two acts on one fold with the same key are a schema error:
 /// each of them falls back to its index, so neither claims the other's name (goldens/pages `acts`, the `twice` fold).
 pub fn acts_of(node: &Value) -> Vec<(String, Value)> {
     let all: Vec<Value> = [get(node, "act").filter(|a| truthy(Some(a))).cloned()]
@@ -126,7 +126,7 @@ pub fn acts_of(node: &Value) -> Vec<(String, Value)> {
         .flatten()
         .chain(concat(get(node, "acts")).into_iter().filter(|a| truthy(Some(a))))
         .collect();
-    let own = |a: &Value| present(get(a, "id")).map_or_else(|| js::string(get(a, "cap")), |v| js::string(Some(v))).trim().to_string();
+    let own = |a: &Value| present(get(a, "id")).map_or_else(|| js::string(get(a, "call")), |v| js::string(Some(v))).trim().to_string();
     let keys: Vec<String> = all.iter().map(own).collect();
     all.into_iter()
         .enumerate()

@@ -66,11 +66,11 @@ fn an_act_is_a_form() {
     };
     let form = |t: &Value| t.pointer("/children/2/children/0/children/0").unwrap().clone();
     let ack = json!({ "title": "Reply from a seat", "trail": ["Everything", "Needs you"], "kids": [],
-        "act": { "cap": "chitin.ack", "call": "ack", "label": "Done", "args": { "msgId": "m1", "state": "done", "n": 2 } } });
+        "act": { "cap": "chitin", "call": "ack", "label": "Done", "args": { "msgId": "m1", "state": "done", "n": 2 } } });
     assert_eq!(
         form(&tree(ack, &["needs", "a/b"])),
-        json!({ "role": "form", "name": "Reply from a seat", "cls": "act", "method": "post", "action": "act/needs/a%2Fb/chitin.ack",
-            "fields": [["token", ""], ["cap", "chitin.ack"], ["call", "ack"], ["args.msgId", "m1"], ["args.state", "done"], ["args.n", "2"]],
+        json!({ "role": "form", "name": "Reply from a seat", "cls": "act", "method": "post", "action": "act/needs/a%2Fb/ack",
+            "fields": [["token", ""], ["cap", "chitin"], ["call", "ack"], ["args.msgId", "m1"], ["args.state", "done"], ["args.n", "2"]],
             "children": [{ "role": "button", "name": "Done", "cls": "act" }] })
     );
     let sign = json!({ "title": "To a seat", "trail": ["Everything"], "href": "/approve/#i-0123456789ab",
@@ -96,7 +96,7 @@ fn acts_keep_their_own_ids() {
         let t: Value = serde_json::from_str(&fold_core::wasm::ax_text(&case.to_string())).unwrap();
         t.pointer("/children/2/children/0/children").unwrap().clone()
     };
-    let a = |cap: &str, label: &str| json!({ "cap": cap, "call": "status", "label": label, "args": { "msg_id": "m1", "from": "s" } });
+    let a = |call: &str, label: &str| json!({ "cap": "chitin", "call": call, "label": label, "args": { "msg_id": "m1", "from": "s" } });
     let actions = |r: &Value| r.as_array().unwrap().iter().filter_map(|f| f["action"].as_str().map(str::to_string)).collect::<Vec<_>>();
     let got = row(json!([a("ack", "Ack"), a("defer", "Defer"), a("decline", "Decline")]));
     assert_eq!(actions(&got), ["act/needs/m%201/ack", "act/needs/m%201/defer", "act/needs/m%201/decline"]);

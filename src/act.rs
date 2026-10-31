@@ -25,9 +25,14 @@ use sha2::{Digest, Sha256};
 /// A token's life: a day's use of an open page (S2 brief §3).
 pub const TTL: i64 = 12 * 3600;
 
-/// The caps this server may run, each as the chitin ack state it sends and the reason chitin requires for it (S2 brief §4).
-pub fn state_of(cap: &str) -> Option<(&'static str, Option<&'static str>)> {
-    match cap {
+/// The acts this server may run, each a `(cap, call)` pair as Allie's cap host names them (`cap` the capability, `call` the
+/// verb; personal-allie-lead 4f93c11f): only `chitin` × `ack`, `defer`, `decline`, each as the chitin ack state it sends and the
+/// fixed reason chitin requires for it (S2 brief §4). Every other pair, `chitin`/`say` among them, is refused.
+pub fn state_of(cap: &str, call: &str) -> Option<(&'static str, Option<&'static str>)> {
+    if cap != "chitin" {
+        return None;
+    }
+    match call {
         "ack" => Some(("acting", None)),
         "defer" => Some(("deferred", Some("Deferred from Basis"))),
         "decline" => Some(("declined", Some("Declined from Basis"))),
@@ -35,9 +40,9 @@ pub fn state_of(cap: &str) -> Option<(&'static str, Option<&'static str>)> {
     }
 }
 
-/// What the status line says after a cap, done (`ok`) or done before (`already`): a fixed table, the query only selects a row.
-pub fn said(cap: &str, how: &str) -> Option<&'static str> {
-    Some(match (cap, how) {
+/// What the status line says after a call, done (`ok`) or done before (`already`): a fixed table, the query only selects a row.
+pub fn said(call: &str, how: &str) -> Option<&'static str> {
+    Some(match (call, how) {
         ("ack", "ok") => "Acknowledged.",
         ("defer", "ok") => "Deferred.",
         ("decline", "ok") => "Declined.",
@@ -220,12 +225,14 @@ pub enum Done {
 /// One ack state move on one chitin message, for the one person this server acts for. The route calls it only once every check
 /// has held; tests inject a recording stub.
 pub trait Actor: Send + Sync {
-    /// Tell `to`, the seat that sent `msg_id`, that it is now `state` (with `why`, where chitin needs a reason).
-    fn ack(&self, msg_id: &str, state: &str, to: &str, why: Option<&str>) -> Result<Done, String>;
+    /// Tell `to`, the seat that sent `msg_id`, that it is now `state` (with `why`, where chitin needs a reason), by the act `act`
+    /// (its act id, the ack's artifact `fold:<act>`).
+    fn ack(&self, msg_id: &str, state: &str, to: &str, why: Option<&str>, act: &str) -> Result<Done, String>;
 }
 
 #[cfg(not(target_arch = "wasm32"))]
-/// The real actor: `chitin ack <msg_id> <state> --to <sender> --as <seat> [--why <why>]`, the key from the environment chitin reads
+/// The real actor: `chitin ack <msg_id> <state> --to <sender> --as <seat> --ref fold:<act id> [--why <why>]`, the reason fixed per
+/// state (work-chitin-author's ack delegate, via personal-assistant d46b12c1); the key from the environment chitin reads
 /// (`CHITIN_KEY_FILE`, set by fold-serve.nix). `written …` is done; a noop chitin reports (`already …`, `… is final`) is done
 /// before; anything else is chitin's one-line reason.
 pub struct Chitin {
@@ -235,9 +242,9 @@ pub struct Chitin {
 
 #[cfg(not(target_arch = "wasm32"))]
 impl Actor for Chitin {
-    fn ack(&self, msg_id: &str, state: &str, to: &str, why: Option<&str>) -> Result<Done, String> {
+    fn ack(&self, msg_id: &str, state: &str, to: &str, why: Option<&str>, act: &str) -> Result<Done, String> {
         let mut c = Command::new(&self.bin);
-        c.args(["ack", msg_id, state, "--to", to, "--as", &self.seat]);
+        c.args(["ack", msg_id, state, "--to", to, "--as", &self.seat, "--ref", &format!("fold:{act}")]);
         if let Some(w) = why {
             c.args(["--why", w]);
         }

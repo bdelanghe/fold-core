@@ -201,7 +201,7 @@ fn blank_status() -> String {
 }
 
 /// A page with its acts' tokens filled for `login` (each bound to the act as the map holds it now) and its status line said.
-/// A form whose act the map lacks, or whose cap this server never runs, keeps its empty token.
+/// A form whose act the map lacks, or whose cap and call this server never runs, keeps its empty token.
 fn fill(page: &str, site: &Site, a: &Acting, login: Option<&str>, now: i64, status: Option<&str>) -> String {
     let map = acts(site);
     let lead = format!("action=\"{}/act/", site.mount);
@@ -216,7 +216,7 @@ fn fill(page: &str, site: &Site, a: &Acting, login: Option<&str>, now: i64, stat
         let token = match (id, login) {
             (Some(id), Some(l)) => map
                 .get(id)
-                .filter(|e| e["cap"].as_str().and_then(act::state_of).is_some())
+                .filter(|e| act::state_of(e["cap"].as_str().unwrap_or(""), e["call"].as_str().unwrap_or("")).is_some())
                 .and_then(|e| e["fixity"].as_str())
                 .map(|fx| act::mint(&a.key, id, fx, l, now)),
             _ => None,
@@ -240,7 +240,7 @@ fn fill(page: &str, site: &Site, a: &Acting, login: Option<&str>, now: i64, stat
     }
 }
 
-/// `?did=<cap>&as=<ok|already>`'s sentence, from the fixed table (src/act.rs `said`): the query only picks a row.
+/// `?did=<call>&as=<ok|already>`'s sentence, from the fixed table (src/act.rs `said`): the query only picks a row.
 fn did(target: &str) -> Option<&'static str> {
     let q = target.split_once('?')?.1.split('#').next()?;
     let get = |k: &str| q.split('&').find_map(|p| p.strip_prefix(k).and_then(|v| v.strip_prefix('=')));
@@ -264,7 +264,7 @@ fn again(site: &Site, a: &Acting, path: &[String], login: &str, now: i64, status
 /// `POST act/<id>` for the person this server acts for: every check, then at most one ack state move (S2 brief §2).
 fn post(site: &Site, a: &Acting, req: &Request, now: i64) -> (Response, Option<Value>) {
     let login = req.header("Tailscale-User-Login");
-    let line = |cap: Option<&str>, act: Option<&str>, item: Option<&str>, msg: Option<&str>, result: String| json!({ "ts": now, "login": login, "peer": req.header("X-Forwarded-For"), "cap": cap, "act": act, "item": item, "msg_id": msg, "result": result });
+    let line = |cc: Option<(&str, &str)>, act: Option<&str>, item: Option<&str>, msg: Option<&str>, result: String| json!({ "ts": now, "login": login, "peer": req.header("X-Forwarded-For"), "cap": cc.map(|c| c.0), "call": cc.map(|c| c.1), "act": act, "item": item, "msg_id": msg, "result": result });
     let no = |status: u16, why: &str| (Response::text(status, why), Some(line(None, None, None, None, format!("refused:{status}"))));
     // Who is asking, and through what: all before the form is read.
     if !req.peer.is_some_and(|p| p.is_loopback()) {
@@ -314,13 +314,13 @@ fn post(site: &Site, a: &Acting, req: &Request, now: i64) -> (Response, Option<V
         };
     };
     let s = |k: &str| entry[k].as_str();
-    let (cap, item) = (s("cap").unwrap_or(""), s("item"));
+    let (cap, call, item) = (s("cap").unwrap_or(""), s("call").unwrap_or(""), s("item"));
     let msg = entry["args"]["msg_id"].as_str();
-    let rec = |result: String| Some(line(Some(cap), Some(&id), item, msg, result));
-    let Some((state, why)) = act::state_of(cap) else {
+    let rec = |result: String| Some(line(Some((cap, call)), Some(&id), item, msg, result));
+    let Some((state, why)) = act::state_of(cap, call) else {
         return (Response::text(422, "this act is not one this server may run"), rec("refused:422".into()));
     };
-    if field("cap").is_some_and(|c| c != cap) {
+    if field("cap").is_some_and(|c| c != cap) || field("call").is_some_and(|c| c != call) {
         return (Response::text(400, "the form does not match the fold"), rec("refused:400".into()));
     }
     // The token: this server's, for this act and person, current, and for the act as it stands.
@@ -345,7 +345,7 @@ fn post(site: &Site, a: &Acting, req: &Request, now: i64) -> (Response, Option<V
     let (Some(msg_id), Some(from)) = (msg, entry["args"]["from"].as_str()) else {
         return (Response::text(422, "this act names no message to answer"), rec("refused:422".into()));
     };
-    let how = match a.actor.ack(msg_id, state, from, why) {
+    let how = match a.actor.ack(msg_id, state, from, why, &id) {
         Ok(Done::Ok) => "ok",
         Ok(Done::Already) => "already",
         Err(e) => {
@@ -353,7 +353,7 @@ fn post(site: &Site, a: &Acting, req: &Request, now: i64) -> (Response, Option<V
             return (Response::text(502, &format!("chitin did not take it: {e}")), rec(format!("chitin:{e}")));
         }
     };
-    let to = format!("{}{}?did={cap}&as={how}", site.mount, page::href("/", &path, "folds"));
+    let to = format!("{}{}?did={call}&as={how}", site.mount, page::href("/", &path, "folds"));
     (Response::new(303).with("Location", to).with("Cache-Control", "no-store"), rec(how.into()))
 }
 

@@ -1,32 +1,32 @@
 {
   "m1/ack": {
     "item": "m1",
-    "cap": "ack",
-    "call": "status",
+    "cap": "chitin",
+    "call": "ack",
     "args": {
       "msg_id": "m-1",
       "from": "seat-a"
     },
-    "fixity": "c1e75852889a08748322a59fe02b91c33439d8b1e655e6d51f44d7d1a6db16bd"
+    "fixity": "34090907ea0f4e7321da6167e4ccab56a77ada2b6fd748430a47ebeb1da689ff"
   },
   "m1/defer": {
     "item": "m1",
-    "cap": "defer",
-    "call": "status",
+    "cap": "chitin",
+    "call": "defer",
     "args": {
       "msg_id": "m-1",
       "from": "seat-a"
     },
-    "fixity": "eede1e25bfe6e51ce024627f6db2c6b9f8397d84087bce02445dd40db03edb40"
+    "fixity": "aaceafd2644f56cdcd20e241c35425ea1d907bbd97d8df75cc884ce3d1cb67da"
   },
   "m1/decline": {
     "item": "m1",
-    "cap": "decline",
-    "call": "status",
+    "cap": "chitin",
+    "call": "decline",
     "args": {
       "msg_id": "m-1",
       "from": "seat-a"
     },
-    "fixity": "bbfa091348ce29f264939895fba3c6a1e5a15ab74cbe1bc65c40bde6c051eea2"
+    "fixity": "5a9c4e8a02964af04a1a1e18258588a83dab390b8c5c651d9cafa8b013a05879"
   }
 }

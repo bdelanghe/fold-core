@@ -187,7 +187,7 @@ fn the_sink_answers_anything_and_logs_only_what_it_accepted() {
 struct Count(Arc<AtomicUsize>);
 
 impl Actor for Count {
-    fn ack(&self, _: &str, _: &str, _: &str, _: Option<&str>) -> Result<Done, String> {
+    fn ack(&self, _: &str, _: &str, _: &str, _: Option<&str>, _: &str) -> Result<Done, String> {
         self.0.fetch_add(1, Ordering::SeqCst);
         Ok(Done::Ok)
     }
@@ -229,7 +229,11 @@ fn act_request(r: &mut Rng) -> Vec<u8> {
     let body = match r.below(4) {
         0 => String::new(),
         1 => String::from_utf8_lossy(&r.bytes(40)).to_string(),
-        _ => format!("token={token}&cap={}", r.pick(&["ack", "decline", "webauthn", ""])),
+        _ => format!(
+            "token={token}&cap={}&call={}",
+            r.pick(&["chitin", "approve", "ack", ""]),
+            r.pick(&["ack", "decline", "sign", "say", "status", ""])
+        ),
     };
     format!("POST {target} HTTP/1.1\r\n{}\r\nContent-Length: {}\r\n\r\n{body}", h.join("\r\n"), body.len()).into_bytes()
 }
@@ -245,8 +249,8 @@ fn the_act_route_never_acts_without_every_check() {
         "<form action=\"/fold/act/needs/m1/ack\"><input type=\"hidden\" name=\"token\" value=\"\"></form>",
     )
     .unwrap();
-    let map = r#"{"needs/m1/ack":{"item":"needs~m1","cap":"ack","call":"status","args":{"msg_id":"m-1","from":"s"},"fixity":"0000000000000000000000000000000000000000000000000000000000000000"},
-                 "needs/m1/webauthn":{"item":"needs~m1","cap":"webauthn","call":"approve","args":{},"fixity":"00"}}"#;
+    let map = r#"{"needs/m1/ack":{"item":"needs~m1","cap":"chitin","call":"ack","args":{"msg_id":"m-1","from":"s"},"fixity":"0000000000000000000000000000000000000000000000000000000000000000"},
+                 "needs/m1/sign":{"item":"needs~m1","cap":"approve","call":"sign","args":{},"fixity":"00"}}"#;
     fs::write(root.join("_acts.json"), map).unwrap();
     let calls = Arc::new(AtomicUsize::new(0));
     let acting =

@@ -45,16 +45,17 @@
       ],
       [
         "ETag",
-        "\"sha-256:e4d62c0eaee474f5d04ccd719de88464a7839e41a6816889b0b675178631884b\""
+        "\"sha-256:29b1d28914bcd9cffef1dd798f872d9c7f505f1ffeb2b6bbb7a76252f928b046\""
       ]
     ],
     "body": {
-      "html_bytes": 3283,
+      "html_bytes": 3632,
       "says": null,
       "tokens": [
-        "v1.1793404800.f914e2b4cd4ba1537f6f022b46ee8341ba215e4c24b6f4e7595c18b9b4eb7dae.3bTQhT2pGQH22zx-xGIewnl-JIR-BdJfHlsoupKKBvA",
-        "v1.1793404800.f568b0f1239d4ab0cf98ff286d2e3a03ce492702b5b2bc1713a9abc0b45cdc4e.fKrQQfgQharZS-9wYIql0ET-c871l3R8cP8j8AUppeI",
-        "v1.1793404800.662a779842c6be8802fbb02f781ff6167401579134d234440de3087c89030360.FTA17inp_eDkaIeWlcmqDWtrLXvqXxR_5tiZ7oY-b7M",
+        "v1.1793404800.60b0f9c8439fc44b0682dae1a95a493b7113a8cdcb382e4191f914115fe3fbaf.qQUHwDyyOH4O5-D4feeruJnJh1qV05-i2FPV2XdUQSw",
+        "v1.1793404800.0350a5244147550322a5437719cbc2a728998dd4450c914586eff80e8deb2e2b.xnFFmFE9ayIac4gRM92qBX6VS8tE1xH4yiVogqGuqwg",
+        "v1.1793404800.3005dba413c52d80f3242c0392a6aea83914e0d0b2ed78dc82dce5b74d1124b0.CUQqXzVS-CCVVzFinUsz1MFddcpSlQ1mp9Vt3Av8k4E",
+        "",
         "",
         ""
       ],
@@ -109,13 +110,14 @@
       ],
       [
         "ETag",
-        "\"sha-256:12a7957b33c743196ead88c89bb09e3b51697af1c5a95778ba50f6a42d419b00\""
+        "\"sha-256:4f836d097c627651ec9ea4e5d7fdc708e17cd1551d61443f9aefdc7aae649214\""
       ]
     ],
     "body": {
-      "html_bytes": 2917,
+      "html_bytes": 3266,
       "says": null,
       "tokens": [
+        "",
         "",
         "",
         "",
@@ -372,7 +374,7 @@
           "application/x-www-form-urlencoded"
         ]
       ],
-      "body": "token=v1.1793404800.f914e2b4cd4ba1537f6f022b46ee8341ba215e4c24b6f4e7595c18b9b4eb7dae.3bTQhT2pGQH22zx-xGIewnl-JIR-BdJfHlsoupKKBvA&cap=ack&call=status&args.msg_id=m-1&args.from=seat-a"
+      "body": "token=v1.1793404800.60b0f9c8439fc44b0682dae1a95a493b7113a8cdcb382e4191f914115fe3fbaf.qQUHwDyyOH4O5-D4feeruJnJh1qV05-i2FPV2XdUQSw&cap=chitin&call=ack&args.msg_id=m-1&args.from=seat-a"
     },
     "status": 405,
     "headers": [
@@ -425,7 +427,7 @@
           "application/x-www-form-urlencoded"
         ]
       ],
-      "body": "token=v1.1793404800.f914e2b4cd4ba1537f6f022b46ee8341ba215e4c24b6f4e7595c18b9b4eb7dae.3bTQhT2pGQH22zx-xGIewnl-JIR-BdJfHlsoupKKBvA&cap=ack&call=status&args.msg_id=m-1&args.from=seat-a"
+      "body": "token=v1.1793404800.60b0f9c8439fc44b0682dae1a95a493b7113a8cdcb382e4191f914115fe3fbaf.qQUHwDyyOH4O5-D4feeruJnJh1qV05-i2FPV2XdUQSw&cap=chitin&call=ack&args.msg_id=m-1&args.from=seat-a"
     },
     "status": 403,
     "headers": [
@@ -445,6 +447,7 @@
       "login": "bobby@example.com",
       "peer": "100.64.0.2",
       "cap": null,
+      "call": null,
       "act": null,
       "item": null,
       "msg_id": null,
@@ -479,7 +482,7 @@
           "application/x-www-form-urlencoded"
         ]
       ],
-      "body": "token=v1.1793404800.f914e2b4cd4ba1537f6f022b46ee8341ba215e4c24b6f4e7595c18b9b4eb7dae.3bTQhT2pGQH22zx-xGIewnl-JIR-BdJfHlsoupKKBvA&cap=ack&call=status&args.msg_id=m-1&args.from=seat-a"
+      "body": "token=v1.1793404800.60b0f9c8439fc44b0682dae1a95a493b7113a8cdcb382e4191f914115fe3fbaf.qQUHwDyyOH4O5-D4feeruJnJh1qV05-i2FPV2XdUQSw&cap=chitin&call=ack&args.msg_id=m-1&args.from=seat-a"
     },
     "status": 403,
     "headers": [
@@ -499,6 +502,7 @@
       "login": null,
       "peer": "100.64.0.2",
       "cap": null,
+      "call": null,
       "act": null,
       "item": null,
       "msg_id": null,
@@ -537,7 +541,7 @@
           "eve@example.com"
         ]
       ],
-      "body": "token=v1.1793404800.f914e2b4cd4ba1537f6f022b46ee8341ba215e4c24b6f4e7595c18b9b4eb7dae.3bTQhT2pGQH22zx-xGIewnl-JIR-BdJfHlsoupKKBvA&cap=ack&call=status&args.msg_id=m-1&args.from=seat-a"
+      "body": "token=v1.1793404800.60b0f9c8439fc44b0682dae1a95a493b7113a8cdcb382e4191f914115fe3fbaf.qQUHwDyyOH4O5-D4feeruJnJh1qV05-i2FPV2XdUQSw&cap=chitin&call=ack&args.msg_id=m-1&args.from=seat-a"
     },
     "status": 403,
     "headers": [
@@ -557,6 +561,7 @@
       "login": "eve@example.com",
       "peer": "100.64.0.2",
       "cap": null,
+      "call": null,
       "act": null,
       "item": null,
       "msg_id": null,
@@ -595,7 +600,7 @@
           "=?utf-8?q?bobby@example.com?="
         ]
       ],
-      "body": "token=v1.1793404800.f914e2b4cd4ba1537f6f022b46ee8341ba215e4c24b6f4e7595c18b9b4eb7dae.3bTQhT2pGQH22zx-xGIewnl-JIR-BdJfHlsoupKKBvA&cap=ack&call=status&args.msg_id=m-1&args.from=seat-a"
+      "body": "token=v1.1793404800.60b0f9c8439fc44b0682dae1a95a493b7113a8cdcb382e4191f914115fe3fbaf.qQUHwDyyOH4O5-D4feeruJnJh1qV05-i2FPV2XdUQSw&cap=chitin&call=ack&args.msg_id=m-1&args.from=seat-a"
     },
     "status": 403,
     "headers": [
@@ -615,6 +620,7 @@
       "login": "=?utf-8?q?bobby@example.com?=",
       "peer": "100.64.0.2",
       "cap": null,
+      "call": null,
       "act": null,
       "item": null,
       "msg_id": null,
@@ -649,7 +655,7 @@
           "application/x-www-form-urlencoded"
         ]
       ],
-      "body": "token=v1.1793404800.f914e2b4cd4ba1537f6f022b46ee8341ba215e4c24b6f4e7595c18b9b4eb7dae.3bTQhT2pGQH22zx-xGIewnl-JIR-BdJfHlsoupKKBvA&cap=ack&call=status&args.msg_id=m-1&args.from=seat-a"
+      "body": "token=v1.1793404800.60b0f9c8439fc44b0682dae1a95a493b7113a8cdcb382e4191f914115fe3fbaf.qQUHwDyyOH4O5-D4feeruJnJh1qV05-i2FPV2XdUQSw&cap=chitin&call=ack&args.msg_id=m-1&args.from=seat-a"
     },
     "status": 403,
     "headers": [
@@ -669,6 +675,7 @@
       "login": "bobby@example.com",
       "peer": "100.64.0.2",
       "cap": null,
+      "call": null,
       "act": null,
       "item": null,
       "msg_id": null,
@@ -707,7 +714,7 @@
           "evil.example"
         ]
       ],
-      "body": "token=v1.1793404800.f914e2b4cd4ba1537f6f022b46ee8341ba215e4c24b6f4e7595c18b9b4eb7dae.3bTQhT2pGQH22zx-xGIewnl-JIR-BdJfHlsoupKKBvA&cap=ack&call=status&args.msg_id=m-1&args.from=seat-a"
+      "body": "token=v1.1793404800.60b0f9c8439fc44b0682dae1a95a493b7113a8cdcb382e4191f914115fe3fbaf.qQUHwDyyOH4O5-D4feeruJnJh1qV05-i2FPV2XdUQSw&cap=chitin&call=ack&args.msg_id=m-1&args.from=seat-a"
     },
     "status": 403,
     "headers": [
@@ -727,6 +734,7 @@
       "login": "bobby@example.com",
       "peer": "100.64.0.2",
       "cap": null,
+      "call": null,
       "act": null,
       "item": null,
       "msg_id": null,
@@ -765,7 +773,7 @@
           "cross-site"
         ]
       ],
-      "body": "token=v1.1793404800.f914e2b4cd4ba1537f6f022b46ee8341ba215e4c24b6f4e7595c18b9b4eb7dae.3bTQhT2pGQH22zx-xGIewnl-JIR-BdJfHlsoupKKBvA&cap=ack&call=status&args.msg_id=m-1&args.from=seat-a"
+      "body": "token=v1.1793404800.60b0f9c8439fc44b0682dae1a95a493b7113a8cdcb382e4191f914115fe3fbaf.qQUHwDyyOH4O5-D4feeruJnJh1qV05-i2FPV2XdUQSw&cap=chitin&call=ack&args.msg_id=m-1&args.from=seat-a"
     },
     "status": 403,
     "headers": [
@@ -785,6 +793,7 @@
       "login": "bobby@example.com",
       "peer": "100.64.0.2",
       "cap": null,
+      "call": null,
       "act": null,
       "item": null,
       "msg_id": null,
@@ -823,7 +832,7 @@
           "same-site"
         ]
       ],
-      "body": "token=v1.1793404800.f914e2b4cd4ba1537f6f022b46ee8341ba215e4c24b6f4e7595c18b9b4eb7dae.3bTQhT2pGQH22zx-xGIewnl-JIR-BdJfHlsoupKKBvA&cap=ack&call=status&args.msg_id=m-1&args.from=seat-a"
+      "body": "token=v1.1793404800.60b0f9c8439fc44b0682dae1a95a493b7113a8cdcb382e4191f914115fe3fbaf.qQUHwDyyOH4O5-D4feeruJnJh1qV05-i2FPV2XdUQSw&cap=chitin&call=ack&args.msg_id=m-1&args.from=seat-a"
     },
     "status": 403,
     "headers": [
@@ -843,6 +852,7 @@
       "login": "bobby@example.com",
       "peer": "100.64.0.2",
       "cap": null,
+      "call": null,
       "act": null,
       "item": null,
       "msg_id": null,
@@ -881,7 +891,7 @@
           "none"
         ]
       ],
-      "body": "token=v1.1793404800.f914e2b4cd4ba1537f6f022b46ee8341ba215e4c24b6f4e7595c18b9b4eb7dae.3bTQhT2pGQH22zx-xGIewnl-JIR-BdJfHlsoupKKBvA&cap=ack&call=status&args.msg_id=m-1&args.from=seat-a"
+      "body": "token=v1.1793404800.60b0f9c8439fc44b0682dae1a95a493b7113a8cdcb382e4191f914115fe3fbaf.qQUHwDyyOH4O5-D4feeruJnJh1qV05-i2FPV2XdUQSw&cap=chitin&call=ack&args.msg_id=m-1&args.from=seat-a"
     },
     "status": 403,
     "headers": [
@@ -901,6 +911,7 @@
       "login": "bobby@example.com",
       "peer": "100.64.0.2",
       "cap": null,
+      "call": null,
       "act": null,
       "item": null,
       "msg_id": null,
@@ -939,7 +950,7 @@
           "null"
         ]
       ],
-      "body": "token=v1.1793404800.f914e2b4cd4ba1537f6f022b46ee8341ba215e4c24b6f4e7595c18b9b4eb7dae.3bTQhT2pGQH22zx-xGIewnl-JIR-BdJfHlsoupKKBvA&cap=ack&call=status&args.msg_id=m-1&args.from=seat-a"
+      "body": "token=v1.1793404800.60b0f9c8439fc44b0682dae1a95a493b7113a8cdcb382e4191f914115fe3fbaf.qQUHwDyyOH4O5-D4feeruJnJh1qV05-i2FPV2XdUQSw&cap=chitin&call=ack&args.msg_id=m-1&args.from=seat-a"
     },
     "status": 403,
     "headers": [
@@ -959,6 +970,7 @@
       "login": "bobby@example.com",
       "peer": "100.64.0.2",
       "cap": null,
+      "call": null,
       "act": null,
       "item": null,
       "msg_id": null,
@@ -997,7 +1009,7 @@
           "https://evil.example"
         ]
       ],
-      "body": "token=v1.1793404800.f914e2b4cd4ba1537f6f022b46ee8341ba215e4c24b6f4e7595c18b9b4eb7dae.3bTQhT2pGQH22zx-xGIewnl-JIR-BdJfHlsoupKKBvA&cap=ack&call=status&args.msg_id=m-1&args.from=seat-a"
+      "body": "token=v1.1793404800.60b0f9c8439fc44b0682dae1a95a493b7113a8cdcb382e4191f914115fe3fbaf.qQUHwDyyOH4O5-D4feeruJnJh1qV05-i2FPV2XdUQSw&cap=chitin&call=ack&args.msg_id=m-1&args.from=seat-a"
     },
     "status": 403,
     "headers": [
@@ -1017,6 +1029,7 @@
       "login": "bobby@example.com",
       "peer": "100.64.0.2",
       "cap": null,
+      "call": null,
       "act": null,
       "item": null,
       "msg_id": null,
@@ -1051,7 +1064,7 @@
           "application/x-www-form-urlencoded"
         ]
       ],
-      "body": "token=v1.1793404800.f914e2b4cd4ba1537f6f022b46ee8341ba215e4c24b6f4e7595c18b9b4eb7dae.3bTQhT2pGQH22zx-xGIewnl-JIR-BdJfHlsoupKKBvA&cap=ack&call=status&args.msg_id=m-1&args.from=seat-a"
+      "body": "token=v1.1793404800.60b0f9c8439fc44b0682dae1a95a493b7113a8cdcb382e4191f914115fe3fbaf.qQUHwDyyOH4O5-D4feeruJnJh1qV05-i2FPV2XdUQSw&cap=chitin&call=ack&args.msg_id=m-1&args.from=seat-a"
     },
     "status": 403,
     "headers": [
@@ -1071,6 +1084,7 @@
       "login": "bobby@example.com",
       "peer": "100.64.0.2",
       "cap": null,
+      "call": null,
       "act": null,
       "item": null,
       "msg_id": null,
@@ -1113,7 +1127,7 @@
           "https://evil.example"
         ]
       ],
-      "body": "token=v1.1793404800.f914e2b4cd4ba1537f6f022b46ee8341ba215e4c24b6f4e7595c18b9b4eb7dae.3bTQhT2pGQH22zx-xGIewnl-JIR-BdJfHlsoupKKBvA&cap=ack&call=status&args.msg_id=m-1&args.from=seat-a"
+      "body": "token=v1.1793404800.60b0f9c8439fc44b0682dae1a95a493b7113a8cdcb382e4191f914115fe3fbaf.qQUHwDyyOH4O5-D4feeruJnJh1qV05-i2FPV2XdUQSw&cap=chitin&call=ack&args.msg_id=m-1&args.from=seat-a"
     },
     "status": 403,
     "headers": [
@@ -1133,6 +1147,7 @@
       "login": "bobby@example.com",
       "peer": "100.64.0.2",
       "cap": null,
+      "call": null,
       "act": null,
       "item": null,
       "msg_id": null,
@@ -1171,7 +1186,7 @@
           "application/json"
         ]
       ],
-      "body": "token=v1.1793404800.f914e2b4cd4ba1537f6f022b46ee8341ba215e4c24b6f4e7595c18b9b4eb7dae.3bTQhT2pGQH22zx-xGIewnl-JIR-BdJfHlsoupKKBvA&cap=ack&call=status&args.msg_id=m-1&args.from=seat-a"
+      "body": "token=v1.1793404800.60b0f9c8439fc44b0682dae1a95a493b7113a8cdcb382e4191f914115fe3fbaf.qQUHwDyyOH4O5-D4feeruJnJh1qV05-i2FPV2XdUQSw&cap=chitin&call=ack&args.msg_id=m-1&args.from=seat-a"
     },
     "status": 400,
     "headers": [
@@ -1191,6 +1206,7 @@
       "login": "bobby@example.com",
       "peer": "100.64.0.2",
       "cap": null,
+      "call": null,
       "act": null,
       "item": null,
       "msg_id": null,
@@ -1249,6 +1265,7 @@
       "login": "bobby@example.com",
       "peer": "100.64.0.2",
       "cap": null,
+      "call": null,
       "act": null,
       "item": null,
       "msg_id": null,
@@ -1287,7 +1304,7 @@
           "application/x-www-form-urlencoded"
         ]
       ],
-      "body": "cap=ack"
+      "body": "cap=chitin&call=ack"
     },
     "status": 400,
     "headers": [
@@ -1307,6 +1324,7 @@
       "login": "bobby@example.com",
       "peer": "100.64.0.2",
       "cap": null,
+      "call": null,
       "act": null,
       "item": null,
       "msg_id": null,
@@ -1345,7 +1363,7 @@
           "application/x-www-form-urlencoded"
         ]
       ],
-      "body": "token=v2.1.2.3&cap=ack&call=status&args.msg_id=m-1&args.from=seat-a"
+      "body": "token=v2.1.2.3&cap=chitin&call=ack&args.msg_id=m-1&args.from=seat-a"
     },
     "status": 400,
     "headers": [
@@ -1364,7 +1382,8 @@
       "ts": 1793361600,
       "login": "bobby@example.com",
       "peer": "100.64.0.2",
-      "cap": "ack",
+      "cap": "chitin",
+      "call": "ack",
       "act": "needs/m%201/ack",
       "item": "needs~m 1",
       "msg_id": "m-1",
@@ -1403,7 +1422,7 @@
           "application/x-www-form-urlencoded"
         ]
       ],
-      "body": "token=v1.1793404800.f914e2b4cd4ba1537f6f022b46ee8341ba215e4c24b6f4e7595c18b9b4eb7dae.3bTQhT2pGQH22zx-xGIewnl-JIR-BdJfHlsoupKKBv&cap=ack&call=status&args.msg_id=m-1&args.from=seat-a"
+      "body": "token=v1.1793404800.60b0f9c8439fc44b0682dae1a95a493b7113a8cdcb382e4191f914115fe3fbaf.qQUHwDyyOH4O5-D4feeruJnJh1qV05-i2FPV2XdUQS&cap=chitin&call=ack&args.msg_id=m-1&args.from=seat-a"
     },
     "status": 400,
     "headers": [
@@ -1422,7 +1441,8 @@
       "ts": 1793361600,
       "login": "bobby@example.com",
       "peer": "100.64.0.2",
-      "cap": "ack",
+      "cap": "chitin",
+      "call": "ack",
       "act": "needs/m%201/ack",
       "item": "needs~m 1",
       "msg_id": "m-1",
@@ -1430,7 +1450,7 @@
     }
   },
   {
-    "what": "the form's cap is not the fold's: a tripwire",
+    "what": "the form's call is not the fold's: a tripwire",
     "request": {
       "method": "POST",
       "target": "/act/needs/m%201/ack",
@@ -1461,7 +1481,7 @@
           "application/x-www-form-urlencoded"
         ]
       ],
-      "body": "token=v1.1793404800.f914e2b4cd4ba1537f6f022b46ee8341ba215e4c24b6f4e7595c18b9b4eb7dae.3bTQhT2pGQH22zx-xGIewnl-JIR-BdJfHlsoupKKBvA&cap=decline&call=status&args.msg_id=m-1&args.from=seat-a"
+      "body": "token=v1.1793404800.60b0f9c8439fc44b0682dae1a95a493b7113a8cdcb382e4191f914115fe3fbaf.qQUHwDyyOH4O5-D4feeruJnJh1qV05-i2FPV2XdUQSw&cap=chitin&call=decline&args.msg_id=m-1&args.from=seat-a"
     },
     "status": 400,
     "headers": [
@@ -1480,7 +1500,67 @@
       "ts": 1793361600,
       "login": "bobby@example.com",
       "peer": "100.64.0.2",
-      "cap": "ack",
+      "cap": "chitin",
+      "call": "ack",
+      "act": "needs/m%201/ack",
+      "item": "needs~m 1",
+      "msg_id": "m-1",
+      "result": "refused:400"
+    }
+  },
+  {
+    "what": "nor is the form's cap",
+    "request": {
+      "method": "POST",
+      "target": "/act/needs/m%201/ack",
+      "peer": "127.0.0.1",
+      "headers": [
+        [
+          "Tailscale-User-Login",
+          "bobby@example.com"
+        ],
+        [
+          "X-Forwarded-For",
+          "100.64.0.2"
+        ],
+        [
+          "X-Forwarded-Proto",
+          "https"
+        ],
+        [
+          "X-Forwarded-Host",
+          "phobos.example.ts.net"
+        ],
+        [
+          "Sec-Fetch-Site",
+          "same-origin"
+        ],
+        [
+          "Content-Type",
+          "application/x-www-form-urlencoded"
+        ]
+      ],
+      "body": "token=v1.1793404800.60b0f9c8439fc44b0682dae1a95a493b7113a8cdcb382e4191f914115fe3fbaf.qQUHwDyyOH4O5-D4feeruJnJh1qV05-i2FPV2XdUQSw&cap=approve&call=ack&args.msg_id=m-1&args.from=seat-a"
+    },
+    "status": 400,
+    "headers": [
+      [
+        "Content-Type",
+        "text/plain; charset=utf-8"
+      ],
+      [
+        "Cache-Control",
+        "no-store"
+      ]
+    ],
+    "body": "the form does not match the fold\n",
+    "actor": [],
+    "log": {
+      "ts": 1793361600,
+      "login": "bobby@example.com",
+      "peer": "100.64.0.2",
+      "cap": "chitin",
+      "call": "ack",
       "act": "needs/m%201/ack",
       "item": "needs~m 1",
       "msg_id": "m-1",
@@ -1519,7 +1599,7 @@
           "application/x-www-form-urlencoded"
         ]
       ],
-      "body": "token=v1.1793404800.f914e2b4cd4ba1537f6f022b46ee8341ba215e4c24b6f4e7595c18b9b4eb7dae.3bTQhT2pGQH22zx-xGIewnl-JIR-BdJfHlsoupKKBvA&cap=ack&call=status&args.msg_id=m-1&args.from=seat-a"
+      "body": "token=v1.1793404800.60b0f9c8439fc44b0682dae1a95a493b7113a8cdcb382e4191f914115fe3fbaf.qQUHwDyyOH4O5-D4feeruJnJh1qV05-i2FPV2XdUQSw&cap=chitin&call=ack&args.msg_id=m-1&args.from=seat-a"
     },
     "status": 400,
     "headers": [
@@ -1539,6 +1619,7 @@
       "login": "bobby@example.com",
       "peer": "100.64.0.2",
       "cap": null,
+      "call": null,
       "act": null,
       "item": null,
       "msg_id": null,
@@ -1577,7 +1658,7 @@
           "application/x-www-form-urlencoded"
         ]
       ],
-      "body": "token=v1.1793404800.f914e2b4cd4ba1537f6f022b46ee8341ba215e4c24b6f4e7595c18b9b4eb7dae.3bTQhT2pGQH22zx-xGIewnl-JIR-BdJfHlsoupKKBvA&cap=ack&call=status&args.msg_id=m-1&args.from=seat-a"
+      "body": "token=v1.1793404800.60b0f9c8439fc44b0682dae1a95a493b7113a8cdcb382e4191f914115fe3fbaf.qQUHwDyyOH4O5-D4feeruJnJh1qV05-i2FPV2XdUQSw&cap=chitin&call=ack&args.msg_id=m-1&args.from=seat-a"
     },
     "status": 404,
     "headers": [
@@ -1597,6 +1678,7 @@
       "login": "bobby@example.com",
       "peer": "100.64.0.2",
       "cap": null,
+      "call": null,
       "act": "needs/m%201/nudge",
       "item": null,
       "msg_id": null,
@@ -1604,10 +1686,10 @@
     }
   },
   {
-    "what": "the passkey is never run here",
+    "what": "the passkey (approve/sign) is never run here",
     "request": {
       "method": "POST",
-      "target": "/act/needs/m%201/webauthn",
+      "target": "/act/needs/m%201/sign",
       "peer": "127.0.0.1",
       "headers": [
         [
@@ -1635,7 +1717,7 @@
           "application/x-www-form-urlencoded"
         ]
       ],
-      "body": "token=v1.1793404800.f914e2b4cd4ba1537f6f022b46ee8341ba215e4c24b6f4e7595c18b9b4eb7dae.3bTQhT2pGQH22zx-xGIewnl-JIR-BdJfHlsoupKKBvA&cap=ack&call=status&args.msg_id=m-1&args.from=seat-a"
+      "body": "token=v1.1793404800.60b0f9c8439fc44b0682dae1a95a493b7113a8cdcb382e4191f914115fe3fbaf.qQUHwDyyOH4O5-D4feeruJnJh1qV05-i2FPV2XdUQSw&cap=chitin&call=ack&args.msg_id=m-1&args.from=seat-a"
     },
     "status": 422,
     "headers": [
@@ -1654,18 +1736,19 @@
       "ts": 1793361600,
       "login": "bobby@example.com",
       "peer": "100.64.0.2",
-      "cap": "webauthn",
-      "act": "needs/m%201/webauthn",
+      "cap": "approve",
+      "call": "sign",
+      "act": "needs/m%201/sign",
       "item": "needs~m 1",
       "msg_id": "m-1",
       "result": "refused:422"
     }
   },
   {
-    "what": "nor a cap this server does not know",
+    "what": "nor chitin/say: only chitin's ack, defer and decline",
     "request": {
       "method": "POST",
-      "target": "/act/needs/m%201/archive",
+      "target": "/act/needs/m%201/say",
       "peer": "127.0.0.1",
       "headers": [
         [
@@ -1693,7 +1776,7 @@
           "application/x-www-form-urlencoded"
         ]
       ],
-      "body": "token=v1.1793404800.f914e2b4cd4ba1537f6f022b46ee8341ba215e4c24b6f4e7595c18b9b4eb7dae.3bTQhT2pGQH22zx-xGIewnl-JIR-BdJfHlsoupKKBvA&cap=ack&call=status&args.msg_id=m-1&args.from=seat-a"
+      "body": "token=v1.1793404800.60b0f9c8439fc44b0682dae1a95a493b7113a8cdcb382e4191f914115fe3fbaf.qQUHwDyyOH4O5-D4feeruJnJh1qV05-i2FPV2XdUQSw&cap=chitin&call=ack&args.msg_id=m-1&args.from=seat-a"
     },
     "status": 422,
     "headers": [
@@ -1712,8 +1795,68 @@
       "ts": 1793361600,
       "login": "bobby@example.com",
       "peer": "100.64.0.2",
-      "cap": "archive",
-      "act": "needs/m%201/archive",
+      "cap": "chitin",
+      "call": "say",
+      "act": "needs/m%201/say",
+      "item": "needs~m 1",
+      "msg_id": "m-1",
+      "result": "refused:422"
+    }
+  },
+  {
+    "what": "nor the legacy {cap: ack, call: status}",
+    "request": {
+      "method": "POST",
+      "target": "/act/needs/m%201/status",
+      "peer": "127.0.0.1",
+      "headers": [
+        [
+          "Tailscale-User-Login",
+          "bobby@example.com"
+        ],
+        [
+          "X-Forwarded-For",
+          "100.64.0.2"
+        ],
+        [
+          "X-Forwarded-Proto",
+          "https"
+        ],
+        [
+          "X-Forwarded-Host",
+          "phobos.example.ts.net"
+        ],
+        [
+          "Sec-Fetch-Site",
+          "same-origin"
+        ],
+        [
+          "Content-Type",
+          "application/x-www-form-urlencoded"
+        ]
+      ],
+      "body": "token=v1.1793404800.60b0f9c8439fc44b0682dae1a95a493b7113a8cdcb382e4191f914115fe3fbaf.qQUHwDyyOH4O5-D4feeruJnJh1qV05-i2FPV2XdUQSw&cap=chitin&call=ack&args.msg_id=m-1&args.from=seat-a"
+    },
+    "status": 422,
+    "headers": [
+      [
+        "Content-Type",
+        "text/plain; charset=utf-8"
+      ],
+      [
+        "Cache-Control",
+        "no-store"
+      ]
+    ],
+    "body": "this act is not one this server may run\n",
+    "actor": [],
+    "log": {
+      "ts": 1793361600,
+      "login": "bobby@example.com",
+      "peer": "100.64.0.2",
+      "cap": "ack",
+      "call": "status",
+      "act": "needs/m%201/status",
       "item": "needs~m 1",
       "msg_id": "m-1",
       "result": "refused:422"
@@ -1751,7 +1894,7 @@
           "application/x-www-form-urlencoded"
         ]
       ],
-      "body": "token=v1.1793404800.f914e2b4cd4ba1537f6f022b46ee8341ba215e4c24b6f4e7595c18b9b4eb7dae.LOnQekIe6yvwN0ealSY-2CqwCDrDgN2xVv856jQMWRU&cap=ack&call=status&args.msg_id=m-1&args.from=seat-a"
+      "body": "token=v1.1793404800.60b0f9c8439fc44b0682dae1a95a493b7113a8cdcb382e4191f914115fe3fbaf.OCUgnm-ZKGIR1Uj0y5iY0J9b3m7qzCYFgNG9zcjYKF4&cap=chitin&call=ack&args.msg_id=m-1&args.from=seat-a"
     },
     "status": 403,
     "headers": [
@@ -1770,7 +1913,8 @@
       "ts": 1793361600,
       "login": "bobby@example.com",
       "peer": "100.64.0.2",
-      "cap": "ack",
+      "cap": "chitin",
+      "call": "ack",
       "act": "needs/m%201/ack",
       "item": "needs~m 1",
       "msg_id": "m-1",
@@ -1809,7 +1953,7 @@
           "application/x-www-form-urlencoded"
         ]
       ],
-      "body": "token=v1.1793361599.f914e2b4cd4ba1537f6f022b46ee8341ba215e4c24b6f4e7595c18b9b4eb7dae.zh20EcDCPLVmSVYY3M0rjbckL3rNUHDnsZNxlFZfCbY&cap=ack&call=status&args.msg_id=m-1&args.from=seat-a"
+      "body": "token=v1.1793361599.60b0f9c8439fc44b0682dae1a95a493b7113a8cdcb382e4191f914115fe3fbaf.GWRLGcO9CfT57qwUu3wSpqscNJXZEwJMWJFv4mq67nE&cap=chitin&call=ack&args.msg_id=m-1&args.from=seat-a"
     },
     "status": 403,
     "headers": [
@@ -1823,12 +1967,13 @@
       ]
     ],
     "body": {
-      "html_bytes": 3347,
+      "html_bytes": 3696,
       "says": "That page had gone stale, so here it is again. Nothing was done.",
       "tokens": [
-        "v1.1793404800.f914e2b4cd4ba1537f6f022b46ee8341ba215e4c24b6f4e7595c18b9b4eb7dae.3bTQhT2pGQH22zx-xGIewnl-JIR-BdJfHlsoupKKBvA",
-        "v1.1793404800.f568b0f1239d4ab0cf98ff286d2e3a03ce492702b5b2bc1713a9abc0b45cdc4e.fKrQQfgQharZS-9wYIql0ET-c871l3R8cP8j8AUppeI",
-        "v1.1793404800.662a779842c6be8802fbb02f781ff6167401579134d234440de3087c89030360.FTA17inp_eDkaIeWlcmqDWtrLXvqXxR_5tiZ7oY-b7M",
+        "v1.1793404800.60b0f9c8439fc44b0682dae1a95a493b7113a8cdcb382e4191f914115fe3fbaf.qQUHwDyyOH4O5-D4feeruJnJh1qV05-i2FPV2XdUQSw",
+        "v1.1793404800.0350a5244147550322a5437719cbc2a728998dd4450c914586eff80e8deb2e2b.xnFFmFE9ayIac4gRM92qBX6VS8tE1xH4yiVogqGuqwg",
+        "v1.1793404800.3005dba413c52d80f3242c0392a6aea83914e0d0b2ed78dc82dce5b74d1124b0.CUQqXzVS-CCVVzFinUsz1MFddcpSlQ1mp9Vt3Av8k4E",
+        "",
         "",
         ""
       ],
@@ -1839,7 +1984,8 @@
       "ts": 1793361600,
       "login": "bobby@example.com",
       "peer": "100.64.0.2",
-      "cap": "ack",
+      "cap": "chitin",
+      "call": "ack",
       "act": "needs/m%201/ack",
       "item": "needs~m 1",
       "msg_id": "m-1",
@@ -1878,7 +2024,7 @@
           "application/x-www-form-urlencoded"
         ]
       ],
-      "body": "token=&cap=ack&call=status&args.msg_id=m-1&args.from=seat-a"
+      "body": "token=&cap=chitin&call=ack&args.msg_id=m-1&args.from=seat-a"
     },
     "status": 403,
     "headers": [
@@ -1892,12 +2038,13 @@
       ]
     ],
     "body": {
-      "html_bytes": 3347,
+      "html_bytes": 3696,
       "says": "That page had gone stale, so here it is again. Nothing was done.",
       "tokens": [
-        "v1.1793404800.f914e2b4cd4ba1537f6f022b46ee8341ba215e4c24b6f4e7595c18b9b4eb7dae.3bTQhT2pGQH22zx-xGIewnl-JIR-BdJfHlsoupKKBvA",
-        "v1.1793404800.f568b0f1239d4ab0cf98ff286d2e3a03ce492702b5b2bc1713a9abc0b45cdc4e.fKrQQfgQharZS-9wYIql0ET-c871l3R8cP8j8AUppeI",
-        "v1.1793404800.662a779842c6be8802fbb02f781ff6167401579134d234440de3087c89030360.FTA17inp_eDkaIeWlcmqDWtrLXvqXxR_5tiZ7oY-b7M",
+        "v1.1793404800.60b0f9c8439fc44b0682dae1a95a493b7113a8cdcb382e4191f914115fe3fbaf.qQUHwDyyOH4O5-D4feeruJnJh1qV05-i2FPV2XdUQSw",
+        "v1.1793404800.0350a5244147550322a5437719cbc2a728998dd4450c914586eff80e8deb2e2b.xnFFmFE9ayIac4gRM92qBX6VS8tE1xH4yiVogqGuqwg",
+        "v1.1793404800.3005dba413c52d80f3242c0392a6aea83914e0d0b2ed78dc82dce5b74d1124b0.CUQqXzVS-CCVVzFinUsz1MFddcpSlQ1mp9Vt3Av8k4E",
+        "",
         "",
         ""
       ],
@@ -1908,7 +2055,8 @@
       "ts": 1793361600,
       "login": "bobby@example.com",
       "peer": "100.64.0.2",
-      "cap": "ack",
+      "cap": "chitin",
+      "call": "ack",
       "act": "needs/m%201/ack",
       "item": "needs~m 1",
       "msg_id": "m-1",
@@ -1947,7 +2095,7 @@
           "application/x-www-form-urlencoded"
         ]
       ],
-      "body": "token=v1.1793404800.0000000000000000000000000000000000000000000000000000000000000000.diTlh12PBR11-oUQ08N7cfSGzXy-dND2sui3dA7yMv0&cap=ack&call=status&args.msg_id=m-1&args.from=seat-a"
+      "body": "token=v1.1793404800.0000000000000000000000000000000000000000000000000000000000000000.diTlh12PBR11-oUQ08N7cfSGzXy-dND2sui3dA7yMv0&cap=chitin&call=ack&args.msg_id=m-1&args.from=seat-a"
     },
     "status": 409,
     "headers": [
@@ -1961,12 +2109,13 @@
       ]
     ],
     "body": {
-      "html_bytes": 3345,
+      "html_bytes": 3694,
       "says": "This changed since you opened it. Read it again before acting.",
       "tokens": [
-        "v1.1793404800.f914e2b4cd4ba1537f6f022b46ee8341ba215e4c24b6f4e7595c18b9b4eb7dae.3bTQhT2pGQH22zx-xGIewnl-JIR-BdJfHlsoupKKBvA",
-        "v1.1793404800.f568b0f1239d4ab0cf98ff286d2e3a03ce492702b5b2bc1713a9abc0b45cdc4e.fKrQQfgQharZS-9wYIql0ET-c871l3R8cP8j8AUppeI",
-        "v1.1793404800.662a779842c6be8802fbb02f781ff6167401579134d234440de3087c89030360.FTA17inp_eDkaIeWlcmqDWtrLXvqXxR_5tiZ7oY-b7M",
+        "v1.1793404800.60b0f9c8439fc44b0682dae1a95a493b7113a8cdcb382e4191f914115fe3fbaf.qQUHwDyyOH4O5-D4feeruJnJh1qV05-i2FPV2XdUQSw",
+        "v1.1793404800.0350a5244147550322a5437719cbc2a728998dd4450c914586eff80e8deb2e2b.xnFFmFE9ayIac4gRM92qBX6VS8tE1xH4yiVogqGuqwg",
+        "v1.1793404800.3005dba413c52d80f3242c0392a6aea83914e0d0b2ed78dc82dce5b74d1124b0.CUQqXzVS-CCVVzFinUsz1MFddcpSlQ1mp9Vt3Av8k4E",
+        "",
         "",
         ""
       ],
@@ -1977,7 +2126,8 @@
       "ts": 1793361600,
       "login": "bobby@example.com",
       "peer": "100.64.0.2",
-      "cap": "ack",
+      "cap": "chitin",
+      "call": "ack",
       "act": "needs/m%201/ack",
       "item": "needs~m 1",
       "msg_id": "m-1",
@@ -2016,7 +2166,7 @@
           "application/x-www-form-urlencoded"
         ]
       ],
-      "body": "token=v1.1793404800.0000000000000000000000000000000000000000000000000000000000000000.BIRRE07yrokVGFzeIYUWUw_tAVyMiic5Ml8tLZ2Nn4M&cap=ack&call=status&args.msg_id=m-1&args.from=seat-a"
+      "body": "token=v1.1793404800.0000000000000000000000000000000000000000000000000000000000000000.BIRRE07yrokVGFzeIYUWUw_tAVyMiic5Ml8tLZ2Nn4M&cap=chitin&call=ack&args.msg_id=m-1&args.from=seat-a"
     },
     "status": 409,
     "headers": [
@@ -2041,6 +2191,7 @@
       "login": "bobby@example.com",
       "peer": "100.64.0.2",
       "cap": null,
+      "call": null,
       "act": "needs/gone/ack",
       "item": null,
       "msg_id": null,
@@ -2079,7 +2230,7 @@
           "application/x-www-form-urlencoded"
         ]
       ],
-      "body": "token=v1.1793404800.12d29925f7f570fb37d8027dbab074fbbd639516f216f79a2ec8009dab583f53.ijql3p-Mp7YuWypAKNv0HwW-XukIm13erk4XFJIBP7k&cap=ack&call=status&args.msg_id=m-1&args.from=seat-a"
+      "body": "token=v1.1793404800.460cb64593d4f1e790233f2b3b78fb491544a89dbd8e1656690d4f022b28d7a7.Dj_5ZOSOlmRpXhlTi6fVLelVpbTbK5HMVnbwq2Yk66c&cap=chitin&call=ack&args.msg_id=m-1&args.from=seat-a"
     },
     "status": 422,
     "headers": [
@@ -2098,7 +2249,8 @@
       "ts": 1793361600,
       "login": "bobby@example.com",
       "peer": "100.64.0.2",
-      "cap": "ack",
+      "cap": "chitin",
+      "call": "ack",
       "act": "needs/bare/ack",
       "item": "needs~bare",
       "msg_id": null,
@@ -2137,7 +2289,7 @@
           "application/x-www-form-urlencoded"
         ]
       ],
-      "body": "token=v1.1793404800.9ef303d27d96044104fa647009d4f182f47876a169d9f69be7e92f73996dc884.ETeXvyMPmd-lLtWt9SQiS5RpuseS2fGKtmMADEbMQD4&cap=ack&call=status&args.msg_id=m-1&args.from=seat-a"
+      "body": "token=v1.1793404800.caf657281e4a9d6ec533c51a87639ef1cf4d0bfd92e2639058169e3676f31d83.LqNo3yjbQSYhSii3i432F8cEzFXKOiV0V021btAWJSo&cap=chitin&call=ack&args.msg_id=m-1&args.from=seat-a"
     },
     "status": 502,
     "headers": [
@@ -2152,13 +2304,14 @@
     ],
     "body": "chitin did not take it: timeout: seat-b did not answer\n",
     "actor": [
-      "m-down acting to=seat-a"
+      "m-down acting to=seat-a ref=fold:needs/down/ack"
     ],
     "log": {
       "ts": 1793361600,
       "login": "bobby@example.com",
       "peer": "100.64.0.2",
-      "cap": "ack",
+      "cap": "chitin",
+      "call": "ack",
       "act": "needs/down/ack",
       "item": "needs~down",
       "msg_id": "m-down",
@@ -2197,7 +2350,7 @@
           "application/x-www-form-urlencoded"
         ]
       ],
-      "body": "token=v1.1793404800.f914e2b4cd4ba1537f6f022b46ee8341ba215e4c24b6f4e7595c18b9b4eb7dae.3bTQhT2pGQH22zx-xGIewnl-JIR-BdJfHlsoupKKBvA&cap=ack&call=status&args.msg_id=m-1&args.from=seat-a"
+      "body": "token=v1.1793404800.60b0f9c8439fc44b0682dae1a95a493b7113a8cdcb382e4191f914115fe3fbaf.qQUHwDyyOH4O5-D4feeruJnJh1qV05-i2FPV2XdUQSw&cap=chitin&call=ack&args.msg_id=m-1&args.from=seat-a"
     },
     "status": 303,
     "headers": [
@@ -2212,13 +2365,14 @@
     ],
     "body": "",
     "actor": [
-      "m-1 acting to=seat-a"
+      "m-1 acting to=seat-a ref=fold:needs/m%201/ack"
     ],
     "log": {
       "ts": 1793361600,
       "login": "bobby@example.com",
       "peer": "100.64.0.2",
-      "cap": "ack",
+      "cap": "chitin",
+      "call": "ack",
       "act": "needs/m%201/ack",
       "item": "needs~m 1",
       "msg_id": "m-1",
@@ -2271,16 +2425,17 @@
       ],
       [
         "ETag",
-        "\"sha-256:48eb87e817e83efba7a27f87dde838a0cdaed5fa2b175665d6cbc6dc70656a6b\""
+        "\"sha-256:93b2a422dea5d375de4bc0f1b9a2ed89682571cd1d35fdcb0966f1673e37eaf3\""
       ]
     ],
     "body": {
-      "html_bytes": 3296,
+      "html_bytes": 3645,
       "says": "Acknowledged.",
       "tokens": [
-        "v1.1793404800.f914e2b4cd4ba1537f6f022b46ee8341ba215e4c24b6f4e7595c18b9b4eb7dae.3bTQhT2pGQH22zx-xGIewnl-JIR-BdJfHlsoupKKBvA",
-        "v1.1793404800.f568b0f1239d4ab0cf98ff286d2e3a03ce492702b5b2bc1713a9abc0b45cdc4e.fKrQQfgQharZS-9wYIql0ET-c871l3R8cP8j8AUppeI",
-        "v1.1793404800.662a779842c6be8802fbb02f781ff6167401579134d234440de3087c89030360.FTA17inp_eDkaIeWlcmqDWtrLXvqXxR_5tiZ7oY-b7M",
+        "v1.1793404800.60b0f9c8439fc44b0682dae1a95a493b7113a8cdcb382e4191f914115fe3fbaf.qQUHwDyyOH4O5-D4feeruJnJh1qV05-i2FPV2XdUQSw",
+        "v1.1793404800.0350a5244147550322a5437719cbc2a728998dd4450c914586eff80e8deb2e2b.xnFFmFE9ayIac4gRM92qBX6VS8tE1xH4yiVogqGuqwg",
+        "v1.1793404800.3005dba413c52d80f3242c0392a6aea83914e0d0b2ed78dc82dce5b74d1124b0.CUQqXzVS-CCVVzFinUsz1MFddcpSlQ1mp9Vt3Av8k4E",
+        "",
         "",
         ""
       ],
@@ -2321,7 +2476,7 @@
           "application/x-www-form-urlencoded"
         ]
       ],
-      "body": "token=v1.1793404800.f914e2b4cd4ba1537f6f022b46ee8341ba215e4c24b6f4e7595c18b9b4eb7dae.3bTQhT2pGQH22zx-xGIewnl-JIR-BdJfHlsoupKKBvA&cap=ack&call=status&args.msg_id=m-1&args.from=seat-a"
+      "body": "token=v1.1793404800.60b0f9c8439fc44b0682dae1a95a493b7113a8cdcb382e4191f914115fe3fbaf.qQUHwDyyOH4O5-D4feeruJnJh1qV05-i2FPV2XdUQSw&cap=chitin&call=ack&args.msg_id=m-1&args.from=seat-a"
     },
     "status": 303,
     "headers": [
@@ -2336,13 +2491,14 @@
     ],
     "body": "",
     "actor": [
-      "m-1 acting to=seat-a"
+      "m-1 acting to=seat-a ref=fold:needs/m%201/ack"
     ],
     "log": {
       "ts": 1793361600,
       "login": "bobby@example.com",
       "peer": "100.64.0.2",
-      "cap": "ack",
+      "cap": "chitin",
+      "call": "ack",
       "act": "needs/m%201/ack",
       "item": "needs~m 1",
       "msg_id": "m-1",
@@ -2395,16 +2551,17 @@
       ],
       [
         "ETag",
-        "\"sha-256:e4d62c0eaee474f5d04ccd719de88464a7839e41a6816889b0b675178631884b\""
+        "\"sha-256:29b1d28914bcd9cffef1dd798f872d9c7f505f1ffeb2b6bbb7a76252f928b046\""
       ]
     ],
     "body": {
-      "html_bytes": 3283,
+      "html_bytes": 3632,
       "says": null,
       "tokens": [
-        "v1.1793404800.f914e2b4cd4ba1537f6f022b46ee8341ba215e4c24b6f4e7595c18b9b4eb7dae.3bTQhT2pGQH22zx-xGIewnl-JIR-BdJfHlsoupKKBvA",
-        "v1.1793404800.f568b0f1239d4ab0cf98ff286d2e3a03ce492702b5b2bc1713a9abc0b45cdc4e.fKrQQfgQharZS-9wYIql0ET-c871l3R8cP8j8AUppeI",
-        "v1.1793404800.662a779842c6be8802fbb02f781ff6167401579134d234440de3087c89030360.FTA17inp_eDkaIeWlcmqDWtrLXvqXxR_5tiZ7oY-b7M",
+        "v1.1793404800.60b0f9c8439fc44b0682dae1a95a493b7113a8cdcb382e4191f914115fe3fbaf.qQUHwDyyOH4O5-D4feeruJnJh1qV05-i2FPV2XdUQSw",
+        "v1.1793404800.0350a5244147550322a5437719cbc2a728998dd4450c914586eff80e8deb2e2b.xnFFmFE9ayIac4gRM92qBX6VS8tE1xH4yiVogqGuqwg",
+        "v1.1793404800.3005dba413c52d80f3242c0392a6aea83914e0d0b2ed78dc82dce5b74d1124b0.CUQqXzVS-CCVVzFinUsz1MFddcpSlQ1mp9Vt3Av8k4E",
+        "",
         "",
         ""
       ],
@@ -2445,7 +2602,7 @@
           "application/x-www-form-urlencoded"
         ]
       ],
-      "body": "token=v1.1793404800.f568b0f1239d4ab0cf98ff286d2e3a03ce492702b5b2bc1713a9abc0b45cdc4e.fKrQQfgQharZS-9wYIql0ET-c871l3R8cP8j8AUppeI&cap=defer&call=status&args.msg_id=m-1&args.from=seat-a"
+      "body": "token=v1.1793404800.0350a5244147550322a5437719cbc2a728998dd4450c914586eff80e8deb2e2b.xnFFmFE9ayIac4gRM92qBX6VS8tE1xH4yiVogqGuqwg&cap=chitin&call=defer&args.msg_id=m-1&args.from=seat-a"
     },
     "status": 303,
     "headers": [
@@ -2460,13 +2617,14 @@
     ],
     "body": "",
     "actor": [
-      "m-1 deferred to=seat-a why=Deferred from Basis"
+      "m-1 deferred to=seat-a ref=fold:needs/m%201/defer why=Deferred from Basis"
     ],
     "log": {
       "ts": 1793361600,
       "login": "bobby@example.com",
       "peer": "100.64.0.2",
-      "cap": "defer",
+      "cap": "chitin",
+      "call": "defer",
       "act": "needs/m%201/defer",
       "item": "needs~m 1",
       "msg_id": "m-1",
@@ -2505,7 +2663,7 @@
           "https://phobos.example.ts.net"
         ]
       ],
-      "body": "token=v1.1793404800.662a779842c6be8802fbb02f781ff6167401579134d234440de3087c89030360.FTA17inp_eDkaIeWlcmqDWtrLXvqXxR_5tiZ7oY-b7M&cap=decline&call=status&args.msg_id=m-1&args.from=seat-a"
+      "body": "token=v1.1793404800.3005dba413c52d80f3242c0392a6aea83914e0d0b2ed78dc82dce5b74d1124b0.CUQqXzVS-CCVVzFinUsz1MFddcpSlQ1mp9Vt3Av8k4E&cap=chitin&call=decline&args.msg_id=m-1&args.from=seat-a"
     },
     "status": 303,
     "headers": [
@@ -2520,13 +2678,14 @@
     ],
     "body": "",
     "actor": [
-      "m-1 declined to=seat-a why=Declined from Basis"
+      "m-1 declined to=seat-a ref=fold:needs/m%201/decline why=Declined from Basis"
     ],
     "log": {
       "ts": 1793361600,
       "login": "bobby@example.com",
       "peer": "100.64.0.2",
-      "cap": "decline",
+      "cap": "chitin",
+      "call": "decline",
       "act": "needs/m%201/decline",
       "item": "needs~m 1",
       "msg_id": "m-1",
