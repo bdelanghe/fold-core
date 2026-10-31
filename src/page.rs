@@ -121,15 +121,18 @@ pub fn title(ax: &Value) -> String {
     }
 }
 
-/// One fold's whole page, from its (marked) tree: or why toDom would refuse the tree.
-pub fn page(tree: &Value, css: &str) -> Result<String, String> {
+/// One fold's whole page, from its (marked) tree: or why toDom would refuse the tree. `base` is the viewer's, whose stylesheet
+/// and Home Screen manifest (viewer/manifest.webmanifest) the page links.
+pub fn page(tree: &Value, base: &str) -> Result<String, String> {
     let main = html(tree)?;
     Ok(format!(
         "<!doctype html>\n<html lang=\"en\">\n<head>\n<meta charset=\"utf-8\">\n\
          <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">\n<meta name=\"color-scheme\" content=\"light dark\">\n\
-         <title>{}</title>\n<link rel=\"stylesheet\" href=\"{}\">\n</head>\n<body>\n{main}\n</body>\n</html>\n",
+         <title>{}</title>\n<link rel=\"stylesheet\" href=\"{}fold.css\">\n<link rel=\"manifest\" href=\"{}manifest.webmanifest\">\n\
+         </head>\n<body>\n{main}\n</body>\n</html>\n",
         text(&title(tree)),
-        attr(css)
+        attr(base),
+        attr(base)
     ))
 }
 
@@ -142,7 +145,6 @@ pub fn site(nodes: &[(String, Value)], source: &str, base: &str, clock: &Clock) 
     // As slides, a link goes to a fold's slides page where it has one (it presents), else to the fold's page; at its heading.
     let page_of = |p: &[String], m: &str| href(base, p, if decks.contains(p) { m } else { "folds" });
     let link = |p: &[String], m: &str| format!("{}#{}", page_of(p, m), html_id(source, &under(p)));
-    let css = format!("{base}fold.css");
     let mut out = vec![];
     for (id, node) in nodes {
         let path = at(id);
@@ -172,7 +174,7 @@ pub fn site(nodes: &[(String, Value)], source: &str, base: &str, clock: &Clock) 
                 }
             }
             mark(&mut tree, base, &html_id(source, &under(&path)), &rows);
-            let made = file(&path, mode).and_then(|f| Ok((f, page(&tree, &css)?)));
+            let made = file(&path, mode).and_then(|f| Ok((f, page(&tree, base)?)));
             out.push(match made {
                 Ok((f, h)) => json!({ "id": id, "mode": mode, "href": href(base, &path, mode), "file": f, "html": h }),
                 Err(e) => json!({ "id": id, "mode": mode, "href": href(base, &path, mode), "error": e }),

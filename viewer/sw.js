@@ -7,8 +7,7 @@
 //   (when it was kept), which is how the viewer knows it is showing the past. Nothing is kept that was not a 200.
 // - Nothing but GET on this origin is touched: no write goes through here (brief item 27).
 const SHELL = "fold-shell-@VERSION@", DATA = "fold-data", WAIT = 3000;
-const FILES = ["./", "view.js", "fold-dom.js", "fold-core.js", "fold_core.wasm", "fold.css", "fonts/atkinson-hyperlegible-next.woff2", "manifest.webmanifest",
-  "icons/favicon.svg", "icons/favicon-32.png", "icons/apple-touch-icon.png", "icons/icon-192.png", "icons/icon-512.png", "icons/icon-maskable-512.png"];
+const FILES = ["./", "view.js", "fold-dom.js", "fold-core.js", "fold_core.wasm", "fold.css", "fonts/atkinson-hyperlegible-next.woff2", "manifest.webmanifest"];
 const scope = new URL("./", self.location).href;
 const shell = new Set(FILES.filter((f) => f !== "./").map((f) => new URL(f, scope).href));
 
