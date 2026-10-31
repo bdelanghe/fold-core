@@ -33,9 +33,10 @@ export function toDom(doc, ax, ids = { n: 0 }, row = null) {
       throw new Error(`fold-ax: a fold is its heading and one list, not ${roles.join(", ")}`);
   }
   const e = doc.createElement(tag);
-  // A node's own id, as a page writes it (src/page.rs): its path under the document; on a row, the IRI of the thing it is too.
+  // A node's own id, as a page writes it (src/page.rs): its path under the document, an element id and never the data's identity. On a
+  // row, the IRI of the thing it shows is its RDFa `about` (brief item 20): the element presents that thing, it is not it.
   if (ax.id) e.id = ax.id;
-  if (ax.haecceity) e.dataset.haecceity = ax.haecceity;
+  if (ax.haecceity) e.setAttribute("about", ax.haecceity);
   if (ax.cls) e.className = ax.cls;
   if (ax.role === "decoration") e.setAttribute("aria-hidden", "true");
   if (ax.role === "list" && (ax.children ?? []).some((c) => c.role !== "listitem")) throw new Error(`fold-ax: a list holds rows, not ${(ax.children ?? []).map((c) => c.role).join(", ")}`);

@@ -71,7 +71,7 @@ fn a_fold_is_a_page_at_its_real_path() {
     // The heading: the fold's id (the root's, its document's), where a link in lands; no autofocus.
     assert!(root.contains(r#"<h1 id="doc" tabindex="-1">Fleet</h1>"#), "{root}");
     // The row: its path as its id, its IRI, a same-tab link to its page's heading, and its hint named by its id.
-    assert!(root.contains(r#"<li id="a%20b" data-haecceity="https://ipso.bounded.tools/doc/a%20b" class="obj" data-i="0">"#), "{root}");
+    assert!(root.contains(r#"<li id="a%20b" about="https://ipso.bounded.tools/doc/a%20b" class="obj" data-i="0">"#), "{root}");
     assert!(
         root.contains(
             r#"<a href="/fold/a%20b/#a%20b" aria-describedby="a%20b:hint">Desk</a><span class="hint" id="a%20b:hint">4 open</span>"#
