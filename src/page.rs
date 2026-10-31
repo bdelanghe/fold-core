@@ -121,7 +121,8 @@ pub fn title(ax: &Value) -> String {
 }
 
 /// One fold's whole page, from its (marked) tree: or why toDom would refuse the tree. `base` is the viewer's, whose stylesheet,
-/// Home Screen manifest (viewer/manifest.webmanifest) and Basis icons the page links, as viewer/index.html does.
+/// Home Screen manifest (viewer/manifest.webmanifest) and Basis icons the page links, as viewer/index.html does. The app
+/// is Basis and fold is its engine, so the Home Screen title is Basis (Bobby dd019b77).
 pub fn page(tree: &Value, base: &str) -> Result<String, String> {
     let main = html(tree)?;
     let b = attr(base);
@@ -130,6 +131,7 @@ pub fn page(tree: &Value, base: &str) -> Result<String, String> {
          <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">\n<meta name=\"color-scheme\" content=\"light dark\">\n\
          <title>{}</title>\n<link rel=\"stylesheet\" href=\"{b}fold.css\">\n<link rel=\"manifest\" href=\"{b}manifest.webmanifest\">\n\
          <link rel=\"icon\" href=\"{b}favicon.svg\" type=\"image/svg+xml\">\n<link rel=\"apple-touch-icon\" href=\"{b}apple-touch-icon.png\">\n\
+         <meta name=\"apple-mobile-web-app-title\" content=\"Basis\">\n\
          </head>\n<body>\n{main}\n</body>\n</html>\n",
         text(&title(tree))
     ))
