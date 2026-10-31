@@ -33,9 +33,16 @@ export function toDom(doc, ax, ids = { n: 0 }, row = null) {
       throw new Error(`fold-ax: a fold is its heading and one list, not ${roles.join(", ")}`);
   }
   const e = doc.createElement(tag);
-  // A node's own id, as a page writes it (src/page.rs): its path under the document; on a row, the IRI of the thing it is too.
+  // A node's own id, as a page writes it (src/page.rs): its path under the document, an element id and never the data's identity.
+  // A row is the RDFa subject, a WebPageElement whose schema:about is the IRI of the thing it shows (brief item 20): the element
+  // presents that thing, it is not it. The about is an empty span's `resource`, since the row's own link goes to a page, not to
+  // the thing, and a body <link> is one lone reads as a nameless link.
   if (ax.id) e.id = ax.id;
-  if (ax.haecceity) e.dataset.haecceity = ax.haecceity;
+  if (ax.haecceity) {
+    if (ax.id) e.setAttribute("resource", `#${ax.id}`);
+    e.setAttribute("typeof", "schema:WebPageElement");
+    const s = doc.createElement("span"); s.setAttribute("property", "schema:about"); s.setAttribute("resource", ax.haecceity); e.append(s);
+  }
   if (ax.cls) e.className = ax.cls;
   if (ax.role === "decoration") e.setAttribute("aria-hidden", "true");
   if (ax.role === "list" && (ax.children ?? []).some((c) => c.role !== "listitem")) throw new Error(`fold-ax: a list holds rows, not ${(ax.children ?? []).map((c) => c.role).join(", ")}`);

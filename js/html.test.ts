@@ -88,6 +88,6 @@ test("toDom writes a page's row as src/page.rs does (tests/pages.rs holds the sa
     ] }] },
   ] };
   expect(parsed(toDom(dom, tree).outerHTML)).toEqual(parsed('<main><h1 id="doc" tabindex="-1">Fleet</h1><ol class="rows" role="list" aria-label="Fleet">' +
-    '<li id="a%20b" data-haecceity="https://ipso.bounded.tools/doc/a%20b" class="obj" data-i="0"><span class="n" aria-hidden="true">1</span>' +
+    '<li id="a%20b" resource="#a%20b" typeof="schema:WebPageElement" class="obj" data-i="0"><span property="schema:about" resource="https://ipso.bounded.tools/doc/a%20b"></span><span class="n" aria-hidden="true">1</span>' +
     '<a href="/fold/a%20b/#a%20b" aria-describedby="a%20b:hint">Desk</a><span class="hint" id="a%20b:hint">4 open</span></li></ol></main>'));
 });

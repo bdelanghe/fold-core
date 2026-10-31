@@ -102,13 +102,20 @@ fn node(ax: &Value, n: &mut usize, row: Option<&str>) -> Result<(El, Option<Stri
         }
     }
     let mut e = El { tag, attrs: vec![], body: String::new() };
-    // A node's own id, as a page writes it (page.rs): its path under the document; on a row, the IRI of the thing it is too.
+    // A node's own id, as a page writes it (page.rs): its path under the document, an element id and never the data's identity.
+    // A row is the RDFa subject, a WebPageElement whose schema:about is the IRI of the thing it shows (brief item 20): the element
+    // presents that thing, it is not it. The about is an empty span's `resource`, since the row's own link goes to a page, not to
+    // the thing, and a body <link> is one lone reads as a nameless link.
     let id = get(ax, "id").and_then(Value::as_str).filter(|x| !x.is_empty());
     if let Some(id) = id {
         e.attrs.push(("id", id.to_string()));
     }
     if truthy(get(ax, "haecceity")) {
-        e.attrs.push(("data-haecceity", js::string(get(ax, "haecceity"))));
+        if let Some(id) = id {
+            e.attrs.push(("resource", format!("#{id}")));
+        }
+        e.attrs.push(("typeof", "schema:WebPageElement".into()));
+        e.body.push_str(&format!("<span property=\"schema:about\" resource=\"{}\"></span>", attr(&js::string(get(ax, "haecceity")))));
     }
     if truthy(get(ax, "cls")) {
         e.attrs.push(("class", js::string(get(ax, "cls"))));
