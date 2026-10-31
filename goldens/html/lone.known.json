@@ -15,6 +15,11 @@
       "case": "fold-act", "ids": ["needs~needs-list-args"], "code": "LONE_SEMANTIC_FORM_CONTROL_UNLABELED",
       "why": "lone 0.8.0 counts every <input> as a control to label, <input type=hidden> too; an act's cap, call and args ride as hidden fields (src/ax.rs act_form), which have no UI and are never in the accessibility tree",
       "clears": "lone skipping type=hidden in its unlabeled-control rule (src/validate/semantic_html.ts)"
+    },
+    {
+      "case": "acts", "ids": ["m 1", "twice"], "code": "LONE_SEMANTIC_FORM_CONTROL_UNLABELED",
+      "why": "the same lone 0.8.0 false positive: each act's token, cap, call and args ride as hidden fields (src/ax.rs act_form), never in the accessibility tree; reported to Bobby via personal-assistant (chitin f8856d04)",
+      "clears": "lone skipping type=hidden in its unlabeled-control rule (src/validate/semantic_html.ts)"
     }
   ]
 }

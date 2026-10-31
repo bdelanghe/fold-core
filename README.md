@@ -81,8 +81,22 @@ binary holding every read and write was the riskiest call). Approvals go through
 
 `fold serve --root <dir> --mount /fold --port <n> [--no-store <prefix>]...` (src/serve.rs) is read-only: GET and HEAD of one
 directory's files, and nothing else. It writes nothing, takes no body (413), and answers every other method 405. The one body it
-takes is an act's form (`POST <mount>/act/<path>/<index>`, at most 8 KiB), read only to be dropped and answered by a page that says
-acting from here isn't on yet, with the way back (goldens/serve/act.html). It replaces
+takes is an act's form (`POST <mount>/act/<path>/<act key>`, at most 4 KiB). Without the act flags, that form is read only to be
+dropped, and the answer is a page that says acting from here isn't on yet, with the way back (goldens/serve/act.html).
+
+With `--act-as <login> --act-host <host> --act-key <file> --chitin <bin> [--act-seat fold-act] [--act-log <file>]`, the form can
+ack, defer or decline a chitin message for that one login (S2: allie-s2-fold-act-write). That's all it can do: a passkey act is
+422 and stays on chitin's `/approve`. Before the actor runs, every check must pass:
+- the peer is loopback;
+- `Tailscale-User-Login` is the login;
+- the request came through serve (`X-Forwarded-Proto`, `X-Forwarded-Host`) and is same-origin (`Sec-Fetch-Site`, else `Origin`);
+- the form's token (src/act.rs: HMAC over the act id, its fixity, expiry and login, 12 hours) is this server's, current, and for
+  the act as it stands.
+
+The act comes from the site's act map (`_acts.json`, written by `site()` and never served), not from the form. Success is a `303`
+back to the fold, whose status line then says what was done. A stale token, or a fold that changed, gets the page back with
+fresh tokens and nothing done. Each POST leaves one line in `acts.jsonl` (0600). goldens/serve/acts.json holds every refusal
+and success, and tools/act-e2e.sh (`checks.act-e2e`) runs one ack end to end with curl and a stub chitin. It replaces
 fold-serve's darkhttpd agents (brief items 23-24), which send no ETag, no per-file Cache-Control and no custom headers.
 
 | Resource | Cache-Control | Validator |

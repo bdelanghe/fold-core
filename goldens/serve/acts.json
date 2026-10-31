@@ -1,0 +1,2536 @@
+[
+  {
+    "what": "an act's page for ME: each form's token filled, private, revalidated",
+    "request": {
+      "method": "GET",
+      "target": "/needs/m%201/",
+      "peer": "127.0.0.1",
+      "headers": [
+        [
+          "Tailscale-User-Login",
+          "bobby@example.com"
+        ],
+        [
+          "X-Forwarded-For",
+          "100.64.0.2"
+        ],
+        [
+          "X-Forwarded-Proto",
+          "https"
+        ],
+        [
+          "X-Forwarded-Host",
+          "phobos.example.ts.net"
+        ],
+        [
+          "Sec-Fetch-Site",
+          "same-origin"
+        ],
+        [
+          "Content-Type",
+          "application/x-www-form-urlencoded"
+        ]
+      ],
+      "body": ""
+    },
+    "status": 200,
+    "headers": [
+      [
+        "Content-Type",
+        "text/html; charset=utf-8"
+      ],
+      [
+        "Cache-Control",
+        "private, no-cache"
+      ],
+      [
+        "ETag",
+        "\"sha-256:e4d62c0eaee474f5d04ccd719de88464a7839e41a6816889b0b675178631884b\""
+      ]
+    ],
+    "body": {
+      "html_bytes": 3283,
+      "says": null,
+      "tokens": [
+        "v1.1793404800.f914e2b4cd4ba1537f6f022b46ee8341ba215e4c24b6f4e7595c18b9b4eb7dae.3bTQhT2pGQH22zx-xGIewnl-JIR-BdJfHlsoupKKBvA",
+        "v1.1793404800.f568b0f1239d4ab0cf98ff286d2e3a03ce492702b5b2bc1713a9abc0b45cdc4e.fKrQQfgQharZS-9wYIql0ET-c871l3R8cP8j8AUppeI",
+        "v1.1793404800.662a779842c6be8802fbb02f781ff6167401579134d234440de3087c89030360.FTA17inp_eDkaIeWlcmqDWtrLXvqXxR_5tiZ7oY-b7M",
+        "",
+        ""
+      ],
+      "h1": "From seat-a"
+    },
+    "actor": [],
+    "log": null
+  },
+  {
+    "what": "an act's page for another login: no token filled",
+    "request": {
+      "method": "GET",
+      "target": "/needs/m%201/",
+      "peer": "127.0.0.1",
+      "headers": [
+        [
+          "X-Forwarded-For",
+          "100.64.0.2"
+        ],
+        [
+          "X-Forwarded-Proto",
+          "https"
+        ],
+        [
+          "X-Forwarded-Host",
+          "phobos.example.ts.net"
+        ],
+        [
+          "Sec-Fetch-Site",
+          "same-origin"
+        ],
+        [
+          "Content-Type",
+          "application/x-www-form-urlencoded"
+        ],
+        [
+          "Tailscale-User-Login",
+          "eve@example.com"
+        ]
+      ],
+      "body": ""
+    },
+    "status": 200,
+    "headers": [
+      [
+        "Content-Type",
+        "text/html; charset=utf-8"
+      ],
+      [
+        "Cache-Control",
+        "private, no-cache"
+      ],
+      [
+        "ETag",
+        "\"sha-256:12a7957b33c743196ead88c89bb09e3b51697af1c5a95778ba50f6a42d419b00\""
+      ]
+    ],
+    "body": {
+      "html_bytes": 2917,
+      "says": null,
+      "tokens": [
+        "",
+        "",
+        "",
+        "",
+        ""
+      ],
+      "h1": "From seat-a"
+    },
+    "actor": [],
+    "log": null
+  },
+  {
+    "what": "a page with no act: as it is on disk",
+    "request": {
+      "method": "GET",
+      "target": "/needs/",
+      "peer": "127.0.0.1",
+      "headers": [
+        [
+          "Tailscale-User-Login",
+          "bobby@example.com"
+        ],
+        [
+          "X-Forwarded-For",
+          "100.64.0.2"
+        ],
+        [
+          "X-Forwarded-Proto",
+          "https"
+        ],
+        [
+          "X-Forwarded-Host",
+          "phobos.example.ts.net"
+        ],
+        [
+          "Sec-Fetch-Site",
+          "same-origin"
+        ],
+        [
+          "Content-Type",
+          "application/x-www-form-urlencoded"
+        ]
+      ],
+      "body": ""
+    },
+    "status": 200,
+    "headers": [
+      [
+        "Content-Type",
+        "text/html; charset=utf-8"
+      ],
+      [
+        "Cache-Control",
+        "no-cache"
+      ],
+      [
+        "ETag",
+        "\"sha-256:6b346ea9540e2733e24fa6a5b93ad7fe0e53e61d1629dfd58b57f11c7c0e58e7\""
+      ]
+    ],
+    "body": {
+      "html_bytes": 1948,
+      "says": null,
+      "tokens": [],
+      "h1": "Needs you"
+    },
+    "actor": [],
+    "log": null
+  },
+  {
+    "what": "the act map is never served",
+    "request": {
+      "method": "GET",
+      "target": "/_acts.json",
+      "peer": "127.0.0.1",
+      "headers": [
+        [
+          "Tailscale-User-Login",
+          "bobby@example.com"
+        ],
+        [
+          "X-Forwarded-For",
+          "100.64.0.2"
+        ],
+        [
+          "X-Forwarded-Proto",
+          "https"
+        ],
+        [
+          "X-Forwarded-Host",
+          "phobos.example.ts.net"
+        ],
+        [
+          "Sec-Fetch-Site",
+          "same-origin"
+        ],
+        [
+          "Content-Type",
+          "application/x-www-form-urlencoded"
+        ]
+      ],
+      "body": ""
+    },
+    "status": 404,
+    "headers": [
+      [
+        "Content-Type",
+        "text/plain; charset=utf-8"
+      ],
+      [
+        "Cache-Control",
+        "no-store"
+      ]
+    ],
+    "body": "no such fold or file\n",
+    "actor": [],
+    "log": null
+  },
+  {
+    "what": "an act is posted, never got",
+    "request": {
+      "method": "GET",
+      "target": "/act/needs/m%201/ack",
+      "peer": "127.0.0.1",
+      "headers": [
+        [
+          "Tailscale-User-Login",
+          "bobby@example.com"
+        ],
+        [
+          "X-Forwarded-For",
+          "100.64.0.2"
+        ],
+        [
+          "X-Forwarded-Proto",
+          "https"
+        ],
+        [
+          "X-Forwarded-Host",
+          "phobos.example.ts.net"
+        ],
+        [
+          "Sec-Fetch-Site",
+          "same-origin"
+        ],
+        [
+          "Content-Type",
+          "application/x-www-form-urlencoded"
+        ]
+      ],
+      "body": ""
+    },
+    "status": 405,
+    "headers": [
+      [
+        "Content-Type",
+        "text/plain; charset=utf-8"
+      ],
+      [
+        "Cache-Control",
+        "no-store"
+      ],
+      [
+        "Allow",
+        "POST"
+      ]
+    ],
+    "body": "an act is posted: POST\n",
+    "actor": [],
+    "log": null
+  },
+  {
+    "what": "nor HEAD",
+    "request": {
+      "method": "HEAD",
+      "target": "/act/needs/m%201/ack",
+      "peer": "127.0.0.1",
+      "headers": [
+        [
+          "Tailscale-User-Login",
+          "bobby@example.com"
+        ],
+        [
+          "X-Forwarded-For",
+          "100.64.0.2"
+        ],
+        [
+          "X-Forwarded-Proto",
+          "https"
+        ],
+        [
+          "X-Forwarded-Host",
+          "phobos.example.ts.net"
+        ],
+        [
+          "Sec-Fetch-Site",
+          "same-origin"
+        ],
+        [
+          "Content-Type",
+          "application/x-www-form-urlencoded"
+        ]
+      ],
+      "body": ""
+    },
+    "status": 405,
+    "headers": [
+      [
+        "Content-Type",
+        "text/plain; charset=utf-8"
+      ],
+      [
+        "Cache-Control",
+        "no-store"
+      ],
+      [
+        "Allow",
+        "POST"
+      ]
+    ],
+    "body": "an act is posted: POST\n",
+    "actor": [],
+    "log": null
+  },
+  {
+    "what": "nor PUT",
+    "request": {
+      "method": "PUT",
+      "target": "/act/needs/m%201/ack",
+      "peer": "127.0.0.1",
+      "headers": [
+        [
+          "Tailscale-User-Login",
+          "bobby@example.com"
+        ],
+        [
+          "X-Forwarded-For",
+          "100.64.0.2"
+        ],
+        [
+          "X-Forwarded-Proto",
+          "https"
+        ],
+        [
+          "X-Forwarded-Host",
+          "phobos.example.ts.net"
+        ],
+        [
+          "Sec-Fetch-Site",
+          "same-origin"
+        ],
+        [
+          "Content-Type",
+          "application/x-www-form-urlencoded"
+        ]
+      ],
+      "body": "token=v1.1793404800.f914e2b4cd4ba1537f6f022b46ee8341ba215e4c24b6f4e7595c18b9b4eb7dae.3bTQhT2pGQH22zx-xGIewnl-JIR-BdJfHlsoupKKBvA&cap=ack&call=status&args.msg_id=m-1&args.from=seat-a"
+    },
+    "status": 405,
+    "headers": [
+      [
+        "Content-Type",
+        "text/plain; charset=utf-8"
+      ],
+      [
+        "Cache-Control",
+        "no-store"
+      ],
+      [
+        "Allow",
+        "POST"
+      ]
+    ],
+    "body": "an act is posted: POST\n",
+    "actor": [],
+    "log": null
+  },
+  {
+    "what": "not from loopback",
+    "request": {
+      "method": "POST",
+      "target": "/act/needs/m%201/ack",
+      "peer": "10.0.0.9",
+      "headers": [
+        [
+          "Tailscale-User-Login",
+          "bobby@example.com"
+        ],
+        [
+          "X-Forwarded-For",
+          "100.64.0.2"
+        ],
+        [
+          "X-Forwarded-Proto",
+          "https"
+        ],
+        [
+          "X-Forwarded-Host",
+          "phobos.example.ts.net"
+        ],
+        [
+          "Sec-Fetch-Site",
+          "same-origin"
+        ],
+        [
+          "Content-Type",
+          "application/x-www-form-urlencoded"
+        ]
+      ],
+      "body": "token=v1.1793404800.f914e2b4cd4ba1537f6f022b46ee8341ba215e4c24b6f4e7595c18b9b4eb7dae.3bTQhT2pGQH22zx-xGIewnl-JIR-BdJfHlsoupKKBvA&cap=ack&call=status&args.msg_id=m-1&args.from=seat-a"
+    },
+    "status": 403,
+    "headers": [
+      [
+        "Content-Type",
+        "text/plain; charset=utf-8"
+      ],
+      [
+        "Cache-Control",
+        "no-store"
+      ]
+    ],
+    "body": "not from the tailnet front\n",
+    "actor": [],
+    "log": {
+      "ts": 1793361600,
+      "login": "bobby@example.com",
+      "peer": "100.64.0.2",
+      "cap": null,
+      "act": null,
+      "item": null,
+      "msg_id": null,
+      "result": "refused:403"
+    }
+  },
+  {
+    "what": "no login",
+    "request": {
+      "method": "POST",
+      "target": "/act/needs/m%201/ack",
+      "peer": "127.0.0.1",
+      "headers": [
+        [
+          "X-Forwarded-For",
+          "100.64.0.2"
+        ],
+        [
+          "X-Forwarded-Proto",
+          "https"
+        ],
+        [
+          "X-Forwarded-Host",
+          "phobos.example.ts.net"
+        ],
+        [
+          "Sec-Fetch-Site",
+          "same-origin"
+        ],
+        [
+          "Content-Type",
+          "application/x-www-form-urlencoded"
+        ]
+      ],
+      "body": "token=v1.1793404800.f914e2b4cd4ba1537f6f022b46ee8341ba215e4c24b6f4e7595c18b9b4eb7dae.3bTQhT2pGQH22zx-xGIewnl-JIR-BdJfHlsoupKKBvA&cap=ack&call=status&args.msg_id=m-1&args.from=seat-a"
+    },
+    "status": 403,
+    "headers": [
+      [
+        "Content-Type",
+        "text/plain; charset=utf-8"
+      ],
+      [
+        "Cache-Control",
+        "no-store"
+      ]
+    ],
+    "body": "not who this server acts for\n",
+    "actor": [],
+    "log": {
+      "ts": 1793361600,
+      "login": null,
+      "peer": "100.64.0.2",
+      "cap": null,
+      "act": null,
+      "item": null,
+      "msg_id": null,
+      "result": "refused:403"
+    }
+  },
+  {
+    "what": "another login",
+    "request": {
+      "method": "POST",
+      "target": "/act/needs/m%201/ack",
+      "peer": "127.0.0.1",
+      "headers": [
+        [
+          "X-Forwarded-For",
+          "100.64.0.2"
+        ],
+        [
+          "X-Forwarded-Proto",
+          "https"
+        ],
+        [
+          "X-Forwarded-Host",
+          "phobos.example.ts.net"
+        ],
+        [
+          "Sec-Fetch-Site",
+          "same-origin"
+        ],
+        [
+          "Content-Type",
+          "application/x-www-form-urlencoded"
+        ],
+        [
+          "Tailscale-User-Login",
+          "eve@example.com"
+        ]
+      ],
+      "body": "token=v1.1793404800.f914e2b4cd4ba1537f6f022b46ee8341ba215e4c24b6f4e7595c18b9b4eb7dae.3bTQhT2pGQH22zx-xGIewnl-JIR-BdJfHlsoupKKBvA&cap=ack&call=status&args.msg_id=m-1&args.from=seat-a"
+    },
+    "status": 403,
+    "headers": [
+      [
+        "Content-Type",
+        "text/plain; charset=utf-8"
+      ],
+      [
+        "Cache-Control",
+        "no-store"
+      ]
+    ],
+    "body": "not who this server acts for\n",
+    "actor": [],
+    "log": {
+      "ts": 1793361600,
+      "login": "eve@example.com",
+      "peer": "100.64.0.2",
+      "cap": null,
+      "act": null,
+      "item": null,
+      "msg_id": null,
+      "result": "refused:403"
+    }
+  },
+  {
+    "what": "a Q-encoded login",
+    "request": {
+      "method": "POST",
+      "target": "/act/needs/m%201/ack",
+      "peer": "127.0.0.1",
+      "headers": [
+        [
+          "X-Forwarded-For",
+          "100.64.0.2"
+        ],
+        [
+          "X-Forwarded-Proto",
+          "https"
+        ],
+        [
+          "X-Forwarded-Host",
+          "phobos.example.ts.net"
+        ],
+        [
+          "Sec-Fetch-Site",
+          "same-origin"
+        ],
+        [
+          "Content-Type",
+          "application/x-www-form-urlencoded"
+        ],
+        [
+          "Tailscale-User-Login",
+          "=?utf-8?q?bobby@example.com?="
+        ]
+      ],
+      "body": "token=v1.1793404800.f914e2b4cd4ba1537f6f022b46ee8341ba215e4c24b6f4e7595c18b9b4eb7dae.3bTQhT2pGQH22zx-xGIewnl-JIR-BdJfHlsoupKKBvA&cap=ack&call=status&args.msg_id=m-1&args.from=seat-a"
+    },
+    "status": 403,
+    "headers": [
+      [
+        "Content-Type",
+        "text/plain; charset=utf-8"
+      ],
+      [
+        "Cache-Control",
+        "no-store"
+      ]
+    ],
+    "body": "unexpected login encoding\n",
+    "actor": [],
+    "log": {
+      "ts": 1793361600,
+      "login": "=?utf-8?q?bobby@example.com?=",
+      "peer": "100.64.0.2",
+      "cap": null,
+      "act": null,
+      "item": null,
+      "msg_id": null,
+      "result": "refused:403"
+    }
+  },
+  {
+    "what": "no X-Forwarded-Proto",
+    "request": {
+      "method": "POST",
+      "target": "/act/needs/m%201/ack",
+      "peer": "127.0.0.1",
+      "headers": [
+        [
+          "Tailscale-User-Login",
+          "bobby@example.com"
+        ],
+        [
+          "X-Forwarded-For",
+          "100.64.0.2"
+        ],
+        [
+          "X-Forwarded-Host",
+          "phobos.example.ts.net"
+        ],
+        [
+          "Sec-Fetch-Site",
+          "same-origin"
+        ],
+        [
+          "Content-Type",
+          "application/x-www-form-urlencoded"
+        ]
+      ],
+      "body": "token=v1.1793404800.f914e2b4cd4ba1537f6f022b46ee8341ba215e4c24b6f4e7595c18b9b4eb7dae.3bTQhT2pGQH22zx-xGIewnl-JIR-BdJfHlsoupKKBvA&cap=ack&call=status&args.msg_id=m-1&args.from=seat-a"
+    },
+    "status": 403,
+    "headers": [
+      [
+        "Content-Type",
+        "text/plain; charset=utf-8"
+      ],
+      [
+        "Cache-Control",
+        "no-store"
+      ]
+    ],
+    "body": "not through tailscale serve\n",
+    "actor": [],
+    "log": {
+      "ts": 1793361600,
+      "login": "bobby@example.com",
+      "peer": "100.64.0.2",
+      "cap": null,
+      "act": null,
+      "item": null,
+      "msg_id": null,
+      "result": "refused:403"
+    }
+  },
+  {
+    "what": "another X-Forwarded-Host",
+    "request": {
+      "method": "POST",
+      "target": "/act/needs/m%201/ack",
+      "peer": "127.0.0.1",
+      "headers": [
+        [
+          "Tailscale-User-Login",
+          "bobby@example.com"
+        ],
+        [
+          "X-Forwarded-For",
+          "100.64.0.2"
+        ],
+        [
+          "X-Forwarded-Proto",
+          "https"
+        ],
+        [
+          "Sec-Fetch-Site",
+          "same-origin"
+        ],
+        [
+          "Content-Type",
+          "application/x-www-form-urlencoded"
+        ],
+        [
+          "X-Forwarded-Host",
+          "evil.example"
+        ]
+      ],
+      "body": "token=v1.1793404800.f914e2b4cd4ba1537f6f022b46ee8341ba215e4c24b6f4e7595c18b9b4eb7dae.3bTQhT2pGQH22zx-xGIewnl-JIR-BdJfHlsoupKKBvA&cap=ack&call=status&args.msg_id=m-1&args.from=seat-a"
+    },
+    "status": 403,
+    "headers": [
+      [
+        "Content-Type",
+        "text/plain; charset=utf-8"
+      ],
+      [
+        "Cache-Control",
+        "no-store"
+      ]
+    ],
+    "body": "not through tailscale serve\n",
+    "actor": [],
+    "log": {
+      "ts": 1793361600,
+      "login": "bobby@example.com",
+      "peer": "100.64.0.2",
+      "cap": null,
+      "act": null,
+      "item": null,
+      "msg_id": null,
+      "result": "refused:403"
+    }
+  },
+  {
+    "what": "Sec-Fetch-Site cross-site",
+    "request": {
+      "method": "POST",
+      "target": "/act/needs/m%201/ack",
+      "peer": "127.0.0.1",
+      "headers": [
+        [
+          "Tailscale-User-Login",
+          "bobby@example.com"
+        ],
+        [
+          "X-Forwarded-For",
+          "100.64.0.2"
+        ],
+        [
+          "X-Forwarded-Proto",
+          "https"
+        ],
+        [
+          "X-Forwarded-Host",
+          "phobos.example.ts.net"
+        ],
+        [
+          "Content-Type",
+          "application/x-www-form-urlencoded"
+        ],
+        [
+          "Sec-Fetch-Site",
+          "cross-site"
+        ]
+      ],
+      "body": "token=v1.1793404800.f914e2b4cd4ba1537f6f022b46ee8341ba215e4c24b6f4e7595c18b9b4eb7dae.3bTQhT2pGQH22zx-xGIewnl-JIR-BdJfHlsoupKKBvA&cap=ack&call=status&args.msg_id=m-1&args.from=seat-a"
+    },
+    "status": 403,
+    "headers": [
+      [
+        "Content-Type",
+        "text/plain; charset=utf-8"
+      ],
+      [
+        "Cache-Control",
+        "no-store"
+      ]
+    ],
+    "body": "cross-site\n",
+    "actor": [],
+    "log": {
+      "ts": 1793361600,
+      "login": "bobby@example.com",
+      "peer": "100.64.0.2",
+      "cap": null,
+      "act": null,
+      "item": null,
+      "msg_id": null,
+      "result": "refused:403"
+    }
+  },
+  {
+    "what": "Sec-Fetch-Site same-site",
+    "request": {
+      "method": "POST",
+      "target": "/act/needs/m%201/ack",
+      "peer": "127.0.0.1",
+      "headers": [
+        [
+          "Tailscale-User-Login",
+          "bobby@example.com"
+        ],
+        [
+          "X-Forwarded-For",
+          "100.64.0.2"
+        ],
+        [
+          "X-Forwarded-Proto",
+          "https"
+        ],
+        [
+          "X-Forwarded-Host",
+          "phobos.example.ts.net"
+        ],
+        [
+          "Content-Type",
+          "application/x-www-form-urlencoded"
+        ],
+        [
+          "Sec-Fetch-Site",
+          "same-site"
+        ]
+      ],
+      "body": "token=v1.1793404800.f914e2b4cd4ba1537f6f022b46ee8341ba215e4c24b6f4e7595c18b9b4eb7dae.3bTQhT2pGQH22zx-xGIewnl-JIR-BdJfHlsoupKKBvA&cap=ack&call=status&args.msg_id=m-1&args.from=seat-a"
+    },
+    "status": 403,
+    "headers": [
+      [
+        "Content-Type",
+        "text/plain; charset=utf-8"
+      ],
+      [
+        "Cache-Control",
+        "no-store"
+      ]
+    ],
+    "body": "cross-site\n",
+    "actor": [],
+    "log": {
+      "ts": 1793361600,
+      "login": "bobby@example.com",
+      "peer": "100.64.0.2",
+      "cap": null,
+      "act": null,
+      "item": null,
+      "msg_id": null,
+      "result": "refused:403"
+    }
+  },
+  {
+    "what": "Sec-Fetch-Site none",
+    "request": {
+      "method": "POST",
+      "target": "/act/needs/m%201/ack",
+      "peer": "127.0.0.1",
+      "headers": [
+        [
+          "Tailscale-User-Login",
+          "bobby@example.com"
+        ],
+        [
+          "X-Forwarded-For",
+          "100.64.0.2"
+        ],
+        [
+          "X-Forwarded-Proto",
+          "https"
+        ],
+        [
+          "X-Forwarded-Host",
+          "phobos.example.ts.net"
+        ],
+        [
+          "Content-Type",
+          "application/x-www-form-urlencoded"
+        ],
+        [
+          "Sec-Fetch-Site",
+          "none"
+        ]
+      ],
+      "body": "token=v1.1793404800.f914e2b4cd4ba1537f6f022b46ee8341ba215e4c24b6f4e7595c18b9b4eb7dae.3bTQhT2pGQH22zx-xGIewnl-JIR-BdJfHlsoupKKBvA&cap=ack&call=status&args.msg_id=m-1&args.from=seat-a"
+    },
+    "status": 403,
+    "headers": [
+      [
+        "Content-Type",
+        "text/plain; charset=utf-8"
+      ],
+      [
+        "Cache-Control",
+        "no-store"
+      ]
+    ],
+    "body": "cross-site\n",
+    "actor": [],
+    "log": {
+      "ts": 1793361600,
+      "login": "bobby@example.com",
+      "peer": "100.64.0.2",
+      "cap": null,
+      "act": null,
+      "item": null,
+      "msg_id": null,
+      "result": "refused:403"
+    }
+  },
+  {
+    "what": "no Sec-Fetch-Site, Origin null",
+    "request": {
+      "method": "POST",
+      "target": "/act/needs/m%201/ack",
+      "peer": "127.0.0.1",
+      "headers": [
+        [
+          "Tailscale-User-Login",
+          "bobby@example.com"
+        ],
+        [
+          "X-Forwarded-For",
+          "100.64.0.2"
+        ],
+        [
+          "X-Forwarded-Proto",
+          "https"
+        ],
+        [
+          "X-Forwarded-Host",
+          "phobos.example.ts.net"
+        ],
+        [
+          "Content-Type",
+          "application/x-www-form-urlencoded"
+        ],
+        [
+          "Origin",
+          "null"
+        ]
+      ],
+      "body": "token=v1.1793404800.f914e2b4cd4ba1537f6f022b46ee8341ba215e4c24b6f4e7595c18b9b4eb7dae.3bTQhT2pGQH22zx-xGIewnl-JIR-BdJfHlsoupKKBvA&cap=ack&call=status&args.msg_id=m-1&args.from=seat-a"
+    },
+    "status": 403,
+    "headers": [
+      [
+        "Content-Type",
+        "text/plain; charset=utf-8"
+      ],
+      [
+        "Cache-Control",
+        "no-store"
+      ]
+    ],
+    "body": "cross-site\n",
+    "actor": [],
+    "log": {
+      "ts": 1793361600,
+      "login": "bobby@example.com",
+      "peer": "100.64.0.2",
+      "cap": null,
+      "act": null,
+      "item": null,
+      "msg_id": null,
+      "result": "refused:403"
+    }
+  },
+  {
+    "what": "no Sec-Fetch-Site, another origin",
+    "request": {
+      "method": "POST",
+      "target": "/act/needs/m%201/ack",
+      "peer": "127.0.0.1",
+      "headers": [
+        [
+          "Tailscale-User-Login",
+          "bobby@example.com"
+        ],
+        [
+          "X-Forwarded-For",
+          "100.64.0.2"
+        ],
+        [
+          "X-Forwarded-Proto",
+          "https"
+        ],
+        [
+          "X-Forwarded-Host",
+          "phobos.example.ts.net"
+        ],
+        [
+          "Content-Type",
+          "application/x-www-form-urlencoded"
+        ],
+        [
+          "Origin",
+          "https://evil.example"
+        ]
+      ],
+      "body": "token=v1.1793404800.f914e2b4cd4ba1537f6f022b46ee8341ba215e4c24b6f4e7595c18b9b4eb7dae.3bTQhT2pGQH22zx-xGIewnl-JIR-BdJfHlsoupKKBvA&cap=ack&call=status&args.msg_id=m-1&args.from=seat-a"
+    },
+    "status": 403,
+    "headers": [
+      [
+        "Content-Type",
+        "text/plain; charset=utf-8"
+      ],
+      [
+        "Cache-Control",
+        "no-store"
+      ]
+    ],
+    "body": "cross-site\n",
+    "actor": [],
+    "log": {
+      "ts": 1793361600,
+      "login": "bobby@example.com",
+      "peer": "100.64.0.2",
+      "cap": null,
+      "act": null,
+      "item": null,
+      "msg_id": null,
+      "result": "refused:403"
+    }
+  },
+  {
+    "what": "no Sec-Fetch-Site and no Origin",
+    "request": {
+      "method": "POST",
+      "target": "/act/needs/m%201/ack",
+      "peer": "127.0.0.1",
+      "headers": [
+        [
+          "Tailscale-User-Login",
+          "bobby@example.com"
+        ],
+        [
+          "X-Forwarded-For",
+          "100.64.0.2"
+        ],
+        [
+          "X-Forwarded-Proto",
+          "https"
+        ],
+        [
+          "X-Forwarded-Host",
+          "phobos.example.ts.net"
+        ],
+        [
+          "Content-Type",
+          "application/x-www-form-urlencoded"
+        ]
+      ],
+      "body": "token=v1.1793404800.f914e2b4cd4ba1537f6f022b46ee8341ba215e4c24b6f4e7595c18b9b4eb7dae.3bTQhT2pGQH22zx-xGIewnl-JIR-BdJfHlsoupKKBvA&cap=ack&call=status&args.msg_id=m-1&args.from=seat-a"
+    },
+    "status": 403,
+    "headers": [
+      [
+        "Content-Type",
+        "text/plain; charset=utf-8"
+      ],
+      [
+        "Cache-Control",
+        "no-store"
+      ]
+    ],
+    "body": "cross-site\n",
+    "actor": [],
+    "log": {
+      "ts": 1793361600,
+      "login": "bobby@example.com",
+      "peer": "100.64.0.2",
+      "cap": null,
+      "act": null,
+      "item": null,
+      "msg_id": null,
+      "result": "refused:403"
+    }
+  },
+  {
+    "what": "same-origin, but an Origin that is not",
+    "request": {
+      "method": "POST",
+      "target": "/act/needs/m%201/ack",
+      "peer": "127.0.0.1",
+      "headers": [
+        [
+          "Tailscale-User-Login",
+          "bobby@example.com"
+        ],
+        [
+          "X-Forwarded-For",
+          "100.64.0.2"
+        ],
+        [
+          "X-Forwarded-Proto",
+          "https"
+        ],
+        [
+          "X-Forwarded-Host",
+          "phobos.example.ts.net"
+        ],
+        [
+          "Sec-Fetch-Site",
+          "same-origin"
+        ],
+        [
+          "Content-Type",
+          "application/x-www-form-urlencoded"
+        ],
+        [
+          "Origin",
+          "https://evil.example"
+        ]
+      ],
+      "body": "token=v1.1793404800.f914e2b4cd4ba1537f6f022b46ee8341ba215e4c24b6f4e7595c18b9b4eb7dae.3bTQhT2pGQH22zx-xGIewnl-JIR-BdJfHlsoupKKBvA&cap=ack&call=status&args.msg_id=m-1&args.from=seat-a"
+    },
+    "status": 403,
+    "headers": [
+      [
+        "Content-Type",
+        "text/plain; charset=utf-8"
+      ],
+      [
+        "Cache-Control",
+        "no-store"
+      ]
+    ],
+    "body": "cross-site\n",
+    "actor": [],
+    "log": {
+      "ts": 1793361600,
+      "login": "bobby@example.com",
+      "peer": "100.64.0.2",
+      "cap": null,
+      "act": null,
+      "item": null,
+      "msg_id": null,
+      "result": "refused:403"
+    }
+  },
+  {
+    "what": "not a form",
+    "request": {
+      "method": "POST",
+      "target": "/act/needs/m%201/ack",
+      "peer": "127.0.0.1",
+      "headers": [
+        [
+          "Tailscale-User-Login",
+          "bobby@example.com"
+        ],
+        [
+          "X-Forwarded-For",
+          "100.64.0.2"
+        ],
+        [
+          "X-Forwarded-Proto",
+          "https"
+        ],
+        [
+          "X-Forwarded-Host",
+          "phobos.example.ts.net"
+        ],
+        [
+          "Sec-Fetch-Site",
+          "same-origin"
+        ],
+        [
+          "Content-Type",
+          "application/json"
+        ]
+      ],
+      "body": "token=v1.1793404800.f914e2b4cd4ba1537f6f022b46ee8341ba215e4c24b6f4e7595c18b9b4eb7dae.3bTQhT2pGQH22zx-xGIewnl-JIR-BdJfHlsoupKKBvA&cap=ack&call=status&args.msg_id=m-1&args.from=seat-a"
+    },
+    "status": 400,
+    "headers": [
+      [
+        "Content-Type",
+        "text/plain; charset=utf-8"
+      ],
+      [
+        "Cache-Control",
+        "no-store"
+      ]
+    ],
+    "body": "not a form: send application/x-www-form-urlencoded\n",
+    "actor": [],
+    "log": {
+      "ts": 1793361600,
+      "login": "bobby@example.com",
+      "peer": "100.64.0.2",
+      "cap": null,
+      "act": null,
+      "item": null,
+      "msg_id": null,
+      "result": "refused:400"
+    }
+  },
+  {
+    "what": "no body",
+    "request": {
+      "method": "POST",
+      "target": "/act/needs/m%201/ack",
+      "peer": "127.0.0.1",
+      "headers": [
+        [
+          "Tailscale-User-Login",
+          "bobby@example.com"
+        ],
+        [
+          "X-Forwarded-For",
+          "100.64.0.2"
+        ],
+        [
+          "X-Forwarded-Proto",
+          "https"
+        ],
+        [
+          "X-Forwarded-Host",
+          "phobos.example.ts.net"
+        ],
+        [
+          "Sec-Fetch-Site",
+          "same-origin"
+        ],
+        [
+          "Content-Type",
+          "application/x-www-form-urlencoded"
+        ]
+      ],
+      "body": ""
+    },
+    "status": 400,
+    "headers": [
+      [
+        "Content-Type",
+        "text/plain; charset=utf-8"
+      ],
+      [
+        "Cache-Control",
+        "no-store"
+      ]
+    ],
+    "body": "no form\n",
+    "actor": [],
+    "log": {
+      "ts": 1793361600,
+      "login": "bobby@example.com",
+      "peer": "100.64.0.2",
+      "cap": null,
+      "act": null,
+      "item": null,
+      "msg_id": null,
+      "result": "refused:400"
+    }
+  },
+  {
+    "what": "no token",
+    "request": {
+      "method": "POST",
+      "target": "/act/needs/m%201/ack",
+      "peer": "127.0.0.1",
+      "headers": [
+        [
+          "Tailscale-User-Login",
+          "bobby@example.com"
+        ],
+        [
+          "X-Forwarded-For",
+          "100.64.0.2"
+        ],
+        [
+          "X-Forwarded-Proto",
+          "https"
+        ],
+        [
+          "X-Forwarded-Host",
+          "phobos.example.ts.net"
+        ],
+        [
+          "Sec-Fetch-Site",
+          "same-origin"
+        ],
+        [
+          "Content-Type",
+          "application/x-www-form-urlencoded"
+        ]
+      ],
+      "body": "cap=ack"
+    },
+    "status": 400,
+    "headers": [
+      [
+        "Content-Type",
+        "text/plain; charset=utf-8"
+      ],
+      [
+        "Cache-Control",
+        "no-store"
+      ]
+    ],
+    "body": "no token\n",
+    "actor": [],
+    "log": {
+      "ts": 1793361600,
+      "login": "bobby@example.com",
+      "peer": "100.64.0.2",
+      "cap": null,
+      "act": null,
+      "item": null,
+      "msg_id": null,
+      "result": "refused:400"
+    }
+  },
+  {
+    "what": "a token of the wrong shape",
+    "request": {
+      "method": "POST",
+      "target": "/act/needs/m%201/ack",
+      "peer": "127.0.0.1",
+      "headers": [
+        [
+          "Tailscale-User-Login",
+          "bobby@example.com"
+        ],
+        [
+          "X-Forwarded-For",
+          "100.64.0.2"
+        ],
+        [
+          "X-Forwarded-Proto",
+          "https"
+        ],
+        [
+          "X-Forwarded-Host",
+          "phobos.example.ts.net"
+        ],
+        [
+          "Sec-Fetch-Site",
+          "same-origin"
+        ],
+        [
+          "Content-Type",
+          "application/x-www-form-urlencoded"
+        ]
+      ],
+      "body": "token=v2.1.2.3&cap=ack&call=status&args.msg_id=m-1&args.from=seat-a"
+    },
+    "status": 400,
+    "headers": [
+      [
+        "Content-Type",
+        "text/plain; charset=utf-8"
+      ],
+      [
+        "Cache-Control",
+        "no-store"
+      ]
+    ],
+    "body": "not a token\n",
+    "actor": [],
+    "log": {
+      "ts": 1793361600,
+      "login": "bobby@example.com",
+      "peer": "100.64.0.2",
+      "cap": "ack",
+      "act": "needs/m%201/ack",
+      "item": "needs~m 1",
+      "msg_id": "m-1",
+      "result": "refused:400"
+    }
+  },
+  {
+    "what": "a token of the wrong length",
+    "request": {
+      "method": "POST",
+      "target": "/act/needs/m%201/ack",
+      "peer": "127.0.0.1",
+      "headers": [
+        [
+          "Tailscale-User-Login",
+          "bobby@example.com"
+        ],
+        [
+          "X-Forwarded-For",
+          "100.64.0.2"
+        ],
+        [
+          "X-Forwarded-Proto",
+          "https"
+        ],
+        [
+          "X-Forwarded-Host",
+          "phobos.example.ts.net"
+        ],
+        [
+          "Sec-Fetch-Site",
+          "same-origin"
+        ],
+        [
+          "Content-Type",
+          "application/x-www-form-urlencoded"
+        ]
+      ],
+      "body": "token=v1.1793404800.f914e2b4cd4ba1537f6f022b46ee8341ba215e4c24b6f4e7595c18b9b4eb7dae.3bTQhT2pGQH22zx-xGIewnl-JIR-BdJfHlsoupKKBv&cap=ack&call=status&args.msg_id=m-1&args.from=seat-a"
+    },
+    "status": 400,
+    "headers": [
+      [
+        "Content-Type",
+        "text/plain; charset=utf-8"
+      ],
+      [
+        "Cache-Control",
+        "no-store"
+      ]
+    ],
+    "body": "not a token\n",
+    "actor": [],
+    "log": {
+      "ts": 1793361600,
+      "login": "bobby@example.com",
+      "peer": "100.64.0.2",
+      "cap": "ack",
+      "act": "needs/m%201/ack",
+      "item": "needs~m 1",
+      "msg_id": "m-1",
+      "result": "refused:400"
+    }
+  },
+  {
+    "what": "the form's cap is not the fold's: a tripwire",
+    "request": {
+      "method": "POST",
+      "target": "/act/needs/m%201/ack",
+      "peer": "127.0.0.1",
+      "headers": [
+        [
+          "Tailscale-User-Login",
+          "bobby@example.com"
+        ],
+        [
+          "X-Forwarded-For",
+          "100.64.0.2"
+        ],
+        [
+          "X-Forwarded-Proto",
+          "https"
+        ],
+        [
+          "X-Forwarded-Host",
+          "phobos.example.ts.net"
+        ],
+        [
+          "Sec-Fetch-Site",
+          "same-origin"
+        ],
+        [
+          "Content-Type",
+          "application/x-www-form-urlencoded"
+        ]
+      ],
+      "body": "token=v1.1793404800.f914e2b4cd4ba1537f6f022b46ee8341ba215e4c24b6f4e7595c18b9b4eb7dae.3bTQhT2pGQH22zx-xGIewnl-JIR-BdJfHlsoupKKBvA&cap=decline&call=status&args.msg_id=m-1&args.from=seat-a"
+    },
+    "status": 400,
+    "headers": [
+      [
+        "Content-Type",
+        "text/plain; charset=utf-8"
+      ],
+      [
+        "Cache-Control",
+        "no-store"
+      ]
+    ],
+    "body": "the form does not match the fold\n",
+    "actor": [],
+    "log": {
+      "ts": 1793361600,
+      "login": "bobby@example.com",
+      "peer": "100.64.0.2",
+      "cap": "ack",
+      "act": "needs/m%201/ack",
+      "item": "needs~m 1",
+      "msg_id": "m-1",
+      "result": "refused:400"
+    }
+  },
+  {
+    "what": "an act id that is not one",
+    "request": {
+      "method": "POST",
+      "target": "/act/needs/%zz/ack",
+      "peer": "127.0.0.1",
+      "headers": [
+        [
+          "Tailscale-User-Login",
+          "bobby@example.com"
+        ],
+        [
+          "X-Forwarded-For",
+          "100.64.0.2"
+        ],
+        [
+          "X-Forwarded-Proto",
+          "https"
+        ],
+        [
+          "X-Forwarded-Host",
+          "phobos.example.ts.net"
+        ],
+        [
+          "Sec-Fetch-Site",
+          "same-origin"
+        ],
+        [
+          "Content-Type",
+          "application/x-www-form-urlencoded"
+        ]
+      ],
+      "body": "token=v1.1793404800.f914e2b4cd4ba1537f6f022b46ee8341ba215e4c24b6f4e7595c18b9b4eb7dae.3bTQhT2pGQH22zx-xGIewnl-JIR-BdJfHlsoupKKBvA&cap=ack&call=status&args.msg_id=m-1&args.from=seat-a"
+    },
+    "status": 400,
+    "headers": [
+      [
+        "Content-Type",
+        "text/plain; charset=utf-8"
+      ],
+      [
+        "Cache-Control",
+        "no-store"
+      ]
+    ],
+    "body": "not an act id\n",
+    "actor": [],
+    "log": {
+      "ts": 1793361600,
+      "login": "bobby@example.com",
+      "peer": "100.64.0.2",
+      "cap": null,
+      "act": null,
+      "item": null,
+      "msg_id": null,
+      "result": "refused:400"
+    }
+  },
+  {
+    "what": "no such act",
+    "request": {
+      "method": "POST",
+      "target": "/act/needs/m%201/nudge",
+      "peer": "127.0.0.1",
+      "headers": [
+        [
+          "Tailscale-User-Login",
+          "bobby@example.com"
+        ],
+        [
+          "X-Forwarded-For",
+          "100.64.0.2"
+        ],
+        [
+          "X-Forwarded-Proto",
+          "https"
+        ],
+        [
+          "X-Forwarded-Host",
+          "phobos.example.ts.net"
+        ],
+        [
+          "Sec-Fetch-Site",
+          "same-origin"
+        ],
+        [
+          "Content-Type",
+          "application/x-www-form-urlencoded"
+        ]
+      ],
+      "body": "token=v1.1793404800.f914e2b4cd4ba1537f6f022b46ee8341ba215e4c24b6f4e7595c18b9b4eb7dae.3bTQhT2pGQH22zx-xGIewnl-JIR-BdJfHlsoupKKBvA&cap=ack&call=status&args.msg_id=m-1&args.from=seat-a"
+    },
+    "status": 404,
+    "headers": [
+      [
+        "Content-Type",
+        "text/plain; charset=utf-8"
+      ],
+      [
+        "Cache-Control",
+        "no-store"
+      ]
+    ],
+    "body": "no such act in this fold\n",
+    "actor": [],
+    "log": {
+      "ts": 1793361600,
+      "login": "bobby@example.com",
+      "peer": "100.64.0.2",
+      "cap": null,
+      "act": "needs/m%201/nudge",
+      "item": null,
+      "msg_id": null,
+      "result": "refused:404"
+    }
+  },
+  {
+    "what": "the passkey is never run here",
+    "request": {
+      "method": "POST",
+      "target": "/act/needs/m%201/webauthn",
+      "peer": "127.0.0.1",
+      "headers": [
+        [
+          "Tailscale-User-Login",
+          "bobby@example.com"
+        ],
+        [
+          "X-Forwarded-For",
+          "100.64.0.2"
+        ],
+        [
+          "X-Forwarded-Proto",
+          "https"
+        ],
+        [
+          "X-Forwarded-Host",
+          "phobos.example.ts.net"
+        ],
+        [
+          "Sec-Fetch-Site",
+          "same-origin"
+        ],
+        [
+          "Content-Type",
+          "application/x-www-form-urlencoded"
+        ]
+      ],
+      "body": "token=v1.1793404800.f914e2b4cd4ba1537f6f022b46ee8341ba215e4c24b6f4e7595c18b9b4eb7dae.3bTQhT2pGQH22zx-xGIewnl-JIR-BdJfHlsoupKKBvA&cap=ack&call=status&args.msg_id=m-1&args.from=seat-a"
+    },
+    "status": 422,
+    "headers": [
+      [
+        "Content-Type",
+        "text/plain; charset=utf-8"
+      ],
+      [
+        "Cache-Control",
+        "no-store"
+      ]
+    ],
+    "body": "this act is not one this server may run\n",
+    "actor": [],
+    "log": {
+      "ts": 1793361600,
+      "login": "bobby@example.com",
+      "peer": "100.64.0.2",
+      "cap": "webauthn",
+      "act": "needs/m%201/webauthn",
+      "item": "needs~m 1",
+      "msg_id": "m-1",
+      "result": "refused:422"
+    }
+  },
+  {
+    "what": "nor a cap this server does not know",
+    "request": {
+      "method": "POST",
+      "target": "/act/needs/m%201/archive",
+      "peer": "127.0.0.1",
+      "headers": [
+        [
+          "Tailscale-User-Login",
+          "bobby@example.com"
+        ],
+        [
+          "X-Forwarded-For",
+          "100.64.0.2"
+        ],
+        [
+          "X-Forwarded-Proto",
+          "https"
+        ],
+        [
+          "X-Forwarded-Host",
+          "phobos.example.ts.net"
+        ],
+        [
+          "Sec-Fetch-Site",
+          "same-origin"
+        ],
+        [
+          "Content-Type",
+          "application/x-www-form-urlencoded"
+        ]
+      ],
+      "body": "token=v1.1793404800.f914e2b4cd4ba1537f6f022b46ee8341ba215e4c24b6f4e7595c18b9b4eb7dae.3bTQhT2pGQH22zx-xGIewnl-JIR-BdJfHlsoupKKBvA&cap=ack&call=status&args.msg_id=m-1&args.from=seat-a"
+    },
+    "status": 422,
+    "headers": [
+      [
+        "Content-Type",
+        "text/plain; charset=utf-8"
+      ],
+      [
+        "Cache-Control",
+        "no-store"
+      ]
+    ],
+    "body": "this act is not one this server may run\n",
+    "actor": [],
+    "log": {
+      "ts": 1793361600,
+      "login": "bobby@example.com",
+      "peer": "100.64.0.2",
+      "cap": "archive",
+      "act": "needs/m%201/archive",
+      "item": "needs~m 1",
+      "msg_id": "m-1",
+      "result": "refused:422"
+    }
+  },
+  {
+    "what": "a token minted by another key",
+    "request": {
+      "method": "POST",
+      "target": "/act/needs/m%201/ack",
+      "peer": "127.0.0.1",
+      "headers": [
+        [
+          "Tailscale-User-Login",
+          "bobby@example.com"
+        ],
+        [
+          "X-Forwarded-For",
+          "100.64.0.2"
+        ],
+        [
+          "X-Forwarded-Proto",
+          "https"
+        ],
+        [
+          "X-Forwarded-Host",
+          "phobos.example.ts.net"
+        ],
+        [
+          "Sec-Fetch-Site",
+          "same-origin"
+        ],
+        [
+          "Content-Type",
+          "application/x-www-form-urlencoded"
+        ]
+      ],
+      "body": "token=v1.1793404800.f914e2b4cd4ba1537f6f022b46ee8341ba215e4c24b6f4e7595c18b9b4eb7dae.LOnQekIe6yvwN0ealSY-2CqwCDrDgN2xVv856jQMWRU&cap=ack&call=status&args.msg_id=m-1&args.from=seat-a"
+    },
+    "status": 403,
+    "headers": [
+      [
+        "Content-Type",
+        "text/plain; charset=utf-8"
+      ],
+      [
+        "Cache-Control",
+        "no-store"
+      ]
+    ],
+    "body": "the token is not this server's\n",
+    "actor": [],
+    "log": {
+      "ts": 1793361600,
+      "login": "bobby@example.com",
+      "peer": "100.64.0.2",
+      "cap": "ack",
+      "act": "needs/m%201/ack",
+      "item": "needs~m 1",
+      "msg_id": "m-1",
+      "result": "refused:403"
+    }
+  },
+  {
+    "what": "an expired token: the page again, a fresh token, nothing done",
+    "request": {
+      "method": "POST",
+      "target": "/act/needs/m%201/ack",
+      "peer": "127.0.0.1",
+      "headers": [
+        [
+          "Tailscale-User-Login",
+          "bobby@example.com"
+        ],
+        [
+          "X-Forwarded-For",
+          "100.64.0.2"
+        ],
+        [
+          "X-Forwarded-Proto",
+          "https"
+        ],
+        [
+          "X-Forwarded-Host",
+          "phobos.example.ts.net"
+        ],
+        [
+          "Sec-Fetch-Site",
+          "same-origin"
+        ],
+        [
+          "Content-Type",
+          "application/x-www-form-urlencoded"
+        ]
+      ],
+      "body": "token=v1.1793361599.f914e2b4cd4ba1537f6f022b46ee8341ba215e4c24b6f4e7595c18b9b4eb7dae.zh20EcDCPLVmSVYY3M0rjbckL3rNUHDnsZNxlFZfCbY&cap=ack&call=status&args.msg_id=m-1&args.from=seat-a"
+    },
+    "status": 403,
+    "headers": [
+      [
+        "Content-Type",
+        "text/html; charset=utf-8"
+      ],
+      [
+        "Cache-Control",
+        "no-store"
+      ]
+    ],
+    "body": {
+      "html_bytes": 3347,
+      "says": "That page had gone stale, so here it is again. Nothing was done.",
+      "tokens": [
+        "v1.1793404800.f914e2b4cd4ba1537f6f022b46ee8341ba215e4c24b6f4e7595c18b9b4eb7dae.3bTQhT2pGQH22zx-xGIewnl-JIR-BdJfHlsoupKKBvA",
+        "v1.1793404800.f568b0f1239d4ab0cf98ff286d2e3a03ce492702b5b2bc1713a9abc0b45cdc4e.fKrQQfgQharZS-9wYIql0ET-c871l3R8cP8j8AUppeI",
+        "v1.1793404800.662a779842c6be8802fbb02f781ff6167401579134d234440de3087c89030360.FTA17inp_eDkaIeWlcmqDWtrLXvqXxR_5tiZ7oY-b7M",
+        "",
+        ""
+      ],
+      "h1": "From seat-a"
+    },
+    "actor": [],
+    "log": {
+      "ts": 1793361600,
+      "login": "bobby@example.com",
+      "peer": "100.64.0.2",
+      "cap": "ack",
+      "act": "needs/m%201/ack",
+      "item": "needs~m 1",
+      "msg_id": "m-1",
+      "result": "stale"
+    }
+  },
+  {
+    "what": "a form no server filled: the same",
+    "request": {
+      "method": "POST",
+      "target": "/act/needs/m%201/ack",
+      "peer": "127.0.0.1",
+      "headers": [
+        [
+          "Tailscale-User-Login",
+          "bobby@example.com"
+        ],
+        [
+          "X-Forwarded-For",
+          "100.64.0.2"
+        ],
+        [
+          "X-Forwarded-Proto",
+          "https"
+        ],
+        [
+          "X-Forwarded-Host",
+          "phobos.example.ts.net"
+        ],
+        [
+          "Sec-Fetch-Site",
+          "same-origin"
+        ],
+        [
+          "Content-Type",
+          "application/x-www-form-urlencoded"
+        ]
+      ],
+      "body": "token=&cap=ack&call=status&args.msg_id=m-1&args.from=seat-a"
+    },
+    "status": 403,
+    "headers": [
+      [
+        "Content-Type",
+        "text/html; charset=utf-8"
+      ],
+      [
+        "Cache-Control",
+        "no-store"
+      ]
+    ],
+    "body": {
+      "html_bytes": 3347,
+      "says": "That page had gone stale, so here it is again. Nothing was done.",
+      "tokens": [
+        "v1.1793404800.f914e2b4cd4ba1537f6f022b46ee8341ba215e4c24b6f4e7595c18b9b4eb7dae.3bTQhT2pGQH22zx-xGIewnl-JIR-BdJfHlsoupKKBvA",
+        "v1.1793404800.f568b0f1239d4ab0cf98ff286d2e3a03ce492702b5b2bc1713a9abc0b45cdc4e.fKrQQfgQharZS-9wYIql0ET-c871l3R8cP8j8AUppeI",
+        "v1.1793404800.662a779842c6be8802fbb02f781ff6167401579134d234440de3087c89030360.FTA17inp_eDkaIeWlcmqDWtrLXvqXxR_5tiZ7oY-b7M",
+        "",
+        ""
+      ],
+      "h1": "From seat-a"
+    },
+    "actor": [],
+    "log": {
+      "ts": 1793361600,
+      "login": "bobby@example.com",
+      "peer": "100.64.0.2",
+      "cap": "ack",
+      "act": "needs/m%201/ack",
+      "item": "needs~m 1",
+      "msg_id": "m-1",
+      "result": "stale"
+    }
+  },
+  {
+    "what": "the item changed since the page was served: the page again, nothing done",
+    "request": {
+      "method": "POST",
+      "target": "/act/needs/m%201/ack",
+      "peer": "127.0.0.1",
+      "headers": [
+        [
+          "Tailscale-User-Login",
+          "bobby@example.com"
+        ],
+        [
+          "X-Forwarded-For",
+          "100.64.0.2"
+        ],
+        [
+          "X-Forwarded-Proto",
+          "https"
+        ],
+        [
+          "X-Forwarded-Host",
+          "phobos.example.ts.net"
+        ],
+        [
+          "Sec-Fetch-Site",
+          "same-origin"
+        ],
+        [
+          "Content-Type",
+          "application/x-www-form-urlencoded"
+        ]
+      ],
+      "body": "token=v1.1793404800.0000000000000000000000000000000000000000000000000000000000000000.diTlh12PBR11-oUQ08N7cfSGzXy-dND2sui3dA7yMv0&cap=ack&call=status&args.msg_id=m-1&args.from=seat-a"
+    },
+    "status": 409,
+    "headers": [
+      [
+        "Content-Type",
+        "text/html; charset=utf-8"
+      ],
+      [
+        "Cache-Control",
+        "no-store"
+      ]
+    ],
+    "body": {
+      "html_bytes": 3345,
+      "says": "This changed since you opened it. Read it again before acting.",
+      "tokens": [
+        "v1.1793404800.f914e2b4cd4ba1537f6f022b46ee8341ba215e4c24b6f4e7595c18b9b4eb7dae.3bTQhT2pGQH22zx-xGIewnl-JIR-BdJfHlsoupKKBvA",
+        "v1.1793404800.f568b0f1239d4ab0cf98ff286d2e3a03ce492702b5b2bc1713a9abc0b45cdc4e.fKrQQfgQharZS-9wYIql0ET-c871l3R8cP8j8AUppeI",
+        "v1.1793404800.662a779842c6be8802fbb02f781ff6167401579134d234440de3087c89030360.FTA17inp_eDkaIeWlcmqDWtrLXvqXxR_5tiZ7oY-b7M",
+        "",
+        ""
+      ],
+      "h1": "From seat-a"
+    },
+    "actor": [],
+    "log": {
+      "ts": 1793361600,
+      "login": "bobby@example.com",
+      "peer": "100.64.0.2",
+      "cap": "ack",
+      "act": "needs/m%201/ack",
+      "item": "needs~m 1",
+      "msg_id": "m-1",
+      "result": "changed"
+    }
+  },
+  {
+    "what": "the item has gone: the page of a fold that is not there, with its way back",
+    "request": {
+      "method": "POST",
+      "target": "/act/needs/gone/ack",
+      "peer": "127.0.0.1",
+      "headers": [
+        [
+          "Tailscale-User-Login",
+          "bobby@example.com"
+        ],
+        [
+          "X-Forwarded-For",
+          "100.64.0.2"
+        ],
+        [
+          "X-Forwarded-Proto",
+          "https"
+        ],
+        [
+          "X-Forwarded-Host",
+          "phobos.example.ts.net"
+        ],
+        [
+          "Sec-Fetch-Site",
+          "same-origin"
+        ],
+        [
+          "Content-Type",
+          "application/x-www-form-urlencoded"
+        ]
+      ],
+      "body": "token=v1.1793404800.0000000000000000000000000000000000000000000000000000000000000000.BIRRE07yrokVGFzeIYUWUw_tAVyMiic5Ml8tLZ2Nn4M&cap=ack&call=status&args.msg_id=m-1&args.from=seat-a"
+    },
+    "status": 409,
+    "headers": [
+      [
+        "Content-Type",
+        "text/html; charset=utf-8"
+      ],
+      [
+        "Cache-Control",
+        "no-store"
+      ]
+    ],
+    "body": {
+      "html_bytes": 1057,
+      "says": null,
+      "tokens": [],
+      "h1": "Nothing here"
+    },
+    "actor": [],
+    "log": {
+      "ts": 1793361600,
+      "login": "bobby@example.com",
+      "peer": "100.64.0.2",
+      "cap": null,
+      "act": "needs/gone/ack",
+      "item": null,
+      "msg_id": null,
+      "result": "changed"
+    }
+  },
+  {
+    "what": "an act that names no message",
+    "request": {
+      "method": "POST",
+      "target": "/act/needs/bare/ack",
+      "peer": "127.0.0.1",
+      "headers": [
+        [
+          "Tailscale-User-Login",
+          "bobby@example.com"
+        ],
+        [
+          "X-Forwarded-For",
+          "100.64.0.2"
+        ],
+        [
+          "X-Forwarded-Proto",
+          "https"
+        ],
+        [
+          "X-Forwarded-Host",
+          "phobos.example.ts.net"
+        ],
+        [
+          "Sec-Fetch-Site",
+          "same-origin"
+        ],
+        [
+          "Content-Type",
+          "application/x-www-form-urlencoded"
+        ]
+      ],
+      "body": "token=v1.1793404800.12d29925f7f570fb37d8027dbab074fbbd639516f216f79a2ec8009dab583f53.ijql3p-Mp7YuWypAKNv0HwW-XukIm13erk4XFJIBP7k&cap=ack&call=status&args.msg_id=m-1&args.from=seat-a"
+    },
+    "status": 422,
+    "headers": [
+      [
+        "Content-Type",
+        "text/plain; charset=utf-8"
+      ],
+      [
+        "Cache-Control",
+        "no-store"
+      ]
+    ],
+    "body": "this act names no message to answer\n",
+    "actor": [],
+    "log": {
+      "ts": 1793361600,
+      "login": "bobby@example.com",
+      "peer": "100.64.0.2",
+      "cap": "ack",
+      "act": "needs/bare/ack",
+      "item": "needs~bare",
+      "msg_id": null,
+      "result": "refused:422"
+    }
+  },
+  {
+    "what": "chitin does not take it",
+    "request": {
+      "method": "POST",
+      "target": "/act/needs/down/ack",
+      "peer": "127.0.0.1",
+      "headers": [
+        [
+          "Tailscale-User-Login",
+          "bobby@example.com"
+        ],
+        [
+          "X-Forwarded-For",
+          "100.64.0.2"
+        ],
+        [
+          "X-Forwarded-Proto",
+          "https"
+        ],
+        [
+          "X-Forwarded-Host",
+          "phobos.example.ts.net"
+        ],
+        [
+          "Sec-Fetch-Site",
+          "same-origin"
+        ],
+        [
+          "Content-Type",
+          "application/x-www-form-urlencoded"
+        ]
+      ],
+      "body": "token=v1.1793404800.9ef303d27d96044104fa647009d4f182f47876a169d9f69be7e92f73996dc884.ETeXvyMPmd-lLtWt9SQiS5RpuseS2fGKtmMADEbMQD4&cap=ack&call=status&args.msg_id=m-1&args.from=seat-a"
+    },
+    "status": 502,
+    "headers": [
+      [
+        "Content-Type",
+        "text/plain; charset=utf-8"
+      ],
+      [
+        "Cache-Control",
+        "no-store"
+      ]
+    ],
+    "body": "chitin did not take it: timeout: seat-b did not answer\n",
+    "actor": [
+      "m-down acting to=seat-a"
+    ],
+    "log": {
+      "ts": 1793361600,
+      "login": "bobby@example.com",
+      "peer": "100.64.0.2",
+      "cap": "ack",
+      "act": "needs/down/ack",
+      "item": "needs~down",
+      "msg_id": "m-down",
+      "result": "chitin:timeout: seat-b did not answer"
+    }
+  },
+  {
+    "what": "ack: done, and back to the fold",
+    "request": {
+      "method": "POST",
+      "target": "/act/needs/m%201/ack",
+      "peer": "127.0.0.1",
+      "headers": [
+        [
+          "Tailscale-User-Login",
+          "bobby@example.com"
+        ],
+        [
+          "X-Forwarded-For",
+          "100.64.0.2"
+        ],
+        [
+          "X-Forwarded-Proto",
+          "https"
+        ],
+        [
+          "X-Forwarded-Host",
+          "phobos.example.ts.net"
+        ],
+        [
+          "Sec-Fetch-Site",
+          "same-origin"
+        ],
+        [
+          "Content-Type",
+          "application/x-www-form-urlencoded"
+        ]
+      ],
+      "body": "token=v1.1793404800.f914e2b4cd4ba1537f6f022b46ee8341ba215e4c24b6f4e7595c18b9b4eb7dae.3bTQhT2pGQH22zx-xGIewnl-JIR-BdJfHlsoupKKBvA&cap=ack&call=status&args.msg_id=m-1&args.from=seat-a"
+    },
+    "status": 303,
+    "headers": [
+      [
+        "Location",
+        "/fold/needs/m%201/?did=ack&as=ok"
+      ],
+      [
+        "Cache-Control",
+        "no-store"
+      ]
+    ],
+    "body": "",
+    "actor": [
+      "m-1 acting to=seat-a"
+    ],
+    "log": {
+      "ts": 1793361600,
+      "login": "bobby@example.com",
+      "peer": "100.64.0.2",
+      "cap": "ack",
+      "act": "needs/m%201/ack",
+      "item": "needs~m 1",
+      "msg_id": "m-1",
+      "result": "ok"
+    }
+  },
+  {
+    "what": "the fold then says so",
+    "request": {
+      "method": "GET",
+      "target": "/needs/m%201/?did=ack&as=ok",
+      "peer": "127.0.0.1",
+      "headers": [
+        [
+          "Tailscale-User-Login",
+          "bobby@example.com"
+        ],
+        [
+          "X-Forwarded-For",
+          "100.64.0.2"
+        ],
+        [
+          "X-Forwarded-Proto",
+          "https"
+        ],
+        [
+          "X-Forwarded-Host",
+          "phobos.example.ts.net"
+        ],
+        [
+          "Sec-Fetch-Site",
+          "same-origin"
+        ],
+        [
+          "Content-Type",
+          "application/x-www-form-urlencoded"
+        ]
+      ],
+      "body": ""
+    },
+    "status": 200,
+    "headers": [
+      [
+        "Content-Type",
+        "text/html; charset=utf-8"
+      ],
+      [
+        "Cache-Control",
+        "private, no-cache"
+      ],
+      [
+        "ETag",
+        "\"sha-256:48eb87e817e83efba7a27f87dde838a0cdaed5fa2b175665d6cbc6dc70656a6b\""
+      ]
+    ],
+    "body": {
+      "html_bytes": 3296,
+      "says": "Acknowledged.",
+      "tokens": [
+        "v1.1793404800.f914e2b4cd4ba1537f6f022b46ee8341ba215e4c24b6f4e7595c18b9b4eb7dae.3bTQhT2pGQH22zx-xGIewnl-JIR-BdJfHlsoupKKBvA",
+        "v1.1793404800.f568b0f1239d4ab0cf98ff286d2e3a03ce492702b5b2bc1713a9abc0b45cdc4e.fKrQQfgQharZS-9wYIql0ET-c871l3R8cP8j8AUppeI",
+        "v1.1793404800.662a779842c6be8802fbb02f781ff6167401579134d234440de3087c89030360.FTA17inp_eDkaIeWlcmqDWtrLXvqXxR_5tiZ7oY-b7M",
+        "",
+        ""
+      ],
+      "h1": "From seat-a"
+    },
+    "actor": [],
+    "log": null
+  },
+  {
+    "what": "ack again, the same token: done before, and harmless",
+    "request": {
+      "method": "POST",
+      "target": "/act/needs/m%201/ack",
+      "peer": "127.0.0.1",
+      "headers": [
+        [
+          "Tailscale-User-Login",
+          "bobby@example.com"
+        ],
+        [
+          "X-Forwarded-For",
+          "100.64.0.2"
+        ],
+        [
+          "X-Forwarded-Proto",
+          "https"
+        ],
+        [
+          "X-Forwarded-Host",
+          "phobos.example.ts.net"
+        ],
+        [
+          "Sec-Fetch-Site",
+          "same-origin"
+        ],
+        [
+          "Content-Type",
+          "application/x-www-form-urlencoded"
+        ]
+      ],
+      "body": "token=v1.1793404800.f914e2b4cd4ba1537f6f022b46ee8341ba215e4c24b6f4e7595c18b9b4eb7dae.3bTQhT2pGQH22zx-xGIewnl-JIR-BdJfHlsoupKKBvA&cap=ack&call=status&args.msg_id=m-1&args.from=seat-a"
+    },
+    "status": 303,
+    "headers": [
+      [
+        "Location",
+        "/fold/needs/m%201/?did=ack&as=already"
+      ],
+      [
+        "Cache-Control",
+        "no-store"
+      ]
+    ],
+    "body": "",
+    "actor": [
+      "m-1 acting to=seat-a"
+    ],
+    "log": {
+      "ts": 1793361600,
+      "login": "bobby@example.com",
+      "peer": "100.64.0.2",
+      "cap": "ack",
+      "act": "needs/m%201/ack",
+      "item": "needs~m 1",
+      "msg_id": "m-1",
+      "result": "already"
+    }
+  },
+  {
+    "what": "a ?did= that is not in the table says nothing",
+    "request": {
+      "method": "GET",
+      "target": "/needs/m%201/?did=%3Cb%3E&as=ok",
+      "peer": "127.0.0.1",
+      "headers": [
+        [
+          "Tailscale-User-Login",
+          "bobby@example.com"
+        ],
+        [
+          "X-Forwarded-For",
+          "100.64.0.2"
+        ],
+        [
+          "X-Forwarded-Proto",
+          "https"
+        ],
+        [
+          "X-Forwarded-Host",
+          "phobos.example.ts.net"
+        ],
+        [
+          "Sec-Fetch-Site",
+          "same-origin"
+        ],
+        [
+          "Content-Type",
+          "application/x-www-form-urlencoded"
+        ]
+      ],
+      "body": ""
+    },
+    "status": 200,
+    "headers": [
+      [
+        "Content-Type",
+        "text/html; charset=utf-8"
+      ],
+      [
+        "Cache-Control",
+        "private, no-cache"
+      ],
+      [
+        "ETag",
+        "\"sha-256:e4d62c0eaee474f5d04ccd719de88464a7839e41a6816889b0b675178631884b\""
+      ]
+    ],
+    "body": {
+      "html_bytes": 3283,
+      "says": null,
+      "tokens": [
+        "v1.1793404800.f914e2b4cd4ba1537f6f022b46ee8341ba215e4c24b6f4e7595c18b9b4eb7dae.3bTQhT2pGQH22zx-xGIewnl-JIR-BdJfHlsoupKKBvA",
+        "v1.1793404800.f568b0f1239d4ab0cf98ff286d2e3a03ce492702b5b2bc1713a9abc0b45cdc4e.fKrQQfgQharZS-9wYIql0ET-c871l3R8cP8j8AUppeI",
+        "v1.1793404800.662a779842c6be8802fbb02f781ff6167401579134d234440de3087c89030360.FTA17inp_eDkaIeWlcmqDWtrLXvqXxR_5tiZ7oY-b7M",
+        "",
+        ""
+      ],
+      "h1": "From seat-a"
+    },
+    "actor": [],
+    "log": null
+  },
+  {
+    "what": "defer: with chitin's reason",
+    "request": {
+      "method": "POST",
+      "target": "/act/needs/m%201/defer",
+      "peer": "127.0.0.1",
+      "headers": [
+        [
+          "Tailscale-User-Login",
+          "bobby@example.com"
+        ],
+        [
+          "X-Forwarded-For",
+          "100.64.0.2"
+        ],
+        [
+          "X-Forwarded-Proto",
+          "https"
+        ],
+        [
+          "X-Forwarded-Host",
+          "phobos.example.ts.net"
+        ],
+        [
+          "Sec-Fetch-Site",
+          "same-origin"
+        ],
+        [
+          "Content-Type",
+          "application/x-www-form-urlencoded"
+        ]
+      ],
+      "body": "token=v1.1793404800.f568b0f1239d4ab0cf98ff286d2e3a03ce492702b5b2bc1713a9abc0b45cdc4e.fKrQQfgQharZS-9wYIql0ET-c871l3R8cP8j8AUppeI&cap=defer&call=status&args.msg_id=m-1&args.from=seat-a"
+    },
+    "status": 303,
+    "headers": [
+      [
+        "Location",
+        "/fold/needs/m%201/?did=defer&as=ok"
+      ],
+      [
+        "Cache-Control",
+        "no-store"
+      ]
+    ],
+    "body": "",
+    "actor": [
+      "m-1 deferred to=seat-a why=Deferred from Basis"
+    ],
+    "log": {
+      "ts": 1793361600,
+      "login": "bobby@example.com",
+      "peer": "100.64.0.2",
+      "cap": "defer",
+      "act": "needs/m%201/defer",
+      "item": "needs~m 1",
+      "msg_id": "m-1",
+      "result": "ok"
+    }
+  },
+  {
+    "what": "decline, Origin and no Sec-Fetch-Site (an older browser)",
+    "request": {
+      "method": "POST",
+      "target": "/act/needs/m%201/decline",
+      "peer": "127.0.0.1",
+      "headers": [
+        [
+          "Tailscale-User-Login",
+          "bobby@example.com"
+        ],
+        [
+          "X-Forwarded-For",
+          "100.64.0.2"
+        ],
+        [
+          "X-Forwarded-Proto",
+          "https"
+        ],
+        [
+          "X-Forwarded-Host",
+          "phobos.example.ts.net"
+        ],
+        [
+          "Content-Type",
+          "application/x-www-form-urlencoded"
+        ],
+        [
+          "Origin",
+          "https://phobos.example.ts.net"
+        ]
+      ],
+      "body": "token=v1.1793404800.662a779842c6be8802fbb02f781ff6167401579134d234440de3087c89030360.FTA17inp_eDkaIeWlcmqDWtrLXvqXxR_5tiZ7oY-b7M&cap=decline&call=status&args.msg_id=m-1&args.from=seat-a"
+    },
+    "status": 303,
+    "headers": [
+      [
+        "Location",
+        "/fold/needs/m%201/?did=decline&as=ok"
+      ],
+      [
+        "Cache-Control",
+        "no-store"
+      ]
+    ],
+    "body": "",
+    "actor": [
+      "m-1 declined to=seat-a why=Declined from Basis"
+    ],
+    "log": {
+      "ts": 1793361600,
+      "login": "bobby@example.com",
+      "peer": "100.64.0.2",
+      "cap": "decline",
+      "act": "needs/m%201/decline",
+      "item": "needs~m 1",
+      "msg_id": "m-1",
+      "result": "ok"
+    }
+  }
+]

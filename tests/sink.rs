@@ -19,6 +19,7 @@ fn req(method: &str, target: &str, headers: &[(&str, &str)], body: &str) -> Requ
         target: target.into(),
         headers: headers.iter().map(|(k, v)| (k.to_string(), v.to_string())).collect(),
         body: body.as_bytes().to_vec(),
+        peer: None,
     }
 }
 

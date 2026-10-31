@@ -32,7 +32,12 @@
       "type": "string"
     },
     "act": {
-      "description": "fold.ts `act`: the fold's one action, `{cap, call, args, label}` (the viewer calls `claude.use(cap)[call](args)`)."
+      "description": "fold.ts `act`: the fold's one action, `{cap, call, args, label}`, shown as an HTML form (ax.rs `act_form`)."
+    },
+    "acts": {
+      "description": "The fold's other acts (S2, allie-s2-fold-act-write §7 step 0: a Needs-you item's ack, defer and decline), each `{id?, cap,\ncall, args, label}` as `act` is, plus its own `id` where it names one. fold-core's own field (not fold.ts's): an act's own id\n(ax.rs `act_key`) is its `id`, else its `cap`, so reordering an item's acts moves no act's id.",
+      "type": "array",
+      "items": true
     },
     "updated": {
       "type": "string"

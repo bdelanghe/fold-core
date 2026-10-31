@@ -470,7 +470,7 @@
     "what": "a POST under act/ that names no act: read-only",
     "request": {
       "method": "POST",
-      "target": "/act/needs",
+      "target": "/act/",
       "headers": []
     },
     "status": 405,

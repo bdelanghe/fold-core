@@ -1,0 +1,32 @@
+{
+  "m1/ack": {
+    "item": "m1",
+    "cap": "ack",
+    "call": "status",
+    "args": {
+      "msg_id": "m-1",
+      "from": "seat-a"
+    },
+    "fixity": "c1e75852889a08748322a59fe02b91c33439d8b1e655e6d51f44d7d1a6db16bd"
+  },
+  "m1/defer": {
+    "item": "m1",
+    "cap": "defer",
+    "call": "status",
+    "args": {
+      "msg_id": "m-1",
+      "from": "seat-a"
+    },
+    "fixity": "eede1e25bfe6e51ce024627f6db2c6b9f8397d84087bce02445dd40db03edb40"
+  },
+  "m1/decline": {
+    "item": "m1",
+    "cap": "decline",
+    "call": "status",
+    "args": {
+      "msg_id": "m-1",
+      "from": "seat-a"
+    },
+    "fixity": "bbfa091348ce29f264939895fba3c6a1e5a15ab74cbe1bc65c40bde6c051eea2"
+  }
+}

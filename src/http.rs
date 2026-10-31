@@ -4,7 +4,7 @@
 
 use std::fs;
 use std::io::{BufRead, BufReader, Write};
-use std::net::{TcpListener, TcpStream};
+use std::net::{IpAddr, TcpListener, TcpStream};
 use std::path::PathBuf;
 use std::sync::{Arc, Mutex};
 use std::time::{Instant, SystemTime};
@@ -20,6 +20,8 @@ pub struct Request {
     pub target: String,
     pub headers: Vec<(String, String)>,
     pub body: Vec<u8>,
+    /// The TCP peer, as [`run`] accepted it; None for a request not read from a socket (tests, [`parse`]).
+    pub peer: Option<IpAddr>,
 }
 
 impl Request {
@@ -62,14 +64,18 @@ fn status_text(s: u16) -> &'static str {
         200 => "OK",
         204 => "No Content",
         301 => "Moved Permanently",
+        303 => "See Other",
         304 => "Not Modified",
         400 => "Bad Request",
         403 => "Forbidden",
         404 => "Not Found",
         405 => "Method Not Allowed",
+        409 => "Conflict",
         413 => "Content Too Large",
         415 => "Unsupported Media Type",
+        422 => "Unprocessable Content",
         429 => "Too Many Requests",
+        502 => "Bad Gateway",
         _ => "Error",
     }
 }
@@ -104,7 +110,7 @@ pub fn parse_with(rd: &mut impl BufRead, limit: &dyn Fn(&str, &str) -> usize) ->
             headers.push((k.trim().to_string(), v.trim().to_string()));
         }
     }
-    let mut req = Request { method, target, headers, body: vec![] };
+    let mut req = Request { method, target, headers, body: vec![], peer: None };
     let len = match req.header("Content-Length") {
         None => 0,
         Some(v) => v.parse::<usize>().map_err(|_| Response::text(400, "Content-Length is not a length"))?,
@@ -151,7 +157,8 @@ pub fn run(listener: TcpListener, limit: Arc<Limit>, log: Option<PathBuf>, handl
                 Err(_) => return,
             };
             let (mut r, head, rec) = match parsed {
-                Ok(req) => {
+                Ok(mut req) => {
+                    req.peer = s.peer_addr().ok().map(|a| a.ip());
                     let (r, rec) = handle(&req, SystemTime::now().into());
                     (r, req.method == "HEAD", rec)
                 }
@@ -163,7 +170,12 @@ pub fn run(listener: TcpListener, limit: Arc<Limit>, log: Option<PathBuf>, handl
             let _ = write(&mut s, &r, head);
             if let (Some(rec), Some(log)) = (rec, log) {
                 let _g = lock.lock();
-                if let Ok(mut f) = fs::OpenOptions::new().create(true).append(true).open(&log) {
+                // A log is the server's own record (acts.jsonl names who acted): readable by its owner only.
+                let mut o = fs::OpenOptions::new();
+                o.create(true).append(true);
+                #[cfg(unix)]
+                std::os::unix::fs::OpenOptionsExt::mode(&mut o, 0o600);
+                if let Ok(mut f) = o.open(&log) {
                     let _ = writeln!(f, "{rec}");
                 }
             }

@@ -1,0 +1,8 @@
+{
+  "walk": {
+    "folds": 3,
+    "reached": 3,
+    "findings": []
+  },
+  "verdict": "Checked by the artificial viewer: every fold reached, nothing blocking."
+}

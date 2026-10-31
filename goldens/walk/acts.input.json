@@ -1,0 +1,106 @@
+{
+  "nodes": [
+    [
+      "root",
+      {
+        "title": "Needs you",
+        "trail": [],
+        "kids": [
+          {
+            "id": "m 1",
+            "title": "From seat-a",
+            "hint": "Ship the fix?"
+          },
+          {
+            "id": "twice",
+            "title": "Two acks"
+          }
+        ]
+      }
+    ],
+    [
+      "m 1",
+      {
+        "title": "From seat-a",
+        "trail": [
+          "Needs you"
+        ],
+        "kids": [],
+        "text": [
+          "Ship the fix?"
+        ],
+        "acts": [
+          {
+            "cap": "ack",
+            "call": "status",
+            "label": "Ack",
+            "args": {
+              "msg_id": "m-1",
+              "from": "seat-a"
+            }
+          },
+          {
+            "cap": "defer",
+            "call": "status",
+            "label": "Defer",
+            "args": {
+              "msg_id": "m-1",
+              "from": "seat-a"
+            }
+          },
+          {
+            "cap": "decline",
+            "call": "status",
+            "label": "Decline",
+            "args": {
+              "msg_id": "m-1",
+              "from": "seat-a"
+            }
+          }
+        ]
+      }
+    ],
+    [
+      "twice",
+      {
+        "title": "Two acks",
+        "trail": [
+          "Needs you"
+        ],
+        "kids": [],
+        "text": [
+          "Two acts with one key: a schema error, each keyed by its index."
+        ],
+        "acts": [
+          {
+            "cap": "ack",
+            "call": "status",
+            "label": "Ack",
+            "args": {
+              "msg_id": "m-1",
+              "from": "seat-a"
+            }
+          },
+          {
+            "cap": "ack",
+            "call": "status",
+            "label": "Ack again",
+            "args": {
+              "msg_id": "m-1",
+              "from": "seat-a"
+            }
+          }
+        ]
+      }
+    ]
+  ],
+  "opts": {
+    "budgets": [
+      {
+        "id": "view.words",
+        "value": 220
+      }
+    ],
+    "localTimeZone": "UTC"
+  }
+}

@@ -17,7 +17,8 @@
 
 use serde_json::{json, Value};
 
-use crate::ax::{at, ax_of};
+use crate::act::fixity;
+use crate::ax::{act_id, acts_of, at, ax_of};
 use crate::html::{attr, html, text};
 use crate::id::{haecceity, html_id, segment_of};
 use crate::js::Clock;
@@ -144,8 +145,33 @@ pub fn page(tree: &Value, base: &str) -> Result<String, String> {
     ))
 }
 
+/// The act map's file under the site's directory (S2 brief §2): never served, as no `_`-name is (serve.rs).
+pub const ACTS: &str = "_acts.json";
+
+/// Every act of a folded document by its act id (ax.rs `act_id`): `{item, cap, call, args, fixity}`, `item` the fold's id. `fold
+/// serve` reads the act a form posts to from here, never from the form, and checks a token's fixity against it.
+pub fn acts(nodes: &[(String, Value)]) -> Value {
+    let mut m = serde_json::Map::new();
+    for (id, node) in nodes {
+        let path = at(id);
+        for (key, a) in acts_of(node) {
+            let row = json!({ "item": id, "cap": a["cap"], "call": a["call"], "args": a["args"], "fixity": fixity(id, &a) });
+            m.insert(act_id(&path, &key), row);
+        }
+    }
+    Value::Object(m)
+}
+
+/// The page of a fold that is not there (ax.rs `ax_of` with no node): what `fold serve` answers when an act's fold has gone.
+pub fn missing(path: &[String], base: &str) -> Result<String, String> {
+    let link = |p: &[String], m: &str| href(base, p, m);
+    page(&ax_of(None, path, &link, "folds", &Clock::new(None, None)), base)
+}
+
 /// Every page of a folded document (`nodes`, fold's `[[id, node], …]`), in its order: a fold's page, then its slides page if it
-/// presents. Each is `{id, mode, href, file, html}`, or `{id, mode, href, error}` for one that cannot be written.
+/// presents. Each is `{id, mode, href, file, html}`, or `{id, mode, href, error}` for one that cannot be written. Last comes the
+/// act map, `{id: "_acts", mode: "acts", href, file: "_acts.json", json}` ([`acts`]), from the same nodes, so the pages and the
+/// acts they post to cannot disagree; a host writes its `json` as it writes a page's `html`.
 pub fn site(nodes: &[(String, Value)], source: &str, base: &str, clock: &Clock) -> Vec<Value> {
     let presents = |n: &Value| n.get("present").is_some_and(|p| !p.is_null());
     let folds: std::collections::HashMap<Vec<String>, &Value> = nodes.iter().map(|(id, n)| (at(id), n)).collect();
@@ -190,5 +216,7 @@ pub fn site(nodes: &[(String, Value)], source: &str, base: &str, clock: &Clock) 
             });
         }
     }
+    let map = serde_json::to_string_pretty(&acts(nodes)).unwrap_or_default() + "\n";
+    out.push(json!({ "id": "_acts", "mode": "acts", "href": format!("{base}{ACTS}"), "file": ACTS, "json": map }));
     out
 }
