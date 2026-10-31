@@ -37,6 +37,7 @@ use sha2::{Digest, Sha256};
 
 use crate::act::{self, Actor, Bad, Done};
 use crate::html::text;
+use crate::id::{haecceity, segment_of};
 use crate::report::{self, Reporting};
 use crate::{ax, page};
 
@@ -155,6 +156,8 @@ pub fn limit(method: &str, target: &str) -> usize {
         ACT_BODY
     } else if method == "POST" && target.split(['?', '#']).next() == Some(REPORT_TOKEN) {
         REPORT_BODY
+    } else if method == "POST" && target.starts_with(COMMENT) {
+        COMMENT_BODY
     } else {
         0
     }
@@ -182,6 +185,9 @@ pub fn answer(site: &Site, req: &Request, now: i64) -> (Response, Option<Value>)
     }
     if path == OVERLAY {
         return (overlay(site, req), None);
+    }
+    if path.starts_with(COMMENT) {
+        return comment(site, req, now);
     }
     let to_act = path.starts_with("/act/");
     match (req.method.as_str(), &site.acting) {
@@ -349,6 +355,137 @@ fn reporter_token(site: &Site, req: &Request, now: i64) -> (Response, Option<Val
     }
 }
 
+/// The comment pages' prefix under the mount: `comment/<fold path>/`, a fold's "Comment in Clax" with JS off.
+pub const COMMENT: &str = "/comment/";
+
+/// The most a comment form's body may be, and the most characters a comment may have.
+pub const COMMENT_BODY: usize = 16 * 1024;
+pub const COMMENT_MAX: usize = 4000;
+
+/// A comment page's fold path (`/comment/a/b%2Fc/` is `[a, b/c]`, `/comment/` the root), each segment decoded on its own.
+fn comment_path(target: &str) -> Option<Vec<String>> {
+    let p = target.split(['?', '#']).next()?.strip_prefix(COMMENT)?;
+    let p = p.strip_suffix('/').unwrap_or(p);
+    if p.is_empty() {
+        return Some(vec![]);
+    }
+    // page::file refuses an id no file can hold (`.`, `..`, `/`, NUL), so such a path has no page and is a 404.
+    p.split('/').map(|s| decode(s).filter(|s| !s.is_empty())).collect()
+}
+
+/// A fold path as it stands in a URL and a haecceity: each id one segment (id.rs `segment_of`).
+fn under(path: &[String]) -> String {
+    path.iter().map(|p| segment_of(p)).collect::<Vec<_>>().join("/")
+}
+
+/// A comment page's own path under the mount.
+fn comment_href(mount: &str, path: &[String]) -> String {
+    let u = under(path);
+    if u.is_empty() {
+        format!("{mount}{COMMENT}")
+    } else {
+        format!("{mount}{COMMENT}{u}/")
+    }
+}
+
+/// HTML's five escapes undone: a fold page's `<h1>` text as the words it shows.
+fn unescape(s: &str) -> String {
+    s.replace("&lt;", "<").replace("&gt;", ">").replace("&quot;", "\"").replace("&nbsp;", "\u{a0}").replace("&amp;", "&")
+}
+
+/// The fold's title, from its page's `<h1>`; None when it has no page here.
+fn fold_title(site: &Site, path: &[String]) -> Option<String> {
+    let html = fs::read_to_string(site.root.join(page::file(path, "folds").ok()?)).ok()?;
+    let h = &html[html.find("<h1")?..];
+    let h = &h[h.find('>')? + 1..];
+    Some(unescape(&h[..h.find("</h1>")?]))
+}
+
+/// A fold's comment page: what it is for, the form (a box and its button), and the way back; `said` above the form when an earlier
+/// post was refused. The fold's own page shape (a heading and one list), so lone reads it as it reads a fold.
+fn comment_page(site: &Site, r: &Reporting, path: &[String], title: &str, said: Option<&str>, status: u16) -> Response {
+    let base = format!("{}/", site.mount);
+    let name = format!("Comment on {title}");
+    let prop = |t: String| json!({ "role": "listitem", "cls": "prop", "children": [{ "role": "text", "name": t }] });
+    let mut rows = vec![prop(format!("What you write goes to {} through Clax, about this fold. Nothing else on the page is sent.", r.owner))];
+    if let Some(s) = said {
+        rows.push(json!({ "role": "listitem", "cls": "prop", "children": [{ "role": "status", "name": s }] }));
+    }
+    rows.push(json!({ "role": "listitem", "cls": "act", "children": [{
+        "role": "form", "name": "Comment", "method": "post", "action": comment_href(&site.mount, path), "fields": [],
+        "children": [
+            { "role": "textbox", "name": "Your comment", "field": "body", "maxlength": COMMENT_MAX },
+            { "role": "button", "name": "Send to Clax" },
+        ],
+    }] }));
+    rows.push(json!({ "role": "listitem", "cls": "prop", "children": [
+        { "role": "link", "name": format!("Back to {title}"), "href": page::href(&base, path, "folds"), "local": true },
+    ] }));
+    let tree = json!({ "role": "main", "children": [
+        { "role": "heading", "name": name, "focus": true },
+        { "role": "list", "name": name, "cls": "rows", "children": rows },
+    ] });
+    match page::page(&tree, &base) {
+        Ok(h) => {
+            let mut res = Response::new(status).with("Content-Type", "text/html; charset=utf-8").with("Cache-Control", "no-store");
+            res.body = h.into_bytes();
+            res
+        }
+        Err(e) => Response::text(500, &e),
+    }
+}
+
+/// `comment/<fold path>/`: GET, the fold's comment page; POST, the comment, for the one login, same-origin (as a report token),
+/// filed as a Clax report about the fold (report.rs `Filer`), then 303 back to the fold. With no filer, a 503 page says comments
+/// from here are not on and nothing was sent. The log line names the fold, never the words.
+fn comment(site: &Site, req: &Request, now: i64) -> (Response, Option<Value>) {
+    let Some(r) = &site.reporting else {
+        return (Response::text(404, "reporting to Clax isn't on here"), None);
+    };
+    let Some(path) = comment_path(&req.target) else { return (Response::text(400, "not a fold path"), None) };
+    let Some(title) = fold_title(site, &path) else {
+        let base = format!("{}/", site.mount);
+        let mut res = Response::new(404).with("Content-Type", "text/html; charset=utf-8").with("Cache-Control", "no-store");
+        res.body = page::missing(&path, &base).unwrap_or_default().into_bytes();
+        return (res, None);
+    };
+    match req.method.as_str() {
+        "GET" | "HEAD" => return (comment_page(site, r, &path, &title, None, 200), None),
+        "POST" => {}
+        _ => return (Response::text(405, "a comment is posted: GET or POST").with("Allow", "GET, POST"), None),
+    }
+    let about = haecceity(&r.source, &under(&path));
+    let line = |result: &str| Some(json!({ "ts": now, "login": req.header("Tailscale-User-Login"), "comment": about, "result": result }));
+    if let Err(why) = front(req, &r.login, &r.host) {
+        return (Response::text(403, why), line("refused:403"));
+    }
+    if req.media_type() != Some("application/x-www-form-urlencoded") {
+        return (Response::text(415, "send the comment as a form"), line("refused:415"));
+    }
+    let body = act::form(&req.body).and_then(|f| f.into_iter().find(|(k, _)| k == "body").map(|(_, v)| v.trim().to_string()));
+    let body = match body {
+        Some(b) if !b.is_empty() && b.chars().count() <= COMMENT_MAX => b,
+        Some(b) if !b.is_empty() => {
+            let said = format!("That is longer than {COMMENT_MAX} characters, so nothing was sent.");
+            return (comment_page(site, r, &path, &title, Some(&said), 400), line("refused:400"));
+        }
+        _ => return (comment_page(site, r, &path, &title, Some("Write your comment first: nothing was sent."), 400), line("refused:400")),
+    };
+    let Some(filer) = &r.filer else {
+        let said = "Comments from here are not on yet, so nothing was sent. With JavaScript on, the Clax button on the fold works.";
+        return (comment_page(site, r, &path, &title, Some(said), 503), line("off"));
+    };
+    let back = page::href(&format!("{}/", site.mount), &path, "folds");
+    let c = report::Comment { external_id: about.clone(), url: format!("https://{}{back}", r.host), title: title.clone(), body };
+    match filer.file(&c) {
+        Ok(()) => (Response::new(303).with("Location", back).with("Cache-Control", "no-store"), line("filed")),
+        Err(e) => {
+            let said = format!("Clax did not take it, so nothing was sent: {}", e.chars().filter(|c| !c.is_control()).take(200).collect::<String>());
+            (comment_page(site, r, &path, &title, Some(&said), 502), line("clax:failed"))
+        }
+    }
+}
+
 /// `GET clax/overlay.js`: the Clax instance's overlay, fetched over loopback each time and served from this origin, so a page can
 /// load it pinned by its SRI digest with no CORS on the instance. Revalidated always; the page's digest is what pins its bytes.
 fn overlay(site: &Site, req: &Request) -> Response {
@@ -505,6 +642,16 @@ fn file(site: &Site, req: &Request, path: &str, now: i64) -> Response {
             let login = req.header("Tailscale-User-Login").filter(|l| *l == a.login);
             bytes = fill(p, site, a, login, now, did(&req.target)).into_bytes();
             private = true;
+        }
+    }
+    // A fold's page, where this server reports to Clax: its list ends with "Comment in Clax", a plain link to the fold's comment
+    // page (close condition 4: with JS off, the page still offers it). Added as it is served, so the pages as written are unchanged.
+    if let (Some(_), true) = (&site.reporting, page) {
+        if let Some(p) = std::str::from_utf8(&bytes).ok().filter(|p| p.contains("</ol></main>")) {
+            let fold: Vec<String> =
+                segs.iter().filter(|s| !s.is_empty() && **s != "index.html" && **s != page::SLIDES).map(|s| s.to_string()).collect();
+            let row = format!("<li class=\"prop\"><a href=\"{}\">Comment in Clax</a></li></ol></main>", text(&comment_href(&site.mount, &fold)));
+            bytes = p.replacen("</ol></main>", &row, 1).into_bytes();
         }
     }
     let class = if site.no_store.iter().any(|p| rel[1..].starts_with(p.as_str())) {

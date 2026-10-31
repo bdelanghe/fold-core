@@ -8,7 +8,7 @@ use std::net::TcpListener;
 use std::sync::{Arc, Mutex};
 
 use fold_core::http::{answer_of, call, loopback, parse};
-use fold_core::report::{ClaxMinter, Config, Grant, Minted, Minter, Reporting};
+use fold_core::report::{ClaxMinter, Comment, Config, Filer, Grant, Minted, Minter, Reporting};
 use fold_core::serve::{answer, limit, Request, Site, OVERLAY, REPORT_BODY, REPORT_TOKEN};
 use serde_json::Value;
 
@@ -20,7 +20,7 @@ const PK: &str = "MCowBQYDK2VwAyEAGb9ECWmEzf6FQbrBZ9w7lshQhqowtrbLDFw4rXAxZuE";
 
 // The upstream is port 9 (discard), where no Clax ever listens: a test never reaches Bobby's own instance on 7480.
 const CONFIG: &str = r#"{"login":"bobby@example.com","host":"phobos.example.ts.net","clax":"https://clax.example.ts.net/",
-  "upstream":"http://127.0.0.1:9","queue":"basis","owner":"personal-allie-lead",
+  "upstream":"http://127.0.0.1:9","queue":"basis","owner":"personal-allie-lead","source":"fleet-map",
   "grant_cmd":["op","read","op://Fleet/clax basis grant/token"],"grant_key_cmd":["op","read","op://Fleet/clax basis grant/key"]}"#;
 
 /// Unpadded base64url.
@@ -84,7 +84,7 @@ fn the_config_names_its_grant_commands_and_never_holds_a_key() {
         assert!(Config::parse(&bad).err().unwrap_or_default().contains("never kept in a file"), "{k}");
     }
     // every field is needed
-    for k in ["login", "host", "clax", "upstream", "queue", "owner", "grant_cmd", "grant_key_cmd"] {
+    for k in ["login", "host", "clax", "upstream", "queue", "owner", "source", "grant_cmd", "grant_key_cmd"] {
         let mut v: Value = serde_json::from_str(CONFIG).unwrap();
         v.as_object_mut().unwrap().remove(k);
         assert!(Config::parse(&v.to_string()).err().unwrap_or_default().contains(k), "{k}");
@@ -176,8 +176,117 @@ fn site(reporting: bool, upstream: String, stub: &Stub) -> Site {
         queue: QUEUE.into(),
         owner: OWNER.into(),
         minter: Box::new(stub.clone()),
+        source: "fleet-map".into(),
+        filer: None,
     });
     Site { root, mount: "/fold".into(), no_store: vec![], acting: None, reporting }
+}
+
+/// A filer that records each comment, and refuses one whose words start with "down".
+#[derive(Clone, Default)]
+struct Filed(Arc<Mutex<Vec<Comment>>>);
+
+impl Filer for Filed {
+    fn file(&self, c: &Comment) -> Result<(), String> {
+        if c.body.starts_with("down") {
+            return Err("clax answered 503: busy".into());
+        }
+        self.0.lock().unwrap().push(c.clone());
+        Ok(())
+    }
+}
+
+/// A site with one fold page (`needs/`, titled with an `&`), the viewer's shell at the root, and a filer if `filed` is given.
+fn comment_site(name: &str, filed: Option<&Filed>) -> Site {
+    let mut s = site(true, "http://127.0.0.1:9".into(), &Stub::default());
+    s.root = std::env::temp_dir().join(format!("fold-report-{name}-{}", std::process::id()));
+    let _ = std::fs::remove_dir_all(&s.root);
+    std::fs::create_dir_all(s.root.join("needs")).unwrap();
+    std::fs::write(s.root.join("index.html"), "<!doctype html><main><h1 tabindex=\"-1\">Loading…</h1></main>\n").unwrap();
+    std::fs::write(
+        s.root.join("needs/index.html"),
+        "<!doctype html><title>Needs</title><main><h1 id=\"needs\" tabindex=\"-1\">Needs &amp; you</h1><ol class=\"rows\" role=\"list\" aria-label=\"Needs &amp; you\"><li class=\"prop\"><span>One thing.</span></li></ol></main>\n",
+    )
+    .unwrap();
+    if let Some(f) = filed {
+        s.reporting.as_mut().unwrap().filer = Some(Box::new(f.clone()));
+    }
+    s
+}
+
+#[test]
+fn with_js_off_a_fold_offers_comment_in_clax_and_takes_it_as_a_form() {
+    let form = |b: &str| from_me("POST", "/comment/needs/", b, &[("Content-Type", Some("application/x-www-form-urlencoded"))]);
+    let text = |r: &fold_core::http::Response| String::from_utf8_lossy(&r.body).to_string();
+
+    // the fold's page, served, ends its list with the link; the viewer's shell (no list) is left as it is
+    let s = comment_site("off", None);
+    let page = text(&answer(&s, &from_me("GET", "/needs/", "", &[]), NOW).0);
+    assert!(page.contains("<li class=\"prop\"><a href=\"/fold/comment/needs/\">Comment in Clax</a></li></ol></main>"), "{page}");
+    assert!(!text(&answer(&s, &from_me("GET", "/", "", &[]), NOW).0).contains("Comment in Clax"));
+    // and not where this server does not report
+    let mut quiet = comment_site("quiet", None);
+    quiet.reporting = None;
+    assert!(!text(&answer(&quiet, &from_me("GET", "/needs/", "", &[]), NOW).0).contains("Comment in Clax"));
+    assert_eq!(answer(&quiet, &from_me("GET", "/comment/needs/", "", &[]), NOW).0.status, 404);
+
+    // the comment page: the fold's shape, a named box that is never prefilled, its button, the way back
+    let (res, log) = answer(&s, &from_me("GET", "/comment/needs/", "", &[]), NOW);
+    let html = text(&res);
+    assert_eq!((res.status, log.is_none()), (200, true));
+    assert!(html.contains("<h1 tabindex=\"-1\">Comment on Needs &amp; you</h1>"), "{html}");
+    assert!(html.contains("<form aria-label=\"Comment\" method=\"post\" action=\"/fold/comment/needs/\">"), "{html}");
+    assert!(html.contains("<textarea aria-label=\"Your comment\" name=\"body\" required=\"\" maxlength=\"4000\"></textarea>"), "{html}");
+    assert!(html.contains("<button type=\"submit\">Send to Clax</button>"), "{html}");
+    assert!(html.contains("<a href=\"/fold/needs/\">Back to Needs &amp; you</a>"), "{html}");
+    assert!(html.contains("goes to personal-allie-lead through Clax"), "{html}");
+    // a fold with no page: the page of a fold that is not there
+    assert_eq!(answer(&s, &from_me("GET", "/comment/gone/", "", &[]), NOW).0.status, 404);
+
+    // no filer yet: 503, said, nothing sent
+    let (res, log) = answer(&s, &form("body=Ship+it"), NOW);
+    assert_eq!((res.status, log.unwrap()["result"].as_str()), (503, Some("off")));
+    assert!(text(&res).contains("Comments from here are not on yet, so nothing was sent."));
+
+    // with a filer: filed about the fold, then back to it
+    let filed = Filed::default();
+    let s = comment_site("on", Some(&filed));
+    let (res, log) = answer(&s, &form("body=Ship+it%2C+please.%0A"), NOW);
+    assert_eq!((res.status, res.header("Location")), (303, Some("/fold/needs/")));
+    let log = log.unwrap();
+    assert_eq!((log["result"].as_str(), log["comment"].as_str()), (Some("filed"), Some("https://ipso.bounded.tools/fleet-map/needs")));
+    assert!(!log.to_string().contains("Ship"), "the log never holds the words");
+    assert_eq!(
+        *filed.0.lock().unwrap(),
+        [Comment {
+            external_id: "https://ipso.bounded.tools/fleet-map/needs".into(),
+            url: "https://phobos.example.ts.net/fold/needs/".into(),
+            title: "Needs & you".into(),
+            body: "Ship it, please.".into(),
+        }]
+    );
+
+    // refused, each before anything is filed
+    let long = format!("body={}", "a".repeat(4001));
+    let refusals: Vec<(&str, Request, u16)> = vec![
+        ("cross-site", from_me("POST", "/comment/needs/", "body=x", &[("Content-Type", Some("application/x-www-form-urlencoded")), ("Sec-Fetch-Site", Some("cross-site"))]), 403),
+        ("another login", from_me("POST", "/comment/needs/", "body=x", &[("Content-Type", Some("application/x-www-form-urlencoded")), ("Tailscale-User-Login", Some("eve@example.com"))]), 403),
+        ("JSON, not a form", from_me("POST", "/comment/needs/", "{\"body\":\"x\"}", &[]), 415),
+        ("nothing written", form("body=+%0A"), 400),
+        ("no body field", form("words=x"), 400),
+        ("too long", form(&long), 400),
+        ("Clax does not take it", form("body=down+again"), 502),
+        ("no PUT", from_me("PUT", "/comment/needs/", "body=x", &[]), 405),
+    ];
+    for (what, r, status) in refusals {
+        let before = filed.0.lock().unwrap().len();
+        assert_eq!(answer(&s, &r, NOW).0.status, status, "{what}");
+        assert_eq!(filed.0.lock().unwrap().len(), before, "{what}: nothing filed");
+    }
+    assert_eq!(limit("POST", "/comment/needs/"), fold_core::serve::COMMENT_BODY);
+    for name in ["off", "quiet", "on"] {
+        let _ = std::fs::remove_dir_all(std::env::temp_dir().join(format!("fold-report-{name}-{}", std::process::id())));
+    }
 }
 
 /// A request as tailscale serve hands one on from ME's own page, with `change` applied (None drops a header).

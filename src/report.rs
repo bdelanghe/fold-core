@@ -45,6 +45,26 @@ pub struct Reporting {
     pub owner: String,
     /// What mints a reporter token: the instance, through the queue's grant ([`ClaxMinter`]); tests give a stub.
     pub minter: Box<dyn Minter>,
+    /// The document's source, as the pages' haecceities name it (id.rs `haecceity`): a comment's artifact is its fold's IRI.
+    pub source: String,
+    /// What files a comment made with JS off (serve.rs's comment page) as a Clax report, if anything: none yet, so that page says
+    /// comments from it are not on (a server-side reporter waits on Bobby's answer on the grant).
+    pub filer: Option<Box<dyn Filer>>,
+}
+
+/// A comment from a fold's comment page, as a Clax report: about the fold (its haecceity, the artifact's external id), seen at
+/// `url`, with the fold's `title` and the reader's words.
+#[derive(Debug, PartialEq, Clone)]
+pub struct Comment {
+    pub external_id: String,
+    pub url: String,
+    pub title: String,
+    pub body: String,
+}
+
+/// What files a [`Comment`] in the queue.
+pub trait Filer: Send + Sync {
+    fn file(&self, c: &Comment) -> Result<(), String>;
 }
 
 /// What a reporter token is: the instance's own answer, `{token, expires_at}` (`expires_at` a time stamp, read by the page).
@@ -62,7 +82,7 @@ pub trait Minter: Send + Sync {
 /// What reads a service grant: given `grant_cmd`'s argv, its stdout, or why not. [`run_grant`] runs it; tests stub it.
 pub type Grant<'a> = dyn Fn(&[String]) -> Result<Vec<u8>, String> + 'a;
 
-/// `--report-config`'s file: `{login, host, clax, upstream, queue, owner, grant_cmd, grant_key_cmd}`, every one required, each
+/// `--report-config`'s file: `{login, host, clax, upstream, queue, owner, source, grant_cmd, grant_key_cmd}`, every one required, each
 /// `_cmd` an argv (no shell): `grant_cmd` prints the grant's `cxq_` token, `grant_key_cmd` its private key.
 pub struct Config {
     pub login: String,
@@ -71,6 +91,8 @@ pub struct Config {
     pub upstream: String,
     pub queue: String,
     pub owner: String,
+    /// The document's source, as its pages' haecceities name it (`fleet-map`).
+    pub source: String,
     pub grant_cmd: Vec<String>,
     pub grant_key_cmd: Vec<String>,
 }
@@ -127,6 +149,7 @@ impl Config {
             upstream,
             queue,
             owner: s("owner")?,
+            source: s("source")?,
             grant_cmd: argv("grant_cmd")?,
             grant_key_cmd: argv("grant_key_cmd")?,
         })
@@ -161,6 +184,8 @@ impl Config {
             queue: self.queue,
             owner: self.owner,
             minter: Box::new(minter),
+            source: self.source,
+            filer: None,
         })
     }
 }
