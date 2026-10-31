@@ -54,9 +54,19 @@ presents as slides also has `…/@slides/`.
 
 `tests/pages.rs` holds every walk case's pages to `goldens/pages/<case>.pages.json`, and `js/parity.test.ts` holds the WASM build to
 them. `js/html.test.ts` has lone bless each page's `<main>`. `checks.pages-browser` (Linux, `viewer/pages-check.ts`) loads every page
-in headless Chromium with JS off, in light and dark. Each page must have the right title, focus its h1 when entered by a link, and
-have links that land. It must also pass lone's colour contrast over the colours Chromium computes from fold.css. Known findings are
-in `goldens/pages/known.json`.
+in headless Chromium with JS off, in five modes: light, dark, both again under `prefers-contrast: more`, and `forced-colors`. Each
+page must have the right title, focus its h1 when entered by a link, and have links that land. It must also pass lone's colour
+contrast over the colours Chromium computes from fold.css, clear 7:1 under `prefers-contrast: more`, and give every button and field a
+visible border. Known findings are in `goldens/pages/known.json`.
+
+The colours themselves are proven before any browser runs them. `tests/contrast.rs` checks `viewer/theme.tokens.json`, a Baobab
+pinning, through `src/baobab.rs`:
+- light and dark: text 4.5, UI 3;
+- light-more and dark-more: text 7, UI 4.5;
+- forced: every role is a CSS system colour, and every pair is one the platform guarantees.
+
+The same test writes the fold.css block and `native/Colors.xcassets` (any, dark and Increase Contrast, for Apple hosts).
+`js/contrast.test.ts` runs Baobab's own TS over the same pairs, and it must agree.
 
 ## Schema
 

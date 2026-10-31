@@ -11,6 +11,11 @@
 :root{--paper:#EDEAE1;--card:#FFFFFF;--ink:#16221C;--soft:#5C6B63;--line:#888374;--accent:#0C5A42;--warn:#8A2B12;}
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--paper:#16221C;--card:#22302A;--ink:#ECEAE3;--soft:#A9B5AE;--line:#888374;--accent:#8FC3A8;--warn:#FF9C80;}}
 :root[data-theme="dark"]{--paper:#16221C;--card:#22302A;--ink:#ECEAE3;--soft:#A9B5AE;--line:#888374;--accent:#8FC3A8;--warn:#FF9C80;}
+@media (prefers-contrast:more) and (prefers-color-scheme:light){:root:not([data-theme="dark"]){--paper:#FFFFFF;--card:#FFFFFF;--ink:#000000;--soft:#16221C;--line:#5C6B63;--accent:#0C5A42;--warn:#8A2B12;}}
+@media (prefers-contrast:more){:root[data-theme="light"]{--paper:#FFFFFF;--card:#FFFFFF;--ink:#000000;--soft:#16221C;--line:#5C6B63;--accent:#0C5A42;--warn:#8A2B12;}}
+@media (prefers-contrast:more) and (prefers-color-scheme:dark){:root:not([data-theme="light"]){--paper:#000000;--card:#16221C;--ink:#FFFFFF;--soft:#ECEAE3;--line:#A9B5AE;--accent:#8FC3A8;--warn:#FF9C80;}}
+@media (prefers-contrast:more){:root[data-theme="dark"]{--paper:#000000;--card:#16221C;--ink:#FFFFFF;--soft:#ECEAE3;--line:#A9B5AE;--accent:#8FC3A8;--warn:#FF9C80;}}
+@media (forced-colors:active){:root,:root[data-theme]{--paper:Canvas;--card:Canvas;--ink:CanvasText;--soft:CanvasText;--line:CanvasText;--accent:LinkText;--warn:CanvasText;}}
 /* baobab:end */
 :root{--face:"Atkinson Hyperlegible Next",system-ui,-apple-system,sans-serif;
   --s0:18px;--r:1.2;--s-1:calc(var(--s0) / var(--r));--s1:calc(var(--s0) * var(--r));--s2:calc(var(--s0) * var(--r) * var(--r));--s3:calc(var(--s2) * var(--r))}
@@ -20,7 +25,7 @@ main,form.reading{max-width:42rem;margin:0 auto;padding:16px}
 /* The document read, as a search box (Bobby 10-30): its path, editable; Open reads another on this site. */
 form.reading{display:flex;flex-wrap:wrap;gap:.5rem;align-items:center;padding-bottom:0;font-size:var(--s-1)}
 form.reading input{flex:1;min-width:12ch;min-height:44px;font:var(--s-1) ui-monospace,monospace;color:var(--ink);background:var(--card);border:1px solid var(--line);border-radius:.4em;padding:0 .5em}
-form.reading button{font:inherit;min-height:44px;color:var(--paper);background:var(--accent);border:0;border-radius:.4em;padding:0 1em}
+form.reading button{font:inherit;min-height:44px;color:var(--paper);background:var(--accent);border:1px solid var(--accent);border-radius:.4em;padding:0 1em}
 form.reading .note{flex-basis:100%;color:var(--soft);overflow-wrap:anywhere}
 nav ol{list-style:none;margin:0;padding:0;font:var(--s-1)/1.6 var(--face)}
 nav li{display:inline}
@@ -44,7 +49,7 @@ body.keys ol.rows li.cur .enter{display:block}
 /* A property row (the object's own words, its link, when its data is from): read, not entered. */
 ol.rows li.prop{display:block;cursor:default;min-height:0}
 ol.rows li.prop a{color:var(--accent)}
-li.act button{font-family:inherit;font-size:var(--s0);color:var(--paper);background:var(--accent);border:0;border-radius:.4em;padding:.5em 1em;min-height:44px}
+li.act button{font-family:inherit;font-size:var(--s0);color:var(--paper);background:var(--accent);border:1px solid var(--accent);border-radius:.4em;padding:.5em 1em;min-height:44px}
 li.act .result{display:block}
 ol.rows li.when,ol.rows li.step{color:var(--soft);font-size:var(--s-1)}
 ol.rows li.stale,ol.rows .hint.alert{color:var(--warn)}
