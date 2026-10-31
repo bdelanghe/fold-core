@@ -21,6 +21,8 @@ pub mod report;
 #[cfg(not(target_arch = "wasm32"))]
 pub mod serve;
 #[cfg(not(target_arch = "wasm32"))]
+pub mod sig;
+#[cfg(not(target_arch = "wasm32"))]
 pub mod sink;
 mod tz;
 pub mod walk;

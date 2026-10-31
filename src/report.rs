@@ -28,7 +28,8 @@ use std::process::Command;
 
 use serde_json::{json, Value};
 
-use crate::http::{call, loopback};
+use crate::http::{authority, call, loopback};
+use crate::sig::{header, nonce, SignInput, Signer};
 
 /// What `fold serve` reports with: whom for, which Clax, which queue, and the grant that lets it mint.
 pub struct Reporting {
@@ -171,12 +172,19 @@ pub struct ClaxMinter {
     pub queue: String,
     token: String,
     key: String,
+    /// The Ed25519 signer made from `key`: none until fold-core has an Ed25519 crate (sig.rs), so the mint refuses.
+    signer: Option<Box<dyn Signer>>,
 }
 
 impl ClaxMinter {
     /// The minter for one queue on the instance at `upstream` (loopback), with its grant's `cxq_` token and key.
     pub fn new(upstream: String, queue: String, token: String, key: String) -> ClaxMinter {
-        ClaxMinter { upstream, queue, token, key }
+        ClaxMinter { upstream, queue, token, key, signer: None }
+    }
+
+    /// The same, signing with `signer` (tests give one; the real one comes with an Ed25519 crate).
+    pub fn with_signer(self, signer: Box<dyn Signer>) -> ClaxMinter {
+        ClaxMinter { signer: Some(signer), ..self }
     }
 
     /// The request a mint makes, before its signature: path, headers (no Origin, no cookie: a service call never carries
@@ -192,17 +200,25 @@ impl ClaxMinter {
         (path, headers, body)
     }
 
-    /// `Clax-Signature` for a request (`clax-ed25519 v2`). Not built yet (module docs): it refuses, so nothing unsigned is sent.
-    fn signature(&self, _path: &str, _body: &str) -> Result<String, String> {
-        let _ = &self.key;
-        Err("clax-ed25519 v2 signing is not built in fold serve yet, so no reporter token can be minted".into())
+    /// `Clax-Signature` for a request (sig.rs, `clax-ed25519 v2`) at `t`, with `nonce`: over the path, the Host [`call`] sends, the
+    /// body and the grant's token. With no signer it refuses, so nothing unsigned is sent.
+    pub fn signature(&self, path: &str, body: &str, t: u64, nonce: &str) -> Result<String, String> {
+        let signer = self.signer.as_deref().ok_or_else(|| {
+            let _ = &self.key; // what the real signer is made from
+            "clax-ed25519 v2 signing is not built in fold serve yet (no Ed25519 crate), so no reporter token can be minted".to_string()
+        })?;
+        let host = authority(&self.upstream).ok_or("the upstream is not on loopback")?;
+        let input = SignInput { method: "POST", target: path, host: &host, t, nonce, body: body.as_bytes(), token: &self.token, agent: &[] };
+        header(signer, &input)
     }
 }
 
 impl Minter for ClaxMinter {
     fn mint(&self, public_key: &str, origin: &str, reporter_id: &str) -> Result<Minted, String> {
         let (path, mut headers, body) = self.request(public_key, origin, reporter_id);
-        headers.push(("Clax-Signature".to_string(), self.signature(&path, &body)?));
+        let t = std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH).map_err(|e| e.to_string())?.as_secs();
+        let sig = self.signature(&path, &body, t, &nonce()?)?;
+        headers.push(("Clax-Signature".to_string(), sig));
         let hs: Vec<(&str, &str)> = headers.iter().map(|(k, v)| (k.as_str(), v.as_str())).collect();
         let r = call(&self.upstream, "POST", &path, &hs, body.as_bytes())?;
         if !(200..300).contains(&r.status) {

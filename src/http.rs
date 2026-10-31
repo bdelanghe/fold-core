@@ -142,6 +142,12 @@ pub fn loopback(origin: &str) -> Option<(String, u16)> {
     Some((host.trim_matches(['[', ']']).to_string(), port))
 }
 
+/// The Host header [`call`] sends to a loopback origin (`127.0.0.1:7480`, `[::1]:7480`): what a signed request signs as its host.
+pub fn authority(origin: &str) -> Option<String> {
+    let (host, port) = loopback(origin)?;
+    Some(if host.contains(':') { format!("[{host}]:{port}") } else { format!("{host}:{port}") })
+}
+
 /// One HTTP/1.1 request to a loopback origin ([`loopback`]), `Connection: close`: its status, headers and body (a Content-Length or
 /// chunked one, or to the close), or why not. For fold serve's calls to the Clax instance beside it (report.rs).
 pub fn call(origin: &str, method: &str, path: &str, headers: &[(&str, &str)], body: &[u8]) -> Result<Response, String> {
@@ -149,7 +155,7 @@ pub fn call(origin: &str, method: &str, path: &str, headers: &[(&str, &str)], bo
     let (host, port) = loopback(origin).ok_or_else(|| format!("{origin}: not an http origin on loopback"))?;
     let mut s = TcpStream::connect((host.as_str(), port)).map_err(|e| format!("{origin}: {e}"))?;
     let _ = s.set_read_timeout(Some(std::time::Duration::from_secs(10)));
-    let authority = if host.contains(':') { format!("[{host}]:{port}") } else { format!("{host}:{port}") };
+    let authority = authority(origin).unwrap_or_default();
     let mut o = format!("{method} {path} HTTP/1.1\r\nHost: {authority}\r\nConnection: close\r\nContent-Length: {}\r\n", body.len());
     for (k, v) in headers {
         o += &format!("{k}: {v}\r\n");
