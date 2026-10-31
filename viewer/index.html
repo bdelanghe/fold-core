@@ -12,8 +12,10 @@
 <meta name="fold-live" content="/live" data-seat="personal-super-human">
 <!-- Clax, through @empathic/clax-sdk only (basis-clax goal): its overlay's path on Bobby's self-hosted Clax (the origin fold serve
      names with the reporter token), its version and its SRI digest. Never copied here. Without the digest, no overlay loads (clax.js
-     pinOf). The version is the SDK's (clax Cargo.toml [workspace.package], 0.6.0); the digest waits on a hash of the served bytes. -->
-<meta name="clax-sdk" content="/_clax/overlay.js" data-version="0.6.0" data-integrity="">
+     pinOf). The version is the SDK's (clax Cargo.toml [workspace.package], 0.6.0); the digest is of /_clax/overlay.js as clax main
+     d7812795 builds it (web/dist, 140094 bytes, the iife `var Clax=…`; personal-cake-goal 700d5d54, two byte-identical vite builds,
+     not yet checked against Bazel's bytes or a running instance's). It goes stale when the overlay changes: re-pin from a named build. -->
+<meta name="clax-sdk" content="/_clax/overlay.js" data-version="0.6.0" data-integrity="sha384-+Rv1wqOXTrwVqUHmv8wGvlpU1KE+mO5WLhLV8Ey8s8KIcZDrE8zDimE/kmFrxiA/">
 <link rel="modulepreload" href="fold-core.js">
 <!-- On the Home Screen (manifest.webmanifest, sw.js): the approved Basis mark, from ~/.lobby/ops/basis-icons (Bobby 910d8009). -->
 <link rel="manifest" href="manifest.webmanifest">
