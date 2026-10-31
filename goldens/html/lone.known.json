@@ -10,6 +10,11 @@
       "case": "inline", "ids": ["artifacts~x", "fat"], "code": "LONE_COGA_CONTENT_DENSITY",
       "why": "these fixtures are over the word budget on purpose: they are where walk.ts and the walk goldens block",
       "clears": "nothing: they stay unblessed as the over-budget case (the walk blocks them too)"
+    },
+    {
+      "case": "fold-act", "ids": ["needs~needs-list-args"], "code": "LONE_SEMANTIC_FORM_CONTROL_UNLABELED",
+      "why": "lone 0.8.0 counts every <input> as a control to label, <input type=hidden> too; an act's cap, call and args ride as hidden fields (src/ax.rs act_form), which have no UI and are never in the accessibility tree",
+      "clears": "lone skipping type=hidden in its unlabeled-control rule (src/validate/semantic_html.ts)"
     }
   ]
 }

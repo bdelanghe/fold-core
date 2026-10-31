@@ -1,0 +1,17 @@
+{
+  "walk": {
+    "folds": 2,
+    "reached": 1,
+    "findings": [
+      {
+        "fold": "needs",
+        "check": "unreachable",
+        "kind": "remove",
+        "blocks": false,
+        "said": "Needs you",
+        "reduction": "no path from the top reaches it: remove it or link it"
+      }
+    ]
+  },
+  "verdict": "Checked by the artificial viewer: every fold reached, nothing blocking."
+}

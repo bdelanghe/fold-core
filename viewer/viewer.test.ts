@@ -83,7 +83,12 @@ for (const f of readdirSync(join(goldens, "ax")).sort()) {
 
 test("a location with no fold, and a document that cannot be read", async () => {
   const nodes = new Map([["root", { title: "T", trail: [], kids: [] }]]);
-  expect(viewOf(ax, nodes, "#/gone", "UTC").tree.children[0]).toEqual({ role: "heading", name: "Nothing here yet" });
+  // A missing fold still has its way back (BRIEF-basis-forms-push-signing-2026-10-31 §5): the path to the root, why, and the root.
+  const gone = viewOf(ax, nodes, "#/gone", "UTC").tree.children;
+  expect(gone.map((c: any) => c.role)).toEqual(["navigation", "heading", "list"]);
+  expect(gone[0].children[0].children[0].children[0]).toEqual({ role: "link", name: "Everything", href: "#/" });
+  expect(gone[1]).toEqual({ role: "heading", name: "Nothing here", focus: true });
+  expect(gone[2].children.map((r: any) => r.children[0].name)).toEqual(["You asked for gone, and no fold has that path.", "Back to Everything"]);
   expect(viewOf(ax, nodes, "", "UTC").mode).toBe("folds");
   await expect(open(fold, "https://data.test/fold-data/none/page.json", { fetch: origin("x", { root: {} }).fetch })).rejects.toThrow("404");
 });

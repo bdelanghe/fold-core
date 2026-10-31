@@ -98,7 +98,7 @@ pub fn run(listener: TcpListener, per_minute: u32, log: PathBuf) -> std::io::Res
     let lim = Mutex::new(Limiter::new(per_minute));
     crate::http::run(
         listener,
-        MAX_BODY,
+        Arc::new(|_: &str, _: &str| MAX_BODY),
         Some(log),
         Arc::new(move |req: &Request, at| accept(&mut lim.lock().unwrap_or_else(|e| e.into_inner()), req, at)),
     )

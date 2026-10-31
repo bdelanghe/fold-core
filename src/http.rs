@@ -74,8 +74,16 @@ fn status_text(s: u16) -> &'static str {
     }
 }
 
-/// One request, its body at most `max_body` bytes (0 for `fold serve`: it takes none), or the answer that refuses it.
+/// One request, its body at most `max_body` bytes, or the answer that refuses it.
 pub fn parse(rd: &mut impl BufRead, max_body: usize) -> Result<Request, Response> {
+    parse_with(rd, &|_: &str, _: &str| max_body)
+}
+
+/// How many body bytes a request may send, by its method and target: asked before any of the body is read.
+pub type Limit = dyn Fn(&str, &str) -> usize + Send + Sync;
+
+/// One request, its body at most `limit(method, target)` bytes, or the answer that refuses it.
+pub fn parse_with(rd: &mut impl BufRead, limit: &dyn Fn(&str, &str) -> usize) -> Result<Request, Response> {
     let mut line = String::new();
     rd.read_line(&mut line).map_err(|_| Response::text(400, "no request"))?;
     let mut parts = line.split_whitespace();
@@ -104,6 +112,7 @@ pub fn parse(rd: &mut impl BufRead, max_body: usize) -> Result<Request, Response
     if req.header("Transfer-Encoding").is_some() {
         return Err(Response::text(400, "no Transfer-Encoding: send a Content-Length"));
     }
+    let max_body = limit(&req.method, &req.target);
     if len > max_body {
         return Err(Response::text(413, &format!("at most {max_body} bytes")));
     }
@@ -130,15 +139,15 @@ pub type Handler = dyn Fn(&Request, DateTime<Utc>) -> (Response, Option<Value>) 
 
 /// Answer on `listener` for ever, one thread per connection. A `Server-Timing` the handler sends gets `serve;dur=<ms>`. Each
 /// record is one JSON line appended to `log`; a handler with no log leaves none.
-pub fn run(listener: TcpListener, max_body: usize, log: Option<PathBuf>, handle: Arc<Handler>) -> std::io::Result<()> {
+pub fn run(listener: TcpListener, limit: Arc<Limit>, log: Option<PathBuf>, handle: Arc<Handler>) -> std::io::Result<()> {
     let lock = Arc::new(Mutex::new(()));
     for s in listener.incoming() {
-        let (handle, log, lock) = (handle.clone(), log.clone(), lock.clone());
+        let (handle, log, lock, limit) = (handle.clone(), log.clone(), lock.clone(), limit.clone());
         let Ok(mut s) = s else { continue };
         std::thread::spawn(move || {
             let t0 = Instant::now();
             let parsed = match s.try_clone() {
-                Ok(c) => parse(&mut BufReader::new(c), max_body),
+                Ok(c) => parse_with(&mut BufReader::new(c), &*limit),
                 Err(_) => return,
             };
             let (mut r, head, rec) = match parsed {

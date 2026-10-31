@@ -1,6 +1,7 @@
 //! `fold serve` (brief items 23-24, split by item 27): the fold viewer and its data over HTTP, read-only. GET and HEAD of static
 //! files, with the headers darkhttpd cannot send (ETag, Cache-Control, Server-Timing), and nothing else: it writes nothing, takes
-//! no body, and every other method is 405. It names no `fold sink` (sink.rs): the sink is kept but not deployed. Approvals go through neither; they stay chitin's `/approve`. [`respond`] is
+//! no body, and every other method is 405. The one exception is an act's form (src/ax.rs `act_form`) submitted with no script:
+//! its POST to `act/<id>` is read only to be dropped, and answered by a page saying acting from here isn't on yet ([`not_yet`]). It names no `fold sink` (sink.rs): the sink is kept but not deployed. Approvals go through neither; they stay chitin's `/approve`. [`respond`] is
 //! pure (a request and a directory in, a response out), so tests/serve.rs holds every resource class's headers as goldens without
 //! a socket; [`run`] is the loopback loop around it (http.rs, src/bin/fold.rs).
 //!
@@ -23,7 +24,10 @@ use std::sync::Arc;
 use std::time::SystemTime;
 
 use chrono::{DateTime, SecondsFormat, Utc};
+use serde_json::json;
 use sha2::{Digest, Sha256};
+
+use crate::{ax, page};
 
 pub use crate::http::{Request, Response};
 
@@ -115,13 +119,67 @@ fn matches(inm: &str, etag: &str) -> bool {
     inm.split(',').map(str::trim).any(|t| t == "*" || t == etag || t.strip_prefix("W/") == Some(etag))
 }
 
+/// The most an act's form may send (its cap, call and args as fields), read only to be dropped. Every other body is refused unread.
+pub const ACT_BODY: usize = 8192;
+
+/// How many body bytes a request may send: none, but for a POST to an act.
+pub fn limit(method: &str, target: &str) -> usize {
+    if method == "POST" && act(target).is_some() {
+        ACT_BODY
+    } else {
+        0
+    }
+}
+
+/// An act's target (`/act/<id>/…/<index>`, src/ax.rs `act_id`) as the path of the fold it is on, each id percent-decoded.
+fn act(target: &str) -> Option<Vec<String>> {
+    let path = target.split(['?', '#']).next()?.strip_prefix("/act/")?;
+    let mut segs: Vec<&str> = path.split('/').collect();
+    segs.pop()?.parse::<usize>().ok()?;
+    segs.into_iter().map(|s| decode(s).filter(|s| !s.is_empty())).collect()
+}
+
 /// One request's answer.
 pub fn respond(site: &Site, req: &Request) -> Response {
     let path = req.target.split(['?', '#']).next().unwrap_or("");
     match req.method.as_str() {
         "GET" | "HEAD" => file(site, req, path),
+        "POST" => match act(&req.target) {
+            Some(fold) => not_yet(site, &fold),
+            None => Response::text(405, "read-only: GET or HEAD").with("Allow", "GET, HEAD"),
+        },
         _ => Response::text(405, "read-only: GET or HEAD").with("Allow", "GET, HEAD"),
     }
+}
+
+/// An act's form submitted with no script to take it (BRIEF-basis-forms-push-signing-2026-10-31 §1, render only): this server
+/// only reads, so it does nothing and says so on a page of its own, with the way back to the fold the act is on and to the root;
+/// never a bare 405. The form's fields were read only to be dropped.
+fn not_yet(site: &Site, fold: &[String]) -> Response {
+    let base = format!("{}/", site.mount);
+    let link = |name: String, to: &[String]| {
+        json!({ "role": "listitem", "cls": "prop", "children": [{ "role": "link", "name": name, "href": page::href(&base, to, "folds"), "local": true }] })
+    };
+    let said = "Nothing was done: this server only reads. Acting from here comes once it can tell who is asking.";
+    let mut rows = vec![json!({ "role": "listitem", "cls": "prop", "children": [{ "role": "text", "name": said }] })];
+    if let Some(id) = fold.last() {
+        rows.push(link(format!("Back to {id}"), fold));
+    }
+    rows.push(link(format!("Back to {}", ax::ROOT), &[]));
+    let title = "Acting from here isn't on yet";
+    let tree = json!({ "role": "main", "children": [
+        { "role": "heading", "name": title, "focus": true },
+        { "role": "list", "name": title, "cls": "rows", "children": rows },
+    ] });
+    let mut r = Response::new(405).with("Allow", "GET, HEAD").with("Cache-Control", "no-store");
+    match page::page(&tree, &base) {
+        Ok(h) => {
+            r = r.with("Content-Type", "text/html; charset=utf-8");
+            r.body = h.into_bytes();
+        }
+        Err(e) => r = Response::text(405, &e).with("Allow", "GET, HEAD"),
+    }
+    r
 }
 
 fn file(site: &Site, req: &Request, path: &str) -> Response {
@@ -179,5 +237,5 @@ fn file(site: &Site, req: &Request, path: &str) -> Response {
 
 /// Serve `site` on `listener` for ever.
 pub fn run(listener: TcpListener, site: Site) -> std::io::Result<()> {
-    crate::http::run(listener, 0, None, Arc::new(move |req: &Request, _| (respond(&site, req), None)))
+    crate::http::run(listener, Arc::new(limit), None, Arc::new(move |req: &Request, _| (respond(&site, req), None)))
 }

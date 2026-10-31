@@ -81,22 +81,97 @@ pub(crate) fn at(id: &str) -> Vec<String> {
     }
 }
 
+/// The root's name in a path that has no trail to name it (a missing fold's).
+pub const ROOT: &str = "Everything";
+
+/// A fold's path as its navigation: a link to each fold above it, named by the trail (or, with none, the root's name and then
+/// the ids). A fold with no way back of its own (`always`: missing, failed, or an empty root) still gets one, to the root.
+fn path_nav(path: &[String], trail: Option<&Value>, href: Href, mode: &str, always: bool) -> Option<Value> {
+    let steps = if path.is_empty() && always { 1 } else { path.len() };
+    let crumbs: Vec<Value> = (0..steps)
+        .map(|i| {
+            let name = present(trail.and_then(|t| t.get(i))).cloned().unwrap_or_else(|| match (always, i) {
+                (false, _) => "Home".into(),
+                (true, 0) => ROOT.into(),
+                (true, _) => path[i - 1].clone().into(),
+            });
+            let to = &path[..i.min(path.len())];
+            json!({ "role": "listitem", "children": [{ "role": "link", "name": name, "href": href(to, mode) }] })
+        })
+        .collect();
+    (steps > 0).then(|| json!({ "role": "navigation", "name": "Path", "children": [{ "role": "list", "name": "Path", "children": crumbs }] }))
+}
+
+/// The root, as a row of a fold that has no way back of its own; none on the root itself.
+fn to_root(path: &[String], trail: Option<&Value>, href: Href, mode: &str) -> Option<Value> {
+    let name = present(trail.and_then(|t| t.get(0))).map_or_else(|| ROOT.to_string(), |v| js::string(Some(v)));
+    (!path.is_empty()).then(|| prop(vec![json!({ "role": "link", "name": format!("Back to {name}"), "href": href(&[], mode) })], "prop root"))
+}
+
+/// The act's own id: the fold's path (each id through `encodeURIComponent`, as the viewer's links write it) and the act's index
+/// among the fold's acts, always the last step, so a path ending in a fold whose id is a number never reads as another's.
+pub fn act_id(path: &[String], i: usize) -> String {
+    path.iter().map(|p| js::encode_uri_component(p) + "/").collect::<String>() + &i.to_string()
+}
+
+/// A fold's act as an HTML form (BRIEF-basis-forms-push-signing-2026-10-31 §1): it posts its cap, call and args as hidden
+/// fields to `act/<act id>` under the viewer's mount, with a native submit button. No script. The passkey (`webauthn`, or
+/// `approve`) is the exception: WebAuthn runs only in a document, so where the fold links its sign page, the form GETs that
+/// page (its `#i-<intent>` kept, as a GET form keeps the action's fragment), which runs the ceremony and comes back.
+fn act_form(node: &Value, path: &[String]) -> Value {
+    let act = &node["act"];
+    let label = get(act, "label").cloned();
+    let cap = js::string(get(act, "cap"));
+    let passkey = matches!(cap.trim(), "webauthn" | "approve") && truthy(get(node, "href"));
+    let (method, action, fields) = if passkey {
+        ("get", node["href"].clone(), vec![])
+    } else {
+        let mut f = vec![json!(["cap", cap]), json!(["call", js::string(get(act, "call"))])];
+        match present(get(act, "args")) {
+            None => {}
+            Some(Value::Object(m)) => f.extend(m.iter().map(|(k, v)| json!([format!("args.{k}"), field(v)]))),
+            Some(v) => f.push(json!(["args", field(v)])),
+        }
+        ("post", format!("act/{}", act_id(path, 0)).into(), f)
+    };
+    let name = present(get(node, "title")).or(label.as_ref()).cloned();
+    obj(vec![
+        ("role", Some("form".into())),
+        ("name", name),
+        ("cls", Some("act".into())),
+        ("method", Some(method.into())),
+        ("action", Some(action)),
+        ("fields", (!fields.is_empty()).then(|| fields.into())),
+        ("children", Some(json!([obj(vec![("role", Some("button".into())), ("name", label), ("cls", Some("act".into()))])]))),
+    ])
+}
+
+/// An arg as a field's value: a string as it is, anything else as its JSON.
+fn field(v: &Value) -> String {
+    match v {
+        Value::String(s) => s.clone(),
+        v => v.to_string(),
+    }
+}
+
 /// fold-ax.js `axOf(node, path, href, mode)`. `clock`'s local zone is the machine's, where JS's `toLocaleString` reads the time.
+///
+/// Where fold-core leaves home's fold-ax.js (goldens/REV), on purpose: an act is a form (`act_form`); and a fold with no way back
+/// of its own still has one (BRIEF-basis-forms-push-signing-2026-10-31 §5). A missing fold, a failed one (`failed`: why its data
+/// could not be read) and a root with nothing in it each show the path (to the root, at least), one line saying what was asked
+/// for and why there is nothing, and, off the root, a link back to it.
 pub fn ax_of(node: Option<&Value>, path: &[String], href: Href, mode: &str, clock: &Clock) -> Value {
     let slides = mode == "slides";
     let Some(node) = node.filter(|n| truthy(Some(n))) else {
-        return json!({ "role": "main", "children": [
-            { "role": "heading", "name": "Nothing here yet" },
-            { "role": "list", "name": "Nothing here yet", "cls": "rows", "children": [said("This fold has no data.".into())] },
-        ] });
+        let asked = if path.is_empty() { ROOT.to_string() } else { path.join(" › ") };
+        let rows: Vec<Value> =
+            [Some(said(format!("You asked for {asked}, and no fold has that path.").into())), to_root(path, None, href, mode)].into_iter().flatten().collect();
+        let mut children: Vec<Value> = path_nav(path, None, href, mode, true).into_iter().collect();
+        children.push(json!({ "role": "heading", "name": "Nothing here", "focus": true }));
+        children.push(json!({ "role": "list", "name": "Nothing here", "cls": "rows", "children": rows }));
+        return json!({ "role": "main", "children": children });
     };
     let trail = get(node, "trail");
-    let crumbs: Vec<Value> = (0..path.len())
-        .map(|i| {
-            let name = present(trail.and_then(|t| t.get(i))).cloned().unwrap_or_else(|| "Home".into());
-            json!({ "role": "listitem", "children": [{ "role": "link", "name": name, "href": href(&path[..i], mode) }] })
-        })
-        .collect();
     let kids = concat(get(node, "kids"));
     let title = get(node, "title").cloned();
     let steps: Vec<(&str, &str)> = if slides {
@@ -109,16 +184,13 @@ pub fn ax_of(node: Option<&Value>, path: &[String], href: Href, mode: &str, cloc
     if truthy(get(node, "stale")) {
         props.push(prop(vec![json!({ "role": "text", "name": node["stale"] })], "prop stale"));
     }
+    let failed = truthy(get(node, "failed"));
+    if failed {
+        props.push(said(node["failed"].clone()));
+    }
     props.extend(concat(get(node, "text")).into_iter().map(said));
     if truthy(get(node, "act")) {
-        let label = get(&node["act"], "label").cloned();
-        props.push(prop(
-            vec![
-                obj(vec![("role", Some("button".into())), ("name", label), ("cls", Some("act".into()))]),
-                json!({ "role": "status", "cls": "result" }),
-            ],
-            "prop act",
-        ));
+        props.push(prop(vec![act_form(node, path), json!({ "role": "status", "cls": "result" })], "prop act"));
     }
     if truthy(get(node, "href")) {
         let name = present(get(node, "hrefLabel")).unwrap_or(&node["href"]).clone();
@@ -170,11 +242,14 @@ pub fn ax_of(node: Option<&Value>, path: &[String], href: Href, mode: &str, cloc
     });
 
     let list_name = format!("{}{}", if slides { "Points of " } else { "" }, js::string(title.as_ref()));
-    let mut children = vec![];
-    if !path.is_empty() {
-        children
-            .push(json!({ "role": "navigation", "name": "Path", "children": [{ "role": "list", "name": "Path", "children": crumbs }] }));
+    // A root with nothing in it says so; a failed fold has said why, and both keep the way back.
+    let empty = path.is_empty() && props.is_empty() && kids.is_empty();
+    if empty {
+        props.push(said("There is nothing in this document yet.".into()));
     }
+    let lost = failed || empty;
+    props.extend(to_root(path, trail, href, mode).filter(|_| lost));
+    let mut children: Vec<Value> = path_nav(path, trail, href, mode, lost).into_iter().collect();
     children.push(obj(vec![("role", Some("heading".into())), ("name", title), ("focus", Some(true.into()))]));
     let rows: Vec<Value> = props.into_iter().chain(objs).chain(tail).collect();
     children.push(json!({ "role": "list", "name": list_name, "cls": "rows", "children": rows }));

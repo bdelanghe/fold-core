@@ -63,11 +63,13 @@ function render(focus) {
   document.querySelector("main").replaceWith(main);
   document.title = node?.title ?? "Basis";
   for (const li of rows()) li.addEventListener("click", e => { if (e.target.tagName !== "A") li.querySelector("a").click(); });
-  // The fold's one action (fold.ts Act), its answer said in the row; no capability here: the fold's link, its fallback.
-  const n = node, a = n?.act, b = main.querySelector("button.act"), say = t => main.querySelector(".result").textContent = t;
-  b?.addEventListener("click", async () => {
-    const c = await window.claude?.use?.(a.cap).catch(() => null);
-    if (!c) return n.href ? window.open(n.href, "_blank") : say("Not available here.");
+  // The fold's one action is a form (src/ax.rs act_form) and submits as one, with no script. Only where a capability host is
+  // present (Allie's window.claude) does the submit go to it instead, its answer said in the row.
+  const n = node, a = n?.act, f = main.querySelector("form.act"), say = t => main.querySelector(".result").textContent = t;
+  if (f && a && window.claude?.use) f.addEventListener("submit", async e => {
+    e.preventDefault();
+    const b = f.querySelector("button"), c = await window.claude.use(a.cap).catch(() => null);
+    if (!c) return say("Not available here.");
     b.disabled = true;
     try { const r = await c[a.call](a.args); say(r?.ok === false ? "Not done: " + r.reason : "Done. " + (r?.message ?? "")); }
     catch (e) { say(e?.code === "cancelled" ? "Cancelled." : "Not done: " + (e?.message ?? e?.code)); b.disabled = false; }
@@ -99,7 +101,7 @@ async function load() {
     if (text === said) { stale(); return false; }
     nodes = next; said = text; return true;
   } catch (e) {
-    if (!nodes.size) nodes = new Map([["root", { title: "Could not read the data", trail: [], text: [`${data.path}: ${e?.message ?? e}`] }]]);
+    if (!nodes.size) nodes = new Map([["root", { title: "Could not read the data", trail: [], failed: `Could not read ${data.path}: ${e?.message ?? e}` }]]);
     return !said;
   }
 }
