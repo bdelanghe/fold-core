@@ -3,6 +3,7 @@
   "private": true,
   "type": "module",
   "devDependencies": {
+    "@bounded-systems/baobab": "npm:@jsr/bounded-systems__baobab@0.2.2",
     "@bounded-systems/lone": "npm:@jsr/bounded-systems__lone@0.8.0",
     "linkedom": "0.18.12"
   }

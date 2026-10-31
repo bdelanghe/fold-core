@@ -5,11 +5,15 @@
    Hyperlegible Next, drawn for low vision (Bobby 10-27, 01M5ZCV508). One scale:
    every size is --s0 times a power of --r (1.2); nothing else sets a size. */
 @font-face{font-family:"Atkinson Hyperlegible Next";src:url("fonts/atkinson-hyperlegible-next.woff2") format("woff2");font-display:swap}
-:root{--paper:#EDEAE1;--card:#FFFFFF;--ink:#16221C;--soft:#5C6B63;--line:#888374;--accent:#0C5A42;--warn:#8A2B12;
-  --face:"Atkinson Hyperlegible Next",system-ui,-apple-system,sans-serif;
+/* The colours, light and dark, are written from theme.tokens.json (a Baobab pinning, src/baobab.rs) and proven there; edit the tokens
+   and run FOLD_BLESS=1 cargo test --test contrast, never the lines between these marks. */
+/* baobab:begin */
+:root{--paper:#EDEAE1;--card:#FFFFFF;--ink:#16221C;--soft:#5C6B63;--line:#888374;--accent:#0C5A42;--warn:#8A2B12;}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--paper:#16221C;--card:#22302A;--ink:#ECEAE3;--soft:#A9B5AE;--line:#888374;--accent:#8FC3A8;--warn:#FF9C80;}}
+:root[data-theme="dark"]{--paper:#16221C;--card:#22302A;--ink:#ECEAE3;--soft:#A9B5AE;--line:#888374;--accent:#8FC3A8;--warn:#FF9C80;}
+/* baobab:end */
+:root{--face:"Atkinson Hyperlegible Next",system-ui,-apple-system,sans-serif;
   --s0:18px;--r:1.2;--s-1:calc(var(--s0) / var(--r));--s1:calc(var(--s0) * var(--r));--s2:calc(var(--s0) * var(--r) * var(--r));--s3:calc(var(--s2) * var(--r))}
-@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--paper:#16221C;--card:#22302A;--ink:#ECEAE3;--soft:#A9B5AE;--line:#5C6B63;--accent:#8FC3A8;--warn:#FF9C80}}
-:root[data-theme="dark"]{--paper:#16221C;--card:#22302A;--ink:#ECEAE3;--soft:#A9B5AE;--line:#5C6B63;--accent:#8FC3A8;--warn:#FF9C80}
 *{box-sizing:border-box}
 body{margin:0;background:var(--paper);color:var(--ink);font:var(--s0)/1.45 var(--face);font-variant-numeric:tabular-nums}
 main,form.reading{max-width:42rem;margin:0 auto;padding:16px}

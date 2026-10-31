@@ -5,13 +5,20 @@
     "": {
       "name": "fold-core-js",
       "devDependencies": {
+        "@bounded-systems/baobab": "npm:@jsr/bounded-systems__baobab@0.2.2",
         "@bounded-systems/lone": "npm:@jsr/bounded-systems__lone@0.8.0",
         "linkedom": "0.18.12",
       },
     },
   },
   "packages": {
+    "@bounded-systems/baobab": ["@jsr/bounded-systems__baobab@0.2.2", "https://npm.jsr.io/~/11/@jsr/bounded-systems__baobab/0.2.2.tgz", { "dependencies": { "@jsr/bounded-systems__lone": "^0.6.0", "@jsr/std__encoding": "^1", "linkedom": "0.15.3" } }, "sha512-hRkQnK3HXglli2cs81zCkTAurCprTicAGlAdFZpbJ/T90eWmBBjcGRNQ+ohsz9jCZvLFxpHYC4+T+lo3mKiQBw=="],
+
     "@bounded-systems/lone": ["@jsr/bounded-systems__lone@0.8.0", "https://npm.jsr.io/~/11/@jsr/bounded-systems__lone/0.8.0.tgz", { "dependencies": { "zod": "3" } }, "sha512-eaX8ud+Vz42bhjrV9XvK0l8rfWmfYVLWUkS6VF2Yuyr021Z2PFHpW4FnVU3UwyJDKMJgEo014zB0IikU2w+TWw=="],
+
+    "@jsr/bounded-systems__lone": ["@jsr/bounded-systems__lone@0.6.0", "https://npm.jsr.io/~/11/@jsr/bounded-systems__lone/0.6.0.tgz", { "dependencies": { "zod": "3" } }, "sha512-76BXXYmCkjHbmSMZ3vQYKFQdj0/T2a94qi0XUfahHgP35IA1Luad/NVnIaqwQUK789BqkqqYd7lPfiTHFblslA=="],
+
+    "@jsr/std__encoding": ["@jsr/std__encoding@1.0.11", "https://npm.jsr.io/~/11/@jsr/std__encoding/1.0.11.tgz", {}, "sha512-4SmW8WXf4x4FjkxVpxbir06QYwxw/h/2+RU5A66iKXbJC9WAYCICZkH01mcOGj8FgSitF/lSTlT585RZfo8Ukg=="],
 
     "boolbase": ["boolbase@1.0.0", "", {}, "sha512-JZOSA7Mo9sNGB8+UjSgzdLtokWAky1zbztM3WRLCbZ70/3cTANmQmOdR7y2g+J0e2WXywy1yS468tY+IruqEww=="],
 
@@ -43,6 +50,12 @@
 
     "zod": ["zod@3.25.76", "", {}, "sha512-gzUt/qt81nXsFGKIFcC3YnfEAx5NkunCfnDlvuBSSFS02bcXu4Lmea0AFIUwbLWxWPx3d9p8S5QoaujKcNQxcQ=="],
 
+    "@bounded-systems/baobab/linkedom": ["linkedom@0.15.3", "", { "dependencies": { "css-select": "^5.1.0", "cssom": "^0.5.0", "html-escaper": "^3.0.3", "htmlparser2": "^8.0.1", "uhyphen": "^0.2.0" } }, "sha512-p+lBSEWzawF3Gy7+nw+5+u+iDthsfZZVd9lwiO96Ihj7Zd8he5BD1Wzdc9Z4GqtU6lKvxhye4W4Zr20uOAGe4A=="],
+
     "dom-serializer/entities": ["entities@4.5.0", "", {}, "sha512-V0hjH4dGPh9Ao5p0MoRY6BVqtwCjhz6vI5LT8AJ55H+4g9/4vbHx1I54fS0XuclLhDHArPQCiMjDxjaL8fPxhw=="],
+
+    "@bounded-systems/baobab/linkedom/htmlparser2": ["htmlparser2@8.0.2", "", { "dependencies": { "domelementtype": "^2.3.0", "domhandler": "^5.0.3", "domutils": "^3.0.1", "entities": "^4.4.0" } }, "sha512-GYdjWKDkbRLkZ5geuHs5NY1puJ+PXwP7+fHPRz06Eirsb9ugf6d8kkXav6ADhcODhFFPMIXyxkxSuMf3D6NCFA=="],
+
+    "@bounded-systems/baobab/linkedom/htmlparser2/entities": ["entities@4.5.0", "", {}, "sha512-V0hjH4dGPh9Ao5p0MoRY6BVqtwCjhz6vI5LT8AJ55H+4g9/4vbHx1I54fS0XuclLhDHArPQCiMjDxjaL8fPxhw=="],
   }
 }
