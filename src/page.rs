@@ -8,8 +8,8 @@
 //!   you are; going back up the path, it is the row you came from. A page opened from nowhere moves no focus (lone's
 //!   LONE_COGA_FOCUS_THEFT: `autofocus` would, without the reader asking).
 //! - The `<h1>` and each child row have the HTML `id` of their path under the document (id.rs `html_id`, so `#<id>` needs no
-//!   escaping), an element id derived from the path for convenience and never read as the data's identity. A row's RDFa `about`
-//!   is the IRI of the thing it shows (id.rs `haecceity`, brief item 20).
+//!   escaping), an element id derived from the path for convenience and never read as the data's identity. A row is the RDFa
+//!   subject, a `schema:WebPageElement` whose `schema:about` is the IRI of the thing it shows (id.rs `haecceity`, brief item 20).
 //! - A fold that presents as slides has a second page, `<base><segment>/…/@slides/`: `@` is always escaped in a segment
 //!   (id.rs `segment_of`), so that step can never be a fold's.
 //!
