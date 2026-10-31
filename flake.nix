@@ -31,9 +31,10 @@
           HOME=$TMPDIR bun build ${self}/js/fold-core.ts --target browser --format esm --outfile $out/fold-core.js
           cp ${pkgs.atkinson-hyperlegible-next}/share/fonts/opentype/AtkinsonHyperlegibleNext-Regular.otf face.otf
           woff2_compress face.otf && cp face.woff2 $out/fonts/atkinson-hyperlegible-next.woff2
-          # the Home Screen app (brief items 10 and 22): its manifest (no icon until the icon panel picks one) and the service worker,
+          # the Home Screen app (brief items 10 and 22): its manifest, the approved Basis icons and the service worker,
           # whose shell cache is named by the digest of every other file here, so each build replaces the last one's copy
-          cp ${self}/viewer/manifest.webmanifest $out/
+          cp ${self}/viewer/manifest.webmanifest ${self}/viewer/favicon.svg ${self}/viewer/apple-touch-icon.png \
+            ${self}/viewer/icon-192.png ${self}/viewer/icon-512.png ${self}/viewer/icon-maskable-512.png $out/
           v=$(cd $out && find . -type f | LC_ALL=C sort | xargs sha256sum | sha256sum | cut -c1-16)
           substitute ${self}/viewer/sw.js $out/sw.js --replace-fail @VERSION@ "$v"
         '';
