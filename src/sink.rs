@@ -7,8 +7,8 @@
 //! - **Identity:** a request with no `Tailscale-User-Login` is refused (403) and leaves nothing. Bound to loopback, only
 //!   tailscale serve reaches it, and it sets that header from the tailnet's own identity.
 //! - **Rate:** each viewer has [`Limiter::per_minute`] accepted requests a clock minute; past that, 429 with `Retry-After`.
-//! - **`POST /v`:** a browser's `<a ping>` (`text/ping`, `Ping-From`, `Ping-To`; page.rs puts `ping` on every link to another
-//!   fold's page) logs a `ping`: the row it was followed from, to the fold it goes to. A prefetch never pings, so it is never a view.
+//! - **`POST /v`:** a browser's `<a ping>` (`text/ping`, `Ping-From`, `Ping-To`; page.rs gives links no `ping` until a sink is
+//!   deployed, Bobby 10ee9ea8) logs a `ping`: the row it was followed from, to the fold it goes to. A prefetch never pings, so it is never a view.
 //! - **`POST /report`:** `application/reports+json` from the Reporting API (serve.rs names this endpoint on every page) logs a
 //!   `report`.
 //! - Bodies are at most [`MAX_BODY`]; any other path or method is refused, and nothing here answers a GET.
