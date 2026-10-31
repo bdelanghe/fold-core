@@ -55,8 +55,8 @@ fn a_bad_ax_input_says_why() {
     assert_eq!(e(r#"{"href": "other"}"#), "href: other is not walk or viewer");
 }
 
-/// An act is a form (BRIEF-basis-forms-push-signing-2026-10-31 §1): named by its fold, posting its cap, call and each arg as a
-/// hidden field to `act/<path>/<index>`, with a native submit button; the passkey GETs its sign page instead, fields and all left
+/// An act is a form (BRIEF-basis-forms-push-signing-2026-10-31 §1): named by its fold, posting its token (empty until fold serve
+/// fills it), cap, call and each arg as a hidden field to `act/<path>/<its own key>`, with a native submit button; the passkey GETs its sign page instead, fields and all left
 /// to that page, the fragment that names the intent kept.
 #[test]
 fn an_act_is_a_form() {
@@ -66,11 +66,11 @@ fn an_act_is_a_form() {
     };
     let form = |t: &Value| t.pointer("/children/2/children/0/children/0").unwrap().clone();
     let ack = json!({ "title": "Reply from a seat", "trail": ["Everything", "Needs you"], "kids": [],
-        "act": { "cap": "chitin.ack", "call": "ack", "label": "Done", "args": { "msgId": "m1", "state": "done", "n": 2 } } });
+        "act": { "cap": "chitin", "call": "ack", "label": "Done", "args": { "msgId": "m1", "state": "done", "n": 2 } } });
     assert_eq!(
         form(&tree(ack, &["needs", "a/b"])),
-        json!({ "role": "form", "name": "Reply from a seat", "cls": "act", "method": "post", "action": "act/needs/a%2Fb/0",
-            "fields": [["cap", "chitin.ack"], ["call", "ack"], ["args.msgId", "m1"], ["args.state", "done"], ["args.n", "2"]],
+        json!({ "role": "form", "name": "Reply from a seat", "cls": "act", "method": "post", "action": "act/needs/a%2Fb/ack",
+            "fields": [["token", ""], ["cap", "chitin"], ["call", "ack"], ["args.msgId", "m1"], ["args.state", "done"], ["args.n", "2"]],
             "children": [{ "role": "button", "name": "Done", "cls": "act" }] })
     );
     let sign = json!({ "title": "To a seat", "trail": ["Everything"], "href": "/approve/#i-0123456789ab",
@@ -81,6 +81,34 @@ fn an_act_is_a_form() {
             "children": [{ "role": "button", "name": "Sign", "cls": "act" }] })
     );
     let html = fold_core::html::html(&json!({ "role": "form", "name": "N", "method": "post", "action": "act/0",
-        "fields": [["cap", "a\"b"]], "children": [{ "role": "button", "name": "Go" }] })).unwrap();
+        "fields": [["cap", "a\"b"]], "children": [{ "role": "button", "name": "Go" }] }))
+    .unwrap();
     assert_eq!(html, "<form aria-label=\"N\" method=\"post\" action=\"act/0\"><input type=\"hidden\" name=\"cap\" value=\"a&quot;b\"><button type=\"submit\">Go</button></form>");
+}
+
+/// A fold's acts (S2): each a form named by its label, keyed by its own id or else its cap, so its act id stays put when the acts
+/// are reordered; two acts with one key are a schema error, and each falls back to its index. One status line follows them.
+#[test]
+fn acts_keep_their_own_ids() {
+    let row = |acts: Value| -> Value {
+        let node = json!({ "title": "From a seat", "trail": ["Everything"], "kids": [], "acts": acts });
+        let case = json!({ "node": node, "path": ["needs", "m 1"], "mode": "folds", "href": "viewer", "localTimeZone": "UTC" });
+        let t: Value = serde_json::from_str(&fold_core::wasm::ax_text(&case.to_string())).unwrap();
+        t.pointer("/children/2/children/0/children").unwrap().clone()
+    };
+    let a = |call: &str, label: &str| json!({ "cap": "chitin", "call": call, "label": label, "args": { "msg_id": "m1", "from": "s" } });
+    let actions = |r: &Value| r.as_array().unwrap().iter().filter_map(|f| f["action"].as_str().map(str::to_string)).collect::<Vec<_>>();
+    let got = row(json!([a("ack", "Ack"), a("defer", "Defer"), a("decline", "Decline")]));
+    assert_eq!(actions(&got), ["act/needs/m%201/ack", "act/needs/m%201/defer", "act/needs/m%201/decline"]);
+    assert_eq!(got[1]["name"], "Defer");
+    assert_eq!(got[3], json!({ "role": "status", "cls": "result", "id": "did" }));
+    let flipped = row(json!([a("decline", "Decline"), a("ack", "Ack")]));
+    assert_eq!(actions(&flipped), ["act/needs/m%201/decline", "act/needs/m%201/ack"]);
+    let mut own = a("ack", "Ack again");
+    own["id"] = "ack-2".into();
+    assert_eq!(actions(&row(json!([a("ack", "Ack"), own]))), ["act/needs/m%201/ack", "act/needs/m%201/ack-2"]);
+    assert_eq!(
+        actions(&row(json!([a("ack", "Ack"), a("ack", "Ack too"), a("defer", "Defer")]))),
+        ["act/needs/m%201/0", "act/needs/m%201/1", "act/needs/m%201/defer"]
+    );
 }

@@ -49,7 +49,7 @@ presents as slides also has `…/@slides/`.
 - **Links:** moves between folds are plain links in the same tab. Each ends in `#<id>`: going in, the fold's `<h1>`, which a browser
   focuses as it loads; going back up the path, the row you came from. No `autofocus`, which lone flags as focus theft. No `ping`: with no
   `fold sink` deployed, every followed link would POST into a 405; it comes back only when a sink is deployed for a real write.
-- **Acts:** a fold's act is a `<form>` named by the fold, posting its cap, call and args as hidden fields to `<base>act/<path>/<index>`
+- **Acts:** a fold's act is a `<form>` named by the fold, posting its cap, call and args as hidden fields to `<base>act/<path>/<act key>`
   with a native submit button, and no script (BRIEF-basis-forms-push-signing-2026-10-31 §1). The passkey (`webauthn`, `approve`)
   GETs the fold's sign page instead, which runs the ceremony.
 - **A way back:** a missing fold, one whose data failed to load (`failed`), and a root with nothing in it each show the path (to the
@@ -81,8 +81,25 @@ binary holding every read and write was the riskiest call). Approvals go through
 
 `fold serve --root <dir> --mount /fold --port <n> [--no-store <prefix>]...` (src/serve.rs) is read-only: GET and HEAD of one
 directory's files, and nothing else. It writes nothing, takes no body (413), and answers every other method 405. The one body it
-takes is an act's form (`POST <mount>/act/<path>/<index>`, at most 8 KiB), read only to be dropped and answered by a page that says
-acting from here isn't on yet, with the way back (goldens/serve/act.html). It replaces
+takes is an act's form (`POST <mount>/act/<path>/<act key>`, at most 4 KiB). Without the act flags, that form is read only to be
+dropped, and the answer is a page that says acting from here isn't on yet, with the way back (goldens/serve/act.html).
+
+With `--act-as <login> --act-host <host> --act-key <file> --chitin <bin> [--act-seat fold-act] [--act-log <file>]`, the form can
+ack, defer or decline a chitin message for that one login (S2: allie-s2-fold-act-write). An act is `{cap, call, args, label}`, `cap`
+the capability and `call` the verb, as Allie's cap host names them; its act key is its `id`, else its `call`. Only `cap: "chitin"`
+with `call` ack, defer or decline runs (`chitin ack <msg> acting|deferred|declined --to <sender> --ref fold:<act id>`); every
+other pair is 422, `chitin`/`say` and the passkey (`approve`/`sign`, which stays on chitin's `/approve`) among them. Before the
+actor runs, every check must pass:
+- the peer is loopback;
+- `Tailscale-User-Login` is the login;
+- the request came through serve (`X-Forwarded-Proto`, `X-Forwarded-Host`) and is same-origin (`Sec-Fetch-Site`, else `Origin`);
+- the form's token (src/act.rs: HMAC over the act id, its fixity, expiry and login, 12 hours) is this server's, current, and for
+  the act as it stands.
+
+The act comes from the site's act map (`_acts.json`, written by `site()` and never served), not from the form. Success is a `303`
+back to the fold, whose status line then says what was done. A stale token, or a fold that changed, gets the page back with
+fresh tokens and nothing done. Each POST leaves one line in `acts.jsonl` (0600). goldens/serve/acts.json holds every refusal
+and success, and tools/act-e2e.sh (`checks.act-e2e`) runs one ack end to end with curl and a stub chitin. It replaces
 fold-serve's darkhttpd agents (brief items 23-24), which send no ETag, no per-file Cache-Control and no custom headers.
 
 | Resource | Cache-Control | Validator |

@@ -99,42 +99,70 @@ fn path_nav(path: &[String], trail: Option<&Value>, href: Href, mode: &str, alwa
             json!({ "role": "listitem", "children": [{ "role": "link", "name": name, "href": href(to, mode) }] })
         })
         .collect();
-    (steps > 0).then(|| json!({ "role": "navigation", "name": "Path", "children": [{ "role": "list", "name": "Path", "children": crumbs }] }))
+    (steps > 0)
+        .then(|| json!({ "role": "navigation", "name": "Path", "children": [{ "role": "list", "name": "Path", "children": crumbs }] }))
 }
 
 /// The root, as a row of a fold that has no way back of its own; none on the root itself.
 fn to_root(path: &[String], trail: Option<&Value>, href: Href, mode: &str) -> Option<Value> {
     let name = present(trail.and_then(|t| t.get(0))).map_or_else(|| ROOT.to_string(), |v| js::string(Some(v)));
-    (!path.is_empty()).then(|| prop(vec![json!({ "role": "link", "name": format!("Back to {name}"), "href": href(&[], mode) })], "prop root"))
+    (!path.is_empty())
+        .then(|| prop(vec![json!({ "role": "link", "name": format!("Back to {name}"), "href": href(&[], mode) })], "prop root"))
 }
 
-/// The act's own id: the fold's path (each id through `encodeURIComponent`, as the viewer's links write it) and the act's index
-/// among the fold's acts, always the last step, so a path ending in a fold whose id is a number never reads as another's.
-pub fn act_id(path: &[String], i: usize) -> String {
-    path.iter().map(|p| js::encode_uri_component(p) + "/").collect::<String>() + &i.to_string()
+/// An act's own id (allie-lead 968825b4): the fold's path (each id through `encodeURIComponent`, as the viewer's links write it)
+/// and the act's own key among the fold's acts ([`acts_of`]), always the last step. The key is the act's, not its place, so
+/// reordering a fold's acts, or the folds around it, moves no act's id.
+pub fn act_id(path: &[String], key: &str) -> String {
+    path.iter().map(|p| js::encode_uri_component(p) + "/").collect::<String>() + &js::encode_uri_component(key)
 }
 
-/// A fold's act as an HTML form (BRIEF-basis-forms-push-signing-2026-10-31 §1): it posts its cap, call and args as hidden
-/// fields to `act/<act id>` under the viewer's mount, with a native submit button. No script. The passkey (`webauthn`, or
-/// `approve`) is the exception: WebAuthn runs only in a document, so where the fold links its sign page, the form GETs that
-/// page (its `#i-<intent>` kept, as a GET form keeps the action's fragment), which runs the ceremony and comes back.
-fn act_form(node: &Value, path: &[String]) -> Value {
-    let act = &node["act"];
+/// A fold's acts with their keys, in order: its one `act` (fold.ts's), then its `acts` (lib.rs `Node::acts`). An act's key is its
+/// own `id`, else its `call`, the verb (`ack`, `defer`, `decline`, `sign`; personal-allie-lead 4f93c11f). Two acts on one fold with the same key are a schema error:
+/// each of them falls back to its index, so neither claims the other's name (goldens/pages `acts`, the `twice` fold).
+pub fn acts_of(node: &Value) -> Vec<(String, Value)> {
+    let all: Vec<Value> = [get(node, "act").filter(|a| truthy(Some(a))).cloned()]
+        .into_iter()
+        .flatten()
+        .chain(concat(get(node, "acts")).into_iter().filter(|a| truthy(Some(a))))
+        .collect();
+    let own = |a: &Value| present(get(a, "id")).map_or_else(|| js::string(get(a, "call")), |v| js::string(Some(v))).trim().to_string();
+    let keys: Vec<String> = all.iter().map(own).collect();
+    all.into_iter()
+        .enumerate()
+        .map(|(i, a)| {
+            let k = &keys[i];
+            let once = !k.is_empty() && keys.iter().filter(|x| *x == k).count() == 1;
+            (if once { k.clone() } else { i.to_string() }, a)
+        })
+        .collect()
+}
+
+/// The empty token field every posting form carries, which `fold serve` fills when it serves the page (serve.rs, S2 brief §3):
+/// a contract between the renderer and the server, both fold-core's, held by goldens/serve/acts.json.
+pub const TOKEN_FIELD: &str = "token";
+
+/// A fold's act as an HTML form (BRIEF-basis-forms-push-signing-2026-10-31 §1): it posts its token (empty until served), cap,
+/// call and args as hidden fields to `act/<act id>` under the viewer's mount, with a native submit button. No script. The
+/// passkey (`webauthn`, or `approve`) is the exception: WebAuthn runs only in a document, so where the fold links its sign page,
+/// the form GETs that page (its `#i-<intent>` kept, as a GET form keeps the action's fragment), which runs the ceremony and
+/// comes back. A form is named by the fold's title when it is the fold's one act, else by its own label.
+fn act_form(node: &Value, act: &Value, path: &[String], key: &str, one: bool) -> Value {
     let label = get(act, "label").cloned();
     let cap = js::string(get(act, "cap"));
     let passkey = matches!(cap.trim(), "webauthn" | "approve") && truthy(get(node, "href"));
     let (method, action, fields) = if passkey {
         ("get", node["href"].clone(), vec![])
     } else {
-        let mut f = vec![json!(["cap", cap]), json!(["call", js::string(get(act, "call"))])];
+        let mut f = vec![json!([TOKEN_FIELD, ""]), json!(["cap", cap]), json!(["call", js::string(get(act, "call"))])];
         match present(get(act, "args")) {
             None => {}
             Some(Value::Object(m)) => f.extend(m.iter().map(|(k, v)| json!([format!("args.{k}"), field(v)]))),
             Some(v) => f.push(json!(["args", field(v)])),
         }
-        ("post", format!("act/{}", act_id(path, 0)).into(), f)
+        ("post", format!("act/{}", act_id(path, key)).into(), f)
     };
-    let name = present(get(node, "title")).or(label.as_ref()).cloned();
+    let name = if one { present(get(node, "title")).or(label.as_ref()).cloned() } else { label.clone() };
     obj(vec![
         ("role", Some("form".into())),
         ("name", name),
@@ -145,6 +173,9 @@ fn act_form(node: &Value, path: &[String]) -> Value {
         ("children", Some(json!([obj(vec![("role", Some("button".into())), ("name", label), ("cls", Some("act".into()))])]))),
     ])
 }
+
+/// The id of a fold's one status line, where `fold serve` says what an act did (S2 brief §2-3).
+pub const STATUS_ID: &str = "did";
 
 /// An arg as a field's value: a string as it is, anything else as its JSON.
 fn field(v: &Value) -> String {
@@ -165,7 +196,10 @@ pub fn ax_of(node: Option<&Value>, path: &[String], href: Href, mode: &str, cloc
     let Some(node) = node.filter(|n| truthy(Some(n))) else {
         let asked = if path.is_empty() { ROOT.to_string() } else { path.join(" › ") };
         let rows: Vec<Value> =
-            [Some(said(format!("You asked for {asked}, and no fold has that path.").into())), to_root(path, None, href, mode)].into_iter().flatten().collect();
+            [Some(said(format!("You asked for {asked}, and no fold has that path.").into())), to_root(path, None, href, mode)]
+                .into_iter()
+                .flatten()
+                .collect();
         let mut children: Vec<Value> = path_nav(path, None, href, mode, true).into_iter().collect();
         children.push(json!({ "role": "heading", "name": "Nothing here", "focus": true }));
         children.push(json!({ "role": "list", "name": "Nothing here", "cls": "rows", "children": rows }));
@@ -189,8 +223,12 @@ pub fn ax_of(node: Option<&Value>, path: &[String], href: Href, mode: &str, cloc
         props.push(said(node["failed"].clone()));
     }
     props.extend(concat(get(node, "text")).into_iter().map(said));
-    if truthy(get(node, "act")) {
-        props.push(prop(vec![act_form(node, path), json!({ "role": "status", "cls": "result" })], "prop act"));
+    let acts = acts_of(node);
+    if !acts.is_empty() {
+        let one = acts.len() == 1;
+        let mut row: Vec<Value> = acts.iter().map(|(k, a)| act_form(node, a, path, k, one)).collect();
+        row.push(json!({ "role": "status", "cls": "result", "id": STATUS_ID }));
+        props.push(prop(row, "prop act"));
     }
     if truthy(get(node, "href")) {
         let name = present(get(node, "hrefLabel")).unwrap_or(&node["href"]).clone();

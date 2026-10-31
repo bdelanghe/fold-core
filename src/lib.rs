@@ -7,6 +7,7 @@
 //! JS string semantics are kept where they show: lengths and cuts count UTF-16 code units, `\s` and `trim()` are JS's whitespace
 //! set, `.` stops at JS line terminators.
 
+pub mod act;
 pub mod ax;
 pub mod baobab;
 pub mod html;
@@ -76,9 +77,15 @@ pub struct Node {
     pub href: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none", default)]
     pub href_label: Option<String>,
-    /// fold.ts `act`: the fold's one action, `{cap, call, args, label}` (the viewer calls `claude.use(cap)[call](args)`).
+    /// fold.ts `act`: the fold's one action, `{cap, call, args, label}`, shown as an HTML form (ax.rs `act_form`).
     #[serde(skip_serializing_if = "Option::is_none", default)]
     pub act: Option<Value>,
+    /// The fold's other acts (S2, allie-s2-fold-act-write §7 step 0: a Needs-you item's ack, defer and decline), each `{id?, cap,
+    /// call, args, label}` as `act` is, plus its own `id` where it names one. fold-core's own field (not fold.ts's): an act's own id
+    /// (ax.rs `acts_of`) is its `id`, else its `call`, so reordering an item's acts moves no act's id. A Needs-you act is
+    /// `{cap: "chitin", call: "ack"|"defer"|"decline", args: {msg_id, from}, label}` (personal-allie-lead 4f93c11f).
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub acts: Option<Vec<Value>>,
     #[serde(skip_serializing_if = "Option::is_none", default)]
     pub updated: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none", default)]
@@ -123,6 +130,24 @@ fn s(v: Option<&Value>) -> Option<String> {
         Some(Value::String(x)) if !js_trim(x).is_empty() => Some(js_trim(x).to_string()),
         _ => None,
     }
+}
+
+/// fold.ts's act: cap, call and label non-blank strings, args a truthy object (arrays too, as `typeof` says); cap and call as
+/// written. One of a fold's `acts` (`own`) keeps its own `id` too, where that is a non-blank string.
+fn act_of(act: Option<&Value>, own: bool) -> Option<Value> {
+    let args = act.and_then(|a| get(a, "args")).filter(|v| v.is_object() || v.is_array())?;
+    let (a, label) = (act?, s(act.and_then(|a| get(a, "label")))?);
+    s(get(a, "cap"))?;
+    s(get(a, "call"))?;
+    let mut m = Map::new();
+    if let Some(id) = s(get(a, "id")).filter(|_| own) {
+        m.insert("id".into(), Value::String(id));
+    }
+    m.insert("cap".into(), a["cap"].clone());
+    m.insert("call".into(), a["call"].clone());
+    m.insert("args".into(), args.clone());
+    m.insert("label".into(), Value::String(label));
+    Some(Value::Object(m))
 }
 
 fn raw(v: Option<&Value>) -> &str {
@@ -323,19 +348,11 @@ impl Folder<'_> {
             n.href = Some(raw(hv).to_string());
             n.href_label = s(link.and_then(|l| get(l, "label")));
         }
-        // fold.ts: cap, call and label non-blank strings, args a truthy object (arrays too, as `typeof` says); cap and call as written
-        let act = get(o, "act");
-        let args = act.and_then(|a| get(a, "args")).filter(|v| v.is_object() || v.is_array());
-        if let (Some(_), Some(_), Some(label), Some(args)) =
-            (s(act.and_then(|a| get(a, "cap"))), s(act.and_then(|a| get(a, "call"))), s(act.and_then(|a| get(a, "label"))), args)
-        {
-            let a = act.expect("act");
-            let mut m = Map::new();
-            m.insert("cap".into(), a["cap"].clone());
-            m.insert("call".into(), a["call"].clone());
-            m.insert("args".into(), args.clone());
-            m.insert("label".into(), Value::String(label));
-            n.act = Some(Value::Object(m));
+        n.act = act_of(get(o, "act"), false);
+        let acts: Vec<Value> =
+            get(o, "acts").and_then(Value::as_array).into_iter().flatten().filter_map(|a| act_of(Some(a), true)).collect();
+        if !acts.is_empty() {
+            n.acts = Some(acts);
         }
         if path.is_empty() {
             n.updated = self.opts.updated.clone();

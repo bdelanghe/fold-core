@@ -63,9 +63,12 @@ fn a_fold_is_a_page_at_its_real_path() {
         [
             ("/fold/", "index.html", "folds"),
             ("/fold/a%20b/", "a b/index.html", "folds"),
-            ("/fold/a%20b/@slides/", "a b/@slides/index.html", "slides")
+            ("/fold/a%20b/@slides/", "a b/@slides/index.html", "slides"),
+            ("/fold/_acts.json", "_acts.json", "acts")
         ]
     );
+    // No fold here acts: the act map is there, and empty, so a map an earlier run wrote is replaced.
+    assert_eq!(pages[3]["json"], "{}\n");
     let root = pages[0]["html"].as_str().unwrap();
     assert!(root.contains("<title>Fleet</title>"), "{root}");
     // The heading: the fold's id (the root's, its document's), where a link in lands; no autofocus.
@@ -94,4 +97,35 @@ fn a_step_no_file_can_hold_is_refused() {
     let e = |i: Value| site(&i)["error"].as_str().unwrap().to_string();
     assert_eq!(e(json!({ "nodes": [] })), "no source: a document is named");
     assert_eq!(e(json!({ "nodes": [], "source": "d", "base": "fold" })), "base: fold is not a path from / to a /");
+}
+
+/// The act map (S2 brief §2): every act of the document by its act id, read by fold serve and never served; each with its fold's
+/// id, its cap, call and args as the data has them, and the fixity a token is bound to, which changes only with that act's item.
+#[test]
+fn the_act_map_is_written_beside_the_pages() {
+    let a = |call: &str| json!({ "cap": "chitin", "call": call, "label": call, "args": { "msg_id": "m1", "from": "seat-a" } });
+    let nodes = |text: &str| {
+        json!([
+            ["root", { "title": "Needs you", "trail": [], "kids": [{ "id": "m 1", "title": "From seat-a" }, { "id": "m2", "title": "Other" }] }],
+            ["m 1", { "title": "From seat-a", "trail": ["Needs you"], "kids": [], "acts": [a("ack"), a("defer")] }],
+            ["m2", { "title": "Other", "trail": ["Needs you"], "kids": [], "text": [text], "acts": [a("ack")] }]
+        ])
+    };
+    let map = |n: Value| -> Value { serde_json::from_str(one(n).last().unwrap()["json"].as_str().unwrap()).unwrap() };
+    let m = map(nodes("one"));
+    let keys: Vec<&String> = m.as_object().unwrap().keys().collect();
+    assert_eq!(keys, ["m%201/ack", "m%201/defer", "m2/ack"]);
+    assert_eq!(m["m%201/defer"]["item"], "m 1");
+    assert_eq!(m["m%201/defer"]["cap"], "chitin");
+    assert_eq!(m["m%201/defer"]["call"], "defer");
+    assert_eq!(m["m%201/defer"]["args"], json!({ "msg_id": "m1", "from": "seat-a" }));
+    assert_eq!(m["m%201/ack"]["fixity"], fold_core::act::fixity("m 1", &a("ack")).as_str());
+    // The page posts where the map says.
+    let page = one(nodes("one"))[1]["html"].as_str().unwrap().to_string();
+    assert!(page.contains(r#"<form class="act" aria-label="defer" method="post" action="/fold/act/m%201/defer"><input type="hidden" name="token" value="">"#), "{page}");
+    assert!(page.contains(r#"<span id="did" class="result" role="status"></span>"#), "{page}");
+    // fixity is the item's act, not the page's or the document's: an unrelated item's text moves only nothing here
+    let m2 = map(nodes("two"));
+    assert_eq!(m2["m%201/ack"]["fixity"], m["m%201/ack"]["fixity"]);
+    assert_eq!(m2["m2/ack"]["fixity"], m["m2/ack"]["fixity"]);
 }

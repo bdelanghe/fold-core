@@ -63,17 +63,8 @@ function render(focus) {
   document.querySelector("main").replaceWith(main);
   document.title = node?.title ?? "Basis";
   for (const li of rows()) li.addEventListener("click", e => { if (e.target.tagName !== "A") li.querySelector("a").click(); });
-  // The fold's one action is a form (src/ax.rs act_form) and submits as one, with no script. Only where a capability host is
-  // present (Allie's window.claude) does the submit go to it instead, its answer said in the row.
-  const n = node, a = n?.act, f = main.querySelector("form.act"), say = t => main.querySelector(".result").textContent = t;
-  if (f && a && window.claude?.use) f.addEventListener("submit", async e => {
-    e.preventDefault();
-    const b = f.querySelector("button"), c = await window.claude.use(a.cap).catch(() => null);
-    if (!c) return say("Not available here.");
-    b.disabled = true;
-    try { const r = await c[a.call](a.args); say(r?.ok === false ? "Not done: " + r.reason : "Done. " + (r?.message ?? "")); }
-    catch (e) { say(e?.code === "cancelled" ? "Cancelled." : "Not done: " + (e?.message ?? e?.code)); b.disabled = false; }
-  });
+  // A fold's acts are forms (src/ax.rs act_form) and submit as forms, natively, in every host, Allie's too: no script takes
+  // them (allie-lead 968825b4). fold serve answers the post (src/serve.rs).
   // Back out (h, ←, Backspace or the path) lands the cursor on the row you came from, as in Allie.
   const back = cameFrom == null ? -1 : (node?.kids ?? []).findIndex(k => k.id === cameFrom);
   if (back >= 0) { cur = back; cameFrom = null; }
