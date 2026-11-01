@@ -42,6 +42,8 @@
         "text": [
           "Before the deck."
         ],
+        "updated": "2026-10-28T16:00:00.000Z",
+        "source": "golden",
         "present": "folds",
         "prev": {
           "id": "root",
@@ -73,6 +75,8 @@
         "text": [
           "Read inline."
         ],
+        "updated": "2026-10-28T16:00:00.000Z",
+        "source": "golden",
         "present": "folds",
         "prev": {
           "id": "intro",
@@ -119,6 +123,8 @@
           "Kept line.",
           "One engine."
         ],
+        "updated": "2026-10-28T16:00:00.000Z",
+        "source": "golden",
         "present": "slides",
         "next": {
           "id": "decks~engine~s1",
@@ -149,6 +155,8 @@
         "text": [
           "Of list seat list row to row gate."
         ],
+        "updated": "2026-10-28T16:00:00.000Z",
+        "source": "golden",
         "present": "slides",
         "prev": {
           "id": "decks~engine",
@@ -174,6 +182,8 @@
         "text": [
           "Item heading seat naïve ›."
         ],
+        "updated": "2026-10-28T16:00:00.000Z",
+        "source": "golden",
         "present": "slides",
         "prev": {
           "id": "decks~engine~s1",
@@ -201,6 +211,8 @@
             "title": "Deep 0"
           }
         ],
+        "updated": "2026-10-28T16:00:00.000Z",
+        "source": "golden",
         "present": "slides",
         "prev": {
           "id": "decks~engine~s1~point-0a",
@@ -224,6 +236,8 @@
           "Point 0b"
         ],
         "kids": [],
+        "updated": "2026-10-28T16:00:00.000Z",
+        "source": "golden",
         "present": "slides",
         "prev": {
           "id": "decks~engine~s1~point-0b",
@@ -248,6 +262,8 @@
         "text": [
           "To gate section budget to seat item word."
         ],
+        "updated": "2026-10-28T16:00:00.000Z",
+        "source": "golden",
         "present": "slides",
         "prev": {
           "id": "decks~engine~s1~point-0b~deep-0",
@@ -272,6 +288,8 @@
         "text": [
           "Fold a a – rule hint “quoted” slide."
         ],
+        "updated": "2026-10-28T16:00:00.000Z",
+        "source": "golden",
         "present": "slides",
         "prev": {
           "id": "decks~engine~s2",
@@ -306,6 +324,8 @@
         "text": [
           "To 😀 › and reader screen section slide."
         ],
+        "updated": "2026-10-28T16:00:00.000Z",
+        "source": "golden",
         "present": "slides",
         "prev": {
           "id": "decks~engine~s3",
@@ -331,6 +351,8 @@
         "text": [
           "List item budget budget fold."
         ],
+        "updated": "2026-10-28T16:00:00.000Z",
+        "source": "golden",
         "present": "slides",
         "prev": {
           "id": "decks~engine~s4",
@@ -358,6 +380,8 @@
             "title": "Deep 3"
           }
         ],
+        "updated": "2026-10-28T16:00:00.000Z",
+        "source": "golden",
         "present": "slides",
         "prev": {
           "id": "decks~engine~s4~point-3a",
@@ -381,6 +405,8 @@
           "Point 3b"
         ],
         "kids": [],
+        "updated": "2026-10-28T16:00:00.000Z",
+        "source": "golden",
         "present": "slides",
         "prev": {
           "id": "decks~engine~s4~point-3b",
@@ -445,6 +471,8 @@
         "text": [
           "Screen 😀 … budget the naïve walk row."
         ],
+        "updated": "2026-10-28T16:00:00.000Z",
+        "source": "golden",
         "present": "slides",
         "prev": {
           "id": "decks~engine~more",
@@ -477,6 +505,8 @@
             "title": "Inner two"
           }
         ],
+        "updated": "2026-10-28T16:00:00.000Z",
+        "source": "golden",
         "present": "slides",
         "next": {
           "id": "decks~engine~more~s5~inner~inner-one",
@@ -497,6 +527,8 @@
           "Inner deck"
         ],
         "kids": [],
+        "updated": "2026-10-28T16:00:00.000Z",
+        "source": "golden",
         "present": "slides",
         "prev": {
           "id": "decks~engine~more~s5~inner",
@@ -526,6 +558,8 @@
             "title": "Inner two a"
           }
         ],
+        "updated": "2026-10-28T16:00:00.000Z",
+        "source": "golden",
         "present": "slides",
         "prev": {
           "id": "decks~engine~more~s5~inner~inner-one",
@@ -551,6 +585,8 @@
           "Inner two"
         ],
         "kids": [],
+        "updated": "2026-10-28T16:00:00.000Z",
+        "source": "golden",
         "present": "slides",
         "prev": {
           "id": "decks~engine~more~s5~inner~inner-two",
@@ -572,6 +608,8 @@
         "text": [
           "Slide page budget reader section agent heading fold."
         ],
+        "updated": "2026-10-28T16:00:00.000Z",
+        "source": "golden",
         "present": "slides",
         "prev": {
           "id": "decks~engine~more~s5~inner~inner-two~inner-two-a",
@@ -607,6 +645,8 @@
         "text": [
           "Page of of section agent 😀 agent seat."
         ],
+        "updated": "2026-10-28T16:00:00.000Z",
+        "source": "golden",
         "present": "slides",
         "prev": {
           "id": "decks~engine~more~s6",
@@ -633,6 +673,8 @@
         "text": [
           "Agent row row item row."
         ],
+        "updated": "2026-10-28T16:00:00.000Z",
+        "source": "golden",
         "present": "slides",
         "prev": {
           "id": "decks~engine~more~s7",
@@ -661,6 +703,8 @@
             "title": "Deep 6"
           }
         ],
+        "updated": "2026-10-28T16:00:00.000Z",
+        "source": "golden",
         "present": "slides",
         "prev": {
           "id": "decks~engine~more~s7~point-6a",
@@ -685,6 +729,8 @@
           "Point 6b"
         ],
         "kids": [],
+        "updated": "2026-10-28T16:00:00.000Z",
+        "source": "golden",
         "present": "slides",
         "prev": {
           "id": "decks~engine~more~s7~point-6b",
@@ -717,6 +763,8 @@
         "text": [
           "Spoken and shown"
         ],
+        "updated": "2026-10-28T16:00:00.000Z",
+        "source": "golden",
         "present": "folds",
         "prev": {
           "id": "decks~engine~more~s7~point-6b~deep-6",
@@ -747,6 +795,8 @@
           "first",
           "second"
         ],
+        "updated": "2026-10-28T16:00:00.000Z",
+        "source": "golden",
         "present": "folds",
         "prev": {
           "id": "decks~talk",
@@ -785,6 +835,8 @@
           "Row of budget “quoted” › a of of “quoted” fold screen 😀 a rule heading the agent row.",
           "Rule über fold a › hint naïve the page seat seat viewer “quoted” “quoted” heading ›."
         ],
+        "updated": "2026-10-28T16:00:00.000Z",
+        "source": "golden",
         "present": "folds",
         "prev": {
           "id": "decks~talk~open",
@@ -815,6 +867,8 @@
           "Screen › 😀 row page slide café naïve viewer a list and and a.",
           "Agent agent the screen reader agent item the walk 😀 deck reader row row viewer über walk slide hint the!"
         ],
+        "updated": "2026-10-28T16:00:00.000Z",
+        "source": "golden",
         "present": "folds",
         "prev": {
           "id": "decks~talk~open~spoken",
@@ -844,6 +898,8 @@
           "› row › rule of of to slide list a hint gate and to naïve list.",
           "Heading page word deck heading hint walk agent – deck walk agent – item café section!"
         ],
+        "updated": "2026-10-28T16:00:00.000Z",
+        "source": "golden",
         "present": "folds",
         "prev": {
           "id": "decks~talk~open~spoken~p2",
@@ -865,6 +921,8 @@
           "Talk"
         ],
         "kids": [],
+        "updated": "2026-10-28T16:00:00.000Z",
+        "source": "golden",
         "present": "folds",
         "prev": {
           "id": "decks~talk~open~spoken~p3",
@@ -908,6 +966,8 @@
           "Reader item screen a the item!",
           "And … slide agent reader list rule … page walk seat naïve 😀 budget › screen café to reader the?"
         ],
+        "updated": "2026-10-28T16:00:00.000Z",
+        "source": "golden",
         "present": "folds",
         "prev": {
           "id": "decks~talk~s2",
@@ -939,6 +999,8 @@
           "😀 of “quoted” list screen › seat “quoted” screen agent viewer agent viewer the.",
           "Heading viewer word hint fold … viewer budget viewer item!"
         ],
+        "updated": "2026-10-28T16:00:00.000Z",
+        "source": "golden",
         "present": "folds",
         "prev": {
           "id": "decks~talk~s3",
@@ -969,6 +1031,8 @@
           "Hint list and walk budget seat?",
           "Section naïve word screen deck naïve fold and to – page ›."
         ],
+        "updated": "2026-10-28T16:00:00.000Z",
+        "source": "golden",
         "present": "folds",
         "prev": {
           "id": "decks~talk~s3~p2",
@@ -994,6 +1058,8 @@
         "text": [
           "– viewer reader the item gate naïve rule deck heading list deck."
         ],
+        "updated": "2026-10-28T16:00:00.000Z",
+        "source": "golden",
         "present": "folds",
         "prev": {
           "id": "decks~talk~s3~p3",
@@ -1016,6 +1082,8 @@
         "text": [
           "After the deck."
         ],
+        "updated": "2026-10-28T16:00:00.000Z",
+        "source": "golden",
         "present": "folds",
         "prev": {
           "id": "decks~talk~s3~p4",

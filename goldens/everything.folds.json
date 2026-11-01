@@ -51,7 +51,9 @@
       ],
       "text": [
         "What the agents need from you, each with what to do."
-      ]
+      ],
+      "updated": "2026-10-28T16:00:00.000Z",
+      "source": "golden"
     }
   ],
   [
@@ -67,7 +69,9 @@
         "You merge every policy change yourself."
       ],
       "href": "https://git.example.test/acme/policy/pull/4",
-      "hrefLabel": "Open acme/policy#4"
+      "hrefLabel": "Open acme/policy#4",
+      "updated": "2026-10-28T16:00:00.000Z",
+      "source": "golden"
     }
   ],
   [
@@ -101,7 +105,9 @@
       ],
       "text": [
         "Which machines are up. The agents and CI run on them."
-      ]
+      ],
+      "updated": "2026-10-28T16:00:00.000Z",
+      "source": "golden"
     }
   ],
   [
@@ -117,7 +123,9 @@
         "the build host",
         "Status: up",
         "Last progress: Tue 23:30"
-      ]
+      ],
+      "updated": "2026-10-28T16:00:00.000Z",
+      "source": "golden"
     }
   ],
   [
@@ -134,7 +142,9 @@
         "the spare",
         "Status: asleep",
         "Last progress: Tue 22:10"
-      ]
+      ],
+      "updated": "2026-10-28T16:00:00.000Z",
+      "source": "golden"
     }
   ],
   [
@@ -151,7 +161,9 @@
         "Status: up"
       ],
       "href": "https://gamma.example.test/status",
-      "hrefLabel": "Status page"
+      "hrefLabel": "Status page",
+      "updated": "2026-10-28T16:00:00.000Z",
+      "source": "golden"
     }
   ],
   [
@@ -176,7 +188,9 @@
       ],
       "text": [
         "How long the runners take."
-      ]
+      ],
+      "updated": "2026-10-28T16:00:00.000Z",
+      "source": "golden"
     }
   ],
   [
@@ -192,7 +206,9 @@
       "text": [
         "last run took four minutes",
         "Tue 11:00"
-      ]
+      ],
+      "updated": "2026-10-28T16:00:00.000Z",
+      "source": "golden"
     }
   ],
   [
@@ -208,7 +224,9 @@
       "text": [
         "last run took two minutes",
         "Tue 11:05"
-      ]
+      ],
+      "updated": "2026-10-28T16:00:00.000Z",
+      "source": "golden"
     }
   ],
   [
@@ -246,7 +264,9 @@
       ],
       "text": [
         "port-goal and others need a look. The agents: goal sessions, standing seats, their pace, what they sent you, and how to reach them without this page."
-      ]
+      ],
+      "updated": "2026-10-28T16:00:00.000Z",
+      "source": "golden"
     }
   ],
   [
@@ -266,7 +286,9 @@
       ],
       "text": [
         "Each running goal session."
-      ]
+      ],
+      "updated": "2026-10-28T16:00:00.000Z",
+      "source": "golden"
     }
   ],
   [
@@ -285,7 +307,9 @@
         "Status: idle",
         "Last progress: Tue 14:44",
         "Waits on: nothing it has said"
-      ]
+      ],
+      "updated": "2026-10-28T16:00:00.000Z",
+      "source": "golden"
     }
   ],
   [
@@ -308,7 +332,9 @@
       ],
       "text": [
         "The standing agents by cluster."
-      ]
+      ],
+      "updated": "2026-10-28T16:00:00.000Z",
+      "source": "golden"
     }
   ],
   [
@@ -326,7 +352,9 @@
           "title": "lead",
           "hint": "idle, last progress Tue 17:52"
         }
-      ]
+      ],
+      "updated": "2026-10-28T16:00:00.000Z",
+      "source": "golden"
     }
   ],
   [
@@ -344,7 +372,9 @@
         "acts for you",
         "Status: idle",
         "Last progress: Tue 17:52"
-      ]
+      ],
+      "updated": "2026-10-28T16:00:00.000Z",
+      "source": "golden"
     }
   ],
   [
@@ -362,7 +392,9 @@
           "title": "publisher",
           "hint": "Alert: waits on an answer in its terminal"
         }
-      ]
+      ],
+      "updated": "2026-10-28T16:00:00.000Z",
+      "source": "golden"
     }
   ],
   [
@@ -381,7 +413,9 @@
         "pushes branches",
         "Status: waiting for an answer",
         "Waits on: an answer in its terminal"
-      ]
+      ],
+      "updated": "2026-10-28T16:00:00.000Z",
+      "source": "golden"
     }
   ],
   [
@@ -401,7 +435,9 @@
       ],
       "text": [
         "How fast the fleet moves."
-      ]
+      ],
+      "updated": "2026-10-28T16:00:00.000Z",
+      "source": "golden"
     }
   ],
   [
@@ -417,7 +453,9 @@
       "text": [
         "twelve changes landed",
         "Status: steady"
-      ]
+      ],
+      "updated": "2026-10-28T16:00:00.000Z",
+      "source": "golden"
     }
   ],
   [
@@ -431,7 +469,9 @@
       "kids": [],
       "text": [
         "No messages to you in the last six hours."
-      ]
+      ],
+      "updated": "2026-10-28T16:00:00.000Z",
+      "source": "golden"
     }
   ],
   [
@@ -470,7 +510,9 @@
           "title": "why does it say part 1 of 14",
           "hint": "Page thread #43"
         }
-      ]
+      ],
+      "updated": "2026-10-28T16:00:00.000Z",
+      "source": "golden"
     }
   ],
   [
@@ -483,7 +525,9 @@
         "More in Agent fleet",
         "Your latest requests"
       ],
-      "kids": []
+      "kids": [],
+      "updated": "2026-10-28T16:00:00.000Z",
+      "source": "golden"
     }
   ],
   [
@@ -499,7 +543,9 @@
       "text": [
         "Seats that stopped.",
         "Nothing is down."
-      ]
+      ],
+      "updated": "2026-10-28T16:00:00.000Z",
+      "source": "golden"
     }
   ],
   [
@@ -512,7 +558,9 @@
       "kids": [],
       "text": [
         "The pages you keep, and what you are reading."
-      ]
+      ],
+      "updated": "2026-10-28T16:00:00.000Z",
+      "source": "golden"
     }
   ],
   [
@@ -536,7 +584,9 @@
       ],
       "text": [
         "Your repositories with pull requests not merged yet."
-      ]
+      ],
+      "updated": "2026-10-28T16:00:00.000Z",
+      "source": "golden"
     }
   ],
   [
@@ -561,7 +611,9 @@
       ],
       "text": [
         "Open pull requests in bdelanghe/widgets."
-      ]
+      ],
+      "updated": "2026-10-28T16:00:00.000Z",
+      "source": "golden"
     }
   ],
   [
@@ -578,7 +630,9 @@
         "Status: checks passing"
       ],
       "href": "https://git.example.test/acme/widgets/pull/123",
-      "hrefLabel": "Open widgets #123"
+      "hrefLabel": "Open widgets #123",
+      "updated": "2026-10-28T16:00:00.000Z",
+      "source": "golden"
     }
   ],
   [
@@ -594,7 +648,9 @@
       "text": [
         "Status: checks running",
         "Last progress: Tue 16:00"
-      ]
+      ],
+      "updated": "2026-10-28T16:00:00.000Z",
+      "source": "golden"
     }
   ],
   [
@@ -614,7 +670,9 @@
       ],
       "text": [
         "Open pull requests in bdelanghe/gadgets."
-      ]
+      ],
+      "updated": "2026-10-28T16:00:00.000Z",
+      "source": "golden"
     }
   ],
   [
@@ -631,7 +689,9 @@
         "Alert: stuck or quiet too long.",
         "Status: checks failing",
         "Waits on: a fix to the build"
-      ]
+      ],
+      "updated": "2026-10-28T16:00:00.000Z",
+      "source": "golden"
     }
   ]
 ]

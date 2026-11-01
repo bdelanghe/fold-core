@@ -48,7 +48,9 @@
         ],
         "text": [
           "What waits for you."
-        ]
+        ],
+        "updated": "2026-10-29T12:00:00.000Z",
+        "source": "golden"
       }
     ],
     [
@@ -74,7 +76,9 @@
             "assertion": "/approve/v1/assertion/a"
           },
           "label": "Approve with passkey"
-        }
+        },
+        "updated": "2026-10-29T12:00:00.000Z",
+        "source": "golden"
       }
     ],
     [
@@ -88,7 +92,9 @@
         "kids": [],
         "text": [
           "What to do: x"
-        ]
+        ],
+        "updated": "2026-10-29T12:00:00.000Z",
+        "source": "golden"
       }
     ],
     [
@@ -102,7 +108,9 @@
         "kids": [],
         "text": [
           "What to do: x"
-        ]
+        ],
+        "updated": "2026-10-29T12:00:00.000Z",
+        "source": "golden"
       }
     ],
     [
@@ -125,7 +133,9 @@
             2
           ],
           "label": "Go"
-        }
+        },
+        "updated": "2026-10-29T12:00:00.000Z",
+        "source": "golden"
       }
     ],
     [
@@ -139,7 +149,9 @@
         "kids": [],
         "text": [
           "What to do: x"
-        ]
+        ],
+        "updated": "2026-10-29T12:00:00.000Z",
+        "source": "golden"
       }
     ]
   ],

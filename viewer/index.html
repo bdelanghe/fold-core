@@ -30,12 +30,14 @@
 <link rel="stylesheet" href="fold.css">
 </head>
 <body>
-<form class="reading" role="search" aria-label="Reading"><label for="reading">Reading</label>
-<input id="reading" name="data" type="search" spellcheck="false" autocomplete="off" aria-describedby="reading-note">
-<button type="submit">Open</button><span id="reading-note" class="note"></span></form>
 <!-- Said when the fold shown is a kept copy (its host did not answer): read with the fold's heading, which describes itself by it. -->
 <p id="stale" class="stale" hidden></p>
 <main><h1 tabindex="-1">Loading…</h1></main>
+<!-- The last region, after the fold (consultant's cold read, RECOMMEND-consultant-2026-11-01-fleet-page-cold-read.md point 6):
+     a way to open another document when this one fails. Where the data is from is said on every fold ("Data from …", src/ax.rs). -->
+<form class="reading" role="search" aria-label="Reading"><label for="reading">Reading</label>
+<input id="reading" name="data" type="search" spellcheck="false" autocomplete="off" aria-describedby="reading-note">
+<button type="submit">Open</button><span id="reading-note" class="note"></span></form>
 <script type="module">
 // A fold viewer that holds no data: it fetches one JSON document from the data origin (the fold-data meta), folds it here with the
 // core's WebAssembly module, and shows one fold at a time. The core gives each fold's accessibility tree (ax_json); fold-dom.js
@@ -50,10 +52,11 @@ import { embed } from "./clax.js";
 const zone = Intl.DateTimeFormat().resolvedOptions().timeZone;
 const meta = document.querySelector('meta[name="fold-data"]');
 // The document read, always said in the Reading box: the meta's, or one named in the address by an absolute path on this site
-// (?data=/fold-data/demo/page.json, as Open submits it). The box holds its path; the note says where it is from, or why it was not read.
+// (?data=/fold-data/demo/page.json, as Open submits it). The box holds its path; the note says why it was not read, or that the address
+// named it. Its source is not said here: every fold says "Data from <source>, <when>" (src/ax.rs).
 const data = dataOf(location.search, location.href, { path: meta.content, source: meta.dataset.source });
 document.getElementById("reading").value = data.path;
-document.getElementById("reading-note").textContent = data.error ? `Not read: ${data.error}` : data.source ? `From ${data.source}` : "Named in the address";
+document.getElementById("reading-note").textContent = data.error ? `Not read: ${data.error}` : data.source ? "" : "Named in the address";
 let nodes = new Map(), said = "", node = null, cur = 0, cameFrom = null, last = [], kept = null, clax = null, claxAt = null;
 // Kept (sw.js answered from its copy): the note says since when and how long ago, and the heading is described by it, so a screen
 // reader hears it with the title as the page opens. Fresh again, it goes.

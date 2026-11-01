@@ -70,7 +70,9 @@
         ],
         "text": [
           "Seats and their fields."
-        ]
+        ],
+        "updated": "2026-10-28T16:00:00.000Z",
+        "source": "golden"
       }
     ],
     [
@@ -87,7 +89,9 @@
           "Status: idle",
           "Last progress: Wed 00:05",
           "Owner: lead-seat"
-        ]
+        ],
+        "updated": "2026-10-28T16:00:00.000Z",
+        "source": "golden"
       }
     ],
     [
@@ -103,7 +107,9 @@
           "Alert: stuck or quiet too long.",
           "Last progress: Tue 23:59",
           "Waits on: an answer"
-        ]
+        ],
+        "updated": "2026-10-28T16:00:00.000Z",
+        "source": "golden"
       }
     ],
     [
@@ -117,7 +123,9 @@
         "kids": [],
         "text": [
           "Alert: stuck or quiet too long."
-        ]
+        ],
+        "updated": "2026-10-28T16:00:00.000Z",
+        "source": "golden"
       }
     ],
     [
@@ -134,7 +142,9 @@
           "Last progress: Tue 13:44",
           "not a time",
           "What to do: Nudge it"
-        ]
+        ],
+        "updated": "2026-10-28T16:00:00.000Z",
+        "source": "golden"
       }
     ],
     [
@@ -176,7 +186,9 @@
         "kids": [],
         "text": [
           "Last progress: Tue 23:30"
-        ]
+        ],
+        "updated": "2026-10-28T16:00:00.000Z",
+        "source": "golden"
       }
     ],
     [
@@ -191,7 +203,9 @@
         "kids": [],
         "text": [
           "Same id as alpha."
-        ]
+        ],
+        "updated": "2026-10-28T16:00:00.000Z",
+        "source": "golden"
       }
     ],
     [
@@ -206,7 +220,9 @@
         "kids": [],
         "text": [
           "Third one."
-        ]
+        ],
+        "updated": "2026-10-28T16:00:00.000Z",
+        "source": "golden"
       }
     ],
     [
@@ -231,7 +247,9 @@
             "id": "r72",
             "title": "Page thread #72"
           }
-        ]
+        ],
+        "updated": "2026-10-28T16:00:00.000Z",
+        "source": "golden"
       }
     ],
     [
@@ -242,7 +260,9 @@
           "Fields",
           "Requests"
         ],
-        "kids": []
+        "kids": [],
+        "updated": "2026-10-28T16:00:00.000Z",
+        "source": "golden"
       }
     ],
     [
@@ -256,7 +276,9 @@
         "kids": [],
         "text": [
           "a request whose words are long enough that the label is clipped at seventy code units for sure"
-        ]
+        ],
+        "updated": "2026-10-28T16:00:00.000Z",
+        "source": "golden"
       }
     ],
     [
@@ -267,7 +289,9 @@
           "Fields",
           "Requests"
         ],
-        "kids": []
+        "kids": [],
+        "updated": "2026-10-28T16:00:00.000Z",
+        "source": "golden"
       }
     ],
     [
@@ -293,7 +317,9 @@
             "title": "Self with query: back to the top",
             "href": "#/"
           }
-        ]
+        ],
+        "updated": "2026-10-28T16:00:00.000Z",
+        "source": "golden"
       }
     ],
     [
@@ -306,7 +332,9 @@
         ],
         "kids": [],
         "href": "https://host.example.test/a/a1b2c3d4e5f6x",
-        "hrefLabel": "Open other"
+        "hrefLabel": "Open other",
+        "updated": "2026-10-28T16:00:00.000Z",
+        "source": "golden"
       }
     ],
     [
@@ -341,7 +369,9 @@
             "title": "Why only",
             "hint": "because ✓"
           }
-        ]
+        ],
+        "updated": "2026-10-28T16:00:00.000Z",
+        "source": "golden"
       }
     ],
     [
@@ -355,7 +385,9 @@
         "kids": [],
         "text": [
           "This hint is long enough to pass ninety code units, and it ends its first sentence here. Then it keeps going on."
-        ]
+        ],
+        "updated": "2026-10-28T16:00:00.000Z",
+        "source": "golden"
       }
     ],
     [
@@ -369,7 +401,9 @@
         "kids": [],
         "text": [
           "This hint is also long, longer than ninety code units, but it has no sentence end anywhere in it at all so it is cut"
-        ]
+        ],
+        "updated": "2026-10-28T16:00:00.000Z",
+        "source": "golden"
       }
     ],
     [
@@ -383,7 +417,9 @@
         "kids": [],
         "text": [
           "Emoji 😀 and dashes – and arrows › count as code units in JS strings so this hint cuts somewhere else entirely… right"
-        ]
+        ],
+        "updated": "2026-10-28T16:00:00.000Z",
+        "source": "golden"
       }
     ],
     [
@@ -394,7 +430,9 @@
           "Fields",
           "Hints"
         ],
-        "kids": []
+        "kids": [],
+        "updated": "2026-10-28T16:00:00.000Z",
+        "source": "golden"
       }
     ],
     [
@@ -411,7 +449,9 @@
           "one",
           "two",
           "padded"
-        ]
+        ],
+        "updated": "2026-10-28T16:00:00.000Z",
+        "source": "golden"
       }
     ],
     [
@@ -444,7 +484,9 @@
         "kids": [],
         "text": [
           "Nothing is empty here."
-        ]
+        ],
+        "updated": "2026-10-28T16:00:00.000Z",
+        "source": "golden"
       }
     ],
     [
@@ -460,7 +502,9 @@
             "id": "a-kid",
             "title": "A kid"
           }
-        ]
+        ],
+        "updated": "2026-10-28T16:00:00.000Z",
+        "source": "golden"
       }
     ],
     [
@@ -472,7 +516,9 @@
           "More of this page",
           "Empty with kids"
         ],
-        "kids": []
+        "kids": [],
+        "updated": "2026-10-28T16:00:00.000Z",
+        "source": "golden"
       }
     ]
   ],

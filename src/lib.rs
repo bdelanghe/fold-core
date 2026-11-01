@@ -364,9 +364,11 @@ impl Folder<'_> {
         if !acts.is_empty() {
             n.acts = Some(acts);
         }
+        // Every fold says where its data is from and when (src/ax.rs "Data from <source>, <when>"), not only the root: a fold
+        // opened by path has no root above it on screen (RECOMMEND-consultant-2026-11-01-fleet-page-cold-read.md point 3).
+        n.updated = self.opts.updated.clone();
+        n.source = self.opts.source.clone();
         if path.is_empty() {
-            n.updated = self.opts.updated.clone();
-            n.source = self.opts.source.clone();
             n.stale = self.opts.stale.clone().filter(|x| !x.is_empty());
         }
         let cell = self.put(path, n);

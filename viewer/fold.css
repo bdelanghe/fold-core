@@ -23,7 +23,7 @@
 body{margin:0;background:var(--paper);color:var(--ink);font:var(--s0)/1.45 var(--face);font-variant-numeric:tabular-nums}
 main,form.reading{max-width:42rem;margin:0 auto;padding:16px}
 /* The document read, as a search box (Bobby 10-30): its path, editable; Open reads another on this site. */
-form.reading{display:flex;flex-wrap:wrap;gap:.5rem;align-items:center;padding-bottom:0;font-size:var(--s-1)}
+form.reading{display:flex;flex-wrap:wrap;gap:.5rem;align-items:center;padding-top:0;font-size:var(--s-1)}
 form.reading input{flex:1;min-width:12ch;min-height:44px;font:var(--s-1) ui-monospace,monospace;color:var(--ink);background:var(--card);border:1px solid var(--line);border-radius:.4em;padding:0 .5em}
 form.reading button{font:inherit;min-height:44px;color:var(--paper);background:var(--accent);border:1px solid var(--accent);border-radius:.4em;padding:0 1em}
 form.reading .note{flex-basis:100%;color:var(--soft);overflow-wrap:anywhere}
@@ -40,7 +40,7 @@ nav li:last-child a::before{content:"‹" / "";text-decoration:none;display:inli
 nav a{color:var(--ink)}
 h1{font-size:var(--s2);font-weight:400;line-height:1.25;margin:.75rem 0 .25rem}
 h1:focus{outline:none}
-ol.rows{list-style:none;margin:1rem 0 0;padding:0;border-left:3px solid var(--line)}
+ol.rows{list-style:none;margin:1rem 0 0;padding:0}
 ol.rows li{display:grid;grid-template-columns:1.75rem 1fr auto;column-gap:.75rem;padding:.6rem .75rem;min-height:44px;cursor:pointer;border-radius:10px}
 ol.rows .n{grid-column:1;grid-row:1;font:var(--s-1) var(--face);color:var(--soft);align-self:baseline}
 ol.rows a{grid-column:2;grid-row:1;color:var(--ink);text-decoration:none}
