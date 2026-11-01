@@ -238,6 +238,8 @@ fn with_js_off_a_fold_offers_comment_in_clax_and_takes_it_as_a_form() {
     assert!(html.contains("<form aria-label=\"Comment\" method=\"post\" action=\"/fold/comment/needs/\">"), "{html}");
     assert!(html.contains("<textarea aria-label=\"Your comment\" name=\"body\" required=\"\" maxlength=\"4000\"></textarea>"), "{html}");
     assert!(html.contains("<button type=\"submit\">Send to Clax</button>"), "{html}");
+    // fold-core renders it, so it carries the stamp and passes the fold contract (src/check.rs, 196765f)
+    assert_eq!(fold_core::check::page(&html), Ok(()), "{html}");
     assert!(html.contains("<a href=\"/fold/needs/\">Back to Needs &amp; you</a>"), "{html}");
     assert!(html.contains("goes to personal-allie-lead through Clax"), "{html}");
     // a fold with no page: the page of a fold that is not there

@@ -135,7 +135,7 @@ pub fn page(tree: &Value, base: &str) -> Result<String, String> {
     let main = html(tree)?;
     let b = attr(base);
     Ok(format!(
-        "<!doctype html>\n<html lang=\"en\">\n<head>\n<meta charset=\"utf-8\">\n\
+        "<!doctype html>\n<html lang=\"en\">\n<head>\n<meta charset=\"utf-8\">\n<meta name=\"generator\" content=\"fold-core\">\n\
          <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">\n<meta name=\"color-scheme\" content=\"light dark\">\n\
          <title>{}</title>\n<link rel=\"stylesheet\" href=\"{b}fold.css\">\n<link rel=\"manifest\" href=\"{b}manifest.webmanifest\">\n\
          <link rel=\"icon\" href=\"{b}favicon.svg\" type=\"image/svg+xml\">\n<link rel=\"apple-touch-icon\" href=\"{b}apple-touch-icon.png\">\n\

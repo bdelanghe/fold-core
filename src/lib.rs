@@ -10,6 +10,7 @@
 pub mod act;
 pub mod ax;
 pub mod baobab;
+pub mod check;
 pub mod html;
 #[cfg(not(target_arch = "wasm32"))]
 pub mod http;

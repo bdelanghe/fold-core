@@ -23,9 +23,9 @@ use std::net::TcpListener;
 use std::path::PathBuf;
 use std::process::exit;
 
-use fold_core::{act, report, serve, sink};
+use fold_core::{act, check, report, serve, sink};
 
-const USAGE: &str = "usage: fold serve --root <dir> --mount </fold> --port <n> [--no-store <prefix>]...\n                  [--act-as <login> --act-host <host> --act-key <file> --chitin <bin> [--act-seat <seat>] [--act-log <file>]]\n                  [--report-config <file>]\n       fold sink --port <n> --log <file> [--per-minute <n>]";
+const USAGE: &str = "usage: fold check <page.html|doc.json>...\n       fold serve --root <dir> --mount </fold> --port <n> [--no-store <prefix>]...\n                  [--act-as <login> --act-host <host> --act-key <file> --chitin <bin> [--act-seat <seat>] [--act-log <file>]]\n                  [--report-config <file>]\n       fold sink --port <n> --log <file> [--per-minute <n>]";
 
 extern "C" {
     fn geteuid() -> u32;
@@ -43,6 +43,9 @@ fn num<T: std::str::FromStr>(cmd: &str, a: &str, v: &str) -> T {
 fn main() {
     let args: Vec<String> = std::env::args().skip(1).collect();
     let cmd = args.first().map(String::as_str).unwrap_or("");
+    if cmd == "check" {
+        exit(run_check(&args[1..]));
+    }
     if cmd != "serve" && cmd != "sink" {
         die(USAGE, 2);
     }
@@ -124,4 +127,30 @@ fn main() {
     if let Err(e) = done {
         die(&format!("fold {cmd}: {e}"), 1);
     }
+}
+
+/// `fold check <file>…`: every file against the fold contract (src/check.rs); 0 when all pass, 1 otherwise.
+fn run_check(files: &[String]) -> i32 {
+    if files.is_empty() {
+        die(USAGE, 2);
+    }
+    let mut bad = 0;
+    for f in files {
+        let text = std::fs::read_to_string(f).unwrap_or_else(|e| die(&format!("fold check: {f}: {e}"), 2));
+        let r = if f.ends_with(".json") {
+            serde_json::from_str(&text).map_err(|e| vec![format!("not JSON: {e}")]).and_then(|d| check::doc(&d))
+        } else {
+            check::page(&text)
+        };
+        match r {
+            Ok(()) => println!("{f}: ok"),
+            Err(es) => {
+                bad += 1;
+                for e in es {
+                    println!("{f}: {e}");
+                }
+            }
+        }
+    }
+    i32::from(bad > 0)
 }
