@@ -28,6 +28,8 @@
         viewer = pkgs.runCommand "fold-viewer" { nativeBuildInputs = [ pkgs.bun pkgs.woff2 ]; } ''
           mkdir -p $out/fonts
           cp ${self}/viewer/index.html ${self}/viewer/fold.css ${self}/viewer/view.js ${self}/viewer/fold-dom.js ${wasm}/lib/fold_core.wasm $out/
+          # Clax through @empathic/clax-sdk (viewer/clax.js), and the tokens it themes the overlay with
+          cp ${self}/viewer/clax.js ${self}/viewer/theme.tokens.json $out/
           HOME=$TMPDIR bun build ${self}/js/fold-core.ts --target browser --format esm --outfile $out/fold-core.js
           cp ${pkgs.atkinson-hyperlegible-next}/share/fonts/opentype/AtkinsonHyperlegibleNext-Regular.otf face.otf
           woff2_compress face.otf && cp face.woff2 $out/fonts/atkinson-hyperlegible-next.woff2

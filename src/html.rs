@@ -21,13 +21,14 @@ pub fn element(role: &str) -> Option<&'static str> {
         "link" => "a",
         "button" => "button",
         "form" => "form",
+        "textbox" => "textarea",
         "status" | "text" | "decoration" => "span",
         _ => return None,
     })
 }
 
 /// The roles that refuse to render without a name (fold-dom.js NEEDS_NAME).
-pub const NEEDS_NAME: [&str; 6] = ["navigation", "heading", "list", "link", "button", "form"];
+pub const NEEDS_NAME: [&str; 7] = ["navigation", "heading", "list", "link", "button", "form", "textbox"];
 
 /// What a fold's main may hold, in order: the path (its scope, as links), its heading, its one list.
 pub const MAIN_ROLES: [&str; 3] = ["navigation", "heading", "list"];
@@ -146,6 +147,15 @@ fn node(ax: &Value, n: &mut usize, row: Option<&str>) -> Result<(El, Option<Stri
             e.body.push_str(&format!("<input type=\"hidden\" name=\"{}\" value=\"{}\">", attr(&k), attr(&v)));
         }
     }
+    // A comment's box (serve.rs's comment page): named by its label, posted as `field`, never prefilled (its name is not its text).
+    if r == "textbox" {
+        e.attrs.push(("aria-label", named.clone()));
+        e.attrs.push(("name", js::string(get(ax, "field"))));
+        e.attrs.push(("required", String::new()));
+        if let Some(m) = get(ax, "maxlength").filter(|v| !v.is_null()) {
+            e.attrs.push(("maxlength", js::string(Some(m))));
+        }
+    }
     if r == "heading" && truthy(get(ax, "focus")) {
         e.attrs.push(("tabindex", "-1".into()));
     }
@@ -172,7 +182,7 @@ fn node(ax: &Value, n: &mut usize, row: Option<&str>) -> Result<(El, Option<Stri
     if let Some(i) = get(ax, "index").filter(|v| !v.is_null()) {
         e.attrs.push(("data-i", js::string(Some(i))));
     }
-    if truthy(get(ax, "name")) && kids.is_empty() && r != "list" && r != "navigation" {
+    if truthy(get(ax, "name")) && kids.is_empty() && r != "list" && r != "navigation" && r != "textbox" {
         e.body.push_str(&text(&named));
     }
     for c in kids {

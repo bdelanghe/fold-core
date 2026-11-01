@@ -37,6 +37,8 @@ use sha2::{Digest, Sha256};
 
 use crate::act::{self, Actor, Bad, Done};
 use crate::html::text;
+use crate::id::{haecceity, segment_of};
+use crate::report::{self, Reporting};
 use crate::{ax, page};
 
 pub use crate::http::{Request, Response};
@@ -50,6 +52,8 @@ pub struct Site {
     pub no_store: Vec<String>,
     /// Whom an act's POST acts for, if anyone: without it, the server only reads.
     pub acting: Option<Acting>,
+    /// Whom `POST report-token` mints Clax reporter tokens for (report.rs), if anyone: without it, the route says reporting is off.
+    pub reporting: Option<Reporting>,
 }
 
 /// The one person this server may act for, and how (`fold serve --act-as --act-host --act-key --chitin`).
@@ -150,6 +154,10 @@ pub const ACT_BODY: usize = 4096;
 pub fn limit(method: &str, target: &str) -> usize {
     if method == "POST" && act(target).is_some() {
         ACT_BODY
+    } else if method == "POST" && target.split(['?', '#']).next() == Some(REPORT_TOKEN) {
+        REPORT_BODY
+    } else if method == "POST" && target.starts_with(COMMENT) {
+        COMMENT_BODY
     } else {
         0
     }
@@ -172,6 +180,15 @@ pub fn respond(site: &Site, req: &Request) -> Response {
 /// One request's answer at `now` (unix seconds), and the line it leaves in the act log, if it reached the act route.
 pub fn answer(site: &Site, req: &Request, now: i64) -> (Response, Option<Value>) {
     let path = req.target.split(['?', '#']).next().unwrap_or("");
+    if path == REPORT_TOKEN {
+        return reporter_token(site, req, now);
+    }
+    if path == OVERLAY {
+        return (overlay(site, req), None);
+    }
+    if path.starts_with(COMMENT) {
+        return comment(site, req, now);
+    }
     let to_act = path.starts_with("/act/");
     match (req.method.as_str(), &site.acting) {
         ("POST", Some(a)) if to_act => post(site, a, req, now),
@@ -261,34 +278,243 @@ fn again(site: &Site, a: &Acting, path: &[String], login: &str, now: i64, status
     r
 }
 
-/// `POST act/<id>` for the person this server acts for: every check, then at most one ack state move (S2 brief §2).
-fn post(site: &Site, a: &Acting, req: &Request, now: i64) -> (Response, Option<Value>) {
-    let login = req.header("Tailscale-User-Login");
-    let line = |cc: Option<(&str, &str)>, act: Option<&str>, item: Option<&str>, msg: Option<&str>, result: String| json!({ "ts": now, "login": login, "peer": req.header("X-Forwarded-For"), "cap": cc.map(|c| c.0), "call": cc.map(|c| c.1), "act": act, "item": item, "msg_id": msg, "result": result });
-    let no = |status: u16, why: &str| (Response::text(status, why), Some(line(None, None, None, None, format!("refused:{status}"))));
-    // Who is asking, and through what: all before the form is read.
+/// Who is asking, and through what, before anything is read: loopback (tailscale serve's front), the one `login` this server is
+/// for, through serve to `host`, and same-origin. The login on success; the refusal (always 403) and why, otherwise.
+fn front<'r>(req: &'r Request, login: &str, host: &str) -> Result<&'r str, &'static str> {
     if !req.peer.is_some_and(|p| p.is_loopback()) {
-        return no(403, "not from the tailnet front");
+        return Err("not from the tailnet front");
     }
-    let Some(login) = login else { return no(403, "not who this server acts for") };
-    if login.starts_with("=?") || !login.is_ascii() {
-        return no(403, "unexpected login encoding");
+    let Some(who) = req.header("Tailscale-User-Login") else { return Err("not who this server acts for") };
+    if who.starts_with("=?") || !who.is_ascii() {
+        return Err("unexpected login encoding");
     }
-    if login != a.login {
-        return no(403, "not who this server acts for");
+    if who != login {
+        return Err("not who this server acts for");
     }
-    if req.header("X-Forwarded-Proto") != Some("https") || req.header("X-Forwarded-Host") != Some(a.host.as_str()) {
-        return no(403, "not through tailscale serve");
+    if req.header("X-Forwarded-Proto") != Some("https") || req.header("X-Forwarded-Host") != Some(host) {
+        return Err("not through tailscale serve");
     }
-    let origin = format!("https://{}", a.host);
+    let origin = format!("https://{host}");
     let same = match (req.header("Sec-Fetch-Site"), req.header("Origin")) {
         (Some("same-origin"), o) => o.is_none_or(|o| o == origin),
         (None, Some(o)) => o == origin,
         _ => false,
     };
     if !same {
-        return no(403, "cross-site");
+        return Err("cross-site");
     }
+    Ok(who)
+}
+
+/// The reporter-token route's path (report.rs): what the Clax overlay on a fold page posts to, under the mount.
+pub const REPORT_TOKEN: &str = "/report-token";
+
+/// The overlay's path under the mount: the Clax instance's `/_clax/overlay.js`, served from this origin (report.rs).
+pub const OVERLAY: &str = "/clax/overlay.js";
+
+/// The most a report-token request's body may be: `{"public_key": …}`.
+pub const REPORT_BODY: usize = 1024;
+
+fn json_answer(status: u16, v: &Value) -> Response {
+    let mut r = Response::new(status).with("Content-Type", "application/json").with("Cache-Control", "no-store");
+    r.body = (v.to_string() + "\n").into_bytes();
+    r
+}
+
+/// `POST report-token`, for the one login this server reports for, same-origin only (report.rs): with no body, what the page mounts
+/// the overlay with, `{instance, queue, owner}`; with `{"public_key"}` (JSON), a reporter token for that key minted by the Clax
+/// instance, `{token, expires_at}`. Never stored; each answer leaves a log line naming no token and no key.
+fn reporter_token(site: &Site, req: &Request, now: i64) -> (Response, Option<Value>) {
+    let Some(r) = &site.reporting else {
+        return (Response::text(404, "reporting to Clax isn't on here"), None);
+    };
+    if req.method != "POST" {
+        return (Response::text(405, "a reporter token is posted for: POST").with("Allow", "POST"), None);
+    }
+    let line = |result: String| Some(json!({ "ts": now, "login": req.header("Tailscale-User-Login"), "peer": req.header("X-Forwarded-For"), "report": r.queue, "result": result }));
+    let who = match front(req, &r.login, &r.host) {
+        Ok(who) => who,
+        Err(why) => return (Response::text(403, why), line("refused:403".into())),
+    };
+    if req.body.is_empty() {
+        let v = json!({ "instance": r.clax, "queue": r.queue, "owner": r.owner });
+        return (json_answer(200, &v), line("mount".into()));
+    }
+    // JSON only: a page's fetch can send it, a cross-site form cannot.
+    if req.media_type() != Some("application/json") {
+        return (Response::text(415, "send the key as application/json"), line("refused:415".into()));
+    }
+    let key = serde_json::from_slice::<Value>(&req.body).ok().and_then(|v| v["public_key"].as_str().map(str::to_string));
+    let Some(key) = key.filter(|k| report::public_key_ok(k)) else {
+        return (Response::text(400, "no public_key, or not one"), line("refused:400".into()));
+    };
+    // The token is for this page's origin (the one front() let through) and for the one login, as Clax's reporter.
+    match r.minter.mint(&key, &format!("https://{}", r.host), who) {
+        Ok(m) => (json_answer(200, &json!({ "token": m.token, "expires_at": m.expires_at })), line("minted".into())),
+        Err(e) => (Response::text(502, &format!("clax did not mint: {e}")), line("clax:failed".into())),
+    }
+}
+
+/// The comment pages' prefix under the mount: `comment/<fold path>/`, a fold's "Comment in Clax" with JS off.
+pub const COMMENT: &str = "/comment/";
+
+/// The most a comment form's body may be, and the most characters a comment may have.
+pub const COMMENT_BODY: usize = 16 * 1024;
+pub const COMMENT_MAX: usize = 4000;
+
+/// A comment page's fold path (`/comment/a/b%2Fc/` is `[a, b/c]`, `/comment/` the root), each segment decoded on its own.
+fn comment_path(target: &str) -> Option<Vec<String>> {
+    let p = target.split(['?', '#']).next()?.strip_prefix(COMMENT)?;
+    let p = p.strip_suffix('/').unwrap_or(p);
+    if p.is_empty() {
+        return Some(vec![]);
+    }
+    // page::file refuses an id no file can hold (`.`, `..`, `/`, NUL), so such a path has no page and is a 404.
+    p.split('/').map(|s| decode(s).filter(|s| !s.is_empty())).collect()
+}
+
+/// A fold path as it stands in a URL and a haecceity: each id one segment (id.rs `segment_of`).
+fn under(path: &[String]) -> String {
+    path.iter().map(|p| segment_of(p)).collect::<Vec<_>>().join("/")
+}
+
+/// A comment page's own path under the mount.
+fn comment_href(mount: &str, path: &[String]) -> String {
+    let u = under(path);
+    if u.is_empty() {
+        format!("{mount}{COMMENT}")
+    } else {
+        format!("{mount}{COMMENT}{u}/")
+    }
+}
+
+/// HTML's five escapes undone: a fold page's `<h1>` text as the words it shows.
+fn unescape(s: &str) -> String {
+    s.replace("&lt;", "<").replace("&gt;", ">").replace("&quot;", "\"").replace("&nbsp;", "\u{a0}").replace("&amp;", "&")
+}
+
+/// The fold's title, from its page's `<h1>`; None when it has no page here.
+fn fold_title(site: &Site, path: &[String]) -> Option<String> {
+    let html = fs::read_to_string(site.root.join(page::file(path, "folds").ok()?)).ok()?;
+    let h = &html[html.find("<h1")?..];
+    let h = &h[h.find('>')? + 1..];
+    Some(unescape(&h[..h.find("</h1>")?]))
+}
+
+/// A fold's comment page: what it is for, the form (a box and its button), and the way back; `said` above the form when an earlier
+/// post was refused. The fold's own page shape (a heading and one list), so lone reads it as it reads a fold.
+fn comment_page(site: &Site, r: &Reporting, path: &[String], title: &str, said: Option<&str>, status: u16) -> Response {
+    let base = format!("{}/", site.mount);
+    let name = format!("Comment on {title}");
+    let prop = |t: String| json!({ "role": "listitem", "cls": "prop", "children": [{ "role": "text", "name": t }] });
+    let mut rows = vec![prop(format!("What you write goes to {} through Clax, about this fold. Nothing else on the page is sent.", r.owner))];
+    if let Some(s) = said {
+        rows.push(json!({ "role": "listitem", "cls": "prop", "children": [{ "role": "status", "name": s }] }));
+    }
+    rows.push(json!({ "role": "listitem", "cls": "act", "children": [{
+        "role": "form", "name": "Comment", "method": "post", "action": comment_href(&site.mount, path), "fields": [],
+        "children": [
+            { "role": "textbox", "name": "Your comment", "field": "body", "maxlength": COMMENT_MAX },
+            { "role": "button", "name": "Send to Clax" },
+        ],
+    }] }));
+    rows.push(json!({ "role": "listitem", "cls": "prop", "children": [
+        { "role": "link", "name": format!("Back to {title}"), "href": page::href(&base, path, "folds"), "local": true },
+    ] }));
+    let tree = json!({ "role": "main", "children": [
+        { "role": "heading", "name": name, "focus": true },
+        { "role": "list", "name": name, "cls": "rows", "children": rows },
+    ] });
+    match page::page(&tree, &base) {
+        Ok(h) => {
+            let mut res = Response::new(status).with("Content-Type", "text/html; charset=utf-8").with("Cache-Control", "no-store");
+            res.body = h.into_bytes();
+            res
+        }
+        Err(e) => Response::text(500, &e),
+    }
+}
+
+/// `comment/<fold path>/`: GET, the fold's comment page; POST, the comment, for the one login, same-origin (as a report token),
+/// filed as a Clax report about the fold (report.rs `Filer`), then 303 back to the fold. With no filer, a 503 page says comments
+/// from here are not on and nothing was sent. The log line names the fold, never the words.
+fn comment(site: &Site, req: &Request, now: i64) -> (Response, Option<Value>) {
+    let Some(r) = &site.reporting else {
+        return (Response::text(404, "reporting to Clax isn't on here"), None);
+    };
+    let Some(path) = comment_path(&req.target) else { return (Response::text(400, "not a fold path"), None) };
+    let Some(title) = fold_title(site, &path) else {
+        let base = format!("{}/", site.mount);
+        let mut res = Response::new(404).with("Content-Type", "text/html; charset=utf-8").with("Cache-Control", "no-store");
+        res.body = page::missing(&path, &base).unwrap_or_default().into_bytes();
+        return (res, None);
+    };
+    match req.method.as_str() {
+        "GET" | "HEAD" => return (comment_page(site, r, &path, &title, None, 200), None),
+        "POST" => {}
+        _ => return (Response::text(405, "a comment is posted: GET or POST").with("Allow", "GET, POST"), None),
+    }
+    let about = haecceity(&r.source, &under(&path));
+    let line = |result: &str| Some(json!({ "ts": now, "login": req.header("Tailscale-User-Login"), "comment": about, "result": result }));
+    if let Err(why) = front(req, &r.login, &r.host) {
+        return (Response::text(403, why), line("refused:403"));
+    }
+    if req.media_type() != Some("application/x-www-form-urlencoded") {
+        return (Response::text(415, "send the comment as a form"), line("refused:415"));
+    }
+    let body = act::form(&req.body).and_then(|f| f.into_iter().find(|(k, _)| k == "body").map(|(_, v)| v.trim().to_string()));
+    let body = match body {
+        Some(b) if !b.is_empty() && b.chars().count() <= COMMENT_MAX => b,
+        Some(b) if !b.is_empty() => {
+            let said = format!("That is longer than {COMMENT_MAX} characters, so nothing was sent.");
+            return (comment_page(site, r, &path, &title, Some(&said), 400), line("refused:400"));
+        }
+        _ => return (comment_page(site, r, &path, &title, Some("Write your comment first: nothing was sent."), 400), line("refused:400")),
+    };
+    let Some(filer) = &r.filer else {
+        let said = "Comments from here are not on yet, so nothing was sent. With JavaScript on, the Clax button on the fold works.";
+        return (comment_page(site, r, &path, &title, Some(said), 503), line("off"));
+    };
+    let back = page::href(&format!("{}/", site.mount), &path, "folds");
+    let c = report::Comment { external_id: about.clone(), url: format!("https://{}{back}", r.host), title: title.clone(), body };
+    match filer.file(&c) {
+        Ok(()) => (Response::new(303).with("Location", back).with("Cache-Control", "no-store"), line("filed")),
+        Err(e) => {
+            let said = format!("Clax did not take it, so nothing was sent: {}", e.chars().filter(|c| !c.is_control()).take(200).collect::<String>());
+            (comment_page(site, r, &path, &title, Some(&said), 502), line("clax:failed"))
+        }
+    }
+}
+
+/// `GET clax/overlay.js`: the Clax instance's overlay, fetched over loopback each time and served from this origin, so a page can
+/// load it pinned by its SRI digest with no CORS on the instance. Revalidated always; the page's digest is what pins its bytes.
+fn overlay(site: &Site, req: &Request) -> Response {
+    let Some(r) = &site.reporting else {
+        return Response::text(404, "reporting to Clax isn't on here");
+    };
+    if req.method != "GET" && req.method != "HEAD" {
+        return Response::text(405, "read-only: GET or HEAD").with("Allow", "GET, HEAD");
+    }
+    match r.overlay() {
+        Ok(b) => {
+            let mut res = Response::new(200).with("Content-Type", "text/javascript; charset=utf-8").with("Cache-Control", "no-cache");
+            res.body = b;
+            res
+        }
+        Err(e) => Response::text(502, &format!("the Clax overlay could not be read: {e}")),
+    }
+}
+
+/// `POST act/<id>` for the person this server acts for: every check, then at most one ack state move (S2 brief §2).
+fn post(site: &Site, a: &Acting, req: &Request, now: i64) -> (Response, Option<Value>) {
+    let login = req.header("Tailscale-User-Login");
+    let line = |cc: Option<(&str, &str)>, act: Option<&str>, item: Option<&str>, msg: Option<&str>, result: String| json!({ "ts": now, "login": login, "peer": req.header("X-Forwarded-For"), "cap": cc.map(|c| c.0), "call": cc.map(|c| c.1), "act": act, "item": item, "msg_id": msg, "result": result });
+    let no = |status: u16, why: &str| (Response::text(status, why), Some(line(None, None, None, None, format!("refused:{status}"))));
+    // Who is asking, and through what: all before the form is read.
+    let login = match front(req, &a.login, &a.host) {
+        Ok(login) => login,
+        Err(why) => return no(403, why),
+    };
     // The form.
     if req.media_type() != Some("application/x-www-form-urlencoded") {
         return no(400, "not a form: send application/x-www-form-urlencoded");
@@ -416,6 +642,16 @@ fn file(site: &Site, req: &Request, path: &str, now: i64) -> Response {
             let login = req.header("Tailscale-User-Login").filter(|l| *l == a.login);
             bytes = fill(p, site, a, login, now, did(&req.target)).into_bytes();
             private = true;
+        }
+    }
+    // A fold's page, where this server reports to Clax: its list ends with "Comment in Clax", a plain link to the fold's comment
+    // page (close condition 4: with JS off, the page still offers it). Added as it is served, so the pages as written are unchanged.
+    if let (Some(_), true) = (&site.reporting, page) {
+        if let Some(p) = std::str::from_utf8(&bytes).ok().filter(|p| p.contains("</ol></main>")) {
+            let fold: Vec<String> =
+                segs.iter().filter(|s| !s.is_empty() && **s != "index.html" && **s != page::SLIDES).map(|s| s.to_string()).collect();
+            let row = format!("<li class=\"prop\"><a href=\"{}\">Comment in Clax</a></li></ol></main>", text(&comment_href(&site.mount, &fold)));
+            bytes = p.replacen("</ol></main>", &row, 1).into_bytes();
         }
     }
     let class = if site.no_store.iter().any(|p| rel[1..].starts_with(p.as_str())) {

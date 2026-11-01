@@ -35,7 +35,7 @@ fn site(name: &str) -> Site {
         fs::write(&f, body).unwrap();
         fs::File::options().write(true).open(&f).unwrap().set_modified(t).unwrap();
     }
-    Site { root, mount: "/fold".into(), no_store: vec!["sign/".into()], acting: None }
+    Site { root, mount: "/fold".into(), no_store: vec!["sign/".into()], acting: None, reporting: None }
 }
 
 fn req(method: &str, target: &str, headers: &[(&str, &str)], body: &str) -> Request {
@@ -203,7 +203,7 @@ fn acting_site(name: &str, stub: &Stub) -> Site {
         fs::write(&f, p["html"].as_str().or(p["json"].as_str()).unwrap()).unwrap();
     }
     let acting = Acting { login: ME.into(), host: HOST.into(), key: KEY.to_vec(), actor: Box::new(stub.clone()) };
-    Site { root, mount: "/fold".into(), no_store: vec![], acting: Some(acting) }
+    Site { root, mount: "/fold".into(), no_store: vec![], acting: Some(acting), reporting: None }
 }
 
 /// A request as tailscale serve hands one on from ME's own page: loopback, ME's login, through serve, same-origin.

@@ -48,10 +48,26 @@ export function dataOf(search, base, meta) {
   return { path: u.pathname + u.search, url: u.href, source: null };
 }
 
-/** What a location shows: its path, its mode, the fold there (undefined when none) and that fold's accessibility tree from the core. */
-export function viewOf(ax, nodes, hash, localTimeZone) {
+/** A source id as one segment of a haecceity (src/id.rs `segment_of`): every UTF-8 byte but `[A-Za-z0-9._-]` as `%XX`, uppercase. */
+export const segmentOf = (id) =>
+  [...new TextEncoder().encode(id)].map((b) => (/[A-Za-z0-9._-]/.test(String.fromCharCode(b)) && b < 0x80 ? String.fromCharCode(b) : `%${b.toString(16).toUpperCase().padStart(2, "0")}`)).join("");
+/** The haecceity of the fold at `path` in the document `source` (src/id.rs `haecceity`): which thing a row shows. */
+export const haecceityOf = (source, path) => `https://ipso.bounded.tools/${segmentOf(source)}${path.length ? "/" + path.map(segmentOf).join("/") : ""}`;
+
+/** Each child row of the tree carries its thing's haecceity, as src/page.rs `mark` gives a pre-rendered page's rows, so a row is the
+ * RDFa subject whose schema:about a Clax report anchors to. No element id is added: the viewer's own ids (reading, stale) stay unique. */
+function markRows(ax, kids, path, source) {
+  if (ax?.role === "listitem" && ax.index != null && kids[ax.index]) ax.haecceity = haecceityOf(source, [...path, kids[ax.index].id]);
+  for (const c of ax?.children ?? []) markRows(c, kids, path, source);
+  return ax;
+}
+
+/** What a location shows: its path, its mode, the fold there (undefined when none) and that fold's accessibility tree from the core.
+ * Given the document's `source`, each child row carries its haecceity; without one (a document named in the address), none does. */
+export function viewOf(ax, nodes, hash, localTimeZone, source = null) {
   const path = pathOf(hash), node = nodes.get(docId(path)), mode = modeOf(hash, node);
-  return { path, mode, node, tree: ax({ node: node ?? null, path, mode, href: "viewer", localTimeZone }) };
+  const tree = ax({ node: node ?? null, path, mode, href: "viewer", localTimeZone });
+  return { path, mode, node, tree: source && node ? markRows(tree, node.kids ?? [], path, source) : tree };
 }
 
 /** What the viewer says over a fold read from the copy kept at `at` (an ISO time) when its host did not answer: the time it is

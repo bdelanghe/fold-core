@@ -15,9 +15,9 @@
 // the object's properties (its own words, its link, when its data is from: plain rows, read in order) and then its child objects
 // (numbered rows you go into). No paragraph, footer, status line or banner exists outside it: toDom refuses them.
 const ELEMENT = {
-  main: "main", navigation: "nav", heading: "h1", list: "ol", listitem: "li", link: "a", button: "button", form: "form", status: "span", text: "span", decoration: "span",
+  main: "main", navigation: "nav", heading: "h1", list: "ol", listitem: "li", link: "a", button: "button", form: "form", textbox: "textarea", status: "span", text: "span", decoration: "span",
 };
-const NEEDS_NAME = new Set(["navigation", "heading", "list", "link", "button", "form"]);
+const NEEDS_NAME = new Set(["navigation", "heading", "list", "link", "button", "form", "textbox"]);
 // What a fold's main may hold, in order: the path (its scope, as links), its heading, its one list.
 const MAIN_ROLES = ["navigation", "heading", "list"];
 
@@ -53,6 +53,11 @@ export function toDom(doc, ax, ids = { n: 0 }, row = null) {
     e.setAttribute("aria-label", ax.name); e.setAttribute("method", String(ax.method)); e.setAttribute("action", String(ax.action));
     for (const [k, v] of ax.fields ?? []) { const i = doc.createElement("input"); i.setAttribute("type", "hidden"); i.setAttribute("name", k); i.setAttribute("value", v); e.append(i); }
   }
+  // A comment's box (src/serve.rs's comment page): named by its label, posted as `field`, never prefilled.
+  if (ax.role === "textbox") {
+    e.setAttribute("aria-label", ax.name); e.setAttribute("name", String(ax.field)); e.setAttribute("required", "");
+    if (ax.maxlength != null) e.setAttribute("maxlength", String(ax.maxlength));
+  }
   if (ax.role === "heading" && ax.focus) e.tabIndex = -1;
   if (ax.role === "link") e.href = ax.href;
   if (ax.role === "link" && ax.ping) e.setAttribute("ping", ax.ping);
@@ -62,7 +67,7 @@ export function toDom(doc, ax, ids = { n: 0 }, row = null) {
   // A link to another fold's page (`local`, src/page.rs) is a move within the fold, as a `#` one is.
   if (ax.role === "link" && !ax.href.startsWith("#") && !ax.local) { e.target = "_blank"; e.rel = "noopener"; }
   if (ax.index != null) e.dataset.i = ax.index;
-  if (ax.name && !(ax.children ?? []).length && ax.role !== "list" && ax.role !== "navigation") e.textContent = ax.name;
+  if (ax.name && !(ax.children ?? []).length && ax.role !== "list" && ax.role !== "navigation" && ax.role !== "textbox") e.textContent = ax.name;
   for (const c of ax.children ?? []) { const x = toDom(doc, c, ids, ax.id || row); e.append(x); if (x._desc) e.append(x._desc); }
   if (ax.role === "link" && ax.description) {
     // The hint is read after the link's name, as its description, and shown under it.

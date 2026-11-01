@@ -7,7 +7,8 @@ import { readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { core } from "../js/fold-core.ts";
 import { toDom } from "./fold-dom.js";
-import { at, dataOf, href, open, pathOf, since, viewOf } from "./view.js";
+import { at, dataOf, haecceityOf, href, open, pathOf, segmentOf, since, viewOf } from "./view.js";
+import { aboutOf, contextOf, embed, flagUnnamed, pinOf, reportToken } from "./clax.js";
 
 const goldens = join(import.meta.dir, "..", "goldens");
 const wasm = process.env.FOLD_CORE_WASM ?? join(import.meta.dir, "..", "target", "wasm32-unknown-unknown", "release", "fold_core.wasm");
@@ -101,6 +102,126 @@ test("the document read: the meta's, or one named in the address by an absolute 
   expect(dataOf("?data=/fold-data/demo/page.json", base, meta)).toEqual({ path: "/fold-data/demo/page.json", url: "https://phobos.test/fold-data/demo/page.json", source: null });
   for (const away of ["https://evil.test/page.json", "//evil.test/page.json", "/\\evil.test/page.json", "http://phobos.test/fold-data/fleet/page.json", "../fold-data/demo/page.json", "page.json"])
     expect(dataOf(`?data=${encodeURIComponent(away)}`, base, meta)).toEqual({ path: away, error: "only a path on this site, from /, is read" });
+});
+
+// The haecceity a row carries in the viewer is the one its pre-rendered page gives it (src/id.rs, src/page.rs): a Clax report made
+// on either anchors to the same thing.
+test("a source id is one segment, as src/id.rs segment_of writes it (tests/ids.rs's vectors)", () => {
+  for (const [id, want] of [["needs", "needs"], ["2fac998588cf", "2fac998588cf"], ["pr/12", "pr%2F12"], ["Needs you", "Needs%20you"],
+    ["Café — Ünïcode", "Caf%C3%A9%20%E2%80%94%20%C3%9Cn%C3%AFcode"], ["日本語", "%E6%97%A5%E6%9C%AC%E8%AA%9E"],
+    ["a#3 (draft) [x]", "a%233%20%28draft%29%20%5Bx%5D"], ["~tilde", "%7Etilde"], ["50%", "50%25"], ["UPPER-lower_9.v2", "UPPER-lower_9.v2"]])
+    expect(segmentOf(id)).toBe(want);
+  expect(haecceityOf("fleet", [])).toBe("https://ipso.bounded.tools/fleet");
+  expect(haecceityOf("Fleet Map", ["prs", "bdelanghe/fold-core#12"])).toBe("https://ipso.bounded.tools/Fleet%20Map/prs/bdelanghe%2Ffold-core%2312");
+});
+
+for (const f of readdirSync(join(goldens, "pages")).filter((f) => f.endsWith(".pages.json")).sort()) {
+  const name = f.replace(/\.pages\.json$/, "");
+  test(`pages ${name}: each row the viewer shows carries the haecceity its pre-rendered page gives it`, () => {
+    const input = read(goldens, "walk", `${name}.input.json`), nodes = new Map(input.nodes as [string, any][]);
+    const abouts = (t: any): string[] => [...(t?.haecceity ? [t.haecceity] : []), ...(t?.children ?? []).flatMap(abouts)];
+    // A repeated id (goldens/walk/repeats) is one fold to the viewer, the last (a Map's), as it is one file to a host, written last.
+    const last = new Map(read(goldens, "pages", f).filter((p: any) => p.mode === "folds" && p.html).map((p: any) => [p.id, p]));
+    for (const p of last.values()) {
+      const want = [...p.html.matchAll(/property="schema:about" resource="([^"]*)"/g)].map((m: string[]) => m[1]);
+      const tree = viewOf(ax, nodes, href(at(p.id), "folds"), input.opts.localTimeZone, name).tree;
+      expect(abouts(tree)).toEqual(want);
+      // and without a source (a document named in the address) no row claims one
+      expect(abouts(viewOf(ax, nodes, href(at(p.id), "folds"), input.opts.localTimeZone).tree)).toEqual([]);
+    }
+  });
+}
+
+/** A row as the DOM has it, enough for clax.js: closest() finds itself (as Element.closest does), its schema:about span if any. */
+function fakeRow(i: number, about: string | null, id = "") {
+  const span = { getAttribute: (k: string) => (k === "property" ? "schema:about" : k === "resource" ? about : null) };
+  const r: any = { id, dataset: { i: String(i) }, children: about ? [span] : [] };
+  r.closest = (sel: string) => (sel.includes("WebPageElement") ? (about ? r : null) : r);
+  return r;
+}
+
+test("a report is about the row's haecceity; a row with none is flagged, never guessed", () => {
+  const named = fakeRow(0, "https://ipso.bounded.tools/fleet/needs"), bare = fakeRow(1, null);
+  expect(aboutOf(named)).toBe("https://ipso.bounded.tools/fleet/needs");
+  expect(aboutOf(bare)).toBeNull();
+  expect(aboutOf(null)).toBeNull();
+  // what the overlay is told: the fold's haecceity as its artifact, each row's by its data-i, the unnamed ones listed
+  expect(contextOf("https://ipso.bounded.tools/fleet", [named, bare], "personal-allie-lead")).toEqual({
+    externalId: "https://ipso.bounded.tools/fleet",
+    metadata: { about: "https://ipso.bounded.tools/fleet", owner: "personal-allie-lead", rows: { 0: "https://ipso.bounded.tools/fleet/needs" }, unnamed: [1] },
+  });
+  // a document with no source: no artifact claimed, no about
+  expect(contextOf(null, [named], "o")).toEqual({ metadata: { about: null, owner: "o", rows: { 0: "https://ipso.bounded.tools/fleet/needs" } } });
+  const flagged = flagUnnamed({ querySelectorAll: () => [named, bare] });
+  expect(flagged).toEqual([bare]);
+  expect([named.dataset.claxFlag, bare.dataset.claxFlag]).toEqual([undefined, "no-haecceity"]);
+});
+
+test("the overlay loads only pinned, same-origin, and mounts as Clax.overlay with fold serve's tokens", async () => {
+  const meta = (content: string, version: string, integrity: string) => ({ content, dataset: { version, integrity } });
+  const base = "https://phobos.test/fold/", sri = "sha384-oqVuAfXRKap7fdgcCY5uykM6+R9GqQ8K/uxy9rx7HNQlGYl1kPzQho1wx4JwY8wC";
+  expect(pinOf(null, base).error).toBe("no clax-sdk overlay is pinned yet");
+  expect(pinOf(meta("", "", ""), base).error).toBe("no clax-sdk overlay is pinned yet");
+  expect(pinOf(meta("clax/overlay.js", "", sri), base).error).toContain("names no version");
+  expect(pinOf(meta("clax/overlay.js", "latest", sri), base).error).toContain("names no version");
+  expect(pinOf(meta("clax/overlay.js", "0.6.0", ""), base).error).toContain("no SRI digest");
+  expect(pinOf(meta("clax/overlay.js", "0.6.0", "md5-xyz"), base).error).toContain("no SRI digest");
+  // fold serve's pass-through only: never another host (the instance sends no CORS header, so a pinned load from it fails)
+  for (const away of ["https://cdn.test/overlay.js", "//cdn.test/overlay.js", "http://localhost:7480/_clax/overlay.js"])
+    expect(pinOf(meta(away, "0.6.0", sri), base).error).toContain("not a path on this origin");
+  expect(pinOf(meta("clax/overlay.js", "0.6.0", sri), base)).toEqual({ src: "https://phobos.test/fold/clax/overlay.js?v=0.6.0", integrity: sri });
+  // the pin index.html ships is one pinOf takes
+  const shipped = readFileSync(join(import.meta.dir, "index.html"), "utf8").match(/<meta name="clax-sdk" content="([^"]*)" data-version="([^"]*)" data-integrity="([^"]*)">/);
+  expect(shipped).not.toBeNull();
+  expect(pinOf(meta(shipped![1], shipped![2], shipped![3]), base).src).toBe("https://phobos.test/fold/clax/overlay.js?v=0.6.0");
+
+  const mount = { instance: "https://clax.tail.test", queue: "basis", owner: "personal-allie-lead" };
+  const minted = { token: "cxr_x", expires_at: "2026-10-31T18:15:00Z" };
+  const calls: string[] = [];
+  const fetchWith = (status: number) => (async (url: string, init?: RequestInit) => {
+    calls.push(`${init?.method ?? "GET"} ${url} ${init?.body ?? ""}`.trim());
+    const keyed = typeof init?.body === "string";
+    return { ok: status === 200, status, json: async () => (keyed ? minted : mount) };
+  }) as unknown as typeof globalThis.fetch;
+  const named = fakeRow(0, "https://ipso.bounded.tools/fleet/needs"), bare = fakeRow(1, null);
+  const doc = (pinned: boolean) => ({
+    baseURI: base,
+    querySelector: () => (pinned ? meta("clax/overlay.js", "0.6.0", "sha384-AAAA") : meta("", "", "")),
+    querySelectorAll: () => [named, bare],
+  });
+  const fail = async () => { throw new Error("not to be loaded"); };
+  const at = () => ({ fold: "https://ipso.bounded.tools/fleet", rows: [named, bare] });
+
+  // unpinned: nothing is fetched, nothing loaded
+  expect((await embed({ doc: doc(false) as any, fetch: fetchWith(200), load: fail, at })).why).toBe("no clax-sdk overlay is pinned yet");
+  expect(calls).toEqual([]);
+  // pinned, but this server does not report (or not for this reader): the overlay is not loaded
+  expect((await embed({ doc: doc(true) as any, fetch: fetchWith(404), load: fail, at })).why).toBe("fold serve does not report to Clax here");
+  expect(calls).toEqual(["POST https://phobos.test/fold/report-token"]);
+  expect(await reportToken(base, null, { fetch: (async () => { throw new Error("offline"); }) as any })).toBeNull();
+  // pinned and reporting: Clax.overlay with the instance, the queue, an auth that asks fold serve, and the fold in view
+  const opened: any[] = [], closed: number[] = [];
+  let loaded: any = null;
+  const Clax = { overlay: (o: any, d: unknown) => { opened.push({ ...o, d }); const n = opened.length; return { close: () => closed.push(n) }; } };
+  const r = await embed({ doc: doc(true) as any, fetch: fetchWith(200), load: async (_d: unknown, pin: any) => { loaded = pin; return Clax; }, at });
+  expect(r.mounted).toBe(true);
+  expect(loaded).toEqual({ src: "https://phobos.test/fold/clax/overlay.js?v=0.6.0", integrity: "sha384-AAAA" });
+  const o = opened[0];
+  expect([o.instance, o.queue, o.externalId]).toEqual([mount.instance, mount.queue, "https://ipso.bounded.tools/fleet"]);
+  expect(o.metadata).toEqual({ about: "https://ipso.bounded.tools/fleet", owner: mount.owner, rows: { 0: "https://ipso.bounded.tools/fleet/needs" }, unnamed: [1] });
+  expect(bare.dataset.claxFlag).toBe("no-haecceity");
+  calls.length = 0;
+  expect(await o.auth("PUBKEY")).toEqual(minted);
+  expect(calls).toEqual(['POST https://phobos.test/fold/report-token {"public_key":"PUBKEY"}']);
+  // a move to another fold: the old overlay closed, a new one for the fold now in view
+  r.reopen();
+  expect([opened.length, closed]).toEqual([2, [1]]);
+  // fold serve not minting: auth throws, so the overlay says it, never a made-up token
+  const r2 = await embed({ doc: doc(true) as any, fetch: (async (u: string, i?: RequestInit) => (typeof i?.body === "string" ? { ok: false, status: 502 } : { ok: true, status: 200, json: async () => mount })) as any, load: async () => Clax, at });
+  await expect(opened[opened.length - 1].auth("PUBKEY")).rejects.toThrow("did not mint");
+  expect(r2.mounted).toBe(true);
+  // a pinned build without Clax.overlay says so, and mounts nothing
+  expect((await embed({ doc: doc(true) as any, fetch: fetchWith(200), load: async () => ({}), at })).why).toBe("the pinned overlay has no Clax.overlay");
 });
 
 // A kept copy (sw.js's Fold-Stored): open says when it was kept, and since says it in the reader's zone with its age in words.
