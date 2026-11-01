@@ -1,6 +1,6 @@
 // The native library (packages.native) through its C ABI, as linked into native/roundtrip.c: one C call per run of that host, its
 // input on stdin as `<call>\t<JSON>`, its output one line, read as core() reads the module's (an `{error}` throws). For the tests.
-import { type Ax, type AxInput, type FoldInput, type Folds, type WalkInput, type WalkOutput } from "./fold-core.ts";
+import { rotorOver, type Ax, type AxInput, type FoldInput, type Folds, type WalkInput, type WalkOutput } from "./fold-core.ts";
 
 export function nativeCore(bin: string) {
   const run = (name: string, text: string) => {
@@ -11,5 +11,5 @@ export function nativeCore(bin: string) {
     return out;
   };
   const json = (name: string) => (input: unknown) => run(name, JSON.stringify(input));
-  return { run, fold: json("fold") as (i: FoldInput) => Folds, walk: json("walk") as (i: WalkInput) => WalkOutput, ax: json("ax") as (i: AxInput) => Ax };
+  return { run, fold: json("fold") as (i: FoldInput) => Folds, walk: json("walk") as (i: WalkInput) => WalkOutput, ax: json("ax") as (i: AxInput) => Ax, rotor: rotorOver(json("rotor")) };
 }

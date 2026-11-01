@@ -34,4 +34,8 @@ struct FoldCoreBuf fold_core_walk_json(uint8_t *ptr, uintptr_t len);
 // `ptr` and `len` are UTF-8 the host wrote into a buffer from `fold_core_alloc(len)`; the call frees it.
 struct FoldCoreBuf fold_core_ax_json(uint8_t *ptr, uintptr_t len);
 
+// # Safety
+// `ptr` and `len` are UTF-8 the host wrote into a buffer from `fold_core_alloc(len)`; the call frees it.
+struct FoldCoreBuf fold_core_rotor_json(uint8_t *ptr, uintptr_t len);
+
 #endif  /* FOLD_CORE_H */

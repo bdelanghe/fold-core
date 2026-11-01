@@ -13,6 +13,9 @@
 //!                               `{nodes, source, base?, localTimeZone?}`: `[{id, mode, href, file, html | error}, ...]`
 //!   needs_json(ptr, len) -> u64 a document with Needs you read live (src/needs.rs), from `{root, needs?, error?, now}`: the
 //!                               root to fold, its sign items those of `needs` (fold serve's `needs.json`), first, as Approvals
+//!   rotor_json(ptr, len) -> u64 the rotor and yank (src/rotor.rs) from `{op, tree, state?, at?, key?, opts?}`: op `init` (tree, at)
+//!                               -> state, `key` (tree, state, key, opts) -> {state, effects, handled}, `kinds` (tree, state, opts)
+//!                               -> [{kind, has}], `row` (tree, state) -> the cursor row or null
 //!   dealloc(ptr, len)           frees either buffer
 //!
 //! The exports are built for wasm32 only (a native build links src/native.rs's instead); the `*_text` entries are for both.
@@ -23,6 +26,7 @@ use serde_json::{json, Value};
 
 use crate::ax::{ax_of, link};
 use crate::js::Clock;
+use crate::rotor;
 use crate::walk::{facto_body, verdict, walk, WalkOpts};
 use crate::{fold, with_sources, FoldOpts};
 
@@ -126,6 +130,30 @@ pub fn site_text(input: &str) -> String {
     })
 }
 
+/// The rotor and yank, from `{op, tree, state?, at?, key?, opts?}`.
+pub fn rotor_text(input: &str) -> String {
+    json_call(input, |case| {
+        let get = |k: &str| case.get(k).cloned().unwrap_or(Value::Null);
+        let tree: rotor::Node = serde_json::from_value(get("tree")).map_err(|e| format!("tree: {e}"))?;
+        let state = || -> Result<rotor::State, String> { serde_json::from_value(get("state")).map_err(|e| format!("state: {e}")) };
+        let opts: rotor::Opts = match get("opts") {
+            Value::Null => rotor::Opts::default(),
+            o => serde_json::from_value(o).map_err(|e| format!("opts: {e}"))?,
+        };
+        let out = match case.get("op").and_then(Value::as_str) {
+            Some("init") => json!(rotor::init(&tree, serde_json::from_value(get("at")).unwrap_or_default())),
+            Some("key") => json!(rotor::key(&tree, &state()?, get("key").as_str().ok_or("no key")?, &opts)),
+            Some("kinds") => json!(rotor::kinds(&tree, &state()?, &opts)
+                .into_iter()
+                .map(|(kind, has)| json!({ "kind": kind, "has": has }))
+                .collect::<Vec<_>>()),
+            Some("row") => json!(rotor::row(&tree, &state()?)),
+            op => return Err(format!("op: {op:?} is not init, key, kinds or row")),
+        };
+        serde_json::to_string(&out).map_err(|e| e.to_string())
+    })
+}
+
 #[cfg(target_arch = "wasm32")]
 unsafe fn call(ptr: *const u8, len: usize, f: fn(&str) -> String) -> u64 {
     let input = std::str::from_utf8(std::slice::from_raw_parts(ptr, len)).unwrap_or("");
@@ -180,4 +208,12 @@ pub unsafe extern "C" fn site_json(ptr: *const u8, len: usize) -> u64 {
 #[no_mangle]
 pub unsafe extern "C" fn needs_json(ptr: *const u8, len: usize) -> u64 {
     call(ptr, len, needs_text)
+}
+
+/// # Safety
+/// `ptr` and `len` are UTF-8 the host wrote into a buffer from `alloc(len)`.
+#[cfg(target_arch = "wasm32")]
+#[no_mangle]
+pub unsafe extern "C" fn rotor_json(ptr: *const u8, len: usize) -> u64 {
+    call(ptr, len, rotor_text)
 }
