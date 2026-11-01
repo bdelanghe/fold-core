@@ -25,7 +25,7 @@ export STUB_RECORD=$work/record
 login=bobby@example.com host=phobos.example.ts.net
 "$fold" serve --root "$work/site" --mount /fold --port 0 \
   --act-as "$login" --act-host "$host" --act-key "$work/state/act.key" --chitin "$work/chitin" \
-  --act-seat fold-ack 2> "$work/serve.log" &
+  --act-seat fold-ack --private talk/ --private-as "$login" --private-host "$host" 2> "$work/serve.log" &
 pid=$!
 for _ in $(seq 50); do grep -q ' on 127.0.0.1:' "$work/serve.log" && break; sleep 0.1; done
 port=$(grep -o ' on 127.0.0.1:[0-9]*' "$work/serve.log" | cut -d: -f2)
@@ -65,6 +65,16 @@ got=$(say "$(token talk say)" "café")
 [ "${got%% *}" = 422 ] || fail "a non-ASCII say: $got"
 [ "$(wc -l < "$STUB_RECORD" | tr -d ' ')" = 3 ] || fail "chitin saw more than one say: $(cat "$STUB_RECORD")"
 
+# talk/ is private (Bobby ecc464a7): the say above went through as the one login; anyone else is 403 there, page and act alike,
+# while m1/ stays the tailnet's
+eve=(-H "Tailscale-User-Login: eve@example.com" -H "X-Forwarded-Proto: https" -H "X-Forwarded-Host: $host" -H "Sec-Fetch-Site: same-origin")
+code() { curl -sS -o /dev/null -w '%{http_code}' "$@"; }
+[ "$(code "${eve[@]}" "$base/talk/")" = 403 ] || fail "another login read the private talk/"
+[ "$(code "${eve[@]}" --data "token=x" "$base/act/talk/say")" = 403 ] || fail "another login reached the private act"
+[ "$(code "${eve[@]}" "$base/m1/")" = 200 ] || fail "another login could not read the open m1/"
+[ "$(code -H "Sec-Fetch-Site: none" "${serve[@]:0:6}" "$base/talk/")" = 200 ] || fail "the one login could not read talk/ from a typed URL"
+[ "$(wc -l < "$STUB_RECORD" | tr -d ' ')" = 3 ] || fail "chitin was called by a refused request: $(cat "$STUB_RECORD")"
+
 # the item's act changes under the open page: its old token is refused, and nothing is sent
 zeros=$(printf '0%.0s' $(seq 64))
 awk -v z="$zeros" '/"fixity":/ { sub(/"fixity": "[0-9a-f]+"/, "\"fixity\": \"" z "\"") } 1' "$work/site/_acts.json" > "$work/acts.json"
@@ -79,4 +89,4 @@ mode() { stat -c %a "$1" 2>/dev/null || stat -f %Lp "$1"; }
 [ "$(wc -l < "$work/state/acts.jsonl" | tr -d ' ')" = 6 ] || fail "acts.jsonl: $(cat "$work/state/acts.jsonl")"
 grep -q "$tok" "$work/state/acts.jsonl" "$work/serve.log" && fail "a token was logged"
 grep -qF "Ship it" "$work/state/acts.jsonl" "$work/serve.log" && fail "a typed line was logged"
-echo "act-e2e: ok (303 ok, 303 already, a say sent once and a non-ASCII one refused, 409 changed; key and log 0600; no token or line logged)"
+echo "act-e2e: ok (303 ok, 303 already, a say sent once and a non-ASCII one refused, private talk/ 403 to another login, 409 changed; key and log 0600; no token or line logged)"

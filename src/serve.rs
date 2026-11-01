@@ -55,6 +55,54 @@ pub struct Site {
     pub acting: Option<Acting>,
     /// Whom `POST report-token` mints Clax reporter tokens for (report.rs), if anyone: without it, the route says reporting is off.
     pub reporting: Option<Reporting>,
+    /// The paths only one person may read (`fold serve --private`), if any: without it, every path is read by any tailnet peer.
+    pub private: Option<Private>,
+}
+
+/// Paths under the mount that only one person may read (`fold serve --private <prefix>... --private-as <login> --private-host
+/// <host>`), for content that is theirs alone (a seat's conversation: RECOMMEND-consultant-2026-11-01-chats-in-fold-viewer §3,
+/// Bobby ecc464a7). A request for anything under a prefix (its file, its act route, its comment page) must come as [`front`]'s
+/// writes do, loopback, that login and through serve to that host, or it is refused 403 before the path is looked at, so a
+/// refusal says nothing of what is there. A read is not held to same-origin: a typed URL or a bookmark carries no `Origin`, and
+/// a read changes nothing. What it serves is `private, no-cache`.
+pub struct Private {
+    /// Each a path under the mount (`seats/`), matched whole segment by whole segment once the path is percent-decoded and its
+    /// empty segments dropped, so `seats` covers `/seats`, `/seats/a/` and `//se%61ts/a` but not `/seatsx/`.
+    pub prefixes: Vec<String>,
+    /// The one tailnet login that may read them, as `Tailscale-User-Login` carries it.
+    pub login: String,
+    /// The host the pages are served at.
+    pub host: String,
+}
+
+impl Private {
+    /// Whether the fold or file at `segs` (decoded, no empty segments) is under a prefix.
+    fn covers(&self, segs: &[String]) -> bool {
+        self.prefixes.iter().any(|p| {
+            let want: Vec<&str> = p.split('/').filter(|s| !s.is_empty()).collect();
+            !want.is_empty() && segs.len() >= want.len() && want.iter().zip(segs).all(|(w, s)| w == s)
+        })
+    }
+}
+
+/// The fold or file a request is for, as decoded segments with the empties dropped: its act route's and its comment page's fold
+/// too. None when a segment does not decode (the route it reaches refuses that itself) or is `.` or `..`.
+fn reached(path: &str) -> Option<Vec<String>> {
+    let rest = path.strip_prefix("/act/").or_else(|| path.strip_prefix(COMMENT)).unwrap_or(path);
+    let segs: Vec<String> = rest.split('/').filter(|s| !s.is_empty()).map(decode).collect::<Option<_>>()?;
+    // a decoded segment may hold `/` (an id's `%2F`): split it too, so `seats%2Fa` is `seats/a`
+    let segs: Vec<String> = segs.iter().flat_map(|s| s.split('/')).filter(|s| !s.is_empty()).map(str::to_string).collect();
+    (!segs.iter().any(|s| s == "." || s == "..")).then_some(segs)
+}
+
+/// The refusal of a private path to anyone else, or None when the request may go on.
+fn gate(site: &Site, req: &Request, path: &str) -> Option<Response> {
+    let p = site.private.as_ref()?;
+    // a path that will not resolve is held as private: it fails closed, and its route would refuse it anyway
+    if reached(path).is_some_and(|segs| !p.covers(&segs)) {
+        return None;
+    }
+    who(req, &p.login, &p.host).err().map(|why| Response::text(403, why))
 }
 
 /// The one person this server may act for, and how (`fold serve --act-as --act-host --act-key --chitin`).
@@ -184,6 +232,9 @@ pub fn respond(site: &Site, req: &Request) -> Response {
 /// One request's answer at `now` (unix seconds), and the line it leaves in the act log, if it reached the act route.
 pub fn answer(site: &Site, req: &Request, now: i64) -> (Response, Option<Value>) {
     let path = req.target.split(['?', '#']).next().unwrap_or("");
+    if let Some(no) = gate(site, req, path) {
+        return (no, None);
+    }
     if path == REPORT_TOKEN {
         return reporter_token(site, req, now);
     }
@@ -285,6 +336,21 @@ fn again(site: &Site, a: &Acting, path: &[String], login: &str, now: i64, status
 /// Who is asking, and through what, before anything is read: loopback (tailscale serve's front), the one `login` this server is
 /// for, through serve to `host`, and same-origin. The login on success; the refusal (always 403) and why, otherwise.
 fn front<'r>(req: &'r Request, login: &str, host: &str) -> Result<&'r str, &'static str> {
+    let who = who(req, login, host)?;
+    let origin = format!("https://{host}");
+    let same = match (req.header("Sec-Fetch-Site"), req.header("Origin")) {
+        (Some("same-origin"), o) => o.is_none_or(|o| o == origin),
+        (None, Some(o)) => o == origin,
+        _ => false,
+    };
+    if !same {
+        return Err("cross-site");
+    }
+    Ok(who)
+}
+
+/// [`front`] but for same-origin: loopback, the one `login`, through serve to `host` (a private read, [`Private`]).
+fn who<'r>(req: &'r Request, login: &str, host: &str) -> Result<&'r str, &'static str> {
     if !req.peer.is_some_and(|p| p.is_loopback()) {
         return Err("not from the tailnet front");
     }
@@ -297,15 +363,6 @@ fn front<'r>(req: &'r Request, login: &str, host: &str) -> Result<&'r str, &'sta
     }
     if req.header("X-Forwarded-Proto") != Some("https") || req.header("X-Forwarded-Host") != Some(host) {
         return Err("not through tailscale serve");
-    }
-    let origin = format!("https://{host}");
-    let same = match (req.header("Sec-Fetch-Site"), req.header("Origin")) {
-        (Some("same-origin"), o) => o.is_none_or(|o| o == origin),
-        (None, Some(o)) => o == origin,
-        _ => false,
-    };
-    if !same {
-        return Err("cross-site");
     }
     Ok(who)
 }
@@ -734,7 +791,14 @@ fn file(site: &Site, req: &Request, path: &str, now: i64) -> Response {
     let hex: String = hash.iter().map(|b| format!("{b:02x}")).collect();
     let etag = format!("\"sha-256:{hex}\"");
     let asof: DateTime<Utc> = meta.modified().unwrap_or(SystemTime::UNIX_EPOCH).into();
-    let cache = if private && class == Class::Page { "private, no-cache" } else { class.cache_control() };
+    let mine = site.private.as_ref().is_some_and(|p| reached(path).is_none_or(|s| p.covers(&s)));
+    let cache = if class == Class::NoStore {
+        class.cache_control()
+    } else if mine || (private && class == Class::Page) {
+        "private, no-cache"
+    } else {
+        class.cache_control()
+    };
     let mut r = Response::new(200).with("Content-Type", content_type(&fp)).with("Cache-Control", cache);
     if class != Class::NoStore {
         r = r.with("ETag", etag.clone()).with("Last-Modified", http_date(asof));

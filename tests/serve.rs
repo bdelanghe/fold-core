@@ -12,7 +12,7 @@ use std::sync::{Arc, Mutex};
 use std::time::{Duration, SystemTime};
 
 use fold_core::act::{self, Actor, Done};
-use fold_core::serve::{answer, respond, run, Acting, Request, Site};
+use fold_core::serve::{answer, respond, run, Acting, Private, Request, Site};
 use serde_json::{json, Value};
 
 /// A served directory with one file of each class, every mtime 2026-10-30T12:00:00Z so Last-Modified and asof hold still.
@@ -35,7 +35,7 @@ fn site(name: &str) -> Site {
         fs::write(&f, body).unwrap();
         fs::File::options().write(true).open(&f).unwrap().set_modified(t).unwrap();
     }
-    Site { root, mount: "/fold".into(), no_store: vec!["sign/".into()], acting: None, reporting: None }
+    Site { root, mount: "/fold".into(), no_store: vec!["sign/".into()], acting: None, reporting: None, private: None }
 }
 
 fn req(method: &str, target: &str, headers: &[(&str, &str)], body: &str) -> Request {
@@ -221,7 +221,7 @@ fn acting_site(name: &str, stub: &Stub) -> Site {
         fs::write(&f, p["html"].as_str().or(p["json"].as_str()).unwrap()).unwrap();
     }
     let acting = Acting { login: ME.into(), host: HOST.into(), key: KEY.to_vec(), actor: Box::new(stub.clone()), spent: Default::default() };
-    Site { root, mount: "/fold".into(), no_store: vec![], acting: Some(acting), reporting: None }
+    Site { root, mount: "/fold".into(), no_store: vec![], acting: Some(acting), reporting: None, private: None }
 }
 
 /// A request as tailscale serve hands one on from ME's own page: loopback, ME's login, through serve, same-origin.
@@ -464,4 +464,82 @@ fn the_e2e_site_is_what_site_writes() {
         }
         assert!(fs::read_to_string(&f).ok().as_deref() == Some(want), "{} is stale (FOLD_BLESS=1 cargo test --test serve)", f.display());
     }
+}
+
+/// `fold serve --private seats/` (Bobby ecc464a7): every path under it, its file, its act route and its comment page, read only by
+/// ME through serve, and 403 before anything is looked at for anyone else, so a refusal says nothing of what is there (no 301, no
+/// 404). The rest of the site is the tailnet's as before. Held in goldens/serve/private.json.
+#[test]
+fn a_private_prefix_is_read_by_one_login_alone() {
+    let mut s = site("private");
+    for (p, body) in [
+        ("seats/claude-break-glass/index.html", "<!doctype html><title>claude-break-glass — Seats</title><main><h1>claude-break-glass</h1></main>\n"),
+        ("seats/claude-break-glass/page.json", "{\"title\":\"claude-break-glass\"}\n"),
+        ("seatsx/index.html", "<!doctype html><title>Not seats</title><main><h1>Not seats</h1></main>\n"),
+    ] {
+        let f = s.root.join(p);
+        fs::create_dir_all(f.parent().unwrap()).unwrap();
+        fs::write(&f, body).unwrap();
+        let t = SystemTime::UNIX_EPOCH + Duration::from_secs(1_793_361_600);
+        fs::File::options().write(true).open(&f).unwrap().set_modified(t).unwrap();
+    }
+    s.private = Some(Private { prefixes: vec!["seats/".into()], login: ME.into(), host: HOST.into() });
+    // a read as tailscale serve hands one on: a typed URL, so no Sec-Fetch-Site of same-origin and no body
+    let read = |method: &str, target: &str, change: &[(&str, Option<&str>)]| {
+        let mut c: Vec<(&str, Option<&str>)> = vec![("Sec-Fetch-Site", Some("none")), ("Content-Type", None)];
+        c.extend_from_slice(change);
+        from_me(method, target, "", &c)
+    };
+    let page = "/seats/claude-break-glass/";
+    let etag = answer(&s, &read("GET", page, &[]), NOW).0.header("ETag").unwrap().to_string();
+    let eve = [("Tailscale-User-Login", Some("eve@example.com"))];
+    let mut far = read("GET", page, &[]);
+    far.peer = Some("100.64.0.9".parse().unwrap());
+    let cases: Vec<(&str, Request)> = vec![
+        ("ME, a typed URL: served, private and revalidated", read("GET", page, &[])),
+        ("ME from a link on another site: a read is not held to same-origin", read("GET", page, &[("Sec-Fetch-Site", Some("cross-site"))])),
+        ("ME, a HEAD", read("HEAD", page, &[])),
+        ("ME, revalidated and unchanged: 304", read("GET", page, &[("If-None-Match", Some(&etag))])),
+        ("ME, its data document: private too", read("GET", "/seats/claude-break-glass/page.json", &[])),
+        ("ME, a directory without its slash: moves to it", read("GET", "/seats/claude-break-glass", &[])),
+        ("ME, nothing there: 404", read("GET", "/seats/gone/", &[])),
+        ("another login: 403", read("GET", page, &eve)),
+        ("no login: 403", read("GET", page, &[("Tailscale-User-Login", None)])),
+        ("not from loopback: 403", far),
+        ("not through serve: 403", read("GET", page, &[("X-Forwarded-Host", None)])),
+        ("another login, the prefix itself", read("GET", "/seats/", &eve)),
+        ("another login, a directory without its slash: 403, not a 301 that says it is there", read("GET", "/seats/claude-break-glass", &eve)),
+        ("another login, nothing there: 403, not a 404", read("GET", "/seats/gone/", &eve)),
+        ("another login, the prefix percent-encoded", read("GET", "/se%61ts/claude-break-glass/", &eve)),
+        ("another login, an empty segment first", read("GET", "//seats/claude-break-glass/", &eve)),
+        ("another login, the slash encoded within one segment", read("GET", "/seats%2Fclaude-break-glass/", &eve)),
+        ("another login, a segment that will not decode: held as private", read("GET", "/seats/%zz/", &eve)),
+        ("another login, its comment page", read("GET", "/comment/seats/claude-break-glass/", &eve)),
+        ("another login, an act on it", from_me("POST", "/act/seats/claude-break-glass/say", "token=", &eve)),
+        ("another login, a path that only starts the same: the tailnet's", read("GET", "/seatsx/", &eve)),
+        ("another login, the root: the tailnet's", read("GET", "/", &eve)),
+    ];
+    let got: Vec<Value> = cases
+        .iter()
+        .map(|(what, r)| {
+            let res = answer(&s, r, NOW).0;
+            json!({
+                "what": what,
+                "request": { "method": r.method, "target": r.target, "headers": r.headers, "peer": r.peer.map(|p| p.to_string()) },
+                "status": res.status,
+                "headers": res.headers,
+                "body_bytes": res.body.len(),
+            })
+        })
+        .collect();
+    let path = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("goldens/serve/private.json");
+    let text = serde_json::to_string_pretty(&got).unwrap() + "\n";
+    if std::env::var("FOLD_BLESS").is_ok() {
+        fs::write(&path, &text).unwrap();
+    }
+    assert!(
+        text == fs::read_to_string(&path).unwrap_or_default(),
+        "goldens/serve/private.json is stale (FOLD_BLESS=1 cargo test --test serve)"
+    );
+    let _ = fs::remove_dir_all(&s.root);
 }
