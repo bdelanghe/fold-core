@@ -45,7 +45,9 @@
           "title": "More in Times in the machine's zone",
           "hint": "With an offset, UTC, A date alone, Midnight as 24, Long ago"
         }
-      ]
+      ],
+      "updated": "2026-10-27T00:00:00Z",
+      "source": "test"
     }
   ],
   [
@@ -60,7 +62,9 @@
       "text": [
         "Status: idle",
         "Last progress: Sun 03:30"
-      ]
+      ],
+      "updated": "2026-10-27T00:00:00Z",
+      "source": "test"
     }
   ],
   [
@@ -75,7 +79,9 @@
       "text": [
         "Status: idle",
         "Last progress: Sun 01:30"
-      ]
+      ],
+      "updated": "2026-10-27T00:00:00Z",
+      "source": "test"
     }
   ],
   [
@@ -89,7 +95,9 @@
       "kids": [],
       "text": [
         "Sun 01:59"
-      ]
+      ],
+      "updated": "2026-10-27T00:00:00Z",
+      "source": "test"
     }
   ],
   [
@@ -103,7 +111,9 @@
       "kids": [],
       "text": [
         "Sun 02:00"
-      ]
+      ],
+      "updated": "2026-10-27T00:00:00Z",
+      "source": "test"
     }
   ],
   [
@@ -150,7 +160,9 @@
       "kids": [],
       "text": [
         "Sat 02:30"
-      ]
+      ],
+      "updated": "2026-10-27T00:00:00Z",
+      "source": "test"
     }
   ],
   [
@@ -165,7 +177,9 @@
       "kids": [],
       "text": [
         "Thu 18:30"
-      ]
+      ],
+      "updated": "2026-10-27T00:00:00Z",
+      "source": "test"
     }
   ],
   [
@@ -180,7 +194,9 @@
       "kids": [],
       "text": [
         "Fri 20:00"
-      ]
+      ],
+      "updated": "2026-10-27T00:00:00Z",
+      "source": "test"
     }
   ],
   [
@@ -195,7 +211,9 @@
       "kids": [],
       "text": [
         "Sun 00:00"
-      ]
+      ],
+      "updated": "2026-10-27T00:00:00Z",
+      "source": "test"
     }
   ],
   [
@@ -210,7 +228,9 @@
       "kids": [],
       "text": [
         "Sun 12:00"
-      ]
+      ],
+      "updated": "2026-10-27T00:00:00Z",
+      "source": "test"
     }
   ]
 ]

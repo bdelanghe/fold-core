@@ -57,7 +57,9 @@
         ],
         "text": [
           "What the agents need from you, each with what to do."
-        ]
+        ],
+        "updated": "2026-10-28T16:00:00.000Z",
+        "source": "golden"
       }
     ],
     [
@@ -73,7 +75,9 @@
           "You merge every policy change yourself. Agents may not."
         ],
         "href": "https://git.example.test/acme/policy/pull/4",
-        "hrefLabel": "Open acme/policy#4"
+        "hrefLabel": "Open acme/policy#4",
+        "updated": "2026-10-28T16:00:00.000Z",
+        "source": "golden"
       }
     ],
     [
@@ -87,7 +91,9 @@
         "kids": [],
         "text": [
           "Phone approval with your passkey"
-        ]
+        ],
+        "updated": "2026-10-28T16:00:00.000Z",
+        "source": "golden"
       }
     ],
     [
@@ -106,7 +112,9 @@
         ],
         "text": [
           "Each running goal session, its goal, and its last progress."
-        ]
+        ],
+        "updated": "2026-10-28T16:00:00.000Z",
+        "source": "golden"
       }
     ],
     [
@@ -125,7 +133,9 @@
           "Last progress: Tue 14:44",
           "Waits on: nothing it has said: it should be working",
           "What to do: Comment here asking the lead to nudge it."
-        ]
+        ],
+        "updated": "2026-10-28T16:00:00.000Z",
+        "source": "golden"
       }
     ],
     [
@@ -147,7 +157,9 @@
         ],
         "text": [
           "The standing agents by cluster: what each is for, its last progress, what it waits on."
-        ]
+        ],
+        "updated": "2026-10-28T16:00:00.000Z",
+        "source": "golden"
       }
     ],
     [
@@ -164,7 +176,9 @@
             "title": "lead",
             "hint": "idle between turns; it wakes on your comments, last progress Tue 17:52"
           }
-        ]
+        ],
+        "updated": "2026-10-28T16:00:00.000Z",
+        "source": "golden"
       }
     ],
     [
@@ -182,7 +196,9 @@
           "Status: idle between turns; it wakes on your comments",
           "Last progress: Tue 17:52",
           "Waits on: your next comment"
-        ]
+        ],
+        "updated": "2026-10-28T16:00:00.000Z",
+        "source": "golden"
       }
     ],
     [
@@ -204,7 +220,9 @@
             "title": "publisher",
             "hint": "Alert: waits on an answer in its terminal (a question or a permission), last progress…"
           }
-        ]
+        ],
+        "updated": "2026-10-28T16:00:00.000Z",
+        "source": "golden"
       }
     ],
     [
@@ -221,7 +239,9 @@
           "writes code in acme/widgets",
           "Status: idle",
           "Last progress: Mon 18:43"
-        ]
+        ],
+        "updated": "2026-10-28T16:00:00.000Z",
+        "source": "golden"
       }
     ],
     [
@@ -241,7 +261,9 @@
           "Last progress: Tue 13:00",
           "Waits on: an answer in its terminal (a question or a permission)",
           "What to do: Comment here asking the lead to nudge it."
-        ]
+        ],
+        "updated": "2026-10-28T16:00:00.000Z",
+        "source": "golden"
       }
     ],
     [
@@ -260,7 +282,9 @@
         ],
         "text": [
           "The latest messages agents sent you, newest first, each cut short."
-        ]
+        ],
+        "updated": "2026-10-28T16:00:00.000Z",
+        "source": "golden"
       }
     ],
     [
@@ -275,7 +299,9 @@
         "text": [
           "widgets #607 merged; the deploy picked it up.",
           "Tue 13:55"
-        ]
+        ],
+        "updated": "2026-10-28T16:00:00.000Z",
+        "source": "golden"
       }
     ],
     [
@@ -294,7 +320,9 @@
         ],
         "text": [
           "The newest things you asked for in comments on this page, cut short."
-        ]
+        ],
+        "updated": "2026-10-28T16:00:00.000Z",
+        "source": "golden"
       }
     ],
     [
@@ -305,7 +333,9 @@
           "Agent fleet",
           "Your latest requests"
         ],
-        "kids": []
+        "kids": [],
+        "updated": "2026-10-28T16:00:00.000Z",
+        "source": "golden"
       }
     ]
   ],
