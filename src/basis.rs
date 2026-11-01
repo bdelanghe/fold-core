@@ -172,3 +172,113 @@ fn text_of(ax: &Value, path: &[String]) -> String {
     }
     out
 }
+
+/// The longest an ask's `item` or `why` may be, in chars: one line a reader takes in at once (the consultant's ≤300).
+pub const ASK_MAX: usize = 300;
+
+/// What `basis ask` is told: the row fleet-map's asks.ts `Ask` reads, typed. `intent` or `link` is required, so every row
+/// under Needs you has something to press (asks.ts `askTarget`).
+#[derive(Debug, Default, Clone)]
+pub struct Ask {
+    pub seat: String,
+    pub topic: String,
+    pub item: String,
+    pub why: String,
+    pub intent: Option<String>,
+    pub link: Option<(String, String)>,
+    pub pr: Option<String>,
+    pub thread: Option<u64>,
+}
+
+fn one_line(name: &str, s: &str) -> Result<(), String> {
+    let n = s.chars().count();
+    if s.trim().is_empty() {
+        return Err(format!("--{name} is empty"));
+    }
+    if s.chars().any(char::is_control) {
+        return Err(format!("--{name} is one line, with no control characters"));
+    }
+    if n > ASK_MAX {
+        return Err(format!("--{name} is {n} chars, over {ASK_MAX}; say less, and put the rest where the link goes"));
+    }
+    Ok(())
+}
+
+/// The asks.json row for `a`, asked `at` (ISO 8601 UTC), or why it is refused. Its `id` is `<topic>-<6 hex of the item's
+/// sha-256>`: it comes from what is asked, never from where the row sits, so removing one ask moves no other's id.
+pub fn ask_row(a: &Ask, at: &str) -> Result<Value, String> {
+    use sha2::{Digest, Sha256};
+    let topic_ok = !a.topic.is_empty()
+        && a.topic.len() <= 32
+        && a.topic.bytes().all(|b| b.is_ascii_lowercase() || b.is_ascii_digit() || b == b'-')
+        && !a.topic.starts_with('-');
+    if !topic_ok {
+        return Err(format!("--topic {}: lowercase letters, digits and -, at most 32 (it is the row's id)", a.topic));
+    }
+    if a.seat.trim().is_empty() {
+        return Err("no seat: --as <seat> (every ask names the seat that asked)".into());
+    }
+    one_line("item", &a.item)?;
+    one_line("why", &a.why)?;
+    if let Some(i) = &a.intent {
+        if i.len() != 12 || !i.bytes().all(|b| b.is_ascii_digit() || (b'a'..=b'f').contains(&b)) {
+            return Err(format!("--intent {i}: a chitin signing intent is 12 lowercase hex"));
+        }
+    }
+    if let Some((href, label)) = &a.link {
+        if !(href.starts_with("https://") || href.starts_with('/')) || href.chars().any(|c| c.is_whitespace() || c.is_control()) {
+            return Err(format!("--link {href}: an https URL or a path from /"));
+        }
+        one_line("label", label)?;
+    }
+    if a.intent.is_none() && a.link.is_none() {
+        return Err("no button: give --intent <12 hex> (a signature) or --link <href> (where it is done)".into());
+    }
+    let digest = Sha256::digest(a.item.as_bytes());
+    let id = format!("{}-{}", a.topic, digest.iter().take(3).map(|b| format!("{b:02x}")).collect::<String>());
+    let mut row = serde_json::Map::new();
+    row.insert("id".into(), id.into());
+    row.insert("item".into(), a.item.clone().into());
+    row.insert("why".into(), a.why.clone().into());
+    row.insert("seat".into(), a.seat.clone().into());
+    row.insert("at".into(), at.into());
+    row.insert("topic".into(), a.topic.clone().into());
+    if let Some(i) = &a.intent {
+        row.insert("intent".into(), i.clone().into());
+    }
+    if let Some((href, label)) = &a.link {
+        row.insert("link".into(), serde_json::json!({ "href": href, "label": label }));
+    }
+    if let Some(p) = &a.pr {
+        row.insert("pr".into(), p.clone().into());
+    }
+    if let Some(t) = a.thread {
+        row.insert("thread".into(), t.into());
+    }
+    Ok(Value::Object(row))
+}
+
+/// The asks file's text with `row` added at the end. The file is a list of rows, or `{asks: [...]}` (asks.ts reads both),
+/// and keeps its shape; no file is an empty list. A row whose `id` is already there is refused: that ask was already asked.
+pub fn add_ask(file: Option<&str>, row: Value) -> Result<String, String> {
+    let mut doc: Value = match file.filter(|t| !t.trim().is_empty()) {
+        Some(t) => serde_json::from_str(t).map_err(|e| format!("the asks file is not JSON: {e}"))?,
+        None => Value::Array(vec![]),
+    };
+    let list = match &mut doc {
+        Value::Array(a) => a,
+        Value::Object(o) => o.get_mut("asks").and_then(Value::as_array_mut).ok_or("the asks file has no asks list")?,
+        _ => return Err("the asks file is not a list of asks".into()),
+    };
+    if list.iter().any(|r| r.get("id").is_some() && r.get("id") == row.get("id")) {
+        return Err(format!("{} is already asked (the same topic and item)", row["id"].as_str().unwrap_or("")));
+    }
+    list.push(row);
+    Ok(serde_json::to_string_pretty(&doc).map_err(|e| e.to_string())? + "\n")
+}
+
+/// Whether `text` asks for a signature. `basis say` refuses these, because signing stays on /approve (`basis ask --intent`).
+pub fn approve_shaped(text: &str) -> bool {
+    let t = text.trim_start().to_lowercase();
+    ["approve:", "sign:", "please approve", "please sign"].iter().any(|p| t.starts_with(p))
+}
