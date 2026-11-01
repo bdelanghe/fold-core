@@ -1,7 +1,8 @@
 //! `fold serve` (brief items 23-24, split by item 27): the fold viewer and its data over HTTP. GET and HEAD of static files, with
 //! the headers darkhttpd cannot send (ETag, Cache-Control, Server-Timing). One write, and only when the server is told whom it acts
 //! for ([`Acting`]): an act's form (src/ax.rs `act_form`) posts to `act/<id>`, and an ack, a defer or a decline moves that chitin
-//! message's state for that one person ([`act`], S2: allie-s2-fold-act-write §2-6, Bobby's boundary 42184457). Every check runs
+//! message's state for that one person ([`act`], S2: allie-s2-fold-act-write §2-6, Bobby's boundary 42184457), or a say sends its
+//! one typed line (Bobby 07c5f8dc widened the boundary for it; the line is checked against the act map's `input`). Every check runs
 //! before anything is done: the peer is loopback, the tailscale serve identity is that person, the request came through serve,
 //! it is same-origin, and the form's token (src/act.rs) is this server's, current, and for the act as it stands. The act itself
 //! is read from the site's act map (`_acts.json`, page.rs), never from the form. Without [`Acting`], such a POST is read only to
