@@ -1,0 +1,49 @@
+@ needs
+in: Needs you
+# Needs you
+What waits for you.
+To a seat · Ship the fix.  → needs/needs-sign-a
+No label  → needs/needs-no-label
+Null args  → needs/needs-null-args
+List args  → needs/needs-list-args
+Blank cap  → needs/needs-blank-cap
+Data from golden, Oct 29, 2026 at 12:00 PM
+
+@ needs/needs-blank-cap
+in: Needs you › Needs you
+# Blank cap
+What to do: x
+Data from golden, Oct 29, 2026 at 12:00 PM
+
+@ needs/needs-list-args
+in: Needs you › Needs you
+# List args
+What to do: x
+act: List args [needs/needs-list-args/c]
+Data from golden, Oct 29, 2026 at 12:00 PM
+
+@ needs/needs-no-label
+in: Needs you › Needs you
+# No label
+What to do: x
+Data from golden, Oct 29, 2026 at 12:00 PM
+
+@ needs/needs-null-args
+in: Needs you › Needs you
+# Null args
+What to do: x
+Data from golden, Oct 29, 2026 at 12:00 PM
+
+@ needs/needs-sign-a
+in: Needs you › Needs you
+# To a seat
+Ship the fix.
+What to do: Approve with your passkey.
+act: To a seat [https://example.test/approve/#i-a]
+Approve on the approval page  ↗ https://example.test/approve/#i-a
+Data from golden, Oct 29, 2026 at 12:00 PM
+
+@ /
+# Needs you
+Needs you · What waits for you.  → needs
+Data from golden, Oct 29, 2026 at 12:00 PM

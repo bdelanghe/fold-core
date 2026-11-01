@@ -1,0 +1,79 @@
+@ local
+in: Zones
+# Times in the machine's zone
+Gap · idle, last progress Sun 03:30  → local/gap
+Overlap · idle, last progress Sun 01:30  → local/overlap
+Before the gap  → local/before-the-gap
+After the overlap  → local/after-the-overlap
+More in Times in the machine's zone · With an offset, UTC, A date alone, Midnight as 24, Long ago  → local/more
+Data from test, Oct 26, 2026 at 8:00 PM
+
+@ local/after-the-overlap
+in: Zones › Times in the machine's zone
+# After the overlap
+Sun 02:00
+Data from test, Oct 26, 2026 at 8:00 PM
+
+@ local/before-the-gap
+in: Zones › Times in the machine's zone
+# Before the gap
+Sun 01:59
+Data from test, Oct 26, 2026 at 8:00 PM
+
+@ local/gap
+in: Zones › Times in the machine's zone
+# Gap
+Status: idle
+Last progress: Sun 03:30
+Data from test, Oct 26, 2026 at 8:00 PM
+
+@ local/more
+in: Zones › Times in the machine's zone
+# More in Times in the machine's zone
+With an offset  → local/more/with-an-offset
+UTC  → local/more/utc
+A date alone  → local/more/a-date-alone
+Midnight as 24  → local/more/midnight-as-24
+Long ago  → local/more/long-ago
+
+@ local/more/a-date-alone
+in: Zones › Times in the machine's zone › More in Times in the machine's zone
+# A date alone
+Fri 20:00
+Data from test, Oct 26, 2026 at 8:00 PM
+
+@ local/more/long-ago
+in: Zones › Times in the machine's zone › More in Times in the machine's zone
+# Long ago
+Sun 12:00
+Data from test, Oct 26, 2026 at 8:00 PM
+
+@ local/more/midnight-as-24
+in: Zones › Times in the machine's zone › More in Times in the machine's zone
+# Midnight as 24
+Sun 00:00
+Data from test, Oct 26, 2026 at 8:00 PM
+
+@ local/more/utc
+in: Zones › Times in the machine's zone › More in Times in the machine's zone
+# UTC
+Thu 18:30
+Data from test, Oct 26, 2026 at 8:00 PM
+
+@ local/more/with-an-offset
+in: Zones › Times in the machine's zone › More in Times in the machine's zone
+# With an offset
+Sat 02:30
+Data from test, Oct 26, 2026 at 8:00 PM
+
+@ local/overlap
+in: Zones › Times in the machine's zone
+# Overlap
+Status: idle
+Last progress: Sun 01:30
+Data from test, Oct 26, 2026 at 8:00 PM
+
+@ /
+# Zones
+Times in the machine's zone  → local
+Data from test, Oct 26, 2026 at 8:00 PM

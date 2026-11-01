@@ -1,0 +1,301 @@
+@ after
+in: Decks
+# After
+After the deck.
+Show as slides  → after
+Data from golden, Oct 28, 2026 at 4:00 PM
+
+@ decks
+in: Decks
+# Decks
+Read inline.
+Engine deck  → decks/engine
+Talk  → decks/talk
+Show as slides  → decks
+Data from golden, Oct 28, 2026 at 4:00 PM
+
+@ decks/engine
+in: Decks › Decks
+# Engine deck
+Kept line.
+One engine.
+Slide 1: why  → decks/engine/s1
+Slide 2: what  → decks/engine/s2
+Slide 3: how  → decks/engine/s3
+Slide 4: who  → decks/engine/s4
+More in Engine deck · Slide 5: when, Slide 6: where, Slide 7: next  → decks/engine/more
+Show as slides  → decks/engine
+Data from golden, Oct 28, 2026 at 4:00 PM
+
+@ decks/engine/more
+in: Decks › Decks › Engine deck
+# More in Engine deck
+Slide 5: when  → decks/engine/more/s5
+Slide 6: where  → decks/engine/more/s6
+Slide 7: next  → decks/engine/more/s7
+Show as slides  → decks/engine/more
+
+@ decks/engine/more/s5
+in: Decks › Decks › Engine deck › More in Engine deck
+# Slide 5: when
+Screen 😀 … budget the naïve walk row.
+Inner deck  → decks/engine/more/s5/inner
+Show as slides  → decks/engine/more/s5
+Data from golden, Oct 28, 2026 at 4:00 PM
+
+@ decks/engine/more/s5/inner
+in: Decks › Decks › Engine deck › More in Engine deck › Slide 5: when
+# Inner deck
+Inner one  → decks/engine/more/s5/inner/inner-one
+Inner two  → decks/engine/more/s5/inner/inner-two
+Show as slides  → decks/engine/more/s5/inner
+Data from golden, Oct 28, 2026 at 4:00 PM
+
+@ decks/engine/more/s5/inner/inner-one
+in: Decks › Decks › Engine deck › More in Engine deck › Slide 5: when › Inner deck
+# Inner one
+Show as slides  → decks/engine/more/s5/inner/inner-one
+Data from golden, Oct 28, 2026 at 4:00 PM
+
+@ decks/engine/more/s5/inner/inner-two
+in: Decks › Decks › Engine deck › More in Engine deck › Slide 5: when › Inner deck
+# Inner two
+Inner two a  → decks/engine/more/s5/inner/inner-two/inner-two-a
+Show as slides  → decks/engine/more/s5/inner/inner-two
+Data from golden, Oct 28, 2026 at 4:00 PM
+
+@ decks/engine/more/s5/inner/inner-two/inner-two-a
+in: Decks › Decks › Engine deck › More in Engine deck › Slide 5: when › Inner deck › Inner two
+# Inner two a
+Show as slides  → decks/engine/more/s5/inner/inner-two/inner-two-a
+Data from golden, Oct 28, 2026 at 4:00 PM
+
+@ decks/engine/more/s6
+in: Decks › Decks › Engine deck › More in Engine deck
+# Slide 6: where
+Slide page budget reader section agent heading fold.
+Show as slides  → decks/engine/more/s6
+Data from golden, Oct 28, 2026 at 4:00 PM
+
+@ decks/engine/more/s7
+in: Decks › Decks › Engine deck › More in Engine deck
+# Slide 7: next
+Page of of section agent 😀 agent seat.
+Point 6a · Agent row row item row.  → decks/engine/more/s7/point-6a
+Point 6b  → decks/engine/more/s7/point-6b
+Show as slides  → decks/engine/more/s7
+Data from golden, Oct 28, 2026 at 4:00 PM
+
+@ decks/engine/more/s7/point-6a
+in: Decks › Decks › Engine deck › More in Engine deck › Slide 7: next
+# Point 6a
+Agent row row item row.
+Show as slides  → decks/engine/more/s7/point-6a
+Data from golden, Oct 28, 2026 at 4:00 PM
+
+@ decks/engine/more/s7/point-6b
+in: Decks › Decks › Engine deck › More in Engine deck › Slide 7: next
+# Point 6b
+Deep 6  → decks/engine/more/s7/point-6b/deep-6
+Show as slides  → decks/engine/more/s7/point-6b
+Data from golden, Oct 28, 2026 at 4:00 PM
+
+@ decks/engine/more/s7/point-6b/deep-6
+in: Decks › Decks › Engine deck › More in Engine deck › Slide 7: next › Point 6b
+# Deep 6
+Show as slides  → decks/engine/more/s7/point-6b/deep-6
+Data from golden, Oct 28, 2026 at 4:00 PM
+
+@ decks/engine/s1
+in: Decks › Decks › Engine deck
+# Slide 1: why
+Of list seat list row to row gate.
+Point 0a · Item heading seat naïve ›.  → decks/engine/s1/point-0a
+Point 0b  → decks/engine/s1/point-0b
+Show as slides  → decks/engine/s1
+Data from golden, Oct 28, 2026 at 4:00 PM
+
+@ decks/engine/s1/point-0a
+in: Decks › Decks › Engine deck › Slide 1: why
+# Point 0a
+Item heading seat naïve ›.
+Show as slides  → decks/engine/s1/point-0a
+Data from golden, Oct 28, 2026 at 4:00 PM
+
+@ decks/engine/s1/point-0b
+in: Decks › Decks › Engine deck › Slide 1: why
+# Point 0b
+Deep 0  → decks/engine/s1/point-0b/deep-0
+Show as slides  → decks/engine/s1/point-0b
+Data from golden, Oct 28, 2026 at 4:00 PM
+
+@ decks/engine/s1/point-0b/deep-0
+in: Decks › Decks › Engine deck › Slide 1: why › Point 0b
+# Deep 0
+Show as slides  → decks/engine/s1/point-0b/deep-0
+Data from golden, Oct 28, 2026 at 4:00 PM
+
+@ decks/engine/s2
+in: Decks › Decks › Engine deck
+# Slide 2: what
+To gate section budget to seat item word.
+Show as slides  → decks/engine/s2
+Data from golden, Oct 28, 2026 at 4:00 PM
+
+@ decks/engine/s3
+in: Decks › Decks › Engine deck
+# Slide 3: how
+Fold a a – rule hint “quoted” slide.
+Show as slides  → decks/engine/s3
+Data from golden, Oct 28, 2026 at 4:00 PM
+
+@ decks/engine/s4
+in: Decks › Decks › Engine deck
+# Slide 4: who
+To 😀 › and reader screen section slide.
+Point 3a · List item budget budget fold.  → decks/engine/s4/point-3a
+Point 3b  → decks/engine/s4/point-3b
+Show as slides  → decks/engine/s4
+Data from golden, Oct 28, 2026 at 4:00 PM
+
+@ decks/engine/s4/point-3a
+in: Decks › Decks › Engine deck › Slide 4: who
+# Point 3a
+List item budget budget fold.
+Show as slides  → decks/engine/s4/point-3a
+Data from golden, Oct 28, 2026 at 4:00 PM
+
+@ decks/engine/s4/point-3b
+in: Decks › Decks › Engine deck › Slide 4: who
+# Point 3b
+Deep 3  → decks/engine/s4/point-3b/deep-3
+Show as slides  → decks/engine/s4/point-3b
+Data from golden, Oct 28, 2026 at 4:00 PM
+
+@ decks/engine/s4/point-3b/deep-3
+in: Decks › Decks › Engine deck › Slide 4: who › Point 3b
+# Deep 3
+Show as slides  → decks/engine/s4/point-3b/deep-3
+Data from golden, Oct 28, 2026 at 4:00 PM
+
+@ decks/talk
+in: Decks › Decks
+# Talk
+Spoken and shown
+Opening line  → decks/talk/open
+No body text  → decks/talk/s2
+Word to café … budget item word 😀 list … … über “quoted” agent. And…  → decks/talk/s3
+Show as slides  → decks/talk
+Data from golden, Oct 28, 2026 at 4:00 PM
+
+@ decks/talk/open
+in: Decks › Decks › Talk
+# Opening line
+first
+second
+What was said  → decks/talk/open/spoken
+Show as slides  → decks/talk/open
+Data from golden, Oct 28, 2026 at 4:00 PM
+
+@ decks/talk/open/spoken
+in: Decks › Decks › Talk › Opening line
+# What was said
+– – – rule section the to item of “quoted” walk walk seat section deck agent viewer gate list section.
+Walk the list item viewer reader!
+A of › “quoted” list über slide – – slide budget list über row agent agent to viewer › hint?
+Row of budget “quoted” › a of of “quoted” fold screen 😀 a rule heading the agent row.
+Rule über fold a › hint naïve the page seat seat viewer “quoted” “quoted” heading ›.
+Seat list “quoted” and the a über “quoted” rule – deck…  → decks/talk/open/spoken/p2
+A reader hint gate and seat screen the screen a item and…  → decks/talk/open/spoken/p3
+Show as slides  → decks/talk/open/spoken
+Data from golden, Oct 28, 2026 at 4:00 PM
+
+@ decks/talk/open/spoken/p2
+in: Decks › Decks › Talk › Opening line › What was said
+# Seat list “quoted” and the a über “quoted” rule – deck…
+Seat list “quoted” and the a über “quoted” rule – deck viewer seat gate!
+Fold › of café deck seat a item deck to?
+Hint deck 😀 row reader item slide naïve heading walk.
+Screen › 😀 row page slide café naïve viewer a list and and a.
+Agent agent the screen reader agent item the walk 😀 deck reader row row viewer über walk slide hint the!
+Show as slides  → decks/talk/open/spoken/p2
+Data from golden, Oct 28, 2026 at 4:00 PM
+
+@ decks/talk/open/spoken/p3
+in: Decks › Decks › Talk › Opening line › What was said
+# A reader hint gate and seat screen the screen a item and…
+A reader hint gate and seat screen the screen a item and the word fold seat?
+Of deck budget … word … and … hint and “quoted” deck.
+› row › rule of of to slide list a hint gate and to naïve list.
+Heading page word deck heading hint walk agent – deck walk agent – item café section!
+Show as slides  → decks/talk/open/spoken/p3
+Data from golden, Oct 28, 2026 at 4:00 PM
+
+@ decks/talk/s2
+in: Decks › Decks › Talk
+# No body text
+Show as slides  → decks/talk/s2
+Data from golden, Oct 28, 2026 at 4:00 PM
+
+@ decks/talk/s3
+in: Decks › Decks › Talk
+# Word to café … budget item word 😀 list … … über “quoted” agent. And…
+Word to café … budget item word 😀 list … … über “quoted” agent.
+And the agent café item word of “quoted” fold ›!
+Gate page budget budget?
+Of – – to … café.
+Of section über section slide section budget list heading walk the seat über über › walk agent reader.
+Reader item screen a the item!
+And … slide agent reader list rule … page walk seat naïve 😀 budget › screen café to reader the?
+› rule section café … naïve über – heading of gate hint…  → decks/talk/s3/p2
+List budget hint word list reader naïve and slide rule…  → decks/talk/s3/p3
+– viewer reader the item gate naïve rule deck heading list…  → decks/talk/s3/p4
+Show as slides  → decks/talk/s3
+Data from golden, Oct 28, 2026 at 4:00 PM
+
+@ decks/talk/s3/p2
+in: Decks › Decks › Talk › Word to café … budget item word 😀 list … … über “quoted” agent. And…
+# › rule section café … naïve über – heading of gate hint…
+› rule section café … naïve über – heading of gate hint über agent a section.
+– reader slide heading screen to screen – word viewer slide – a viewer.
+Fold the hint gate list a!
+Agent › and slide “quoted” word?
+Seat … gate viewer über –.
+😀 of “quoted” list screen › seat “quoted” screen agent viewer agent viewer the.
+Heading viewer word hint fold … viewer budget viewer item!
+Show as slides  → decks/talk/s3/p2
+Data from golden, Oct 28, 2026 at 4:00 PM
+
+@ decks/talk/s3/p3
+in: Decks › Decks › Talk › Word to café … budget item word 😀 list … … über “quoted” agent. And…
+# List budget hint word list reader naïve and slide rule…
+List budget hint word list reader naïve and slide rule rule page 😀 hint to ›?
+Hint page heading café gate … page hint and row agent heading screen café › naïve.
+Viewer seat deck to heading heading rule word seat – deck gate seat viewer.
+Naïve section agent deck naïve hint rule a walk item list and heading viewer!
+Hint list and walk budget seat?
+Section naïve word screen deck naïve fold and to – page ›.
+Show as slides  → decks/talk/s3/p3
+Data from golden, Oct 28, 2026 at 4:00 PM
+
+@ decks/talk/s3/p4
+in: Decks › Decks › Talk › Word to café … budget item word 😀 list … … über “quoted” agent. And…
+# – viewer reader the item gate naïve rule deck heading list…
+– viewer reader the item gate naïve rule deck heading list deck.
+Show as slides  → decks/talk/s3/p4
+Data from golden, Oct 28, 2026 at 4:00 PM
+
+@ intro
+in: Decks
+# Intro
+Before the deck.
+Show as slides  → intro
+Data from golden, Oct 28, 2026 at 4:00 PM
+
+@ /
+# Decks
+Intro · Before the deck.  → intro
+Decks · Read inline.  → decks
+After · After the deck.  → after
+Show as slides
+Data from golden, Oct 28, 2026 at 4:00 PM

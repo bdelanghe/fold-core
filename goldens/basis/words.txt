@@ -1,0 +1,41 @@
+@ at
+in: Home
+# At
+word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word
+
+@ blank
+in: Home
+# 
+
+@ four
+in: Home
+# one two three four
+
+@ h
+in: Words
+# H
+https://example.org/h  ↗ https://example.org/h
+
+@ over
+in: Home
+# Over
+word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word
+
+@ /
+# Words
+As a string  → s
+Href  → h
+At  → at
+Over  → over
+Three  → three
+Four  → four
+Blank  → blank
+
+@ s
+in: Home
+# A string
+Stuck.
+
+@ three
+in: Home
+# one two three

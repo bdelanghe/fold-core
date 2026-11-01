@@ -1,0 +1,24 @@
+@ a
+in: Home
+# A
+A holds one thing.
+Back  → a/back
+
+@ a/back
+in: Home › Home
+# Back
+Back to A.
+A again  → a/back/a
+
+@ a/back/a
+in: Home › Home › Home
+# A again
+Here again.
+
+@ b
+in: Home
+# Stray
+
+@ /
+# Top
+A · What A is.  → a

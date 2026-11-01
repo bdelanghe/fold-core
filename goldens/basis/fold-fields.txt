@@ -1,0 +1,180 @@
+@ hints
+in: Fields
+# Hints
+Long one · This hint is long enough to pass ninety code units, and it ends its first sentence here.  → hints/long-one
+Long two · This hint is also long, longer than ninety code units, but it has no sentence end…  → hints/long-two
+Long three · Emoji 😀 and dashes – and arrows › count as code units in JS strings so this hint cuts…  → hints/long-three
+Same as label  → hints/same-as-label
+Why only · because ✓  → hints/why-only
+Data from golden, Oct 28, 2026 at 4:00 PM
+
+@ hints/long-one
+in: Fields › Hints
+# Long one
+This hint is long enough to pass ninety code units, and it ends its first sentence here. Then it keeps going on.
+Data from golden, Oct 28, 2026 at 4:00 PM
+
+@ hints/long-three
+in: Fields › Hints
+# Long three
+Emoji 😀 and dashes – and arrows › count as code units in JS strings so this hint cuts somewhere else entirely… right
+Data from golden, Oct 28, 2026 at 4:00 PM
+
+@ hints/long-two
+in: Fields › Hints
+# Long two
+This hint is also long, longer than ninety code units, but it has no sentence end anywhere in it at all so it is cut
+Data from golden, Oct 28, 2026 at 4:00 PM
+
+@ hints/same-as-label
+in: Fields › Hints
+# Same as label
+Data from golden, Oct 28, 2026 at 4:00 PM
+
+@ hints/why-only
+in: Fields › Hints
+# Why only
+because ✓
+one
+two
+padded
+Data from golden, Oct 28, 2026 at 4:00 PM
+
+@ more
+in: Fields
+# More of this page
+Empty  → more/empty
+Empty with kids  → more/empty2
+
+@ more/empty
+in: Fields › More of this page
+# Empty
+Nothing is empty here.
+Data from golden, Oct 28, 2026 at 4:00 PM
+
+@ more/empty2
+in: Fields › More of this page
+# Empty with kids
+A kid  → more/empty2/a-kid
+Data from golden, Oct 28, 2026 at 4:00 PM
+
+@ more/empty2/a-kid
+in: Fields › More of this page › Empty with kids
+# A kid
+Data from golden, Oct 28, 2026 at 4:00 PM
+
+@ pages
+in: Fields
+# Your pages
+Fleet page: back to the top · Where you are now.  ↗ #/
+Other page  → pages/other
+Self with query: back to the top  ↗ #/
+Data from golden, Oct 28, 2026 at 4:00 PM
+
+@ pages/other
+in: Fields › Your pages
+# Other page
+Open other  ↗ https://host.example.test/a/a1b2c3d4e5f6x
+Data from golden, Oct 28, 2026 at 4:00 PM
+
+@ refs
+in: Fields
+# Requests
+why does it say part 1 of 14 · Page thread #70  → refs/r70
+a request whose words are long enough that the label is clipped at… · Page thread #71  → refs/r71
+Page thread #72  → refs/r72
+Data from golden, Oct 28, 2026 at 4:00 PM
+
+@ refs/r70
+in: Fields › Requests
+# why does it say part 1 of 14
+Data from golden, Oct 28, 2026 at 4:00 PM
+
+@ refs/r71
+in: Fields › Requests
+# a request whose words are long enough that the label is clipped at…
+a request whose words are long enough that the label is clipped at seventy code units for sure
+Data from golden, Oct 28, 2026 at 4:00 PM
+
+@ refs/r72
+in: Fields › Requests
+# Page thread #72
+Data from golden, Oct 28, 2026 at 4:00 PM
+
+@ /
+# Fields
+stale since a test
+Seats · Seats and their fields.  → s
+Requests  → refs
+Your pages  → pages
+Hints  → hints
+More of this page · Empty, Empty with kids  → more
+Data from golden, Oct 28, 2026 at 4:00 PM
+
+@ s
+in: Fields
+# Seats
+Seats and their fields.
+alpha · Alert: it has been quiet for a day  → s/a
+beta · Alert: waits on an answer , last progress Tue 23:59  → s/b
+gamma · Alert: quiet too long  → s/c
+delta · working, last progress Tue 13:44  → s/d
+More in Seats · epsilon, duplicate id, another duplicate  → s/more
+Data from golden, Oct 28, 2026 at 4:00 PM
+
+@ s/a
+in: Fields › Seats
+# alpha
+Alert: it has been quiet for a day.
+Status: idle
+Last progress: Wed 00:05
+Owner: lead-seat
+Data from golden, Oct 28, 2026 at 4:00 PM
+
+@ s/b
+in: Fields › Seats
+# beta
+Alert: stuck or quiet too long.
+Last progress: Tue 23:59
+Waits on: an answer
+Data from golden, Oct 28, 2026 at 4:00 PM
+
+@ s/c
+in: Fields › Seats
+# gamma
+Alert: stuck or quiet too long.
+Data from golden, Oct 28, 2026 at 4:00 PM
+
+@ s/d
+in: Fields › Seats
+# delta
+Status: working
+Last progress: Tue 13:44
+not a time
+What to do: Nudge it
+Data from golden, Oct 28, 2026 at 4:00 PM
+
+@ s/more
+in: Fields › Seats
+# More in Seats
+epsilon · last progress Tue 23:30  → s/more/e
+duplicate id · Same id as alpha.  → s/more/a
+another duplicate · Third one.  → s/more/a-2
+
+@ s/more/a
+in: Fields › Seats › More in Seats
+# duplicate id
+Same id as alpha.
+Data from golden, Oct 28, 2026 at 4:00 PM
+
+@ s/more/a-2
+in: Fields › Seats › More in Seats
+# another duplicate
+Third one.
+Data from golden, Oct 28, 2026 at 4:00 PM
+
+@ s/more/e
+in: Fields › Seats › More in Seats
+# epsilon
+Last progress: Tue 23:30
+Data from golden, Oct 28, 2026 at 4:00 PM

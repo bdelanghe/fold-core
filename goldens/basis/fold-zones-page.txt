@@ -1,0 +1,26 @@
+@ /
+# A page in its own zone
+Times  → times
+
+@ times
+in: A page in its own zone
+# Times
+No offset · idle, last progress Sun 08:00  → times/no-offset
+UTC  → times/utc
+Chatham  → times/chatham
+
+@ times/chatham
+in: A page in its own zone › Times
+# Chatham
+Sun 16:45
+
+@ times/no-offset
+in: A page in its own zone › Times
+# No offset
+Status: idle
+Last progress: Sun 08:00
+
+@ times/utc
+in: A page in its own zone › Times
+# UTC
+Fri 01:30

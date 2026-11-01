@@ -1,0 +1,67 @@
+@ one
+in: Deck
+# One
+One says one thing.
+act: One [https://example.org/one]
+The page  ↗ https://example.org/one
+Healthy.
+Show as slides  → one
+Data from its writer, Jan 5, 2026 at 6:29 PM
+
+@ /
+# Deck
+Old data.
+A deck.
+Checked.
+One · The first.  → one
+Two · The second.  → two
+Three · The third.  → three
+Show as slides
+Data from deck-sync, Oct 27, 2026 at 1:05 PM
+
+@ three
+in: Deck
+# Three
+word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word
+Show as slides  → three
+Data from a writer, Oct 27, 2026 at 10:00 AM
+
+@ two
+in: Home
+# Two
+act: Two [two/y]
+https://example.org/two  ↗ https://example.org/two
+Point 0 · hint hint hint hint hint hint hint hint hint hint hint hint hint hint hint hint hint hint hint hint  → two/p0
+Point 1 · hint hint hint hint hint hint hint hint hint hint hint hint hint hint hint hint hint hint hint hint  → two/p1
+Point 2 · hint hint hint hint hint hint hint hint hint hint hint hint hint hint hint hint hint hint hint hint  → two/p2
+Point 3 · hint hint hint hint hint hint hint hint hint hint hint hint hint hint hint hint hint hint hint hint  → two/p3
+Point 4 · hint hint hint hint hint hint hint hint hint hint hint hint hint hint hint hint hint hint hint hint  → two/p4
+Show as slides  → two
+Data from its writer, Invalid Date
+
+@ two/p0
+in: Home › Home
+# Point 0
+word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word
+Show as slides  → two/p0
+Data from its writer, Oct 27, 2026 at 12:00 AM
+
+@ two/p1
+in: Home › Home
+# Point 1
+One.
+
+@ two/p2
+in: Home › Home
+# Point 2
+Two.
+
+@ two/p3
+in: Home › Home
+# Point 3
+Three.
+
+@ two/p4
+in: Home › Home
+# Point 4
+Four.

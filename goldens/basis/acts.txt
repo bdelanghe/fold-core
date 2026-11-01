@@ -1,0 +1,16 @@
+@ m%201
+in: Needs you
+# From seat-a
+Ship the fix?
+act: Ack [m%201/ack] · Defer [m%201/defer] · Decline [m%201/decline]
+
+@ /
+# Needs you
+From seat-a · Ship the fix?  → m%201
+Two acks  → twice
+
+@ twice
+in: Needs you
+# Two acks
+Two acts with one key: a schema error, each keyed by its index.
+act: Ack [twice/0] · Ack again [twice/1]
