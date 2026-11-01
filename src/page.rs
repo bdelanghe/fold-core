@@ -148,14 +148,18 @@ pub fn page(tree: &Value, base: &str) -> Result<String, String> {
 /// The act map's file under the site's directory (S2 brief §2): never served, as no `_`-name is (serve.rs).
 pub const ACTS: &str = "_acts.json";
 
-/// Every act of a folded document by its act id (ax.rs `act_id`): `{item, cap, call, args, fixity}`, `item` the fold's id. `fold
+/// Every act of a folded document by its act id (ax.rs `act_id`): `{item, cap, call, args, fixity}` and its `input` when it has
+/// one (src/act.rs `Input`), `item` the fold's id. `fold
 /// serve` reads the act a form posts to from here, never from the form, and checks a token's fixity against it.
 pub fn acts(nodes: &[(String, Value)]) -> Value {
     let mut m = serde_json::Map::new();
     for (id, node) in nodes {
         let path = at(id);
         for (key, a) in acts_of(node) {
-            let row = json!({ "item": id, "cap": a["cap"], "call": a["call"], "args": a["args"], "fixity": fixity(id, &a) });
+            let mut row = json!({ "item": id, "cap": a["cap"], "call": a["call"], "args": a["args"], "fixity": fixity(id, &a) });
+            if let Some(i) = a.get("input") {
+                row["input"] = i.clone();
+            }
             m.insert(act_id(&path, &key), row);
         }
     }

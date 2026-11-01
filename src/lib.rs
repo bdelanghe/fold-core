@@ -88,7 +88,8 @@ pub struct Node {
     /// The fold's other acts (S2, allie-s2-fold-act-write §7 step 0: a Needs-you item's ack, defer and decline), each `{id?, cap,
     /// call, args, label}` as `act` is, plus its own `id` where it names one. fold-core's own field (not fold.ts's): an act's own id
     /// (ax.rs `acts_of`) is its `id`, else its `call`, so reordering an item's acts moves no act's id. A Needs-you act is
-    /// `{cap: "chitin", call: "ack"|"defer"|"decline", args: {msg_id, from}, label}` (personal-allie-lead 4f93c11f).
+    /// `{cap: "chitin", call: "ack"|"defer"|"decline", args: {msg_id, from}, label}` (personal-allie-lead 4f93c11f). A typed say
+    /// is `{cap: "chitin", call: "say", args: {to, in_reply_to?}, input: {field, label, maxlength, charset}, label}` (Bobby 07c5f8dc).
     #[serde(skip_serializing_if = "Option::is_none", default)]
     pub acts: Option<Vec<Value>>,
     #[serde(skip_serializing_if = "Option::is_none", default)]
@@ -152,6 +153,10 @@ fn act_of(act: Option<&Value>, own: bool) -> Option<Value> {
     m.insert("call".into(), a["call"].clone());
     m.insert("args".into(), args.clone());
     m.insert("label".into(), Value::String(label));
+    // fold-core's own too: one of `acts` keeps its typed field's spec (src/act.rs `input_of` says whether it is one it takes)
+    if let Some(i) = get(a, "input").filter(|i| own && i.is_object()) {
+        m.insert("input".into(), i.clone());
+    }
     Some(Value::Object(m))
 }
 

@@ -175,11 +175,11 @@
       ],
       [
         "ETag",
-        "\"sha-256:65475e6ddc47092ba43f58b3eef1a6aa73151bc54a3512164f23d3c1d63680a6\""
+        "\"sha-256:282aeebfbd117a6678e1fdea0238924aa5fb2302207c357297249a6a172b79d1\""
       ]
     ],
     "body": {
-      "html_bytes": 1992,
+      "html_bytes": 3564,
       "says": null,
       "tokens": [],
       "h1": "Needs you"
@@ -2317,6 +2317,1191 @@
       "msg_id": "m-down",
       "result": "chitin:timeout: seat-b did not answer"
     }
+  },
+  {
+    "what": "an act's typed field: its text box before its button, its token filled",
+    "request": {
+      "method": "GET",
+      "target": "/needs/talk/",
+      "peer": "127.0.0.1",
+      "headers": [
+        [
+          "Tailscale-User-Login",
+          "bobby@example.com"
+        ],
+        [
+          "X-Forwarded-For",
+          "100.64.0.2"
+        ],
+        [
+          "X-Forwarded-Proto",
+          "https"
+        ],
+        [
+          "X-Forwarded-Host",
+          "phobos.example.ts.net"
+        ],
+        [
+          "Sec-Fetch-Site",
+          "same-origin"
+        ],
+        [
+          "Content-Type",
+          "application/x-www-form-urlencoded"
+        ]
+      ],
+      "body": ""
+    },
+    "status": 200,
+    "headers": [
+      [
+        "Content-Type",
+        "text/html; charset=utf-8"
+      ],
+      [
+        "Cache-Control",
+        "private, no-cache"
+      ],
+      [
+        "ETag",
+        "\"sha-256:0e4d92142c37723c513197681a772bcdaa81f1aa979c2bcbdc7f1c2cb570e41d\""
+      ]
+    ],
+    "body": {
+      "html_bytes": 1578,
+      "says": null,
+      "tokens": [
+        "v1.1793404800.10bcd75e4511cac407db4ceacd74f9c0451c39a9e7d199985a11a843c1f78917.K8zj0Pug663wy0qYLnDRw4dKtnCD4pychqJmFg26N20"
+      ],
+      "h1": "Talk to seat-a"
+    },
+    "actor": [],
+    "log": null
+  },
+  {
+    "what": "say: the forged login of another person",
+    "request": {
+      "method": "POST",
+      "target": "/act/needs/talk/say",
+      "peer": "127.0.0.1",
+      "headers": [
+        [
+          "X-Forwarded-For",
+          "100.64.0.2"
+        ],
+        [
+          "X-Forwarded-Proto",
+          "https"
+        ],
+        [
+          "X-Forwarded-Host",
+          "phobos.example.ts.net"
+        ],
+        [
+          "Sec-Fetch-Site",
+          "same-origin"
+        ],
+        [
+          "Content-Type",
+          "application/x-www-form-urlencoded"
+        ],
+        [
+          "Tailscale-User-Login",
+          "eve@example.com"
+        ]
+      ],
+      "body": "token=v1.1793404800.10bcd75e4511cac407db4ceacd74f9c0451c39a9e7d199985a11a843c1f78917.K8zj0Pug663wy0qYLnDRw4dKtnCD4pychqJmFg26N20&cap=chitin&call=say&args.to=seat-a&args.in_reply_to=m-1&args.line=Ship it."
+    },
+    "status": 403,
+    "headers": [
+      [
+        "Content-Type",
+        "text/plain; charset=utf-8"
+      ],
+      [
+        "Cache-Control",
+        "no-store"
+      ]
+    ],
+    "body": "not who this server acts for\n",
+    "actor": [],
+    "log": {
+      "ts": 1793361600,
+      "login": "eve@example.com",
+      "peer": "100.64.0.2",
+      "cap": null,
+      "call": null,
+      "act": null,
+      "item": null,
+      "msg_id": null,
+      "result": "refused:403"
+    }
+  },
+  {
+    "what": "say: ME's login, forged from off the host",
+    "request": {
+      "method": "POST",
+      "target": "/act/needs/talk/say",
+      "peer": "100.64.0.9",
+      "headers": [
+        [
+          "Tailscale-User-Login",
+          "bobby@example.com"
+        ],
+        [
+          "X-Forwarded-For",
+          "100.64.0.2"
+        ],
+        [
+          "X-Forwarded-Proto",
+          "https"
+        ],
+        [
+          "X-Forwarded-Host",
+          "phobos.example.ts.net"
+        ],
+        [
+          "Sec-Fetch-Site",
+          "same-origin"
+        ],
+        [
+          "Content-Type",
+          "application/x-www-form-urlencoded"
+        ]
+      ],
+      "body": "token=v1.1793404800.10bcd75e4511cac407db4ceacd74f9c0451c39a9e7d199985a11a843c1f78917.K8zj0Pug663wy0qYLnDRw4dKtnCD4pychqJmFg26N20&cap=chitin&call=say&args.to=seat-a&args.in_reply_to=m-1&args.line=Ship it."
+    },
+    "status": 403,
+    "headers": [
+      [
+        "Content-Type",
+        "text/plain; charset=utf-8"
+      ],
+      [
+        "Cache-Control",
+        "no-store"
+      ]
+    ],
+    "body": "not from the tailnet front\n",
+    "actor": [],
+    "log": {
+      "ts": 1793361600,
+      "login": "bobby@example.com",
+      "peer": "100.64.0.2",
+      "cap": null,
+      "call": null,
+      "act": null,
+      "item": null,
+      "msg_id": null,
+      "result": "refused:403"
+    }
+  },
+  {
+    "what": "say: through no tailscale serve",
+    "request": {
+      "method": "POST",
+      "target": "/act/needs/talk/say",
+      "peer": "127.0.0.1",
+      "headers": [
+        [
+          "Tailscale-User-Login",
+          "bobby@example.com"
+        ],
+        [
+          "X-Forwarded-For",
+          "100.64.0.2"
+        ],
+        [
+          "X-Forwarded-Proto",
+          "https"
+        ],
+        [
+          "Sec-Fetch-Site",
+          "same-origin"
+        ],
+        [
+          "Content-Type",
+          "application/x-www-form-urlencoded"
+        ]
+      ],
+      "body": "token=v1.1793404800.10bcd75e4511cac407db4ceacd74f9c0451c39a9e7d199985a11a843c1f78917.K8zj0Pug663wy0qYLnDRw4dKtnCD4pychqJmFg26N20&cap=chitin&call=say&args.to=seat-a&args.in_reply_to=m-1&args.line=Ship it."
+    },
+    "status": 403,
+    "headers": [
+      [
+        "Content-Type",
+        "text/plain; charset=utf-8"
+      ],
+      [
+        "Cache-Control",
+        "no-store"
+      ]
+    ],
+    "body": "not through tailscale serve\n",
+    "actor": [],
+    "log": {
+      "ts": 1793361600,
+      "login": "bobby@example.com",
+      "peer": "100.64.0.2",
+      "cap": null,
+      "call": null,
+      "act": null,
+      "item": null,
+      "msg_id": null,
+      "result": "refused:403"
+    }
+  },
+  {
+    "what": "say: a form no server filled",
+    "request": {
+      "method": "POST",
+      "target": "/act/needs/talk/say",
+      "peer": "127.0.0.1",
+      "headers": [
+        [
+          "Tailscale-User-Login",
+          "bobby@example.com"
+        ],
+        [
+          "X-Forwarded-For",
+          "100.64.0.2"
+        ],
+        [
+          "X-Forwarded-Proto",
+          "https"
+        ],
+        [
+          "X-Forwarded-Host",
+          "phobos.example.ts.net"
+        ],
+        [
+          "Sec-Fetch-Site",
+          "same-origin"
+        ],
+        [
+          "Content-Type",
+          "application/x-www-form-urlencoded"
+        ]
+      ],
+      "body": "token=&cap=chitin&call=say&args.to=seat-a&args.in_reply_to=m-1&args.line=Ship it."
+    },
+    "status": 403,
+    "headers": [
+      [
+        "Content-Type",
+        "text/html; charset=utf-8"
+      ],
+      [
+        "Cache-Control",
+        "no-store"
+      ]
+    ],
+    "body": {
+      "html_bytes": 1642,
+      "says": "That page had gone stale, so here it is again. Nothing was done.",
+      "tokens": [
+        "v1.1793404800.10bcd75e4511cac407db4ceacd74f9c0451c39a9e7d199985a11a843c1f78917.K8zj0Pug663wy0qYLnDRw4dKtnCD4pychqJmFg26N20"
+      ],
+      "h1": "Talk to seat-a"
+    },
+    "actor": [],
+    "log": {
+      "ts": 1793361600,
+      "login": "bobby@example.com",
+      "peer": "100.64.0.2",
+      "cap": "chitin",
+      "call": "say",
+      "act": "needs/talk/say",
+      "item": "needs~talk",
+      "msg_id": "m-1",
+      "result": "stale"
+    }
+  },
+  {
+    "what": "say: nothing typed",
+    "request": {
+      "method": "POST",
+      "target": "/act/needs/talk/say",
+      "peer": "127.0.0.1",
+      "headers": [
+        [
+          "Tailscale-User-Login",
+          "bobby@example.com"
+        ],
+        [
+          "X-Forwarded-For",
+          "100.64.0.2"
+        ],
+        [
+          "X-Forwarded-Proto",
+          "https"
+        ],
+        [
+          "X-Forwarded-Host",
+          "phobos.example.ts.net"
+        ],
+        [
+          "Sec-Fetch-Site",
+          "same-origin"
+        ],
+        [
+          "Content-Type",
+          "application/x-www-form-urlencoded"
+        ]
+      ],
+      "body": "token=v1.1793404801.10bcd75e4511cac407db4ceacd74f9c0451c39a9e7d199985a11a843c1f78917.OpVhfSZIbA49-7BQQtNAFj_Tr4kR8XmJc8ZygGo8xAs&cap=chitin&call=say&args.to=seat-a&args.in_reply_to=m-1&args.line=+++"
+    },
+    "status": 422,
+    "headers": [
+      [
+        "Content-Type",
+        "text/html; charset=utf-8"
+      ],
+      [
+        "Cache-Control",
+        "no-store"
+      ]
+    ],
+    "body": {
+      "html_bytes": 1614,
+      "says": "Nothing was sent: nothing was typed.",
+      "tokens": [
+        "v1.1793404800.10bcd75e4511cac407db4ceacd74f9c0451c39a9e7d199985a11a843c1f78917.K8zj0Pug663wy0qYLnDRw4dKtnCD4pychqJmFg26N20"
+      ],
+      "h1": "Talk to seat-a"
+    },
+    "actor": [],
+    "log": {
+      "ts": 1793361600,
+      "login": "bobby@example.com",
+      "peer": "100.64.0.2",
+      "cap": "chitin",
+      "call": "say",
+      "act": "needs/talk/say",
+      "item": "needs~talk",
+      "msg_id": "m-1",
+      "result": "refused:422",
+      "text_len": 3,
+      "text_sha256": "0aad7da77d2ed59c396c99a74e49f3a4524dcdbcb5163251b1433d640247aeb4"
+    }
+  },
+  {
+    "what": "say: past its maxlength",
+    "request": {
+      "method": "POST",
+      "target": "/act/needs/talk/say",
+      "peer": "127.0.0.1",
+      "headers": [
+        [
+          "Tailscale-User-Login",
+          "bobby@example.com"
+        ],
+        [
+          "X-Forwarded-For",
+          "100.64.0.2"
+        ],
+        [
+          "X-Forwarded-Proto",
+          "https"
+        ],
+        [
+          "X-Forwarded-Host",
+          "phobos.example.ts.net"
+        ],
+        [
+          "Sec-Fetch-Site",
+          "same-origin"
+        ],
+        [
+          "Content-Type",
+          "application/x-www-form-urlencoded"
+        ]
+      ],
+      "body": "token=v1.1793404802.10bcd75e4511cac407db4ceacd74f9c0451c39a9e7d199985a11a843c1f78917.C3jSfe2Ou6IFe_oqvQeBoe_glv1xSZhjLBROt1B9am4&cap=chitin&call=say&args.to=seat-a&args.in_reply_to=m-1&args.line=aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    },
+    "status": 422,
+    "headers": [
+      [
+        "Content-Type",
+        "text/html; charset=utf-8"
+      ],
+      [
+        "Cache-Control",
+        "no-store"
+      ]
+    ],
+    "body": {
+      "html_bytes": 1618,
+      "says": "Nothing was sent: that text is too long.",
+      "tokens": [
+        "v1.1793404800.10bcd75e4511cac407db4ceacd74f9c0451c39a9e7d199985a11a843c1f78917.K8zj0Pug663wy0qYLnDRw4dKtnCD4pychqJmFg26N20"
+      ],
+      "h1": "Talk to seat-a"
+    },
+    "actor": [],
+    "log": {
+      "ts": 1793361600,
+      "login": "bobby@example.com",
+      "peer": "100.64.0.2",
+      "cap": "chitin",
+      "call": "say",
+      "act": "needs/talk/say",
+      "item": "needs~talk",
+      "msg_id": "m-1",
+      "result": "refused:422",
+      "text_len": 97,
+      "text_sha256": "2a2c60fe96afac9151d4bd932fdb45be2c7e175e02b0598426cac15c38511cb4"
+    }
+  },
+  {
+    "what": "say: not printable ASCII",
+    "request": {
+      "method": "POST",
+      "target": "/act/needs/talk/say",
+      "peer": "127.0.0.1",
+      "headers": [
+        [
+          "Tailscale-User-Login",
+          "bobby@example.com"
+        ],
+        [
+          "X-Forwarded-For",
+          "100.64.0.2"
+        ],
+        [
+          "X-Forwarded-Proto",
+          "https"
+        ],
+        [
+          "X-Forwarded-Host",
+          "phobos.example.ts.net"
+        ],
+        [
+          "Sec-Fetch-Site",
+          "same-origin"
+        ],
+        [
+          "Content-Type",
+          "application/x-www-form-urlencoded"
+        ]
+      ],
+      "body": "token=v1.1793404803.10bcd75e4511cac407db4ceacd74f9c0451c39a9e7d199985a11a843c1f78917.sCEKUxp-feefHA_FjBFEV0s9U5ZpdjanDjeSTaoVYsc&cap=chitin&call=say&args.to=seat-a&args.in_reply_to=m-1&args.line=caf%C3%A9"
+    },
+    "status": 422,
+    "headers": [
+      [
+        "Content-Type",
+        "text/html; charset=utf-8"
+      ],
+      [
+        "Cache-Control",
+        "no-store"
+      ]
+    ],
+    "body": {
+      "html_bytes": 1653,
+      "says": "Nothing was sent: only letters, digits, spaces and punctuation can be sent.",
+      "tokens": [
+        "v1.1793404800.10bcd75e4511cac407db4ceacd74f9c0451c39a9e7d199985a11a843c1f78917.K8zj0Pug663wy0qYLnDRw4dKtnCD4pychqJmFg26N20"
+      ],
+      "h1": "Talk to seat-a"
+    },
+    "actor": [],
+    "log": {
+      "ts": 1793361600,
+      "login": "bobby@example.com",
+      "peer": "100.64.0.2",
+      "cap": "chitin",
+      "call": "say",
+      "act": "needs/talk/say",
+      "item": "needs~talk",
+      "msg_id": "m-1",
+      "result": "refused:422",
+      "text_len": 5,
+      "text_sha256": "850f7dc43910ff890f8879c0ed26fe697c93a067ad93a7d50f466a7028a9bf4e"
+    }
+  },
+  {
+    "what": "say: a line break",
+    "request": {
+      "method": "POST",
+      "target": "/act/needs/talk/say",
+      "peer": "127.0.0.1",
+      "headers": [
+        [
+          "Tailscale-User-Login",
+          "bobby@example.com"
+        ],
+        [
+          "X-Forwarded-For",
+          "100.64.0.2"
+        ],
+        [
+          "X-Forwarded-Proto",
+          "https"
+        ],
+        [
+          "X-Forwarded-Host",
+          "phobos.example.ts.net"
+        ],
+        [
+          "Sec-Fetch-Site",
+          "same-origin"
+        ],
+        [
+          "Content-Type",
+          "application/x-www-form-urlencoded"
+        ]
+      ],
+      "body": "token=v1.1793404804.10bcd75e4511cac407db4ceacd74f9c0451c39a9e7d199985a11a843c1f78917.fp8BvruVNCcbmDsUU5PiSS83sKzwCcJt_b-OrxUWwkk&cap=chitin&call=say&args.to=seat-a&args.in_reply_to=m-1&args.line=one%0Atwo"
+    },
+    "status": 422,
+    "headers": [
+      [
+        "Content-Type",
+        "text/html; charset=utf-8"
+      ],
+      [
+        "Cache-Control",
+        "no-store"
+      ]
+    ],
+    "body": {
+      "html_bytes": 1653,
+      "says": "Nothing was sent: only letters, digits, spaces and punctuation can be sent.",
+      "tokens": [
+        "v1.1793404800.10bcd75e4511cac407db4ceacd74f9c0451c39a9e7d199985a11a843c1f78917.K8zj0Pug663wy0qYLnDRw4dKtnCD4pychqJmFg26N20"
+      ],
+      "h1": "Talk to seat-a"
+    },
+    "actor": [],
+    "log": {
+      "ts": 1793361600,
+      "login": "bobby@example.com",
+      "peer": "100.64.0.2",
+      "cap": "chitin",
+      "call": "say",
+      "act": "needs/talk/say",
+      "item": "needs~talk",
+      "msg_id": "m-1",
+      "result": "refused:422",
+      "text_len": 7,
+      "text_sha256": "21066d108d5319ecb5a1fc4454f42ef22fc5f1c7df49c31d90294950e0ea8b2c"
+    }
+  },
+  {
+    "what": "say: a lone --flag, which chitin would read as its own",
+    "request": {
+      "method": "POST",
+      "target": "/act/needs/talk/say",
+      "peer": "127.0.0.1",
+      "headers": [
+        [
+          "Tailscale-User-Login",
+          "bobby@example.com"
+        ],
+        [
+          "X-Forwarded-For",
+          "100.64.0.2"
+        ],
+        [
+          "X-Forwarded-Proto",
+          "https"
+        ],
+        [
+          "X-Forwarded-Host",
+          "phobos.example.ts.net"
+        ],
+        [
+          "Sec-Fetch-Site",
+          "same-origin"
+        ],
+        [
+          "Content-Type",
+          "application/x-www-form-urlencoded"
+        ]
+      ],
+      "body": "token=v1.1793404805.10bcd75e4511cac407db4ceacd74f9c0451c39a9e7d199985a11a843c1f78917.ZgYACQCjDZCVtcndtOPODJR7yKabaWw2cHPuTupKbII&cap=chitin&call=say&args.to=seat-a&args.in_reply_to=m-1&args.line=--queue"
+    },
+    "status": 422,
+    "headers": [
+      [
+        "Content-Type",
+        "text/html; charset=utf-8"
+      ],
+      [
+        "Cache-Control",
+        "no-store"
+      ]
+    ],
+    "body": {
+      "html_bytes": 1636,
+      "says": "Nothing was sent: a lone word starting -- reads as a flag.",
+      "tokens": [
+        "v1.1793404800.10bcd75e4511cac407db4ceacd74f9c0451c39a9e7d199985a11a843c1f78917.K8zj0Pug663wy0qYLnDRw4dKtnCD4pychqJmFg26N20"
+      ],
+      "h1": "Talk to seat-a"
+    },
+    "actor": [],
+    "log": {
+      "ts": 1793361600,
+      "login": "bobby@example.com",
+      "peer": "100.64.0.2",
+      "cap": "chitin",
+      "call": "say",
+      "act": "needs/talk/say",
+      "item": "needs~talk",
+      "msg_id": "m-1",
+      "result": "refused:422",
+      "text_len": 7,
+      "text_sha256": "5e6b9052da2c14cc1cde72ddb9fd9c901b183b72af379411864a54bdaaae2843"
+    }
+  },
+  {
+    "what": "say: no typed field",
+    "request": {
+      "method": "POST",
+      "target": "/act/needs/talk/say",
+      "peer": "127.0.0.1",
+      "headers": [
+        [
+          "Tailscale-User-Login",
+          "bobby@example.com"
+        ],
+        [
+          "X-Forwarded-For",
+          "100.64.0.2"
+        ],
+        [
+          "X-Forwarded-Proto",
+          "https"
+        ],
+        [
+          "X-Forwarded-Host",
+          "phobos.example.ts.net"
+        ],
+        [
+          "Sec-Fetch-Site",
+          "same-origin"
+        ],
+        [
+          "Content-Type",
+          "application/x-www-form-urlencoded"
+        ]
+      ],
+      "body": "token=v1.1793404806.10bcd75e4511cac407db4ceacd74f9c0451c39a9e7d199985a11a843c1f78917.WoEMiagDSfkKgyDRapVr3TUHHHYrzc36_8VvpkkwTCk&cap=chitin&call=say&args.to=seat-a&args.in_reply_to=m-1"
+    },
+    "status": 400,
+    "headers": [
+      [
+        "Content-Type",
+        "text/plain; charset=utf-8"
+      ],
+      [
+        "Cache-Control",
+        "no-store"
+      ]
+    ],
+    "body": "the form carries no one typed line\n",
+    "actor": [],
+    "log": {
+      "ts": 1793361600,
+      "login": "bobby@example.com",
+      "peer": "100.64.0.2",
+      "cap": "chitin",
+      "call": "say",
+      "act": "needs/talk/say",
+      "item": "needs~talk",
+      "msg_id": "m-1",
+      "result": "refused:400"
+    }
+  },
+  {
+    "what": "say: two typed fields",
+    "request": {
+      "method": "POST",
+      "target": "/act/needs/talk/say",
+      "peer": "127.0.0.1",
+      "headers": [
+        [
+          "Tailscale-User-Login",
+          "bobby@example.com"
+        ],
+        [
+          "X-Forwarded-For",
+          "100.64.0.2"
+        ],
+        [
+          "X-Forwarded-Proto",
+          "https"
+        ],
+        [
+          "X-Forwarded-Host",
+          "phobos.example.ts.net"
+        ],
+        [
+          "Sec-Fetch-Site",
+          "same-origin"
+        ],
+        [
+          "Content-Type",
+          "application/x-www-form-urlencoded"
+        ]
+      ],
+      "body": "token=v1.1793404807.10bcd75e4511cac407db4ceacd74f9c0451c39a9e7d199985a11a843c1f78917.9gz7S29VRxBWk2YHh3jQKPuar1rBa8pu5z8oOXaD7og&cap=chitin&call=say&args.to=seat-a&args.in_reply_to=m-1&args.line=x&args.line=y"
+    },
+    "status": 400,
+    "headers": [
+      [
+        "Content-Type",
+        "text/plain; charset=utf-8"
+      ],
+      [
+        "Cache-Control",
+        "no-store"
+      ]
+    ],
+    "body": "the form carries no one typed line\n",
+    "actor": [],
+    "log": {
+      "ts": 1793361600,
+      "login": "bobby@example.com",
+      "peer": "100.64.0.2",
+      "cap": "chitin",
+      "call": "say",
+      "act": "needs/talk/say",
+      "item": "needs~talk",
+      "msg_id": "m-1",
+      "result": "refused:400"
+    }
+  },
+  {
+    "what": "say: an ack's free text never reaches chitin: an ack with a typed field runs nothing",
+    "request": {
+      "method": "POST",
+      "target": "/act/needs/mute/ack",
+      "peer": "127.0.0.1",
+      "headers": [
+        [
+          "Tailscale-User-Login",
+          "bobby@example.com"
+        ],
+        [
+          "X-Forwarded-For",
+          "100.64.0.2"
+        ],
+        [
+          "X-Forwarded-Proto",
+          "https"
+        ],
+        [
+          "X-Forwarded-Host",
+          "phobos.example.ts.net"
+        ],
+        [
+          "Sec-Fetch-Site",
+          "same-origin"
+        ],
+        [
+          "Content-Type",
+          "application/x-www-form-urlencoded"
+        ]
+      ],
+      "body": "token=v1.1793404800.33d8da3f25559eddb2cbbb4cce4c67066d1dd781b6da44ab7715d156a733506c.Vs5mUvgRXxxPFUJyiqLO8KcujG1i1EaXsYpV7IMcAzA&cap=chitin&call=ack&args.msg_id=m-1&args.from=seat-a&args.line=hi"
+    },
+    "status": 422,
+    "headers": [
+      [
+        "Content-Type",
+        "text/plain; charset=utf-8"
+      ],
+      [
+        "Cache-Control",
+        "no-store"
+      ]
+    ],
+    "body": "this act is not one this server may run\n",
+    "actor": [],
+    "log": {
+      "ts": 1793361600,
+      "login": "bobby@example.com",
+      "peer": "100.64.0.2",
+      "cap": "chitin",
+      "call": "ack",
+      "act": "needs/mute/ack",
+      "item": "needs~mute",
+      "msg_id": "m-2",
+      "result": "refused:422"
+    }
+  },
+  {
+    "what": "say: an input this server doesn't take runs nothing",
+    "request": {
+      "method": "POST",
+      "target": "/act/needs/loose/say",
+      "peer": "127.0.0.1",
+      "headers": [
+        [
+          "Tailscale-User-Login",
+          "bobby@example.com"
+        ],
+        [
+          "X-Forwarded-For",
+          "100.64.0.2"
+        ],
+        [
+          "X-Forwarded-Proto",
+          "https"
+        ],
+        [
+          "X-Forwarded-Host",
+          "phobos.example.ts.net"
+        ],
+        [
+          "Sec-Fetch-Site",
+          "same-origin"
+        ],
+        [
+          "Content-Type",
+          "application/x-www-form-urlencoded"
+        ]
+      ],
+      "body": "token=v1.1793404800.4470596081f4986420f27c524a653088cdf32edfa09b11e8e6af5db8c7d0e644.mOJm-J0GGj2rSk-tBStxl-A1Lgkzfe02wyaOEXRfbw0&cap=chitin&call=say&args.to=seat-a&args.in_reply_to=m-1&args.line=hi"
+    },
+    "status": 422,
+    "headers": [
+      [
+        "Content-Type",
+        "text/plain; charset=utf-8"
+      ],
+      [
+        "Cache-Control",
+        "no-store"
+      ]
+    ],
+    "body": "this act is not one this server may run\n",
+    "actor": [],
+    "log": {
+      "ts": 1793361600,
+      "login": "bobby@example.com",
+      "peer": "100.64.0.2",
+      "cap": "chitin",
+      "call": "say",
+      "act": "needs/loose/say",
+      "item": "needs~loose",
+      "msg_id": null,
+      "result": "refused:422"
+    }
+  },
+  {
+    "what": "say: chitin does not take it, and the form is not spent",
+    "request": {
+      "method": "POST",
+      "target": "/act/needs/far/say",
+      "peer": "127.0.0.1",
+      "headers": [
+        [
+          "Tailscale-User-Login",
+          "bobby@example.com"
+        ],
+        [
+          "X-Forwarded-For",
+          "100.64.0.2"
+        ],
+        [
+          "X-Forwarded-Proto",
+          "https"
+        ],
+        [
+          "X-Forwarded-Host",
+          "phobos.example.ts.net"
+        ],
+        [
+          "Sec-Fetch-Site",
+          "same-origin"
+        ],
+        [
+          "Content-Type",
+          "application/x-www-form-urlencoded"
+        ]
+      ],
+      "body": "token=v1.1793404800.e6e036ef606b2ac1f358ec55755ee57e3cb42230490f02a1b655e065d3edcd63.Hq_p01liAejkRjj8IfbgiQbtxgEdx9JotvoafJ99s8g&cap=chitin&call=say&args.to=seat-a&args.in_reply_to=m-1&args.line=Ship it."
+    },
+    "status": 502,
+    "headers": [
+      [
+        "Content-Type",
+        "text/plain; charset=utf-8"
+      ],
+      [
+        "Cache-Control",
+        "no-store"
+      ]
+    ],
+    "body": "chitin did not take it: timeout: seat-down did not answer\n",
+    "actor": [
+      "say to=seat-down reply=m-1 ref=fold:needs/far/say text=Ship it."
+    ],
+    "log": {
+      "ts": 1793361600,
+      "login": "bobby@example.com",
+      "peer": "100.64.0.2",
+      "cap": "chitin",
+      "call": "say",
+      "act": "needs/far/say",
+      "item": "needs~far",
+      "msg_id": "m-1",
+      "result": "chitin:timeout: seat-down did not answer",
+      "text_len": 8,
+      "text_sha256": "0a14835d955ea31e4ed165449136f2a21b5b3976b4fca9fdd51fb91627386bed"
+    }
+  },
+  {
+    "what": "say: so the same form may try again",
+    "request": {
+      "method": "POST",
+      "target": "/act/needs/far/say",
+      "peer": "127.0.0.1",
+      "headers": [
+        [
+          "Tailscale-User-Login",
+          "bobby@example.com"
+        ],
+        [
+          "X-Forwarded-For",
+          "100.64.0.2"
+        ],
+        [
+          "X-Forwarded-Proto",
+          "https"
+        ],
+        [
+          "X-Forwarded-Host",
+          "phobos.example.ts.net"
+        ],
+        [
+          "Sec-Fetch-Site",
+          "same-origin"
+        ],
+        [
+          "Content-Type",
+          "application/x-www-form-urlencoded"
+        ]
+      ],
+      "body": "token=v1.1793404800.e6e036ef606b2ac1f358ec55755ee57e3cb42230490f02a1b655e065d3edcd63.Hq_p01liAejkRjj8IfbgiQbtxgEdx9JotvoafJ99s8g&cap=chitin&call=say&args.to=seat-a&args.in_reply_to=m-1&args.line=Ship it."
+    },
+    "status": 502,
+    "headers": [
+      [
+        "Content-Type",
+        "text/plain; charset=utf-8"
+      ],
+      [
+        "Cache-Control",
+        "no-store"
+      ]
+    ],
+    "body": "chitin did not take it: timeout: seat-down did not answer\n",
+    "actor": [
+      "say to=seat-down reply=m-1 ref=fold:needs/far/say text=Ship it."
+    ],
+    "log": {
+      "ts": 1793361600,
+      "login": "bobby@example.com",
+      "peer": "100.64.0.2",
+      "cap": "chitin",
+      "call": "say",
+      "act": "needs/far/say",
+      "item": "needs~far",
+      "msg_id": "m-1",
+      "result": "chitin:timeout: seat-down did not answer",
+      "text_len": 8,
+      "text_sha256": "0a14835d955ea31e4ed165449136f2a21b5b3976b4fca9fdd51fb91627386bed"
+    }
+  },
+  {
+    "what": "say: 96 printable characters, sent, and back to the fold",
+    "request": {
+      "method": "POST",
+      "target": "/act/needs/talk/say",
+      "peer": "127.0.0.1",
+      "headers": [
+        [
+          "Tailscale-User-Login",
+          "bobby@example.com"
+        ],
+        [
+          "X-Forwarded-For",
+          "100.64.0.2"
+        ],
+        [
+          "X-Forwarded-Proto",
+          "https"
+        ],
+        [
+          "X-Forwarded-Host",
+          "phobos.example.ts.net"
+        ],
+        [
+          "Sec-Fetch-Site",
+          "same-origin"
+        ],
+        [
+          "Content-Type",
+          "application/x-www-form-urlencoded"
+        ]
+      ],
+      "body": "token=v1.1793404808.10bcd75e4511cac407db4ceacd74f9c0451c39a9e7d199985a11a843c1f78917.LO6dlxN_1Wjtx_5StWYGNn2I4vabdqNv-0tzQVlSLvA&cap=chitin&call=say&args.to=seat-a&args.in_reply_to=m-1&args.line=Ship it, ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+    },
+    "status": 303,
+    "headers": [
+      [
+        "Location",
+        "/fold/needs/talk/?did=say&as=ok"
+      ],
+      [
+        "Cache-Control",
+        "no-store"
+      ]
+    ],
+    "body": "",
+    "actor": [
+      "say to=seat-a reply=m-1 ref=fold:needs/talk/say text=Ship it, ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+    ],
+    "log": {
+      "ts": 1793361600,
+      "login": "bobby@example.com",
+      "peer": "100.64.0.2",
+      "cap": "chitin",
+      "call": "say",
+      "act": "needs/talk/say",
+      "item": "needs~talk",
+      "msg_id": "m-1",
+      "result": "ok",
+      "text_len": 96,
+      "text_sha256": "e3c23609ccb375486d5041e80d7433e8eecd64e132f9cef28c6e064eba0e5754"
+    }
+  },
+  {
+    "what": "say: the same form again: sent once, and harmless",
+    "request": {
+      "method": "POST",
+      "target": "/act/needs/talk/say",
+      "peer": "127.0.0.1",
+      "headers": [
+        [
+          "Tailscale-User-Login",
+          "bobby@example.com"
+        ],
+        [
+          "X-Forwarded-For",
+          "100.64.0.2"
+        ],
+        [
+          "X-Forwarded-Proto",
+          "https"
+        ],
+        [
+          "X-Forwarded-Host",
+          "phobos.example.ts.net"
+        ],
+        [
+          "Sec-Fetch-Site",
+          "same-origin"
+        ],
+        [
+          "Content-Type",
+          "application/x-www-form-urlencoded"
+        ]
+      ],
+      "body": "token=v1.1793404808.10bcd75e4511cac407db4ceacd74f9c0451c39a9e7d199985a11a843c1f78917.LO6dlxN_1Wjtx_5StWYGNn2I4vabdqNv-0tzQVlSLvA&cap=chitin&call=say&args.to=seat-a&args.in_reply_to=m-1&args.line=Ship it again."
+    },
+    "status": 303,
+    "headers": [
+      [
+        "Location",
+        "/fold/needs/talk/?did=say&as=already"
+      ],
+      [
+        "Cache-Control",
+        "no-store"
+      ]
+    ],
+    "body": "",
+    "actor": [],
+    "log": {
+      "ts": 1793361600,
+      "login": "bobby@example.com",
+      "peer": "100.64.0.2",
+      "cap": "chitin",
+      "call": "say",
+      "act": "needs/talk/say",
+      "item": "needs~talk",
+      "msg_id": "m-1",
+      "result": "already",
+      "text_len": 14,
+      "text_sha256": "daca69f3943b4460dc563241a8b9d70853bf0b5a323dcda1c9f46c9f000e7d0b"
+    }
+  },
+  {
+    "what": "the fold then says so",
+    "request": {
+      "method": "GET",
+      "target": "/needs/talk/?did=say&as=ok",
+      "peer": "127.0.0.1",
+      "headers": [
+        [
+          "Tailscale-User-Login",
+          "bobby@example.com"
+        ],
+        [
+          "X-Forwarded-For",
+          "100.64.0.2"
+        ],
+        [
+          "X-Forwarded-Proto",
+          "https"
+        ],
+        [
+          "X-Forwarded-Host",
+          "phobos.example.ts.net"
+        ],
+        [
+          "Sec-Fetch-Site",
+          "same-origin"
+        ],
+        [
+          "Content-Type",
+          "application/x-www-form-urlencoded"
+        ]
+      ],
+      "body": ""
+    },
+    "status": 200,
+    "headers": [
+      [
+        "Content-Type",
+        "text/html; charset=utf-8"
+      ],
+      [
+        "Cache-Control",
+        "private, no-cache"
+      ],
+      [
+        "ETag",
+        "\"sha-256:656eded607bad0c8b10349e3e3c9bf89de4a81e722358f4984103929d118819c\""
+      ]
+    ],
+    "body": {
+      "html_bytes": 1583,
+      "says": "Sent.",
+      "tokens": [
+        "v1.1793404800.10bcd75e4511cac407db4ceacd74f9c0451c39a9e7d199985a11a843c1f78917.K8zj0Pug663wy0qYLnDRw4dKtnCD4pychqJmFg26N20"
+      ],
+      "h1": "Talk to seat-a"
+    },
+    "actor": [],
+    "log": null
   },
   {
     "what": "ack: done, and back to the fold",

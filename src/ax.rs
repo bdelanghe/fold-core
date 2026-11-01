@@ -163,6 +163,13 @@ fn act_form(node: &Value, act: &Value, path: &[String], key: &str, one: bool) ->
         ("post", format!("act/{}", act_id(path, key)).into(), f)
     };
     let name = if one { present(get(node, "title")).or(label.as_ref()).cloned() } else { label.clone() };
+    // A typed field (src/act.rs `Input`), its text box before the button: named by its own label, posted as `args.<field>`.
+    let mut kids = vec![];
+    if let (false, Some(i)) = (passkey, crate::act::input_of(act)) {
+        let named = present(act.get("input").and_then(|i| i.get("label"))).cloned().or(label.clone());
+        kids.push(json!({ "role": "textbox", "name": named, "field": format!("args.{}", i.field), "maxlength": i.maxlength }));
+    }
+    kids.push(obj(vec![("role", Some("button".into())), ("name", label), ("cls", Some("act".into()))]));
     obj(vec![
         ("role", Some("form".into())),
         ("name", name),
@@ -170,7 +177,7 @@ fn act_form(node: &Value, act: &Value, path: &[String], key: &str, one: bool) ->
         ("method", Some(method.into())),
         ("action", Some(action)),
         ("fields", (!fields.is_empty()).then(|| fields.into())),
-        ("children", Some(json!([obj(vec![("role", Some("button".into())), ("name", label), ("cls", Some("act".into()))])]))),
+        ("children", Some(kids.into())),
     ])
 }
 

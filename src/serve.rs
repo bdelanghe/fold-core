@@ -64,8 +64,11 @@ pub struct Acting {
     pub host: String,
     /// The token key (src/act.rs `key`).
     pub key: Vec<u8>,
-    /// What moves the chitin message's state once every check holds.
+    /// What moves the chitin message's state, or says the typed line, once every check holds.
     pub actor: Box<dyn Actor>,
+    /// The tokens a say has spent: one form sends once (a double tap, a replay or a back-button resubmit is "Already sent."). Kept
+    /// for the server's life; a token outlives a restart only by its [`act::TTL`].
+    pub spent: std::sync::Mutex<std::collections::HashSet<String>>,
 }
 
 /// How a resource may be cached (item 23's table), by its path.
@@ -233,7 +236,7 @@ fn fill(page: &str, site: &Site, a: &Acting, login: Option<&str>, now: i64, stat
         let token = match (id, login) {
             (Some(id), Some(l)) => map
                 .get(id)
-                .filter(|e| act::state_of(e["cap"].as_str().unwrap_or(""), e["call"].as_str().unwrap_or("")).is_some())
+                .filter(|e| act::run_of(e).is_some())
                 .and_then(|e| e["fixity"].as_str())
                 .map(|fx| act::mint(&a.key, id, fx, l, now)),
             _ => None,
@@ -541,9 +544,9 @@ fn post(site: &Site, a: &Acting, req: &Request, now: i64) -> (Response, Option<V
     };
     let s = |k: &str| entry[k].as_str();
     let (cap, call, item) = (s("cap").unwrap_or(""), s("call").unwrap_or(""), s("item"));
-    let msg = entry["args"]["msg_id"].as_str();
+    let msg = entry["args"]["msg_id"].as_str().or(entry["args"]["in_reply_to"].as_str());
     let rec = |result: String| Some(line(Some((cap, call)), Some(&id), item, msg, result));
-    let Some((state, why)) = act::state_of(cap, call) else {
+    let Some(run) = act::run_of(entry) else {
         return (Response::text(422, "this act is not one this server may run"), rec("refused:422".into()));
     };
     if field("cap").is_some_and(|c| c != cap) || field("call").is_some_and(|c| c != call) {
@@ -568,6 +571,10 @@ fn post(site: &Site, a: &Acting, req: &Request, now: i64) -> (Response, Option<V
         }
         Ok(_) => {}
     }
+    let (state, why) = match run {
+        act::Run::Ack { state, why } => (state, why),
+        act::Run::Say(input) => return say(site, a, &path, &id, entry, &input, &fields, token, login, now, rec),
+    };
     let (Some(msg_id), Some(from)) = (msg, entry["args"]["from"].as_str()) else {
         return (Response::text(422, "this act names no message to answer"), rec("refused:422".into()));
     };
@@ -581,6 +588,63 @@ fn post(site: &Site, a: &Acting, req: &Request, now: i64) -> (Response, Option<V
     };
     let to = format!("{}{}?did={call}&as={how}", site.mount, page::href("/", &path, "folds"));
     (Response::new(303).with("Location", to).with("Cache-Control", "no-store"), rec(how.into()))
+}
+
+/// A say, its token good for the act as it stands: the one typed field, read from the form only as the act map's `input` names
+/// it and checked against that (src/act.rs `typed`), then said once per token. The log keeps the text's length and digest, never
+/// the text.
+#[allow(clippy::too_many_arguments)]
+fn say(
+    site: &Site,
+    a: &Acting,
+    path: &[String],
+    id: &str,
+    entry: &Value,
+    input: &act::Input,
+    fields: &[(String, String)],
+    token: &str,
+    login: &str,
+    now: i64,
+    rec: impl Fn(String) -> Option<Value>,
+) -> (Response, Option<Value>) {
+    let name = format!("args.{}", input.field);
+    let typed: Vec<&str> = fields.iter().filter(|(n, _)| *n == name).map(|(_, v)| v.as_str()).collect();
+    let [text] = typed.as_slice() else {
+        return (Response::text(400, "the form carries no one typed line"), rec("refused:400".into()));
+    };
+    let with = |r: Option<Value>| {
+        r.map(|mut v| {
+            v["text_len"] = text.len().into();
+            v["text_sha256"] = act::hex(&Sha256::digest(text.as_bytes())).into();
+            v
+        })
+    };
+    if let Err(why) = act::typed(input, text) {
+        return (again(site, a, path, login, now, 422, &format!("Nothing was sent: {why}.")), with(rec("refused:422".into())));
+    }
+    let Some(to) = entry["args"]["to"].as_str().filter(|t| !t.trim().is_empty()) else {
+        return (Response::text(422, "this act names no one to say it to"), with(rec("refused:422".into())));
+    };
+    let reply = entry["args"]["in_reply_to"].as_str().filter(|r| !r.trim().is_empty());
+    let back = |how: &str| {
+        let to = format!("{}{}?did=say&as={how}", site.mount, page::href("/", path, "folds"));
+        Response::new(303).with("Location", to).with("Cache-Control", "no-store")
+    };
+    if !a.spent.lock().map(|mut s| s.insert(token.to_string())).unwrap_or(false) {
+        return (back("already"), with(rec("already".into())));
+    }
+    match a.actor.say(to, text, reply, id) {
+        Ok(Done::Ok) => (back("ok"), with(rec("ok".into()))),
+        Ok(Done::Already) => (back("already"), with(rec("already".into()))),
+        Err(e) => {
+            // not sent: the same form may try again
+            if let Ok(mut s) = a.spent.lock() {
+                s.remove(token);
+            }
+            let e: String = e.chars().filter(|c| !c.is_control()).take(200).collect();
+            (Response::text(502, &format!("chitin did not take it: {e}")), with(rec(format!("chitin:{e}"))))
+        }
+    }
 }
 
 /// An act's form submitted with no script to take it (BRIEF-basis-forms-push-signing-2026-10-31 §1, render only): this server

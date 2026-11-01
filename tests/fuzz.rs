@@ -191,6 +191,10 @@ impl Actor for Count {
         self.0.fetch_add(1, Ordering::SeqCst);
         Ok(Done::Ok)
     }
+    fn say(&self, _: &str, _: &str, _: Option<&str>, _: &str) -> Result<Done, String> {
+        self.0.fetch_add(1, Ordering::SeqCst);
+        Ok(Done::Ok)
+    }
 }
 
 /// A request near an act's: each check's header right more often than not, a body that is a form more often than not.
@@ -254,7 +258,7 @@ fn the_act_route_never_acts_without_every_check() {
     fs::write(root.join("_acts.json"), map).unwrap();
     let calls = Arc::new(AtomicUsize::new(0));
     let acting =
-        Acting { login: "bobby@example.com".into(), host: "phobos.ts.net".into(), key: vec![3; 32], actor: Box::new(Count(calls.clone())) };
+        Acting { login: "bobby@example.com".into(), host: "phobos.ts.net".into(), key: vec![3; 32], actor: Box::new(Count(calls.clone())), spent: Default::default() };
     let site = Site { root: root.clone(), mount: "/fold".into(), no_store: vec![], acting: Some(acting), reporting: None };
     let listing = |p: &std::path::Path| {
         let mut v: Vec<_> = fs::read_dir(p).unwrap().map(|e| e.unwrap().file_name()).collect();
