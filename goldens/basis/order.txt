@@ -1,0 +1,99 @@
+@ 1x
+in: Home
+# Fold 1x
+Stuck.
+
+@ A
+in: Home
+# Fold A
+Stuck.
+
+@ Ab
+in: Home
+# Fold Ab
+Stuck.
+
+@ _x
+in: Home
+# Fold _x
+Stuck.
+
+@ a
+in: Home
+# Fold a
+Stuck.
+
+@ a-
+in: Home
+# Fold a-
+Stuck.
+
+@ a-b
+in: Home
+# Fold a-b
+Stuck.
+
+@ a.b
+in: Home
+# Fold a.b
+Stuck.
+
+@ a1
+in: Home
+# Fold a1
+Stuck.
+
+@ aB
+in: Home
+# Fold aB
+Stuck.
+
+@ a_b
+in: Home
+# Fold a_b
+Stuck.
+
+@ aa
+in: Home
+# Fold aa
+Stuck.
+
+@ ab
+in: Home
+# Fold ab
+Stuck.
+
+@ a/ab
+in: Home › Home
+# Fold a~ab
+Stuck.
+
+@ a/a/b
+in: Home › Home › Home
+# Fold a~a~b
+Stuck.
+
+@ a/b
+in: Home › Home
+# Fold a~b
+Stuck.
+
+@ b
+in: Home
+# Fold b
+Stuck.
+
+@ part-10
+in: Home
+# Fold part-10
+Stuck.
+
+@ part-2
+in: Home
+# Fold part-2
+Stuck.
+
+@ z9
+in: Home
+# Fold z9
+Stuck.

@@ -1,0 +1,33 @@
+@ 100%25%26%27%28%29%2A%21/
+in: Ids to encode › Home
+# Marks
+Marks.
+
+@ a%20b
+in: Ids to encode
+# A space
+Inside a space.
+Emoji  → a%20b/%F0%9F%99%82
+
+@ a%20b/%F0%9F%99%82
+in: Ids to encode › A space
+# Emoji
+Two levels in.
+Show as slides  → a%20b/%F0%9F%99%82
+
+@ /
+# Ids to encode
+A space · An id with a space.  → a%20b
+Über · An id past ASCII.  → %C3%BCber
+Delimiters · An id with URL delimiters.  → x%2Fy%3Fz%23w
+Marks · An id with marks encodeURIComponent keeps and drops.  → 100%25%26%27%28%29%2A%21%7E
+
+@ x%2Fy%3Fz%23w
+in: Ids to encode
+# Delimiters
+Delimiters.
+
+@ %C3%BCber
+in: Ids to encode
+# Über
+Past ASCII.

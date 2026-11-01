@@ -1,0 +1,53 @@
+@ a
+in: Home
+# Alpha
+X 0  ↗ https://example.org
+X 1  ↗ https://example.org
+X 2  ↗ https://example.org
+X 3  ↗ https://example.org
+X 4  ↗ https://example.org
+X 5  ↗ https://example.org
+
+@ b
+in: Home
+# Beta
+
+@ c
+in: Home
+#   Gamma  delta epsilon
+
+@ orphan
+in: Home
+# Orphan
+No one links here.
+
+@ orphan2
+in: Home
+# Orphan two words
+
+@ /
+# Top
+Stuck.
+Status: idle
+Stuck: these are not moving.
+We are being worked on today.
+Alpha · Work in progress: alpha  → a
+Gone  → gone
+Beta · A hint that was cut…  → b
+Gamma · Three dots...  → c
+Only a link  ↗ https://example.org
+States · Lines that name a state.  → states
+
+@ states
+in: Home
+# States
+Down
+  **BLOCKED!!**  
+Waiting…
+stale
+Unknown?
+offline now
+— Failed —
+Error_
+erroré
+Degraded 2

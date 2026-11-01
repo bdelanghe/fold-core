@@ -1,0 +1,122 @@
+@ goals
+in: Agent fleet
+# Goal sessions
+Each running goal session, its goal, and its last progress.
+port-goal · Alert: waits on nothing it has said: it should be working, last progress Tue 14:44  → goals/goal-port-goal
+Data from golden, Oct 28, 2026 at 4:00 PM
+
+@ goals/goal-port-goal
+in: Agent fleet › Goal sessions
+# port-goal
+Alert: stuck or quiet too long.
+Port the tooling to Rust.
+Status: idle
+Last progress: Tue 14:44
+Waits on: nothing it has said: it should be working
+What to do: Comment here asking the lead to nudge it.
+Data from golden, Oct 28, 2026 at 4:00 PM
+
+@ inbox
+in: Agent fleet
+# Messages to you
+The latest messages agents sent you, newest first, each cut short.
+assistant · widgets #607 merged; the deploy picked it up.  → inbox/inbox-0
+Data from golden, Oct 28, 2026 at 4:00 PM
+
+@ inbox/inbox-0
+in: Agent fleet › Messages to you
+# assistant
+widgets #607 merged; the deploy picked it up.
+Tue 13:55
+Data from golden, Oct 28, 2026 at 4:00 PM
+
+@ needs
+in: Agent fleet
+# Needs you
+What the agents need from you, each with what to do.
+Merge the policy note · You merge every policy change yourself. Agents may not.  → needs/needs-ask-0
+Register your passkey once at the desk · Phone approval with your passkey  → needs/needs-landing-3
+Data from golden, Oct 28, 2026 at 4:00 PM
+
+@ needs/needs-ask-0
+in: Agent fleet › Needs you
+# Merge the policy note
+You merge every policy change yourself. Agents may not.
+Open acme/policy#4  ↗ https://git.example.test/acme/policy/pull/4
+Data from golden, Oct 28, 2026 at 4:00 PM
+
+@ needs/needs-landing-3
+in: Agent fleet › Needs you
+# Register your passkey once at the desk
+Phone approval with your passkey
+Data from golden, Oct 28, 2026 at 4:00 PM
+
+@ requests
+in: Agent fleet
+# Your latest requests
+The newest things you asked for in comments on this page, cut short.
+why does it say part 1 of 14 · Page thread #43  → requests/request-43
+Data from golden, Oct 28, 2026 at 4:00 PM
+
+@ requests/request-43
+in: Agent fleet › Your latest requests
+# why does it say part 1 of 14
+Data from golden, Oct 28, 2026 at 4:00 PM
+
+@ /
+# Agent fleet
+Needs you · What the agents need from you, each with what to do.  → needs
+Goal sessions · Each running goal session, its goal, and its last progress.  → goals
+Seats · The standing agents by cluster: what each is for, its last progress, what it waits on.  → seats
+Messages to you · The latest messages agents sent you, newest first, each cut short.  → inbox
+Your latest requests · The newest things you asked for in comments on this page, cut short.  → requests
+Data from golden, Oct 28, 2026 at 4:00 PM
+
+@ seats
+in: Agent fleet
+# Seats
+The standing agents by cluster: what each is for, its last progress, what it waits on.
+Your hands  → seats/your-hands
+Work: one author per repo  → seats/work-one-author-per-repo
+Data from golden, Oct 28, 2026 at 4:00 PM
+
+@ seats/work-one-author-per-repo
+in: Agent fleet › Seats
+# Work: one author per repo
+widgets-author · idle, last progress Mon 18:43  → seats/work-one-author-per-repo/seat-widgets-author
+publisher · Alert: waits on an answer in its terminal (a question or a permission), last progress…  → seats/work-one-author-per-repo/seat-publisher
+Data from golden, Oct 28, 2026 at 4:00 PM
+
+@ seats/work-one-author-per-repo/seat-publisher
+in: Agent fleet › Seats › Work: one author per repo
+# publisher
+Alert: stuck or quiet too long.
+pushes branches and opens pull requests
+Status: waiting for an answer
+Last progress: Tue 13:00
+Waits on: an answer in its terminal (a question or a permission)
+What to do: Comment here asking the lead to nudge it.
+Data from golden, Oct 28, 2026 at 4:00 PM
+
+@ seats/work-one-author-per-repo/seat-widgets-author
+in: Agent fleet › Seats › Work: one author per repo
+# widgets-author
+writes code in acme/widgets
+Status: idle
+Last progress: Mon 18:43
+Data from golden, Oct 28, 2026 at 4:00 PM
+
+@ seats/your-hands
+in: Agent fleet › Seats
+# Your hands
+lead · idle between turns; it wakes on your comments, last progress Tue 17:52  → seats/your-hands/seat-lead
+Data from golden, Oct 28, 2026 at 4:00 PM
+
+@ seats/your-hands/seat-lead
+in: Agent fleet › Seats › Your hands
+# lead
+acts for you: lands and merges work, answers this page
+Status: idle between turns; it wakes on your comments
+Last progress: Tue 17:52
+Waits on: your next comment
+Data from golden, Oct 28, 2026 at 4:00 PM

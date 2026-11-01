@@ -1,0 +1,239 @@
+@ fleet
+in: Everything
+# Agent fleet
+port-goal and others need a look. The agents: goal sessions, standing seats, their pace, what they sent you, and how to reach them without this page.
+Goal sessions · Each running goal session.  → fleet/goals
+Seats · The standing agents by cluster.  → fleet/seats
+Pace · How fast the fleet moves.  → fleet/pace
+Messages to you  → fleet/inbox
+More in Agent fleet · Your latest requests, Down  → fleet/more
+Data from golden, Oct 28, 2026 at 4:00 PM
+
+@ fleet/goals
+in: Everything › Agent fleet
+# Goal sessions
+Each running goal session.
+port-goal · Alert: waits on nothing it has said, last progress Tue 14:44  → fleet/goals/goal-port-goal
+Data from golden, Oct 28, 2026 at 4:00 PM
+
+@ fleet/goals/goal-port-goal
+in: Everything › Agent fleet › Goal sessions
+# port-goal
+Alert: stuck or quiet too long.
+Port the tooling to Rust.
+Status: idle
+Last progress: Tue 14:44
+Waits on: nothing it has said
+Data from golden, Oct 28, 2026 at 4:00 PM
+
+@ fleet/inbox
+in: Everything › Agent fleet
+# Messages to you
+No messages to you in the last six hours.
+Data from golden, Oct 28, 2026 at 4:00 PM
+
+@ fleet/more
+in: Everything › Agent fleet
+# More in Agent fleet
+Your latest requests  → fleet/more/requests
+Down · Seats that stopped.  → fleet/more/down
+
+@ fleet/more/down
+in: Everything › Agent fleet › More in Agent fleet
+# Down
+Seats that stopped.
+Nothing is down.
+Data from golden, Oct 28, 2026 at 4:00 PM
+
+@ fleet/more/requests
+in: Everything › Agent fleet › More in Agent fleet
+# Your latest requests
+why does it say part 1 of 14 · Page thread #43  → fleet/more/requests/request-43
+Data from golden, Oct 28, 2026 at 4:00 PM
+
+@ fleet/more/requests/request-43
+in: Everything › Agent fleet › More in Agent fleet › Your latest requests
+# why does it say part 1 of 14
+Data from golden, Oct 28, 2026 at 4:00 PM
+
+@ fleet/pace
+in: Everything › Agent fleet
+# Pace
+How fast the fleet moves.
+today · steady  → fleet/pace/pace-today
+Data from golden, Oct 28, 2026 at 4:00 PM
+
+@ fleet/pace/pace-today
+in: Everything › Agent fleet › Pace
+# today
+twelve changes landed
+Status: steady
+Data from golden, Oct 28, 2026 at 4:00 PM
+
+@ fleet/seats
+in: Everything › Agent fleet
+# Seats
+The standing agents by cluster.
+Your hands  → fleet/seats/your-hands
+Work  → fleet/seats/work
+Data from golden, Oct 28, 2026 at 4:00 PM
+
+@ fleet/seats/work
+in: Everything › Agent fleet › Seats
+# Work
+publisher · Alert: waits on an answer in its terminal  → fleet/seats/work/seat-publisher
+Data from golden, Oct 28, 2026 at 4:00 PM
+
+@ fleet/seats/work/seat-publisher
+in: Everything › Agent fleet › Seats › Work
+# publisher
+Alert: stuck or quiet too long.
+pushes branches
+Status: waiting for an answer
+Waits on: an answer in its terminal
+Data from golden, Oct 28, 2026 at 4:00 PM
+
+@ fleet/seats/your-hands
+in: Everything › Agent fleet › Seats
+# Your hands
+lead · idle, last progress Tue 17:52  → fleet/seats/your-hands/seat-lead
+Data from golden, Oct 28, 2026 at 4:00 PM
+
+@ fleet/seats/your-hands/seat-lead
+in: Everything › Agent fleet › Seats › Your hands
+# lead
+acts for you
+Status: idle
+Last progress: Tue 17:52
+Data from golden, Oct 28, 2026 at 4:00 PM
+
+@ machines
+in: Everything
+# Machines
+Which machines are up. The agents and CI run on them.
+alpha · up, last progress Tue 23:30  → machines/machine-alpha
+beta · Alert: no heartbeat for an hour  → machines/machine-beta
+gamma · up  → machines/machine-gamma
+CI timings · How long the runners take.  → machines/ci
+Data from golden, Oct 28, 2026 at 4:00 PM
+
+@ machines/ci
+in: Everything › Machines
+# CI timings
+How long the runners take.
+main · last run took four minutes  → machines/ci/ci-main
+pull requests · last run took two minutes  → machines/ci/ci-pr
+Data from golden, Oct 28, 2026 at 4:00 PM
+
+@ machines/ci/ci-main
+in: Everything › Machines › CI timings
+# main
+last run took four minutes
+Tue 11:00
+Data from golden, Oct 28, 2026 at 4:00 PM
+
+@ machines/ci/ci-pr
+in: Everything › Machines › CI timings
+# pull requests
+last run took two minutes
+Tue 11:05
+Data from golden, Oct 28, 2026 at 4:00 PM
+
+@ machines/machine-alpha
+in: Everything › Machines
+# alpha
+the build host
+Status: up
+Last progress: Tue 23:30
+Data from golden, Oct 28, 2026 at 4:00 PM
+
+@ machines/machine-beta
+in: Everything › Machines
+# beta
+Alert: no heartbeat for an hour.
+the spare
+Status: asleep
+Last progress: Tue 22:10
+Data from golden, Oct 28, 2026 at 4:00 PM
+
+@ machines/machine-gamma
+in: Everything › Machines
+# gamma
+a small board
+Status: up
+Status page  ↗ https://gamma.example.test/status
+Data from golden, Oct 28, 2026 at 4:00 PM
+
+@ needs
+in: Everything
+# Needs you
+What the agents need from you, each with what to do.
+Merge the policy note · You merge every policy change yourself.  → needs/needs-ask-0
+Data from golden, Oct 28, 2026 at 4:00 PM
+
+@ needs/needs-ask-0
+in: Everything › Needs you
+# Merge the policy note
+You merge every policy change yourself.
+Open acme/policy#4  ↗ https://git.example.test/acme/policy/pull/4
+Data from golden, Oct 28, 2026 at 4:00 PM
+
+@ pages
+in: Everything
+# Pages
+The pages you keep, and what you are reading.
+Data from golden, Oct 28, 2026 at 4:00 PM
+
+@ repos
+in: Everything
+# Repos
+Your repositories with pull requests not merged yet.
+widgets · Open pull requests in bdelanghe/widgets.  → repos/repo-widgets
+gadgets · Open pull requests in bdelanghe/gadgets.  → repos/repo-gadgets
+Data from golden, Oct 28, 2026 at 4:00 PM
+
+@ repos/repo-gadgets
+in: Everything › Repos
+# gadgets
+Open pull requests in bdelanghe/gadgets.
+Bump the toolchain · Alert: waits on a fix to the build  → repos/repo-gadgets/pr-gadgets-7
+Data from golden, Oct 28, 2026 at 4:00 PM
+
+@ repos/repo-gadgets/pr-gadgets-7
+in: Everything › Repos › gadgets
+# Bump the toolchain
+Alert: stuck or quiet too long.
+Status: checks failing
+Waits on: a fix to the build
+Data from golden, Oct 28, 2026 at 4:00 PM
+
+@ repos/repo-widgets
+in: Everything › Repos
+# widgets
+Open pull requests in bdelanghe/widgets.
+Fix the frobnicator · widgets #123  → repos/repo-widgets/pr-widgets-123
+Add a second frobnicator · widgets #124  → repos/repo-widgets/pr-widgets-124
+Data from golden, Oct 28, 2026 at 4:00 PM
+
+@ repos/repo-widgets/pr-widgets-123
+in: Everything › Repos › widgets
+# Fix the frobnicator
+Status: checks passing
+Open widgets #123  ↗ https://git.example.test/acme/widgets/pull/123
+Data from golden, Oct 28, 2026 at 4:00 PM
+
+@ repos/repo-widgets/pr-widgets-124
+in: Everything › Repos › widgets
+# Add a second frobnicator
+Status: checks running
+Last progress: Tue 16:00
+Data from golden, Oct 28, 2026 at 4:00 PM
+
+@ /
+# Everything
+Needs you · What the agents need from you, each with what to do.  → needs
+Machines · Which machines are up. The agents and CI run on them.  → machines
+Agent fleet · port-goal and others need a look.  → fleet
+Pages · The pages you keep, and what you are reading.  → pages
+Repos · Your repositories with pull requests not merged yet.  → repos
+Data from golden, Oct 28, 2026 at 4:00 PM

@@ -1,0 +1,17 @@
+@ gap
+in: When
+# Gap
+Data in a gap.
+Data from its writer, Mar 8, 2026 at 3:30 AM
+
+@ overlap
+in: When
+# Overlap
+Data in an overlap.
+Data from its writer, Nov 1, 2026 at 1:30 AM
+
+@ /
+# When
+Gap · A time that is not on the clock.  → gap
+Overlap · A time the clock shows twice.  → overlap
+Data from the writer, Oct 27, 2026 at 9:05 AM

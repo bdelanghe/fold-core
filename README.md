@@ -129,6 +129,29 @@ fold-serve's darkhttpd agents (brief items 23-24), which send no ETag, no per-fi
 `tests/fuzz.rs` throws request-shaped bytes at both (`FOLD_FUZZ=<n>` cases a side): neither panics or answers outside its statuses,
 serve never serves a byte from outside its root nor writes into it, and the sink logs only what it accepted from an identity.
 
+## basis: a fold as text, for a seat
+
+`basis` is the engine's second binary. It isn't named `fold`, because `/usr/bin/fold` comes first on a Mac's PATH. It reads a
+document the way the viewer does and writes nothing (src/basis.rs, src/bin/basis.rs):
+
+    basis read [<path>]... [--doc <file>] [--json]
+    basis needs [--doc <file>] [--json]     # basis read "Needs you"
+
+The document is `--doc`, else `$BASIS_DOC`, else fleet-map's `~/.local/state/fold-data/fleet/page.json`. A path is a list of
+steps joined by `/`. Each step is a fold's id, as written or as its page's anchor writes it, or else its title (case folded),
+so `needs`, `"Needs you"` and `needs/needs-ask-0` all reach the same fold. The text shows:
+
+- `@ <path>`;
+- `in: <way back>`;
+- `# <heading>`;
+- one line per row, holding the row's spoken words (ax.rs `spoken`, the words a screen reader says);
+- `→ <path>` on a row that goes into a fold. That path is the page's row anchor, and `basis read` takes it.
+- `↗ <href>` on a row whose link comes from the data;
+- `act: <name> [<act id>]` for acts.
+
+`--json` prints the fold's accessibility tree instead. `tests/basis.rs` holds every walk golden's folds against
+`goldens/basis/<case>.txt`, and checks that every `→` path resolves and is an anchor its page writes.
+
 ## Schema
 
 `schema/node.schema.json` is the fold node types (`Node`, `Kid`, `Step`) as JSON Schema (draft 2020-12), generated from them by
