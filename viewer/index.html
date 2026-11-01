@@ -13,10 +13,12 @@
 <!-- Clax, through @empathic/clax-sdk only (basis-clax goal): the instance's /_clax/overlay.js, as fold serve passes it through on
      this origin (clax/overlay.js, src/report.rs: the instance sends no CORS header, so a pinned script must be same-origin), with the
      SDK's version and the SRI digest of the instance's bytes. Never copied here. The version is the SDK's (clax Cargo.toml
-     [workspace.package], 0.6.0); the digest is of /_clax/overlay.js as clax main d7812795 builds it (web/dist, 140094 bytes, the
-     iife `var Clax=…`; personal-cake-goal 700d5d54, two byte-identical vite builds, not yet checked against Bazel's bytes or a
-     running instance's: a mismatch fails closed). It goes stale when the overlay changes: re-pin from a named build. -->
-<meta name="clax-sdk" content="clax/overlay.js" data-version="0.6.0" data-integrity="sha384-+Rv1wqOXTrwVqUHmv8wGvlpU1KE+mO5WLhLV8Ey8s8KIcZDrE8zDimE/kmFrxiA/">
+     [workspace.package], 0.6.0); the digest is of /_clax/overlay.js as the running instance serves it: clax wip/bdelanghe
+     818a674a, home pins/empathic/clax.json (/nix/store/ckw047…-clax-0.6.0), 141084 bytes, read from
+     https://phobos.tail556f5b.ts.net/_clax/overlay.js on 2026-11-02 (the earlier pin was clax main d7812795's vite build, which no
+     instance serves, so the overlay never mounted: RECOMMEND-consultant-2026-11-01-clax-sdk-in-basis.md). A mismatch fails closed.
+     It goes stale when the home clax pin moves: re-pin from the deployed build (S2 derives it from the closure). -->
+<meta name="clax-sdk" content="clax/overlay.js" data-version="0.6.0" data-integrity="sha384-HOmKT9h5Ol0a2IC6ZGJXXxo6Gnf5olfeyKNtVD8dhcCXEetJzsIwffcNRaYMPxxt">
 <link rel="modulepreload" href="fold-core.js">
 <!-- On the Home Screen (manifest.webmanifest, sw.js): the approved Basis mark, from ~/.lobby/ops/basis-icons (Bobby 910d8009). -->
 <link rel="manifest" href="manifest.webmanifest">
