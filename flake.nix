@@ -83,7 +83,8 @@
           touch $out
         '';
         # an act end to end with no JavaScript (S2: allie-s2-fold-act-write §6): fold serve acting for one login on loopback, a stub
-        # chitin on its --chitin, and curl as the phone: GET the token, POST it (303 ok), again (303 already), after a change (409)
+        # chitin on its --chitin, and curl as the phone: GET the token, POST it (303 ok), again (303 already), a typed say sent once
+        # (Bobby 07c5f8dc), after a change (409)
         act-e2e = pkgs.runCommand "fold-core-act-e2e" { nativeBuildInputs = [ pkgs.bash pkgs.curl pkgs.gawk pkgs.gnugrep pkgs.coreutils ]; } ''
           bash ${self}/tools/act-e2e.sh ${self.packages.${pkgs.stdenv.hostPlatform.system}.default}/bin/fold ${self}/goldens/serve/act-site
           touch $out

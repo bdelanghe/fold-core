@@ -169,6 +169,14 @@ impl Actor for Stub {
             _ => Ok(Done::Ok),
         }
     }
+    fn say(&self, to: &str, text: &str, in_reply_to: Option<&str>, act: &str) -> Result<Done, String> {
+        let call = format!("say to={to} reply={} ref=fold:{act} text={text}", in_reply_to.unwrap_or("-"));
+        self.0.lock().unwrap().push(call);
+        if to == "seat-down" {
+            return Err("timeout: seat-down did not answer".into());
+        }
+        Ok(Done::Ok)
+    }
 }
 
 const NOW: i64 = 1_793_361_600;
@@ -186,14 +194,24 @@ fn acting_site(name: &str, stub: &Stub) -> Site {
     let passkey = json!({ "cap": "approve", "call": "sign", "label": "Sign", "args": { "msg_id": "m-1", "from": "seat-a" } });
     let legacy = json!({ "cap": "ack", "call": "status", "label": "Ack", "args": { "msg_id": "m-1", "from": "seat-a" } });
     let kid = |id: &str| json!({ "id": id, "title": id });
+    // A typed say (Bobby 07c5f8dc): its one line, printable ASCII, up to 96.
+    let line = json!({ "field": "line", "label": "Your reply", "maxlength": 96, "charset": "ascii-printable" });
+    let say = |to: &str| json!({ "cap": "chitin", "call": "say", "label": "Reply", "args": { "to": to, "in_reply_to": "m-1" }, "input": line });
     let nodes = json!([
         ["root", { "title": "Everything", "trail": [], "kids": [kid("needs")] }],
-        ["needs", { "title": "Needs you", "trail": ["Everything"], "kids": [kid("m 1"), kid("bare"), kid("down")] }],
+        ["needs", { "title": "Needs you", "trail": ["Everything"], "kids": [kid("m 1"), kid("bare"), kid("down"), kid("talk"), kid("mute"), kid("loose"), kid("far")] }],
         ["needs~m 1", { "title": "From seat-a", "trail": ["Everything", "Needs you"], "kids": [], "text": ["Ship the fix?"],
             "acts": [a("ack", "m-1"), a("defer", "m-1"), a("decline", "m-1"), passkey, a("say", "m-1"), legacy] }],
         ["needs~bare", { "title": "No message", "trail": ["Everything", "Needs you"], "kids": [],
             "acts": [{ "cap": "chitin", "call": "ack", "label": "Ack", "args": {} }] }],
-        ["needs~down", { "title": "Seat down", "trail": ["Everything", "Needs you"], "kids": [], "acts": [a("ack", "m-down")] }]
+        ["needs~down", { "title": "Seat down", "trail": ["Everything", "Needs you"], "kids": [], "acts": [a("ack", "m-down")] }],
+        ["needs~talk", { "title": "Talk to seat-a", "trail": ["Everything", "Needs you"], "kids": [], "acts": [say("seat-a")] }],
+        ["needs~mute", { "title": "An ack with a typed field", "trail": ["Everything", "Needs you"], "kids": [],
+            "acts": [{ "cap": "chitin", "call": "ack", "label": "Ack", "args": { "msg_id": "m-2", "from": "seat-a" }, "input": line }] }],
+        ["needs~loose", { "title": "A say in a charset it can't have", "trail": ["Everything", "Needs you"], "kids": [],
+            "acts": [{ "cap": "chitin", "call": "say", "label": "Reply", "args": { "to": "seat-a" },
+                "input": { "field": "line", "label": "Your reply", "maxlength": 96, "charset": "utf-8" } }] }],
+        ["needs~far", { "title": "Talk to a seat that is down", "trail": ["Everything", "Needs you"], "kids": [], "acts": [say("seat-down")] }]
     ]);
     let pages: Value =
         serde_json::from_str(&fold_core::wasm::site_text(&json!({ "nodes": nodes, "source": "fleet" }).to_string())).unwrap();
@@ -202,7 +220,7 @@ fn acting_site(name: &str, stub: &Stub) -> Site {
         fs::create_dir_all(f.parent().unwrap()).unwrap();
         fs::write(&f, p["html"].as_str().or(p["json"].as_str()).unwrap()).unwrap();
     }
-    let acting = Acting { login: ME.into(), host: HOST.into(), key: KEY.to_vec(), actor: Box::new(stub.clone()) };
+    let acting = Acting { login: ME.into(), host: HOST.into(), key: KEY.to_vec(), actor: Box::new(stub.clone()), spent: Default::default() };
     Site { root, mount: "/fold".into(), no_store: vec![], acting: Some(acting), reporting: None }
 }
 
@@ -260,6 +278,13 @@ fn every_act_refusal_and_success() {
     let expired = act::mint(&KEY, "needs/m%201/ack", &fixity(&s, "needs/m%201/ack"), ME, NOW - act::TTL - 1);
     let changed = act::mint(&KEY, "needs/m%201/ack", &"0".repeat(64), ME, NOW);
     let gone = act::mint(&KEY, "needs/gone/ack", &"0".repeat(64), ME, NOW);
+    let talk = "/act/needs/talk/say";
+    // each say case its own form: a token minted a second apart is another token
+    let tok = |k: i64| act::mint(&KEY, "needs/talk/say", &fixity(&s, "needs/talk/say"), ME, NOW + k);
+    let sb = |t: &str, text: &str| format!("token={t}&cap=chitin&call=say&args.to=seat-a&args.in_reply_to=m-1&args.line={text}");
+    let far_tok = act::mint(&KEY, "needs/far/say", &fixity(&s, "needs/far/say"), ME, NOW);
+    let mut far_say = from_me("POST", talk, &sb(&tok(0), "Ship it."), &[]);
+    far_say.peer = Some("100.64.0.9".parse().unwrap());
     let cases: Vec<(&str, Request)> = vec![
         ("an act's page for ME: each form's token filled, private, revalidated", from_me("GET", page, "", &[])),
         (
@@ -315,6 +340,25 @@ fn every_act_refusal_and_success() {
             "chitin does not take it",
             from_me("POST", "/act/needs/down/ack", &body(&act::mint(&KEY, "needs/down/ack", &fixity(&s, "needs/down/ack"), ME, NOW)), &[]),
         ),
+        ("an act's typed field: its text box before its button, its token filled", from_me("GET", "/needs/talk/", "", &[])),
+        ("say: the forged login of another person", from_me("POST", talk, &sb(&tok(0), "Ship it."), &[("Tailscale-User-Login", Some("eve@example.com"))])),
+        ("say: ME's login, forged from off the host", far_say),
+        ("say: through no tailscale serve", from_me("POST", talk, &sb(&tok(0), "Ship it."), &[("X-Forwarded-Host", None)])),
+        ("say: a form no server filled", from_me("POST", talk, &sb("", "Ship it."), &[])),
+        ("say: nothing typed", from_me("POST", talk, &sb(&tok(1), "+++"), &[])),
+        ("say: past its maxlength", from_me("POST", talk, &sb(&tok(2), &"a".repeat(97)), &[])),
+        ("say: not printable ASCII", from_me("POST", talk, &sb(&tok(3), "caf%C3%A9"), &[])),
+        ("say: a line break", from_me("POST", talk, &sb(&tok(4), "one%0Atwo"), &[])),
+        ("say: a lone --flag, which chitin would read as its own", from_me("POST", talk, &sb(&tok(5), "--queue"), &[])),
+        ("say: no typed field", from_me("POST", talk, &sb(&tok(6), "x").replace("&args.line=x", ""), &[])),
+        ("say: two typed fields", from_me("POST", talk, &format!("{}&args.line=y", sb(&tok(7), "x")), &[])),
+        ("say: an ack's free text never reaches chitin: an ack with a typed field runs nothing", from_me("POST", "/act/needs/mute/ack", &format!("{}&args.line=hi", body(&act::mint(&KEY, "needs/mute/ack", &fixity(&s, "needs/mute/ack"), ME, NOW))), &[])),
+        ("say: an input this server doesn't take runs nothing", from_me("POST", "/act/needs/loose/say", &sb(&act::mint(&KEY, "needs/loose/say", &fixity(&s, "needs/loose/say"), ME, NOW), "hi"), &[])),
+        ("say: chitin does not take it, and the form is not spent", from_me("POST", "/act/needs/far/say", &sb(&far_tok, "Ship it."), &[])),
+        ("say: so the same form may try again", from_me("POST", "/act/needs/far/say", &sb(&far_tok, "Ship it."), &[])),
+        ("say: 96 printable characters, sent, and back to the fold", from_me("POST", talk, &sb(&tok(8), &format!("Ship it, {}", "~".repeat(87))), &[])),
+        ("say: the same form again: sent once, and harmless", from_me("POST", talk, &sb(&tok(8), "Ship it again."), &[])),
+        ("the fold then says so", from_me("GET", "/needs/talk/?did=say&as=ok", "", &[])),
         ("ack: done, and back to the fold", from_me("POST", ack, &gb, &[])),
         ("the fold then says so", from_me("GET", "/needs/m%201/?did=ack&as=ok", "", &[])),
         ("ack again, the same token: done before, and harmless", from_me("POST", ack, &gb, &[])),
@@ -369,6 +413,9 @@ fn every_act_refusal_and_success() {
         *stub.0.lock().unwrap(),
         [
             "m-down acting to=seat-a ref=fold:needs/down/ack",
+            "say to=seat-down reply=m-1 ref=fold:needs/far/say text=Ship it.",
+            "say to=seat-down reply=m-1 ref=fold:needs/far/say text=Ship it.",
+            &format!("say to=seat-a reply=m-1 ref=fold:needs/talk/say text=Ship it, {}", "~".repeat(87)),
             "m-1 acting to=seat-a ref=fold:needs/m%201/ack",
             "m-1 acting to=seat-a ref=fold:needs/m%201/ack",
             "m-1 deferred to=seat-a ref=fold:needs/m%201/defer why=Deferred from Basis",
@@ -394,13 +441,16 @@ fn every_act_refusal_and_success() {
     let _ = fs::remove_dir_all(&s.root);
 }
 
-/// The site tools/act-e2e.sh serves (goldens/serve/act-site): one Needs-you item with its acts, as `site()` writes it.
+/// The site tools/act-e2e.sh serves (goldens/serve/act-site): one Needs-you item with its acts and a typed say, as `site()` writes it.
 #[test]
 fn the_e2e_site_is_what_site_writes() {
     let a = |call: &str| json!({ "cap": "chitin", "call": call, "label": call, "args": { "msg_id": "m-1", "from": "seat-a" } });
     let nodes = json!([
-        ["root", { "title": "Everything", "trail": [], "kids": [{ "id": "m1", "title": "From seat-a" }] }],
-        ["m1", { "title": "From seat-a", "trail": ["Everything"], "kids": [], "text": ["Ship the fix?"], "acts": [a("ack"), a("defer"), a("decline")] }]
+        ["root", { "title": "Everything", "trail": [], "kids": [{ "id": "m1", "title": "From seat-a" }, { "id": "talk", "title": "Talk to seat-a" }] }],
+        ["m1", { "title": "From seat-a", "trail": ["Everything"], "kids": [], "text": ["Ship the fix?"], "acts": [a("ack"), a("defer"), a("decline")] }],
+        ["talk", { "title": "Talk to seat-a", "trail": ["Everything"], "kids": [], "acts": [{ "cap": "chitin", "call": "say", "label": "Reply",
+            "args": { "to": "seat-a", "in_reply_to": "m-1" },
+            "input": { "field": "line", "label": "Your reply", "maxlength": 96, "charset": "ascii-printable" } }] }]
     ]);
     let pages: Value =
         serde_json::from_str(&fold_core::wasm::site_text(&json!({ "nodes": nodes, "source": "fleet" }).to_string())).unwrap();

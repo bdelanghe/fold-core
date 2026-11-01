@@ -91,7 +91,7 @@ fn main() {
                     log.display()
                 );
                 let actor = Box::new(act::Chitin { bin, seat: act_seat });
-                (Some(serve::Acting { login, host, key, actor }), Some(log))
+                (Some(serve::Acting { login, host, key, actor, spent: Default::default() }), Some(log))
             }
             _ => die("fold serve: --act-as, --act-host, --act-key and --chitin go together", 2),
         };

@@ -2,8 +2,8 @@
 # act-e2e.sh <fold binary> <site dir>: an act end to end with no JavaScript (S2: allie-s2-fold-act-write §6). It starts `fold serve`
 # acting for one login on a loopback port, with a stub chitin that records its argv. Then it uses curl to GET the item's page with
 # tailscale serve's headers, read the ack form's token, and POST it: 303 to the fold with did=ack&as=ok, and the stub saw exactly
-# one ack. The same POST again: 303 as=already. After the act map changes under the page: 409, and nothing more is sent. At the end
-# the key and the act log are 0600.
+# one ack. The same POST again: 303 as=already. A typed say (Bobby 07c5f8dc) the same way: its line sent once, as one argument, and
+# never logged. After the act map changes under the page: 409, and nothing more is sent. At the end the key and the act log are 0600.
 set -euo pipefail
 fold=$1 src=$2
 work=$(mktemp -d)
@@ -33,8 +33,9 @@ base=http://127.0.0.1:$port
 serve=(-H "Tailscale-User-Login: $login" -H "X-Forwarded-Proto: https" -H "X-Forwarded-Host: $host" -H "Sec-Fetch-Site: same-origin")
 
 fail() { echo "act-e2e: $*"; cat "$work/serve.log"; exit 1; }
+# token [fold] [act]: the token the fold's page carries for that act's form
 token() {
-  curl -fsS "${serve[@]}" "$base/m1/" | grep -o 'action="/fold/act/m1/ack"><input type="hidden" name="token" value="[^"]*"' | cut -d'"' -f8
+  curl -fsS "${serve[@]}" "$base/${1:-m1}/" | grep -o "action=\"/fold/act/${1:-m1}/${2:-ack}\"><input type=\"hidden\" name=\"token\" value=\"[^\"]*\"" | cut -d'"' -f8
 }
 post() { curl -sS -o /dev/null -w '%{http_code} %{redirect_url}' "${serve[@]}" --data-urlencode "token=$1" --data "cap=chitin&call=ack" "$base/act/m1/ack"; }
 
@@ -48,17 +49,33 @@ curl -fsS "${serve[@]}" "$base/m1/?did=ack&as=ok" | grep -q 'role="status">Ackno
 got=$(post "$tok")
 [ "$got" = "303 $base/fold/m1/?did=ack&as=already" ] || fail "second POST: $got"
 
+# a typed say: the line is the stub's last argument, sent once
+line="Ship it, and say so: 100% (ok?)"
+say() { curl -sS -o /dev/null -w '%{http_code} %{redirect_url}' "${serve[@]}" --data-urlencode "token=$1" --data "cap=chitin&call=say" --data-urlencode "args.line=$2" "$base/act/talk/say"; }
+curl -fsS "${serve[@]}" "$base/talk/" | grep -q '<textarea aria-label="Your reply" name="args.line" required="" maxlength="96"></textarea><button' || fail "no text box before the say's button"
+stok=$(token talk say)
+[ -n "$stok" ] || fail "the say's page carried no token"
+got=$(say "$stok" "$line")
+[ "$got" = "303 $base/fold/talk/?did=say&as=ok" ] || fail "say: $got"
+[ "$(tail -n 1 "$STUB_RECORD")" = "say --as fold-act --in-reply-to m-1 --meta ref=fold:talk/say seat-a $line" ] || fail "chitin saw: $(tail -n 1 "$STUB_RECORD")"
+got=$(say "$stok" "$line")
+[ "$got" = "303 $base/fold/talk/?did=say&as=already" ] || fail "say again: $got"
+got=$(say "$(token talk say)" "café")
+[ "${got%% *}" = 422 ] || fail "a non-ASCII say: $got"
+[ "$(wc -l < "$STUB_RECORD" | tr -d ' ')" = 3 ] || fail "chitin saw more than one say: $(cat "$STUB_RECORD")"
+
 # the item's act changes under the open page: its old token is refused, and nothing is sent
 zeros=$(printf '0%.0s' $(seq 64))
 awk -v z="$zeros" '/"fixity":/ { sub(/"fixity": "[0-9a-f]+"/, "\"fixity\": \"" z "\"") } 1' "$work/site/_acts.json" > "$work/acts.json"
 mv "$work/acts.json" "$work/site/_acts.json"
 got=$(post "$tok")
 [ "${got%% *}" = 409 ] || fail "after the change: $got"
-[ "$(wc -l < "$STUB_RECORD" | tr -d ' ')" = 2 ] || fail "chitin was called after a refusal: $(cat "$STUB_RECORD")"
+[ "$(wc -l < "$STUB_RECORD" | tr -d ' ')" = 3 ] || fail "chitin was called after a refusal: $(cat "$STUB_RECORD")"
 
 mode() { stat -c %a "$1" 2>/dev/null || stat -f %Lp "$1"; }
 [ "$(mode "$work/state/act.key")" = 600 ] || fail "act.key is $(mode "$work/state/act.key")"
 [ "$(mode "$work/state/acts.jsonl")" = 600 ] || fail "acts.jsonl is $(mode "$work/state/acts.jsonl")"
-[ "$(wc -l < "$work/state/acts.jsonl" | tr -d ' ')" = 3 ] || fail "acts.jsonl: $(cat "$work/state/acts.jsonl")"
+[ "$(wc -l < "$work/state/acts.jsonl" | tr -d ' ')" = 6 ] || fail "acts.jsonl: $(cat "$work/state/acts.jsonl")"
 grep -q "$tok" "$work/state/acts.jsonl" "$work/serve.log" && fail "a token was logged"
-echo "act-e2e: ok (303 ok, 303 already, 409 changed; chitin saw one ack and its replay; key and log 0600)"
+grep -qF "Ship it" "$work/state/acts.jsonl" "$work/serve.log" && fail "a typed line was logged"
+echo "act-e2e: ok (303 ok, 303 already, a say sent once and a non-ASCII one refused, 409 changed; key and log 0600; no token or line logged)"

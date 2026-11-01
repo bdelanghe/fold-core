@@ -28,5 +28,21 @@
       "from": "seat-a"
     },
     "fixity": "5a9c4e8a02964af04a1a1e18258588a83dab390b8c5c651d9cafa8b013a05879"
+  },
+  "talk/say": {
+    "item": "talk",
+    "cap": "chitin",
+    "call": "say",
+    "args": {
+      "to": "seat-a",
+      "in_reply_to": "m-1"
+    },
+    "fixity": "0c3f51554daac2214385f85c06a03757d1765280b1c94c94b969814f87d7cb25",
+    "input": {
+      "field": "line",
+      "label": "Your reply",
+      "maxlength": 96,
+      "charset": "ascii-printable"
+    }
   }
 }

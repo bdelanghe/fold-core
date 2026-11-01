@@ -25,9 +25,9 @@ use sha2::{Digest, Sha256};
 /// A token's life: a day's use of an open page (S2 brief §3).
 pub const TTL: i64 = 12 * 3600;
 
-/// The acts this server may run, each a `(cap, call)` pair as Allie's cap host names them (`cap` the capability, `call` the
-/// verb; personal-allie-lead 4f93c11f): only `chitin` × `ack`, `defer`, `decline`, each as the chitin ack state it sends and the
-/// fixed reason chitin requires for it (S2 brief §4). Every other pair, `chitin`/`say` among them, is refused.
+/// The ack moves this server may run, each a `(cap, call)` pair as Allie's cap host names them (`cap` the capability, `call` the
+/// verb; personal-allie-lead 4f93c11f): `chitin` × `ack`, `defer`, `decline`, each as the chitin ack state it sends and the
+/// fixed reason chitin requires for it (S2 brief §4). The one other act it runs, chitin's `say`, is [`run_of`]'s.
 pub fn state_of(cap: &str, call: &str) -> Option<(&'static str, Option<&'static str>)> {
     if cap != "chitin" {
         return None;
@@ -46,14 +46,85 @@ pub fn said(call: &str, how: &str) -> Option<&'static str> {
         ("ack", "ok") => "Acknowledged.",
         ("defer", "ok") => "Deferred.",
         ("decline", "ok") => "Declined.",
+        ("say", "ok") => "Sent.",
         ("ack", "already") => "Already acknowledged.",
         ("defer", "already") => "Already deferred.",
         ("decline", "already") => "Already declined.",
+        ("say", "already") => "Already sent.",
         _ => return None,
     })
 }
 
-fn hex(b: &[u8]) -> String {
+/// The most a typed value may hold, in characters, whatever an act's `input` asks.
+pub const INPUT_MAX: u64 = 1000;
+
+/// An act's one typed field (Bobby 07c5f8dc, as designed in 5f9d0d87 and answered in 3afeab31): `input: {field, label,
+/// maxlength, charset}` on the act, rendered as a named text box before its button and posted as `args.<field>`. The spec is
+/// part of the act, so its fixity and token cover it; the typed value is payload, outside both, and is checked here against
+/// the act map's spec, never against the form.
+#[derive(Debug, PartialEq, Clone)]
+pub struct Input {
+    pub field: String,
+    pub maxlength: usize,
+}
+
+/// An act's `input`, when it is one this server takes: a `field` of `[a-z][a-z0-9_]*` naming no fixed arg, a `maxlength` of 1 to
+/// [`INPUT_MAX`], and the one charset there is, `ascii-printable` (0x20-0x7E). Anything else is no input this server takes.
+pub fn input_of(act: &Value) -> Option<Input> {
+    let i = act.get("input")?;
+    let field = i.get("field")?.as_str()?;
+    let mut b = field.bytes();
+    if !b.next().is_some_and(|c| c.is_ascii_lowercase()) || !b.all(|c| c.is_ascii_lowercase() || c.is_ascii_digit() || c == b'_') {
+        return None;
+    }
+    if act.get("args").and_then(|a| a.get(field)).is_some() {
+        return None;
+    }
+    let max = i.get("maxlength")?.as_u64().filter(|m| (1..=INPUT_MAX).contains(m))?;
+    if i.get("charset")?.as_str()? != "ascii-printable" {
+        return None;
+    }
+    Some(Input { field: field.into(), maxlength: max as usize })
+}
+
+/// Why a typed value is not sent: a fixed sentence (the value is never echoed).
+pub fn typed(input: &Input, v: &str) -> Result<(), &'static str> {
+    if v.trim().is_empty() {
+        return Err("nothing was typed");
+    }
+    if !v.bytes().all(|b| (0x20..=0x7e).contains(&b)) {
+        return Err("only letters, digits, spaces and punctuation can be sent");
+    }
+    if v.len() > input.maxlength {
+        return Err("that text is too long");
+    }
+    // chitin's own parser takes a lone `--word` argument as its flag wherever it stands: never hand it one
+    if v.starts_with("--") && !v.contains(' ') {
+        return Err("a lone word starting -- reads as a flag");
+    }
+    Ok(())
+}
+
+/// What an act runs, read from the act map's row alone: an ack state move, or a say with its one typed field. Free text never
+/// reaches an ack: an ack, defer or decline that carries an `input` runs nothing.
+#[derive(Debug, PartialEq)]
+pub enum Run {
+    Ack { state: &'static str, why: Option<&'static str> },
+    Say(Input),
+}
+
+/// The act map row's run, if this server may run it: chitin's ack, defer and decline (Bobby's boundary 42184457) and, since Bobby
+/// 07c5f8dc widened it, chitin's say with a typed line. Every other pair runs nothing.
+pub fn run_of(entry: &Value) -> Option<Run> {
+    let s = |k: &str| entry.get(k).and_then(Value::as_str).unwrap_or("");
+    let (cap, call) = (s("cap"), s("call"));
+    if let Some((state, why)) = state_of(cap, call) {
+        return entry.get("input").is_none().then_some(Run::Ack { state, why });
+    }
+    (cap == "chitin" && call == "say").then(|| input_of(entry).map(Run::Say)).flatten()
+}
+
+pub fn hex(b: &[u8]) -> String {
     b.iter().map(|x| format!("{x:02x}")).collect()
 }
 
@@ -229,6 +300,9 @@ pub trait Actor: Send + Sync {
     /// Tell `to`, the seat that sent `msg_id`, that it is now `state` (with `why`, where chitin needs a reason), by the act `act`
     /// (its act id, the ack's artifact `fold:<act>`).
     fn ack(&self, msg_id: &str, state: &str, to: &str, why: Option<&str>, act: &str) -> Result<Done, String>;
+    /// Say `text` to the seat `to` (in reply to `in_reply_to`, when the act names one), by the act `act`. The route has checked
+    /// `text` against the act's input ([`typed`]) and spent the form's token, so one form sends once.
+    fn say(&self, to: &str, text: &str, in_reply_to: Option<&str>, act: &str) -> Result<Done, String>;
 }
 
 #[cfg(not(target_arch = "wasm32"))]
@@ -249,14 +323,38 @@ impl Actor for Chitin {
         if let Some(w) = why {
             c.args(["--why", w]);
         }
-        let out = c.output().map_err(|e| format!("could not run chitin: {e}"))?;
-        let (o, e) = (String::from_utf8_lossy(&out.stdout), String::from_utf8_lossy(&out.stderr));
-        let line = o.lines().chain(e.lines()).map(str::trim).find(|l| !l.is_empty()).unwrap_or("").to_string();
+        let (ok, line) = first_line(&mut c)?;
         let noop = line.contains("already ") || line.ends_with(" is final") || line.contains("does not follow");
-        match (out.status.success(), noop) {
+        match (ok, noop) {
             (_, true) => Ok(Done::Already),
             (true, false) if line.starts_with("written") => Ok(Done::Ok),
-            _ => Err(if line.is_empty() { format!("chitin exited {}", out.status) } else { line.chars().take(200).collect() }),
+            _ => Err(line),
         }
     }
+
+    /// `chitin say --as <seat> [--in-reply-to <id>] --meta ref=fold:<act id> <to> <text>`: the text one argument, last, never a
+    /// lone `--word` ([`typed`]). `written` or `held` (kept for the seat) is sent; anything else is chitin's one-line reason.
+    fn say(&self, to: &str, text: &str, in_reply_to: Option<&str>, act: &str) -> Result<Done, String> {
+        let mut c = Command::new(&self.bin);
+        c.args(["say", "--as", &self.seat]);
+        if let Some(r) = in_reply_to {
+            c.args(["--in-reply-to", r]);
+        }
+        c.args(["--meta", &format!("ref=fold:{act}"), to, text]);
+        let (ok, line) = first_line(&mut c)?;
+        if ok && (line.starts_with("written") || line.starts_with("held")) {
+            Ok(Done::Ok)
+        } else {
+            Err(line)
+        }
+    }
+}
+
+#[cfg(not(target_arch = "wasm32"))]
+/// Run chitin: whether it exited 0, and its first line (stdout, then stderr), cut to 200 characters; its exit status if silent.
+fn first_line(c: &mut Command) -> Result<(bool, String), String> {
+    let out = c.output().map_err(|e| format!("could not run chitin: {e}"))?;
+    let (o, e) = (String::from_utf8_lossy(&out.stdout), String::from_utf8_lossy(&out.stderr));
+    let line: String = o.lines().chain(e.lines()).map(str::trim).find(|l| !l.is_empty()).unwrap_or("").chars().take(200).collect();
+    Ok((out.status.success(), if line.is_empty() { format!("chitin exited {}", out.status) } else { line }))
 }
