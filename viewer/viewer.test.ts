@@ -120,7 +120,9 @@ for (const f of readdirSync(join(goldens, "pages")).filter((f) => f.endsWith(".p
   test(`pages ${name}: each row the viewer shows carries the haecceity its pre-rendered page gives it`, () => {
     const input = read(goldens, "walk", `${name}.input.json`), nodes = new Map(input.nodes as [string, any][]);
     const abouts = (t: any): string[] => [...(t?.haecceity ? [t.haecceity] : []), ...(t?.children ?? []).flatMap(abouts)];
-    for (const p of read(goldens, "pages", f).filter((p: any) => p.mode === "folds" && p.html)) {
+    // A repeated id (goldens/walk/repeats) is one fold to the viewer, the last (a Map's), as it is one file to a host, written last.
+    const last = new Map(read(goldens, "pages", f).filter((p: any) => p.mode === "folds" && p.html).map((p: any) => [p.id, p]));
+    for (const p of last.values()) {
       const want = [...p.html.matchAll(/property="schema:about" resource="([^"]*)"/g)].map((m: string[]) => m[1]);
       const tree = viewOf(ax, nodes, href(at(p.id), "folds"), input.opts.localTimeZone, name).tree;
       expect(abouts(tree)).toEqual(want);
