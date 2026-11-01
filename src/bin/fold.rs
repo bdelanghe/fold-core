@@ -3,7 +3,8 @@
 //! - `fold serve --root <dir> --mount </fold> --port <n> [--no-store <path prefix>]...`: one directory, read-only (src/serve.rs).
 //!   It replaces fold-serve's darkhttpd agents (brief item 24). With `--act-as <login> --act-host <host> --act-key <file> --chitin
 //!   <bin> [--act-seat <seat>] [--act-log <file>]`, an act's form may ack, defer or decline a chitin message for that one login
-//!   (S2: allie-s2-fold-act-write): the key is made if missing (0600), the seat is `fold-act` unless named, and each act's line goes
+//!   (S2: allie-s2-fold-act-write), or say its one typed line as seat `fold-act` (act.rs `SAY_SEAT`, whatever `--act-seat` says):
+//!   the key is made if missing (0600), an ack's seat is `fold-act` unless named, and each act's line goes
 //!   to `--act-log`, by default `acts.jsonl` beside the key. With `--report-config <file>` (src/report.rs), `POST report-token`
 //!   gets Clax reporter tokens for the config's one login from the instance beside it, and `GET clax/overlay.js` passes its
 //!   overlay through: the queue's grant (token and key) is read at start by the config's `grant_cmd` and `grant_key_cmd` and
@@ -87,7 +88,8 @@ fn main() {
                 let key = act::key(&kf).unwrap_or_else(|e| die(&format!("fold serve: --act-key: {e}"), 1));
                 let log = act_log.unwrap_or_else(|| kf.with_file_name("acts.jsonl"));
                 eprintln!(
-                    "fold serve: acting for {login} at https://{host}{mount}/act/ as chitin seat {act_seat}, logged to {}",
+                    "fold serve: acting for {login} at https://{host}{mount}/act/ as chitin seat {act_seat} (a say as {}), logged to {}",
+                    act::SAY_SEAT,
                     log.display()
                 );
                 let actor = Box::new(act::Chitin { bin, seat: act_seat });

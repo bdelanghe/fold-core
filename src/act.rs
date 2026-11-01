@@ -305,6 +305,10 @@ pub trait Actor: Send + Sync {
     fn say(&self, to: &str, text: &str, in_reply_to: Option<&str>, act: &str) -> Result<Done, String>;
 }
 
+/// The one chitin seat a typed say speaks as (Bobby 38e765d3, signed ebe199a4: S2 42184457 widened to typed say "as seat
+/// fold-act"). It is never `--act-seat`, which names the ack's seat, so a say can't speak as Bobby or as any seat the flag names.
+pub const SAY_SEAT: &str = "fold-act";
+
 #[cfg(not(target_arch = "wasm32"))]
 /// The real actor: `chitin ack <msg_id> <state> --to <sender> --as <seat> --ref fold:<act id> [--why <why>]`, the reason fixed per
 /// state (work-chitin-author's ack delegate, via personal-assistant d46b12c1); the key from the environment chitin reads
@@ -312,6 +316,7 @@ pub trait Actor: Send + Sync {
 /// before; anything else is chitin's one-line reason.
 pub struct Chitin {
     pub bin: String,
+    /// The seat an ack moves state as (`--act-seat`). A say ignores it and speaks as [`SAY_SEAT`].
     pub seat: String,
 }
 
@@ -332,11 +337,12 @@ impl Actor for Chitin {
         }
     }
 
-    /// `chitin say --as <seat> [--in-reply-to <id>] --meta ref=fold:<act id> <to> <text>`: the text one argument, last, never a
-    /// lone `--word` ([`typed`]). `written` or `held` (kept for the seat) is sent; anything else is chitin's one-line reason.
+    /// `chitin say --as fold-act [--in-reply-to <id>] --meta ref=fold:<act id> <to> <text>`: always as [`SAY_SEAT`], never `seat`;
+    /// the text one argument, last, never a lone `--word` ([`typed`]). `written` or `held` (kept for the seat) is sent; anything
+    /// else is chitin's one-line reason.
     fn say(&self, to: &str, text: &str, in_reply_to: Option<&str>, act: &str) -> Result<Done, String> {
         let mut c = Command::new(&self.bin);
-        c.args(["say", "--as", &self.seat]);
+        c.args(["say", "--as", SAY_SEAT]);
         if let Some(r) = in_reply_to {
             c.args(["--in-reply-to", r]);
         }
