@@ -87,9 +87,12 @@ dropped, and the answer is a page that says acting from here isn't on yet, with 
 With `--act-as <login> --act-host <host> --act-key <file> --chitin <bin> [--act-seat fold-act] [--act-log <file>]`, the form can
 ack, defer or decline a chitin message for that one login (S2: allie-s2-fold-act-write). An act is `{cap, call, args, label}`, `cap`
 the capability and `call` the verb, as Allie's cap host names them; its act key is its `id`, else its `call`. Only `cap: "chitin"`
-with `call` ack, defer or decline runs (`chitin ack <msg> acting|deferred|declined --to <sender> --ref fold:<act id>`); every
-other pair is 422, `chitin`/`say` and the passkey (`approve`/`sign`, which stays on chitin's `/approve`) among them. Before the
-actor runs, every check must pass:
+with `call` ack, defer or decline runs (`chitin ack <msg> acting|deferred|declined --to <sender> --as <act seat> --ref fold:<act
+id>`), and so does `chitin`/`say` (Bobby 38e765d3, which widens S2 42184457): its act carries an `input`, and the form's one typed line
+must be printable ASCII within that input's `maxlength`. Free text on an ack, defer or decline is 422, and so is a bad line. It is
+sent once per token, always as seat `fold-act` (`chitin say --as fold-act --meta ref=fold:<act id> <to> <line>`), whatever
+`--act-seat` says. Every other pair is 422, the passkey (`approve`/`sign`, which stays on chitin's `/approve`) among them. Before
+the actor runs, every check must pass:
 - the peer is loopback;
 - `Tailscale-User-Login` is the login;
 - the request came through serve (`X-Forwarded-Proto`, `X-Forwarded-Host`) and is same-origin (`Sec-Fetch-Site`, else `Origin`);
@@ -98,8 +101,9 @@ actor runs, every check must pass:
 
 The act comes from the site's act map (`_acts.json`, written by `site()` and never served), not from the form. Success is a `303`
 back to the fold, whose status line then says what was done. A stale token, or a fold that changed, gets the page back with
-fresh tokens and nothing done. Each POST leaves one line in `acts.jsonl` (0600). goldens/serve/acts.json holds every refusal
-and success, and tools/act-e2e.sh (`checks.act-e2e`) runs one ack end to end with curl and a stub chitin. It replaces
+fresh tokens and nothing done. Each POST leaves one line in `acts.jsonl` (0600); for a say, that line has the text's length and
+sha-256, never the text. goldens/serve/acts.json holds every refusal and success, and tools/act-e2e.sh (`checks.act-e2e`) runs
+one ack and one say end to end with curl and a stub chitin. It replaces
 fold-serve's darkhttpd agents (brief items 23-24), which send no ETag, no per-file Cache-Control and no custom headers.
 
 | Resource | Cache-Control | Validator |

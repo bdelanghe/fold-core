@@ -24,7 +24,8 @@ export STUB_RECORD=$work/record
 
 login=bobby@example.com host=phobos.example.ts.net
 "$fold" serve --root "$work/site" --mount /fold --port 0 \
-  --act-as "$login" --act-host "$host" --act-key "$work/state/act.key" --chitin "$work/chitin" 2> "$work/serve.log" &
+  --act-as "$login" --act-host "$host" --act-key "$work/state/act.key" --chitin "$work/chitin" \
+  --act-seat fold-ack 2> "$work/serve.log" &
 pid=$!
 for _ in $(seq 50); do grep -q ' on 127.0.0.1:' "$work/serve.log" && break; sleep 0.1; done
 port=$(grep -o ' on 127.0.0.1:[0-9]*' "$work/serve.log" | cut -d: -f2)
@@ -43,13 +44,13 @@ tok=$(token)
 [ -n "$tok" ] || fail "the page carried no token"
 got=$(post "$tok")
 [ "$got" = "303 $base/fold/m1/?did=ack&as=ok" ] || fail "first POST: $got"
-[ "$(cat "$STUB_RECORD")" = "ack m-1 acting --to seat-a --as fold-act --ref fold:m1/ack" ] || fail "chitin saw: $(cat "$STUB_RECORD")"
+[ "$(cat "$STUB_RECORD")" = "ack m-1 acting --to seat-a --as fold-ack --ref fold:m1/ack" ] || fail "chitin saw: $(cat "$STUB_RECORD")"
 curl -fsS "${serve[@]}" "$base/m1/?did=ack&as=ok" | grep -q 'role="status">Acknowledged.</span>' || fail "the fold did not say Acknowledged."
 
 got=$(post "$tok")
 [ "$got" = "303 $base/fold/m1/?did=ack&as=already" ] || fail "second POST: $got"
 
-# a typed say: the line is the stub's last argument, sent once
+# a typed say: the line is the stub's last argument, sent once, and as fold-act though --act-seat names fold-ack (Bobby 38e765d3)
 line="Ship it, and say so: 100% (ok?)"
 say() { curl -sS -o /dev/null -w '%{http_code} %{redirect_url}' "${serve[@]}" --data-urlencode "token=$1" --data "cap=chitin&call=say" --data-urlencode "args.line=$2" "$base/act/talk/say"; }
 curl -fsS "${serve[@]}" "$base/talk/" | grep -q '<textarea aria-label="Your reply" name="args.line" required="" maxlength="96"></textarea><button' || fail "no text box before the say's button"
