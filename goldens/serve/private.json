@@ -1,0 +1,1030 @@
+[
+  {
+    "what": "ME, a typed URL: served, private and revalidated",
+    "request": {
+      "method": "GET",
+      "target": "/seats/claude-break-glass/",
+      "headers": [
+        [
+          "Tailscale-User-Login",
+          "bobby@example.com"
+        ],
+        [
+          "X-Forwarded-For",
+          "100.64.0.2"
+        ],
+        [
+          "X-Forwarded-Proto",
+          "https"
+        ],
+        [
+          "X-Forwarded-Host",
+          "phobos.example.ts.net"
+        ],
+        [
+          "Sec-Fetch-Site",
+          "none"
+        ]
+      ],
+      "peer": "127.0.0.1"
+    },
+    "status": 200,
+    "headers": [
+      [
+        "Content-Type",
+        "text/html; charset=utf-8"
+      ],
+      [
+        "Cache-Control",
+        "private, no-cache"
+      ],
+      [
+        "ETag",
+        "\"sha-256:ae82314c260aafde978899dd7be3d6b8f4e32cb6b26239a330b863d408b402b8\""
+      ],
+      [
+        "Last-Modified",
+        "Fri, 30 Oct 2026 12:00:00 GMT"
+      ],
+      [
+        "Content-Digest",
+        "sha-256=:roIxTCYKr96XiJnde+PWuPTjLLayYjmjMLhj1Ai0Arg=:"
+      ],
+      [
+        "Server-Timing",
+        "digest;desc=\"sha-256:ae82314c260aafde978899dd7be3d6b8f4e32cb6b26239a330b863d408b402b8\", asof;desc=\"2026-10-30T12:00:00Z\""
+      ]
+    ],
+    "body_bytes": 99
+  },
+  {
+    "what": "ME from a link on another site: a read is not held to same-origin",
+    "request": {
+      "method": "GET",
+      "target": "/seats/claude-break-glass/",
+      "headers": [
+        [
+          "Tailscale-User-Login",
+          "bobby@example.com"
+        ],
+        [
+          "X-Forwarded-For",
+          "100.64.0.2"
+        ],
+        [
+          "X-Forwarded-Proto",
+          "https"
+        ],
+        [
+          "X-Forwarded-Host",
+          "phobos.example.ts.net"
+        ],
+        [
+          "Sec-Fetch-Site",
+          "cross-site"
+        ]
+      ],
+      "peer": "127.0.0.1"
+    },
+    "status": 200,
+    "headers": [
+      [
+        "Content-Type",
+        "text/html; charset=utf-8"
+      ],
+      [
+        "Cache-Control",
+        "private, no-cache"
+      ],
+      [
+        "ETag",
+        "\"sha-256:ae82314c260aafde978899dd7be3d6b8f4e32cb6b26239a330b863d408b402b8\""
+      ],
+      [
+        "Last-Modified",
+        "Fri, 30 Oct 2026 12:00:00 GMT"
+      ],
+      [
+        "Content-Digest",
+        "sha-256=:roIxTCYKr96XiJnde+PWuPTjLLayYjmjMLhj1Ai0Arg=:"
+      ],
+      [
+        "Server-Timing",
+        "digest;desc=\"sha-256:ae82314c260aafde978899dd7be3d6b8f4e32cb6b26239a330b863d408b402b8\", asof;desc=\"2026-10-30T12:00:00Z\""
+      ]
+    ],
+    "body_bytes": 99
+  },
+  {
+    "what": "ME, a HEAD",
+    "request": {
+      "method": "HEAD",
+      "target": "/seats/claude-break-glass/",
+      "headers": [
+        [
+          "Tailscale-User-Login",
+          "bobby@example.com"
+        ],
+        [
+          "X-Forwarded-For",
+          "100.64.0.2"
+        ],
+        [
+          "X-Forwarded-Proto",
+          "https"
+        ],
+        [
+          "X-Forwarded-Host",
+          "phobos.example.ts.net"
+        ],
+        [
+          "Sec-Fetch-Site",
+          "none"
+        ]
+      ],
+      "peer": "127.0.0.1"
+    },
+    "status": 200,
+    "headers": [
+      [
+        "Content-Type",
+        "text/html; charset=utf-8"
+      ],
+      [
+        "Cache-Control",
+        "private, no-cache"
+      ],
+      [
+        "ETag",
+        "\"sha-256:ae82314c260aafde978899dd7be3d6b8f4e32cb6b26239a330b863d408b402b8\""
+      ],
+      [
+        "Last-Modified",
+        "Fri, 30 Oct 2026 12:00:00 GMT"
+      ],
+      [
+        "Content-Digest",
+        "sha-256=:roIxTCYKr96XiJnde+PWuPTjLLayYjmjMLhj1Ai0Arg=:"
+      ],
+      [
+        "Server-Timing",
+        "digest;desc=\"sha-256:ae82314c260aafde978899dd7be3d6b8f4e32cb6b26239a330b863d408b402b8\", asof;desc=\"2026-10-30T12:00:00Z\""
+      ]
+    ],
+    "body_bytes": 99
+  },
+  {
+    "what": "ME, revalidated and unchanged: 304",
+    "request": {
+      "method": "GET",
+      "target": "/seats/claude-break-glass/",
+      "headers": [
+        [
+          "Tailscale-User-Login",
+          "bobby@example.com"
+        ],
+        [
+          "X-Forwarded-For",
+          "100.64.0.2"
+        ],
+        [
+          "X-Forwarded-Proto",
+          "https"
+        ],
+        [
+          "X-Forwarded-Host",
+          "phobos.example.ts.net"
+        ],
+        [
+          "Sec-Fetch-Site",
+          "none"
+        ],
+        [
+          "If-None-Match",
+          "\"sha-256:ae82314c260aafde978899dd7be3d6b8f4e32cb6b26239a330b863d408b402b8\""
+        ]
+      ],
+      "peer": "127.0.0.1"
+    },
+    "status": 304,
+    "headers": [
+      [
+        "Cache-Control",
+        "private, no-cache"
+      ],
+      [
+        "ETag",
+        "\"sha-256:ae82314c260aafde978899dd7be3d6b8f4e32cb6b26239a330b863d408b402b8\""
+      ],
+      [
+        "Last-Modified",
+        "Fri, 30 Oct 2026 12:00:00 GMT"
+      ],
+      [
+        "Server-Timing",
+        "digest;desc=\"sha-256:ae82314c260aafde978899dd7be3d6b8f4e32cb6b26239a330b863d408b402b8\", asof;desc=\"2026-10-30T12:00:00Z\""
+      ]
+    ],
+    "body_bytes": 0
+  },
+  {
+    "what": "ME, its data document: private too",
+    "request": {
+      "method": "GET",
+      "target": "/seats/claude-break-glass/page.json",
+      "headers": [
+        [
+          "Tailscale-User-Login",
+          "bobby@example.com"
+        ],
+        [
+          "X-Forwarded-For",
+          "100.64.0.2"
+        ],
+        [
+          "X-Forwarded-Proto",
+          "https"
+        ],
+        [
+          "X-Forwarded-Host",
+          "phobos.example.ts.net"
+        ],
+        [
+          "Sec-Fetch-Site",
+          "none"
+        ]
+      ],
+      "peer": "127.0.0.1"
+    },
+    "status": 200,
+    "headers": [
+      [
+        "Content-Type",
+        "application/json"
+      ],
+      [
+        "Cache-Control",
+        "private, no-cache"
+      ],
+      [
+        "ETag",
+        "\"sha-256:cf6b933028447a1dc9ccc9705150fc63bc66d7e7563c5d1b6b6e35952f70802d\""
+      ],
+      [
+        "Last-Modified",
+        "Fri, 30 Oct 2026 12:00:00 GMT"
+      ],
+      [
+        "Content-Digest",
+        "sha-256=:z2uTMChEeh3JzMlwUVD8Y7xm1+dWPF0ba241lS9wgC0=:"
+      ],
+      [
+        "Server-Timing",
+        "digest;desc=\"sha-256:cf6b933028447a1dc9ccc9705150fc63bc66d7e7563c5d1b6b6e35952f70802d\", asof;desc=\"2026-10-30T12:00:00Z\""
+      ]
+    ],
+    "body_bytes": 31
+  },
+  {
+    "what": "ME, a directory without its slash: moves to it",
+    "request": {
+      "method": "GET",
+      "target": "/seats/claude-break-glass",
+      "headers": [
+        [
+          "Tailscale-User-Login",
+          "bobby@example.com"
+        ],
+        [
+          "X-Forwarded-For",
+          "100.64.0.2"
+        ],
+        [
+          "X-Forwarded-Proto",
+          "https"
+        ],
+        [
+          "X-Forwarded-Host",
+          "phobos.example.ts.net"
+        ],
+        [
+          "Sec-Fetch-Site",
+          "none"
+        ]
+      ],
+      "peer": "127.0.0.1"
+    },
+    "status": 301,
+    "headers": [
+      [
+        "Location",
+        "/fold/seats/claude-break-glass/"
+      ],
+      [
+        "Cache-Control",
+        "no-store"
+      ]
+    ],
+    "body_bytes": 0
+  },
+  {
+    "what": "ME, nothing there: 404",
+    "request": {
+      "method": "GET",
+      "target": "/seats/gone/",
+      "headers": [
+        [
+          "Tailscale-User-Login",
+          "bobby@example.com"
+        ],
+        [
+          "X-Forwarded-For",
+          "100.64.0.2"
+        ],
+        [
+          "X-Forwarded-Proto",
+          "https"
+        ],
+        [
+          "X-Forwarded-Host",
+          "phobos.example.ts.net"
+        ],
+        [
+          "Sec-Fetch-Site",
+          "none"
+        ]
+      ],
+      "peer": "127.0.0.1"
+    },
+    "status": 404,
+    "headers": [
+      [
+        "Content-Type",
+        "text/plain; charset=utf-8"
+      ],
+      [
+        "Cache-Control",
+        "no-store"
+      ]
+    ],
+    "body_bytes": 21
+  },
+  {
+    "what": "another login: 403",
+    "request": {
+      "method": "GET",
+      "target": "/seats/claude-break-glass/",
+      "headers": [
+        [
+          "X-Forwarded-For",
+          "100.64.0.2"
+        ],
+        [
+          "X-Forwarded-Proto",
+          "https"
+        ],
+        [
+          "X-Forwarded-Host",
+          "phobos.example.ts.net"
+        ],
+        [
+          "Sec-Fetch-Site",
+          "none"
+        ],
+        [
+          "Tailscale-User-Login",
+          "eve@example.com"
+        ]
+      ],
+      "peer": "127.0.0.1"
+    },
+    "status": 403,
+    "headers": [
+      [
+        "Content-Type",
+        "text/plain; charset=utf-8"
+      ],
+      [
+        "Cache-Control",
+        "no-store"
+      ]
+    ],
+    "body_bytes": 29
+  },
+  {
+    "what": "no login: 403",
+    "request": {
+      "method": "GET",
+      "target": "/seats/claude-break-glass/",
+      "headers": [
+        [
+          "X-Forwarded-For",
+          "100.64.0.2"
+        ],
+        [
+          "X-Forwarded-Proto",
+          "https"
+        ],
+        [
+          "X-Forwarded-Host",
+          "phobos.example.ts.net"
+        ],
+        [
+          "Sec-Fetch-Site",
+          "none"
+        ]
+      ],
+      "peer": "127.0.0.1"
+    },
+    "status": 403,
+    "headers": [
+      [
+        "Content-Type",
+        "text/plain; charset=utf-8"
+      ],
+      [
+        "Cache-Control",
+        "no-store"
+      ]
+    ],
+    "body_bytes": 29
+  },
+  {
+    "what": "not from loopback: 403",
+    "request": {
+      "method": "GET",
+      "target": "/seats/claude-break-glass/",
+      "headers": [
+        [
+          "Tailscale-User-Login",
+          "bobby@example.com"
+        ],
+        [
+          "X-Forwarded-For",
+          "100.64.0.2"
+        ],
+        [
+          "X-Forwarded-Proto",
+          "https"
+        ],
+        [
+          "X-Forwarded-Host",
+          "phobos.example.ts.net"
+        ],
+        [
+          "Sec-Fetch-Site",
+          "none"
+        ]
+      ],
+      "peer": "100.64.0.9"
+    },
+    "status": 403,
+    "headers": [
+      [
+        "Content-Type",
+        "text/plain; charset=utf-8"
+      ],
+      [
+        "Cache-Control",
+        "no-store"
+      ]
+    ],
+    "body_bytes": 27
+  },
+  {
+    "what": "not through serve: 403",
+    "request": {
+      "method": "GET",
+      "target": "/seats/claude-break-glass/",
+      "headers": [
+        [
+          "Tailscale-User-Login",
+          "bobby@example.com"
+        ],
+        [
+          "X-Forwarded-For",
+          "100.64.0.2"
+        ],
+        [
+          "X-Forwarded-Proto",
+          "https"
+        ],
+        [
+          "Sec-Fetch-Site",
+          "none"
+        ]
+      ],
+      "peer": "127.0.0.1"
+    },
+    "status": 403,
+    "headers": [
+      [
+        "Content-Type",
+        "text/plain; charset=utf-8"
+      ],
+      [
+        "Cache-Control",
+        "no-store"
+      ]
+    ],
+    "body_bytes": 28
+  },
+  {
+    "what": "another login, the prefix itself",
+    "request": {
+      "method": "GET",
+      "target": "/seats/",
+      "headers": [
+        [
+          "X-Forwarded-For",
+          "100.64.0.2"
+        ],
+        [
+          "X-Forwarded-Proto",
+          "https"
+        ],
+        [
+          "X-Forwarded-Host",
+          "phobos.example.ts.net"
+        ],
+        [
+          "Sec-Fetch-Site",
+          "none"
+        ],
+        [
+          "Tailscale-User-Login",
+          "eve@example.com"
+        ]
+      ],
+      "peer": "127.0.0.1"
+    },
+    "status": 403,
+    "headers": [
+      [
+        "Content-Type",
+        "text/plain; charset=utf-8"
+      ],
+      [
+        "Cache-Control",
+        "no-store"
+      ]
+    ],
+    "body_bytes": 29
+  },
+  {
+    "what": "another login, a directory without its slash: 403, not a 301 that says it is there",
+    "request": {
+      "method": "GET",
+      "target": "/seats/claude-break-glass",
+      "headers": [
+        [
+          "X-Forwarded-For",
+          "100.64.0.2"
+        ],
+        [
+          "X-Forwarded-Proto",
+          "https"
+        ],
+        [
+          "X-Forwarded-Host",
+          "phobos.example.ts.net"
+        ],
+        [
+          "Sec-Fetch-Site",
+          "none"
+        ],
+        [
+          "Tailscale-User-Login",
+          "eve@example.com"
+        ]
+      ],
+      "peer": "127.0.0.1"
+    },
+    "status": 403,
+    "headers": [
+      [
+        "Content-Type",
+        "text/plain; charset=utf-8"
+      ],
+      [
+        "Cache-Control",
+        "no-store"
+      ]
+    ],
+    "body_bytes": 29
+  },
+  {
+    "what": "another login, nothing there: 403, not a 404",
+    "request": {
+      "method": "GET",
+      "target": "/seats/gone/",
+      "headers": [
+        [
+          "X-Forwarded-For",
+          "100.64.0.2"
+        ],
+        [
+          "X-Forwarded-Proto",
+          "https"
+        ],
+        [
+          "X-Forwarded-Host",
+          "phobos.example.ts.net"
+        ],
+        [
+          "Sec-Fetch-Site",
+          "none"
+        ],
+        [
+          "Tailscale-User-Login",
+          "eve@example.com"
+        ]
+      ],
+      "peer": "127.0.0.1"
+    },
+    "status": 403,
+    "headers": [
+      [
+        "Content-Type",
+        "text/plain; charset=utf-8"
+      ],
+      [
+        "Cache-Control",
+        "no-store"
+      ]
+    ],
+    "body_bytes": 29
+  },
+  {
+    "what": "another login, the prefix percent-encoded",
+    "request": {
+      "method": "GET",
+      "target": "/se%61ts/claude-break-glass/",
+      "headers": [
+        [
+          "X-Forwarded-For",
+          "100.64.0.2"
+        ],
+        [
+          "X-Forwarded-Proto",
+          "https"
+        ],
+        [
+          "X-Forwarded-Host",
+          "phobos.example.ts.net"
+        ],
+        [
+          "Sec-Fetch-Site",
+          "none"
+        ],
+        [
+          "Tailscale-User-Login",
+          "eve@example.com"
+        ]
+      ],
+      "peer": "127.0.0.1"
+    },
+    "status": 403,
+    "headers": [
+      [
+        "Content-Type",
+        "text/plain; charset=utf-8"
+      ],
+      [
+        "Cache-Control",
+        "no-store"
+      ]
+    ],
+    "body_bytes": 29
+  },
+  {
+    "what": "another login, an empty segment first",
+    "request": {
+      "method": "GET",
+      "target": "//seats/claude-break-glass/",
+      "headers": [
+        [
+          "X-Forwarded-For",
+          "100.64.0.2"
+        ],
+        [
+          "X-Forwarded-Proto",
+          "https"
+        ],
+        [
+          "X-Forwarded-Host",
+          "phobos.example.ts.net"
+        ],
+        [
+          "Sec-Fetch-Site",
+          "none"
+        ],
+        [
+          "Tailscale-User-Login",
+          "eve@example.com"
+        ]
+      ],
+      "peer": "127.0.0.1"
+    },
+    "status": 403,
+    "headers": [
+      [
+        "Content-Type",
+        "text/plain; charset=utf-8"
+      ],
+      [
+        "Cache-Control",
+        "no-store"
+      ]
+    ],
+    "body_bytes": 29
+  },
+  {
+    "what": "another login, the slash encoded within one segment",
+    "request": {
+      "method": "GET",
+      "target": "/seats%2Fclaude-break-glass/",
+      "headers": [
+        [
+          "X-Forwarded-For",
+          "100.64.0.2"
+        ],
+        [
+          "X-Forwarded-Proto",
+          "https"
+        ],
+        [
+          "X-Forwarded-Host",
+          "phobos.example.ts.net"
+        ],
+        [
+          "Sec-Fetch-Site",
+          "none"
+        ],
+        [
+          "Tailscale-User-Login",
+          "eve@example.com"
+        ]
+      ],
+      "peer": "127.0.0.1"
+    },
+    "status": 403,
+    "headers": [
+      [
+        "Content-Type",
+        "text/plain; charset=utf-8"
+      ],
+      [
+        "Cache-Control",
+        "no-store"
+      ]
+    ],
+    "body_bytes": 29
+  },
+  {
+    "what": "another login, a segment that will not decode: held as private",
+    "request": {
+      "method": "GET",
+      "target": "/seats/%zz/",
+      "headers": [
+        [
+          "X-Forwarded-For",
+          "100.64.0.2"
+        ],
+        [
+          "X-Forwarded-Proto",
+          "https"
+        ],
+        [
+          "X-Forwarded-Host",
+          "phobos.example.ts.net"
+        ],
+        [
+          "Sec-Fetch-Site",
+          "none"
+        ],
+        [
+          "Tailscale-User-Login",
+          "eve@example.com"
+        ]
+      ],
+      "peer": "127.0.0.1"
+    },
+    "status": 403,
+    "headers": [
+      [
+        "Content-Type",
+        "text/plain; charset=utf-8"
+      ],
+      [
+        "Cache-Control",
+        "no-store"
+      ]
+    ],
+    "body_bytes": 29
+  },
+  {
+    "what": "another login, its comment page",
+    "request": {
+      "method": "GET",
+      "target": "/comment/seats/claude-break-glass/",
+      "headers": [
+        [
+          "X-Forwarded-For",
+          "100.64.0.2"
+        ],
+        [
+          "X-Forwarded-Proto",
+          "https"
+        ],
+        [
+          "X-Forwarded-Host",
+          "phobos.example.ts.net"
+        ],
+        [
+          "Sec-Fetch-Site",
+          "none"
+        ],
+        [
+          "Tailscale-User-Login",
+          "eve@example.com"
+        ]
+      ],
+      "peer": "127.0.0.1"
+    },
+    "status": 403,
+    "headers": [
+      [
+        "Content-Type",
+        "text/plain; charset=utf-8"
+      ],
+      [
+        "Cache-Control",
+        "no-store"
+      ]
+    ],
+    "body_bytes": 29
+  },
+  {
+    "what": "another login, an act on it",
+    "request": {
+      "method": "POST",
+      "target": "/act/seats/claude-break-glass/say",
+      "headers": [
+        [
+          "X-Forwarded-For",
+          "100.64.0.2"
+        ],
+        [
+          "X-Forwarded-Proto",
+          "https"
+        ],
+        [
+          "X-Forwarded-Host",
+          "phobos.example.ts.net"
+        ],
+        [
+          "Sec-Fetch-Site",
+          "same-origin"
+        ],
+        [
+          "Content-Type",
+          "application/x-www-form-urlencoded"
+        ],
+        [
+          "Tailscale-User-Login",
+          "eve@example.com"
+        ]
+      ],
+      "peer": "127.0.0.1"
+    },
+    "status": 403,
+    "headers": [
+      [
+        "Content-Type",
+        "text/plain; charset=utf-8"
+      ],
+      [
+        "Cache-Control",
+        "no-store"
+      ]
+    ],
+    "body_bytes": 29
+  },
+  {
+    "what": "another login, a path that only starts the same: the tailnet's",
+    "request": {
+      "method": "GET",
+      "target": "/seatsx/",
+      "headers": [
+        [
+          "X-Forwarded-For",
+          "100.64.0.2"
+        ],
+        [
+          "X-Forwarded-Proto",
+          "https"
+        ],
+        [
+          "X-Forwarded-Host",
+          "phobos.example.ts.net"
+        ],
+        [
+          "Sec-Fetch-Site",
+          "none"
+        ],
+        [
+          "Tailscale-User-Login",
+          "eve@example.com"
+        ]
+      ],
+      "peer": "127.0.0.1"
+    },
+    "status": 200,
+    "headers": [
+      [
+        "Content-Type",
+        "text/html; charset=utf-8"
+      ],
+      [
+        "Cache-Control",
+        "no-cache"
+      ],
+      [
+        "ETag",
+        "\"sha-256:02fd6057452a9d8214e70099ea392d485633221adf66aa7388e871b6e159d572\""
+      ],
+      [
+        "Last-Modified",
+        "Fri, 30 Oct 2026 12:00:00 GMT"
+      ],
+      [
+        "Content-Digest",
+        "sha-256=:Av1gV0UqnYIU5wCZ6jktSFYzIhrfZqpziOhxtuFZ1XI=:"
+      ],
+      [
+        "Server-Timing",
+        "digest;desc=\"sha-256:02fd6057452a9d8214e70099ea392d485633221adf66aa7388e871b6e159d572\", asof;desc=\"2026-10-30T12:00:00Z\""
+      ]
+    ],
+    "body_bytes": 71
+  },
+  {
+    "what": "another login, the root: the tailnet's",
+    "request": {
+      "method": "GET",
+      "target": "/",
+      "headers": [
+        [
+          "X-Forwarded-For",
+          "100.64.0.2"
+        ],
+        [
+          "X-Forwarded-Proto",
+          "https"
+        ],
+        [
+          "X-Forwarded-Host",
+          "phobos.example.ts.net"
+        ],
+        [
+          "Sec-Fetch-Site",
+          "none"
+        ],
+        [
+          "Tailscale-User-Login",
+          "eve@example.com"
+        ]
+      ],
+      "peer": "127.0.0.1"
+    },
+    "status": 200,
+    "headers": [
+      [
+        "Content-Type",
+        "text/html; charset=utf-8"
+      ],
+      [
+        "Cache-Control",
+        "no-cache"
+      ],
+      [
+        "ETag",
+        "\"sha-256:b63bfb63c8492b82f4979244a67e7eb019bff74ea74c97ca4d2a8b23319d064b\""
+      ],
+      [
+        "Last-Modified",
+        "Fri, 30 Oct 2026 12:00:00 GMT"
+      ],
+      [
+        "Content-Digest",
+        "sha-256=:tjv7Y8hJK4L0l5JEpn5+sBm/906nTJfKTSqLIzGdBks=:"
+      ],
+      [
+        "Server-Timing",
+        "digest;desc=\"sha-256:b63bfb63c8492b82f4979244a67e7eb019bff74ea74c97ca4d2a8b23319d064b\", asof;desc=\"2026-10-30T12:00:00Z\""
+      ]
+    ],
+    "body_bytes": 63
+  }
+]

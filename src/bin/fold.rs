@@ -22,6 +22,9 @@
 //!    "source": "fleet-map", "grant_cmd": ["op", "read", "op://Fleet/basis-clax-queue/credential"],
 //!    "grant_key_cmd": ["op", "read", "op://Fleet/basis-clax-queue/private key"]}
 //!   ```
+//!
+//!   With `--private <prefix>... --private-as <login> --private-host <host>`, every path under a prefix (`seats/`) is read only by
+//!   that login through serve to that host, and anyone else gets 403 (serve.rs `Private`); the rest stays readable by the tailnet.
 //! - `fold sink --port <n> --log <signals.jsonl> [--per-minute <n>]`: the pings and reports, append-only (src/sink.rs), put at
 //!   `<mount>/_sink`.
 
@@ -31,7 +34,7 @@ use std::process::exit;
 
 use fold_core::{act, check, report, serve, sink};
 
-const USAGE: &str = "usage: fold check <page.html|doc.json>...\n       fold serve --root <dir> --mount </fold> --port <n> [--no-store <prefix>]...\n                  [--act-as <login> --act-host <host> --act-key <file> --chitin <bin> [--act-seat <seat>] [--act-log <file>] [--needs-as <title> [--notify-as <seat>]]]\n                  [--report-config <file>]\n       fold sink --port <n> --log <file> [--per-minute <n>]";
+const USAGE: &str = "usage: fold check <page.html|doc.json>...\n       fold serve --root <dir> --mount </fold> --port <n> [--no-store <prefix>]...\n                  [--act-as <login> --act-host <host> --act-key <file> --chitin <bin> [--act-seat <seat>] [--act-log <file>] [--needs-as <title> [--notify-as <seat>]]]\n                  [--report-config <file>] [--private <prefix>... --private-as <login> --private-host <host>]\n       fold sink --port <n> --log <file> [--per-minute <n>]";
 
 extern "C" {
     fn geteuid() -> u32;
@@ -65,6 +68,7 @@ fn main() {
     let mut report_config: Option<PathBuf> = None;
     let mut needs_as: Option<String> = None;
     let mut notify_as: Option<String> = None;
+    let (mut private, mut private_as, mut private_host): (Vec<String>, Option<String>, Option<String>) = (vec![], None, None);
     let mut it = args[1..].iter();
     while let Some(a) = it.next() {
         let v = it.next().unwrap_or_else(|| die(&format!("fold {cmd}: {a} needs a value"), 2));
@@ -81,6 +85,9 @@ fn main() {
             ("serve", "--needs-as") => needs_as = Some(v.clone()),
             ("serve", "--notify-as") => notify_as = Some(v.clone()),
             ("serve", "--report-config") => report_config = Some(PathBuf::from(v)),
+            ("serve", "--private") => private.push(v.clone()),
+            ("serve", "--private-as") => private_as = Some(v.clone()),
+            ("serve", "--private-host") => private_host = Some(v.clone()),
             ("sink", "--log") => log = Some(PathBuf::from(v)),
             ("sink", "--per-minute") => per_minute = num(cmd, a, v),
             (_, "--port") => port = num(cmd, a, v),
@@ -137,9 +144,17 @@ fn main() {
             );
             r
         });
+        let private = match (private.is_empty(), private_as, private_host) {
+            (true, None, None) => None,
+            (false, Some(login), Some(host)) => {
+                eprintln!("fold serve: {} readable only by {login} through https://{host}{mount}/", private.join(", "));
+                Some(serve::Private { prefixes: private, login, host })
+            }
+            _ => die("fold serve: --private, --private-as and --private-host go together", 2),
+        };
         let how = if acting.is_some() { "acting for one login" } else { "read-only" };
         eprintln!("fold serve: {} at {mount}/ on {at}, {how}", root.display());
-        serve::run(listener, serve::Site { root, mount, no_store, acting, reporting }, log)
+        serve::run(listener, serve::Site { root, mount, no_store, acting, reporting, private }, log)
     } else {
         let log = log.unwrap_or_else(|| die("fold sink: --log is needed", 2));
         eprintln!("fold sink: appending to {} on {at}, {per_minute} a minute a viewer", log.display());

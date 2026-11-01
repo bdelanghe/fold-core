@@ -269,7 +269,7 @@ fn served_as(stub: &Stub, needs_as: Option<&str>, notify_as: Option<&str>) -> Si
         notify_as: notify_as.map(str::to_string),
         pending: Default::default(),
     };
-    Site { root, mount: "/fold".into(), no_store: vec![], acting: Some(acting), reporting: None }
+    Site { root, mount: "/fold".into(), no_store: vec![], acting: Some(acting), reporting: None, private: None }
 }
 
 /// A request as tailscale serve hands one on from ME's page: loopback, ME's login, through serve, same-origin, JSON.
