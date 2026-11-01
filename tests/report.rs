@@ -179,7 +179,7 @@ fn site(reporting: bool, upstream: String, stub: &Stub) -> Site {
         source: "fleet-map".into(),
         filer: None,
     });
-    Site { root, mount: "/fold".into(), no_store: vec![], acting: None, reporting }
+    Site { root, mount: "/fold".into(), no_store: vec![], acting: None, reporting, private: None }
 }
 
 /// A filer that records each comment, and refuses one whose words start with "down".
