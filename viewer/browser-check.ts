@@ -4,7 +4,8 @@
 // Needs you is read live beside it (/fold/needs.json, two intents waiting), so every run shows Approvals; then one intent is approved
 // with Enter and the other declined with its passkey button (chitin-approve's API faked here, its decline as addendum 1 names it,
 // the passkey a stub: nothing real is signed),
-// and each leaves, its result said where you land.
+// and each leaves, its result said in the notices zone. Through it all the zone keeps its place and size and the fold does not move:
+// a notice never bumps the page (the brief's semantic-zones addendum).
 //   VIEWER=<packages.viewer> CHROMIUM=<chromium binary> bun viewer/browser-check.ts <golden case>
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
@@ -123,21 +124,23 @@ async function whileAsleep(w: number, h: number) {
     await send("Page.enable");
     const first = (await opened()) && (await wait("!!navigator.serviceWorker.controller"));
     const kept = await opened(); // read through the worker, so the page and the document are kept
+    const zones = () => value(`JSON.stringify([document.getElementById("notices").getBoundingClientRect(), document.querySelector("main").getBoundingClientRect()].flatMap((r) => [Math.round(r.top), Math.round(r.height)]).slice(0, 3))`);
+    const fresh = await zones();
     asleep = true;
     const again = await opened();
-    const note = await value(`document.getElementById("stale").hidden ? null : document.getElementById("stale").textContent`);
+    const note = await value(`document.getElementById("stale").textContent || null`), stale = await zones();
     const { nodes } = await send("Accessibility.getFullAXTree");
     const h1 = nodes.filter((x: any) => !x.ignored && x.role?.value === "heading" && x.properties?.some((q: any) => q.name === "level" && q.value.value === 1))
       .map((x: any) => [x.name?.value ?? "", x.description?.value ?? ""]);
     const objs = await value(`document.querySelectorAll("ol.rows > li.obj").length`);
-    return { first, kept, again, note, h1, objs, err: c.err() };
+    return { first, kept, again, note, h1, objs, still: fresh === stale, zones: [fresh, stale], err: c.err() };
   } finally { asleep = false; await c.close(); }
 }
 for (const [w, h] of [[390, 844], [1024, 1366]]) {
-  const { first, kept, again, note, h1, objs, err } = await whileAsleep(w, h);
+  const { first, kept, again, note, h1, objs, still, zones, err } = await whileAsleep(w, h);
   const said = /^Not updated since \d\d:\d\d, less than a minute ago\.$/.test(note ?? "");
-  const ok = first && kept && again && said && h1.length === 1 && h1[0][0] === root.title && h1[0][1] === note && objs === root.kids.length;
-  console.log(`${ok ? "ok  " : "FAIL"} ${w}x${h} /fold/ with its host asleep: opened ${[first, kept, again]}, heading ${JSON.stringify(h1)}, ${objs} rows, note ${JSON.stringify(note)} (want ${JSON.stringify(root.title)}, ${root.kids.length})`);
+  const ok = first && kept && again && said && h1.length === 1 && h1[0][0] === root.title && h1[0][1] === note && objs === root.kids.length && still;
+  console.log(`${ok ? "ok  " : "FAIL"} ${w}x${h} /fold/ with its host asleep: zones fresh/stale ${JSON.stringify(zones)}, opened ${[first, kept, again]}, heading ${JSON.stringify(h1)}, ${objs} rows, note ${JSON.stringify(note)} (want ${JSON.stringify(root.title)}, ${root.kids.length})`);
   if (!ok) { failed++; console.log(err.slice(-2000)); }
 }
 // Needs you, live, in the browser: the item's two acts are form landmarks named by their labels; Enter on the item runs its passkey
@@ -157,28 +160,37 @@ async function signs(w: number, h: number) {
       const b = (n) => new Uint8Array([n]).buffer; return { id: "cred", rawId: b(9), type: "public-key", response: { clientDataJSON: b(1), authenticatorData: b(2), signature: b(3), userHandle: null } }; }`);
     const { nodes: ax } = await send("Accessibility.getFullAXTree");
     const forms = ax.filter((x: any) => !x.ignored && x.role?.value === "form").map((x: any) => x.name?.value);
+    // where the zones are: the notices zone's top and height and the fold's top, in CSS px
+    const rects = () => value(`JSON.stringify([document.getElementById("notices").getBoundingClientRect(), document.querySelector("main").getBoundingClientRect()].flatMap((r) => [Math.round(r.top), Math.round(r.height)]).slice(0, 3))`);
+    const empty = await value(`document.getElementById("notice").textContent`), before = await rects();
+    // the passkey held until released, so the zone can be measured while it says what is being signed
+    await value(`window.__hold = new Promise((r) => { window.__release = r; }); const g = navigator.credentials.get; navigator.credentials.get = async (o) => { await window.__hold; return g(o); }`);
     await value(`document.querySelector("main h1").focus()`);
     await key("Enter", "Enter", 13);
-    const approved = await wait(`location.hash === "#/needs/approvals" && document.getElementById("said").textContent.startsWith("Sent to personal-assistant")`);
+    const during = (await wait(`document.getElementById("notice").textContent.startsWith("Approving for personal-assistant")`)) ? await rects() : "never said";
+    await value("window.__release()");
+    const approved = await wait(`location.hash === "#/needs/approvals" && document.getElementById("notice").textContent.startsWith("Sent to personal-assistant")`);
     const asked = await value("window.__asked");
-    const said1 = await value(`document.getElementById("said").textContent`);
+    const said1 = await value(`document.getElementById("notice").textContent`), after = await rects();
     await value(`document.querySelector("main h1").focus()`);
     await key("]", "BracketRight", 221); await key("]", "BracketRight", 221);
     const stepped = await wait(`location.hash === "#/needs/needs-ask-0"`);
     await send("Page.navigate", { url: `http://127.0.0.1:${server.port}/fold/#/needs/approvals/needs-sign-0a0a0a0a0a0a` });
     await wait(`document.querySelector("main h1")?.textContent === "To personal-cake-goal"`);
     await value(`document.querySelector('form[data-call="decline"] button').click()`);
-    const declined = await wait(`location.hash === "#/needs" && document.getElementById("said").textContent.startsWith("Declined.")`);
+    const declined = await wait(`location.hash === "#/needs" && document.getElementById("notice").textContent.startsWith("Declined.")`);
     const groups = await value(`[...document.querySelectorAll("ol.rows > li.obj > a")].map((a) => a.textContent).join("|")`);
-    return { ready, forms, approved, asked, said1, stepped, declined, groups, err: c.err() };
+    const last = await rects();
+    return { ready, forms, approved, asked, said1, stepped, declined, groups, empty, still: [before, during, after, last], err: c.err() };
   } finally { await c.close(); }
 }
 {
   const r = await signs(390, 844);
   const ok = r.ready && JSON.stringify(r.forms) === JSON.stringify(["Approve with passkey", "Decline with passkey"]) && r.approved && r.asked === "1,2,3 required"
     && r.stepped && r.declined && !r.groups.includes("Approvals") && waiting.length === 0
+    && r.empty === "No notices" && r.still.every((x: string) => x === r.still[0])
     && JSON.stringify(seen) === JSON.stringify(["GET /approve/v1/challenge/0123456789ab", "POST /approve/v1/assertion/0123456789ab application/json", "GET /approve/v1/decline/0a0a0a0a0a0a", "POST /approve/v1/decline/0a0a0a0a0a0a application/json"]);
-  console.log(`${ok ? "ok  " : "FAIL"} 390x844 Needs you: forms ${JSON.stringify(r.forms)}, approved by Enter ${r.approved} (passkey asked ${JSON.stringify(r.asked)}, said ${JSON.stringify(r.said1)}), ]] ${r.stepped}, declined ${r.declined}, rows ${JSON.stringify(r.groups)}, calls ${JSON.stringify(seen)}`);
+  console.log(`${ok ? "ok  " : "FAIL"} 390x844 Needs you: forms ${JSON.stringify(r.forms)}, approved by Enter ${r.approved} (passkey asked ${JSON.stringify(r.asked)}, said ${JSON.stringify(r.said1)}), ]] ${r.stepped}, declined ${r.declined}, rows ${JSON.stringify(r.groups)}, zones [notices top, height; fold top] before/during/after/last ${JSON.stringify(r.still)}, calls ${JSON.stringify(seen)}`);
   if (!ok) { failed++; console.log(r.err.slice(-2000)); }
 }
 server.stop(true);

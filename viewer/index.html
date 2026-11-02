@@ -35,11 +35,11 @@
 <link rel="stylesheet" href="fold.css">
 </head>
 <body>
-<!-- Said when the fold shown is a kept copy (its host did not answer): read with the fold's heading, which describes itself by it. -->
-<p id="stale" class="stale" hidden></p>
-<!-- What an act on an intent did (sign.js), when its item has gone and the fold you are on has no status line of its own: said once,
-     cleared by the next move. A live region from the start, so it is heard when it is filled. -->
-<p id="said" class="stale said" role="status"></p>
+<!-- The notices zone (BRIEF addendum, Bobby: "we have a spot for notifactiuons even if there are none ... we avoid moving content
+     bewteen semantic zones"): one landmark, always here, the same size whether it says nothing ("No notices") or something, so a
+     notice never moves the fold. Every notice this page makes is said here and nowhere else: the kept copy's note (which the heading
+     is described by), what a passkey ceremony is doing and what it did, notification results. The polite live region is #notice. -->
+<aside id="notices" class="notices" aria-label="Notices"><p id="stale" class="stale"></p><p id="notice" role="status">No notices</p></aside>
 <main><h1 tabindex="-1">Loading…</h1></main>
 <!-- The last region, after the fold (consultant's cold read, RECOMMEND-consultant-2026-11-01-fleet-page-cold-read.md point 6):
      a way to open another document when this one fails. Where the data is from is said on every fold ("Data from …", src/ax.rs). -->
@@ -77,8 +77,16 @@ let live = null, told = null, keyAt = { key: "", t: 0 };
 // reader hears it with the title as the page opens. Fresh again, it goes.
 function stale() {
   const p = document.getElementById("stale"), h = document.querySelector("main h1");
-  p.hidden = !kept; p.textContent = kept ? since(kept, new Date(), zone) : "";
+  p.textContent = kept ? since(kept, new Date(), zone) : "";
   if (kept) h?.setAttribute("aria-describedby", "stale"); else h?.removeAttribute("aria-describedby");
+  say(said_);
+}
+// The one place a notice is said (the notices zone): `m`, or "No notices" when there is none and no kept-copy note either.
+let said_ = null;
+function say(m) {
+  said_ = m || null;
+  const n = document.getElementById("notice"), t = said_ ?? (kept ? "" : "No notices");
+  if (n.textContent !== t) n.textContent = t;
 }
 const href = (p, m = modeOf(location.hash, node)) => link(p, m);
 const rows = () => [...document.querySelectorAll("ol.rows > li.obj")]; // the child objects; property rows are read, not entered
@@ -111,7 +119,7 @@ function show(focus) {
   cameFrom = last.length > p.length && p.every((x, i) => x === last[i]) ? last[p.length] : null;
   last = p;
   render(focus);
-  document.getElementById("said").textContent = told ?? ""; told = null;
+  say(told); told = null; // a move clears the last notice, unless the move is what a notice was for
 }
 // The document, folded here. A failed read keeps the folds already shown; with none yet, the root says why.
 async function load() {
@@ -154,23 +162,23 @@ addEventListener("hashchange", () => {
 });
 // An act on an intent (src/ax.rs act_form: data-intent, data-call), taken here; every other act submits natively (allie-lead 968825b4).
 // Both are passkey verdicts (BRIEF addendum 1), run against chitin-approve (sign.js), their words from the challenge. Either way, what
-// waits is read again, and an item that has gone takes you back to its group, where what was done is said.
+// waits is read again, and an item that has gone takes you back to its group; what was done is said in the notices zone.
 document.addEventListener("submit", async (e) => {
   const f = e.target, id = f?.dataset?.intent, call = f?.dataset?.call;
-  // Notify me on this device, or stop (BRIEF addendum 2): only a page can ask the browser, so the script takes it; said in the fold's status line.
+  // Notify me on this device, or stop (BRIEF addendum 2): only a page can ask the browser, so the script takes it; said in the notices zone.
   if (f?.dataset?.push) {
     e.preventDefault();
     if (f.getAttribute("aria-busy") === "true") return;
     f.setAttribute("aria-busy", "true");
     const r = await notifyHere(f.dataset.push, location.href);
     f.removeAttribute("aria-busy");
-    const s = document.getElementById("did"); if (s) s.textContent = r.said;
+    say(r.said);
     return;
   }
   if (!id) return;
   e.preventDefault();
   if (!intentOk(id) || f.getAttribute("aria-busy") === "true") return;
-  const at = pathOf(location.hash), tell = (m) => { const s = document.getElementById("did"); if (s) s.textContent = m; };
+  const at = pathOf(location.hash), tell = say;
   f.setAttribute("aria-busy", "true");
   let r;
   if (Object.hasOwn(ENDPOINTS, call)) {

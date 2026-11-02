@@ -74,6 +74,17 @@ On an iPhone a page gets pushes only once Basis is on the Home Screen, and the a
 (`To <recipient>`, never its text), tagged by the item, with no sound or vibration of its own. A tap opens the item's fold in the
 viewer, where Approve and Decline are (`sw.js`).
 
+**The notices zone** (the brief's semantic-zones addendum, Bobby: "we have a spot for notifactiuons even if there are none ... we
+avoid moving content bewteen semantic zones"). Above the fold is one `aside` landmark, "Notices", which is always there and always
+the same height. When it says nothing it says "No notices"; a long notice scrolls inside it. Every notice the viewer makes is said
+there and nowhere else:
+- the kept copy's "Not updated since…", which the heading is described by;
+- what a passkey ceremony is doing and what it did;
+- notification results.
+
+`#notice` is its polite live region. So a notice never moves the fold. The browser check measures the zone and the fold before,
+during and after each ceremony, and fresh against stale, and requires them unmoved.
+
 An item that has gone takes you back to its group, or to Needs you if it was the last. There a status line (`#said`) says what was
 done. Keys: j/k move, Enter goes in (or, on an item, runs its act), h goes back, and `]]`/`[[` step to the next or previous fold
 beside the one you are in. From a group that is the next group; from an item, the next item. This is vim's section motion, and it is
