@@ -2,7 +2,8 @@
 // /fold-data/fleet/page.json, as on phobos, and headless Chromium at the phone's and the iPad's size. Each location must render the
 // fold the core folds there: the page loaded the module, fetched the document, folded it and derived the DOM, all in the browser.
 // Needs you is read live beside it (/fold/needs.json, two intents waiting), so every run shows Approvals; then one intent is approved
-// with Enter (chitin-approve's API faked here, the passkey a stub: nothing real is signed) and the other declined with its button,
+// with Enter and the other declined with its passkey button (chitin-approve's API faked here, its decline as addendum 1 names it,
+// the passkey a stub: nothing real is signed),
 // and each leaves, its result said where you land.
 //   VIEWER=<packages.viewer> CHROMIUM=<chromium binary> bun viewer/browser-check.ts <golden case>
 import { readFileSync } from "node:fs";
@@ -26,17 +27,19 @@ const seen: string[] = [];
 const answer = (v: unknown) => new Response(JSON.stringify(v), { headers: { "content-type": "application/json", "cache-control": "no-store" } });
 async function live(req: Request, p: string): Promise<Response | null> {
   if (p === "/fold/needs.json") return answer({ as: "bobby", waiting });
-  const m = p.match(/^\/(approve\/v1\/challenge|approve\/v1\/assertion|fold\/decline)\/([0-9a-f]{12})$/);
+  const m = p.match(/^\/approve\/v1\/(challenge|assertion|decline)\/([0-9a-f]{12})$/);
   if (!m) return null;
   const [, what, id] = m, it = waiting.find((w) => w.id === id);
   seen.push(`${req.method} ${p}${req.method === "POST" ? " " + req.headers.get("content-type") : ""}`);
   if (!it) return answer({ ok: false, reason: `${id} is not waiting` });
-  if (what.endsWith("challenge")) return answer({ ok: true, intent: it, frame: { hop: it.to, hash: "f00dfeed", iat: "2026-11-02T00:00:00.000Z" },
+  const pk = { challenge: "AQID", rpId: "127.0.0.1", allowCredentials: [{ type: "public-key", id: "CQ" }], userVerification: "required", timeout: 60000 };
+  if (what === "decline" && req.method === "GET") return answer({ ok: true, verdict: "decline", intent: it, publicKey: pk });
+  if (what === "challenge") return answer({ ok: true, intent: it, frame: { hop: it.to, hash: "f00dfeed", iat: "2026-11-02T00:00:00.000Z" },
     publicKey: { challenge: "AQID", rpId: "127.0.0.1", allowCredentials: [{ type: "public-key", id: "CQ" }], userVerification: "required", timeout: 60000 } });
   const body = await req.json().catch(() => null);
-  if (what.endsWith("assertion") && body?.response?.signature !== "Aw") return answer({ ok: false, reason: "not the stub's assertion" });
+  if (body?.response?.signature !== "Aw") return answer({ ok: false, reason: "not the stub's assertion" });
   waiting = waiting.filter((w) => w.id !== id);
-  return answer(what.endsWith("assertion") ? { ok: true, message: "written m-9", outcome: "written" } : { ok: true, message: `${id} declined` });
+  return answer(what === "assertion" ? { ok: true, message: "written m-9", outcome: "written" } : { ok: true, message: `${id} declined` });
 }
 const server = Bun.serve({
   hostname: "127.0.0.1", port: 0,
@@ -44,7 +47,7 @@ const server = Bun.serve({
     if (asleep) return new Promise<Response>(() => {});
     const p = new URL(req.url).pathname;
     const l = live(req, p);
-    if (p === "/fold/needs.json" || /^\/(approve|fold\/decline)\//.test(p)) return l.then((r) => r ?? new Response("", { status: 404 }));
+    if (p === "/fold/needs.json" || p.startsWith("/approve/")) return l.then((r) => r ?? new Response("", { status: 404 }));
     if (p === "/fold-data/fleet/page.json") return new Response(page, { headers: { "content-type": "application/json" } });
     if (p === "/fold-data/demo/page.json") return new Response(demo, { headers: { "content-type": "application/json" } });
     // /fold, with no slash, is the page too (as a static server or a proxy may answer it): the page must go on to /fold/
@@ -139,7 +142,8 @@ for (const [w, h] of [[390, 844], [1024, 1366]]) {
 }
 // Needs you, live, in the browser: the item's two acts are form landmarks named by their labels; Enter on the item runs its passkey
 // (the stub authenticator; the words said before it are the challenge's), it leaves, and its group says what was done; ]] then steps
-// from Approvals to the next fold beside it; the other item's Decline button declines it, Approvals goes, and Needs you says so.
+// from Approvals to the next fold beside it; the other item's "Decline with passkey" button runs its passkey against the decline
+// endpoint, Approvals goes, and Needs you says so.
 async function signs(w: number, h: number) {
   const c = await chrome(chromium, w, h, `chromium-needs-${w}`), { send, value } = c;
   const until = Date.now() + 30_000, wait = async (e: string) => { while (!(await value(e)) && Date.now() < until) await Bun.sleep(100); return !!(await value(e)); };
@@ -171,9 +175,9 @@ async function signs(w: number, h: number) {
 }
 {
   const r = await signs(390, 844);
-  const ok = r.ready && JSON.stringify(r.forms) === JSON.stringify(["Approve with passkey", "Decline"]) && r.approved && r.asked === "1,2,3 required"
+  const ok = r.ready && JSON.stringify(r.forms) === JSON.stringify(["Approve with passkey", "Decline with passkey"]) && r.approved && r.asked === "1,2,3 required"
     && r.stepped && r.declined && !r.groups.includes("Approvals") && waiting.length === 0
-    && JSON.stringify(seen) === JSON.stringify(["GET /approve/v1/challenge/0123456789ab", "POST /approve/v1/assertion/0123456789ab application/json", "POST /fold/decline/0a0a0a0a0a0a application/json"]);
+    && JSON.stringify(seen) === JSON.stringify(["GET /approve/v1/challenge/0123456789ab", "POST /approve/v1/assertion/0123456789ab application/json", "GET /approve/v1/decline/0a0a0a0a0a0a", "POST /approve/v1/decline/0a0a0a0a0a0a application/json"]);
   console.log(`${ok ? "ok  " : "FAIL"} 390x844 Needs you: forms ${JSON.stringify(r.forms)}, approved by Enter ${r.approved} (passkey asked ${JSON.stringify(r.asked)}, said ${JSON.stringify(r.said1)}), ]] ${r.stepped}, declined ${r.declined}, rows ${JSON.stringify(r.groups)}, calls ${JSON.stringify(seen)}`);
   if (!ok) { failed++; console.log(r.err.slice(-2000)); }
 }

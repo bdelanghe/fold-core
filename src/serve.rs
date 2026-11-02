@@ -8,8 +8,8 @@
 //! is read from the site's act map (`_acts.json`, page.rs), never from the form. Without [`Acting`], such a POST is read only to
 //! be dropped and answered by a page saying acting from here isn't on ([`not_yet`]). It names no `fold sink` (sink.rs): the sink
 //! is kept but not deployed. With `--needs-as <title>` it also reads Needs you live ([`NEEDS`]: that title's waiting intents, from
-//! chitin, on each request) and declines one ([`DECLINE`]), under the same checks. Signing never comes here: the viewer runs the
-//! passkey in the page against chitin-approve's own `/approve/v1/*` (viewer/sign.js), whose seats verify it. [`answer`] is pure (a
+//! chitin, on each request), under the same checks. A verdict never comes here, approve or decline: the viewer runs the passkey in
+//! the page against chitin-approve's own `/approve/v1/*` (viewer/sign.js), which binds it, and the seats verify it. [`answer`] is pure (a
 //! request, a directory and the time in; a response and its log line out), so tests/serve.rs holds every class and every refusal
 //! as goldens without a socket; [`run`] is the loopback loop around it (http.rs, src/bin/fold.rs).
 //!
@@ -72,8 +72,8 @@ pub struct Acting {
     /// The tokens a say has spent: one form sends once (a double tap, a replay or a back-button resubmit is "Already sent."). Kept
     /// for the server's life; a token outlives a restart only by its [`act::TTL`].
     pub spent: std::sync::Mutex<std::collections::HashSet<String>>,
-    /// The chitin title whose waiting intents `needs.json` lists and `decline/<id>` declines (`--needs-as`), if any: without it,
-    /// both routes say Needs you isn't read live here.
+    /// The chitin title whose waiting intents `needs.json` lists (`--needs-as`), if any: without it, the route says Needs you
+    /// isn't read live here.
     pub needs_as: Option<String>,
 }
 
@@ -167,8 +167,6 @@ pub fn limit(method: &str, target: &str) -> usize {
         REPORT_BODY
     } else if method == "POST" && target.starts_with(COMMENT) {
         COMMENT_BODY
-    } else if method == "POST" && target.starts_with(DECLINE) {
-        DECLINE_BODY
     } else {
         0
     }
@@ -202,9 +200,6 @@ pub fn answer(site: &Site, req: &Request, now: i64) -> (Response, Option<Value>)
     }
     if path == NEEDS {
         return (needs(site, req), None);
-    }
-    if path.starts_with(DECLINE) {
-        return decline(site, req, now);
     }
     let to_act = path.starts_with("/act/");
     match (req.method.as_str(), &site.acting) {
@@ -506,13 +501,6 @@ fn comment(site: &Site, req: &Request, now: i64) -> (Response, Option<Value>) {
 /// Needs you, live (src/needs.rs): what waits for the title's signature, read from chitin on each request, under the mount.
 pub const NEEDS: &str = "/needs.json";
 
-/// One waiting intent declined: `decline/<intent id>`, under the mount. A prefix of its own, as `act/` and `comment/` are, so no
-/// fold's page (`needs/…`) is shadowed.
-pub const DECLINE: &str = "/decline/";
-
-/// The most a decline's body may be: `{}`.
-pub const DECLINE_BODY: usize = 64;
-
 /// Whom the live Needs you reads for, if anyone: the acting login and the `--needs-as` title.
 fn needs_for(site: &Site) -> Option<(&Acting, &str)> {
     let a = site.acting.as_ref()?;
@@ -534,45 +522,6 @@ fn needs(site: &Site, req: &Request) -> Response {
     match a.actor.pending(title) {
         Ok(p) => json_answer(200, &crate::needs::answer(title, &crate::needs::waiting(&p, title))),
         Err(e) => json_answer(502, &json!({ "error": format!("chitin did not list them: {}", e.chars().filter(|c| !c.is_control()).take(200).collect::<String>()) })),
-    }
-}
-
-/// `POST decline/<id>`, for the one login, same-origin, as JSON only (a page's fetch can send it, a cross-site form cannot): the
-/// id checked as chitin's, then read again in the title's waiting list just before `chitin decline` (which would rename any id),
-/// so only an intent that waits for that title is declined. `{ok, message}` or `{ok: false, reason}`; the log line names the id.
-fn decline(site: &Site, req: &Request, now: i64) -> (Response, Option<Value>) {
-    let Some((a, title)) = needs_for(site) else {
-        return (Response::text(404, "Needs you isn't read live here"), None);
-    };
-    let id = req.target.split(['?', '#']).next().and_then(|p| p.strip_prefix(DECLINE)).unwrap_or("");
-    let line = |result: &str| Some(json!({ "ts": now, "login": req.header("Tailscale-User-Login"), "peer": req.header("X-Forwarded-For"), "decline": id, "as": title, "result": result }));
-    let no = |status: u16, reason: &str, result: &str| (json_answer(status, &json!({ "ok": false, "reason": reason })), line(result));
-    if req.method != "POST" {
-        return (Response::text(405, "a decline is posted: POST").with("Allow", "POST"), None);
-    }
-    if let Err(why) = front(req, &a.login, &a.host) {
-        return no(403, why, "refused:403");
-    }
-    if req.media_type() != Some("application/json") {
-        return no(415, "send the decline as application/json", "refused:415");
-    }
-    if !crate::needs::intent_ok(id) {
-        return no(400, "not an intent id", "refused:400");
-    }
-    let waits = match a.actor.pending(title) {
-        Ok(p) => crate::needs::waiting(&p, title).iter().any(|w| w["id"].as_str() == Some(id)),
-        Err(e) => return no(502, &format!("chitin did not list them: {}", e.chars().filter(|c| !c.is_control()).take(200).collect::<String>()), "chitin:pending"),
-    };
-    if !waits {
-        return no(409, &format!("{id} isn't waiting for {title} now, so nothing was declined"), "refused:409");
-    }
-    match a.actor.decline(id) {
-        Ok(Done::Ok) => (json_answer(200, &json!({ "ok": true, "message": format!("{id} declined") })), line("ok")),
-        Ok(Done::Already) => (json_answer(200, &json!({ "ok": true, "message": format!("{id} was already gone") })), line("already")),
-        Err(e) => {
-            let e: String = e.chars().filter(|c| !c.is_control()).take(200).collect();
-            no(502, &format!("chitin did not take it: {e}"), &format!("chitin:{e}"))
-        }
     }
 }
 

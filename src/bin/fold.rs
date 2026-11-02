@@ -6,8 +6,8 @@
 //!   (S2: allie-s2-fold-act-write), or say its one typed line as seat `fold-act` (act.rs `SAY_SEAT`, whatever `--act-seat` says):
 //!   the key is made if missing (0600), an ack's seat is `fold-act` unless named, and each act's line goes
 //!   to `--act-log`, by default `acts.jsonl` beside the key. With `--needs-as <title>` too, `GET needs.json` lists what waits for
-//!   that chitin title's signature, read live (`chitin pending --as <title> --json`), and `POST decline/<id>` declines one of them
-//!   (`chitin decline <id>`): Needs you's Approvals (src/needs.rs). With `--report-config <file>` (src/report.rs), `POST report-token`
+//!   that chitin title's signature, read live (`chitin pending --as <title> --json`): Needs you's Approvals (src/needs.rs). Its
+//!   verdicts, approve and decline, are each a passkey the viewer runs against chitin-approve, never this server. With `--report-config <file>` (src/report.rs), `POST report-token`
 //!   gets Clax reporter tokens for the config's one login from the instance beside it, and `GET clax/overlay.js` passes its
 //!   overlay through: the queue's grant (token and key) is read at start by the config's `grant_cmd` and `grant_key_cmd` and
 //!   kept in memory only, and a config inside `--root` is refused (it would be served). For Basis (queue `basis`, its grant in

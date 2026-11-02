@@ -111,7 +111,7 @@
                   "text": "Route the plan to the hubs.",
                   "quoted": true,
                   "why": "Waits for your signature. Queued by claude-break-glass; intent 0123456789ab, text hash deadbeefcafe.",
-                  "action": "Approve with your passkey, or decline it.",
+                  "action": "Approve or decline it with your passkey.",
                   "at": "2026-10-30T11:57:55.000Z",
                   "act": {
                     "cap": "webauthn",
@@ -124,11 +124,12 @@
                   },
                   "acts": [
                     {
-                      "cap": "intent",
+                      "cap": "webauthn",
                       "call": "decline",
-                      "label": "Decline",
+                      "label": "Decline with passkey",
                       "args": {
-                        "intent": "0123456789ab"
+                        "challenge": "/approve/v1/decline/0123456789ab",
+                        "assertion": "/approve/v1/decline/0123456789ab"
                       }
                     }
                   ]
@@ -140,7 +141,7 @@
                   "text": "Land <b>it</b> \"now\".",
                   "quoted": true,
                   "why": "Waits for your signature. Queued by an unknown seat; intent 0a0a0a0a0a0a.",
-                  "action": "Approve with your passkey, or decline it.",
+                  "action": "Approve or decline it with your passkey.",
                   "act": {
                     "cap": "webauthn",
                     "call": "approve",
@@ -152,11 +153,12 @@
                   },
                   "acts": [
                     {
-                      "cap": "intent",
+                      "cap": "webauthn",
                       "call": "decline",
-                      "label": "Decline",
+                      "label": "Decline with passkey",
                       "args": {
-                        "intent": "0a0a0a0a0a0a"
+                        "challenge": "/approve/v1/decline/0a0a0a0a0a0a",
+                        "assertion": "/approve/v1/decline/0a0a0a0a0a0a"
                       }
                     }
                   ]
@@ -772,7 +774,7 @@
                   "text": "Route the plan to the hubs.",
                   "quoted": true,
                   "why": "Waits for your signature. Queued by claude-break-glass; intent 0123456789ab, text hash deadbeefcafe.",
-                  "action": "Approve with your passkey, or decline it.",
+                  "action": "Approve or decline it with your passkey.",
                   "at": "2026-10-30T11:57:55.000Z",
                   "act": {
                     "cap": "webauthn",
@@ -785,11 +787,12 @@
                   },
                   "acts": [
                     {
-                      "cap": "intent",
+                      "cap": "webauthn",
                       "call": "decline",
-                      "label": "Decline",
+                      "label": "Decline with passkey",
                       "args": {
-                        "intent": "0123456789ab"
+                        "challenge": "/approve/v1/decline/0123456789ab",
+                        "assertion": "/approve/v1/decline/0123456789ab"
                       }
                     }
                   ]
@@ -801,7 +804,7 @@
                   "text": "Land <b>it</b> \"now\".",
                   "quoted": true,
                   "why": "Waits for your signature. Queued by an unknown seat; intent 0a0a0a0a0a0a.",
-                  "action": "Approve with your passkey, or decline it.",
+                  "action": "Approve or decline it with your passkey.",
                   "act": {
                     "cap": "webauthn",
                     "call": "approve",
@@ -813,11 +816,12 @@
                   },
                   "acts": [
                     {
-                      "cap": "intent",
+                      "cap": "webauthn",
                       "call": "decline",
-                      "label": "Decline",
+                      "label": "Decline with passkey",
                       "args": {
-                        "intent": "0a0a0a0a0a0a"
+                        "challenge": "/approve/v1/decline/0a0a0a0a0a0a",
+                        "assertion": "/approve/v1/decline/0a0a0a0a0a0a"
                       }
                     }
                   ]

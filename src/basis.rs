@@ -12,7 +12,7 @@
 //! - one line per row, its spoken words joined by ` · `, and `  → <path>` when the row goes in to a fold (that fold's path,
 //!   what `basis read` takes and the page's row anchor), or `  ↗ <href>` when its link is one the data carries;
 //! - `act: <name> [<act id>] · …` for a row of acts (page.rs `acts`, the id `fold serve` takes an act's post at); an act on an
-//!   intent (needs.rs: the passkey, the decline) as `[<call> <intent id>]`.
+//!   intent (needs.rs: its two passkey verdicts) as `[<call> <intent id>]`.
 
 use std::collections::HashMap;
 

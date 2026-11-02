@@ -143,12 +143,11 @@ pub fn acts_of(node: &Value) -> Vec<(String, Value)> {
 pub const TOKEN_FIELD: &str = "token";
 
 /// A fold's act as an HTML form (BRIEF-basis-forms-push-signing-2026-10-31 §1): it posts its token (empty until served), cap,
-/// call and args as hidden fields to `act/<act id>` under the viewer's mount, with a native submit button. No script. Two acts
-/// on an intent (src/needs.rs `intent_of`) are the exception, and carry the intent's id and their call for the viewer's script
-/// (viewer/sign.js), which takes them in the page (BRIEF-stint-2026-11-02-approve-into-fold):
-/// - the passkey (`webauthn`, or `approve`): WebAuthn runs only in a document. With no script, where the fold links its sign
-///   page, the form GETs that page (its `#i-<intent>` kept, as a GET form keeps the action's fragment).
-/// - the decline (`intent`/`decline`): a POST to `decline/<intent>` (src/serve.rs), sent by the script as JSON.
+/// call and args as hidden fields to `act/<act id>` under the viewer's mount, with a native submit button. No script. The
+/// passkey (`webauthn`, or `approve`) is the exception: WebAuthn runs only in a document. A passkey act on an intent (src/needs.rs
+/// `intent_of`: Approve or Decline, BRIEF-stint-2026-11-02-approve-into-fold and its addendum 1) carries the intent's id and its
+/// verdict for the viewer's script (viewer/sign.js), which runs the ceremony in the page. With no script, where the fold links its
+/// sign page, the form GETs that page (its `#i-<intent>` kept, as a GET form keeps the action's fragment).
 ///
 /// A form is named by the fold's title when it is the fold's one act, else by its own label.
 fn act_form(node: &Value, act: &Value, path: &[String], key: &str, one: bool) -> Value {
@@ -158,8 +157,6 @@ fn act_form(node: &Value, act: &Value, path: &[String], key: &str, one: bool) ->
     let passkey = matches!(cap.trim(), "webauthn" | "approve") && (truthy(get(node, "href")) || intent.is_some());
     let (method, action, fields) = if passkey {
         ("get", present(get(node, "href")).cloned().unwrap_or_else(|| "".into()), vec![])
-    } else if let Some((id, "decline")) = &intent {
-        ("post", format!("decline/{id}").into(), vec![])
     } else {
         let mut f = vec![json!([TOKEN_FIELD, ""]), json!(["cap", cap]), json!(["call", js::string(get(act, "call"))])];
         match present(get(act, "args")) {

@@ -1,5 +1,5 @@
 //! Needs you, live (src/needs.rs, BRIEF-stint-2026-11-02-approve-into-fold): the overlay a document gets from `needs.json`, the
-//! folds and forms a live item becomes, and `fold serve`'s two routes (`needs.json`, `decline/<id>`) with every refusal, held in
+//! folds and forms a live item becomes (two passkey verdicts, BRIEF addendum 1), and `fold serve`'s `needs.json` with every refusal, held in
 //! goldens/needs/overlay.json and goldens/needs/serve.json. `FOLD_BLESS=1 cargo test --test needs` writes them.
 
 use std::fs;
@@ -106,7 +106,7 @@ fn the_overlay_puts_the_live_list_first_and_nothing_else() {
 
 /// The live document folded: Needs you › Approvals › the item, at the producer's id, with its two forms, each naming the intent.
 #[test]
-fn a_live_item_is_a_fold_with_its_passkey_and_its_decline() {
+fn a_live_item_is_a_fold_with_two_passkey_verdicts() {
     let root = overlay(json!({ "root": page(), "needs": { "as": "bobby", "waiting": pending() }, "now": NOW_MS }));
     let folds: Value =
         serde_json::from_str(&fold_core::wasm::fold_text(&json!({ "root": root, "opts": { "localTimeZone": "UTC" } }).to_string()))
@@ -133,15 +133,20 @@ fn a_live_item_is_a_fold_with_its_passkey_and_its_decline() {
         json!([
             { "role": "form", "name": "Approve with passkey", "cls": "act", "method": "get", "action": "", "intent": ID, "call": "approve",
               "children": [{ "role": "button", "name": "Approve with passkey", "cls": "act" }] },
-            { "role": "form", "name": "Decline", "cls": "act", "method": "post", "action": format!("decline/{ID}"), "intent": ID, "call": "decline",
-              "children": [{ "role": "button", "name": "Decline", "cls": "act" }] },
+            { "role": "form", "name": "Decline with passkey", "cls": "act", "method": "get", "action": "", "intent": ID, "call": "decline",
+              "children": [{ "role": "button", "name": "Decline with passkey", "cls": "act" }] },
             { "role": "status", "cls": "result", "id": "did" }
         ])
     );
     let html: Value = serde_json::from_str(&fold_core::wasm::html_text(&tree.to_string())).unwrap();
     let html = html["html"].as_str().unwrap();
     assert!(html.contains(&format!("<form class=\"act\" aria-label=\"Approve with passkey\" method=\"get\" action=\"\" data-intent=\"{ID}\" data-call=\"approve\">")), "{html}");
-    assert!(html.contains(&format!("action=\"decline/{ID}\" data-intent=\"{ID}\" data-call=\"decline\">")), "{html}");
+    assert!(
+        html.contains(&format!(
+            "aria-label=\"Decline with passkey\" method=\"get\" action=\"\" data-intent=\"{ID}\" data-call=\"decline\">"
+        )),
+        "{html}"
+    );
 }
 
 /// `basis --needs` reads the same folds at the same paths: `Needs you/Approvals/<item>` by title or by id, and its text names the
@@ -167,23 +172,32 @@ fn basis_reads_the_live_document_at_the_viewers_paths() {
     );
 }
 
-/// No other act names an intent: endpoints from anywhere but the intent's own id, an id chitin would not make, or a decline on
-/// another cap stay as they were (a passkey with no sign page is a plain act form, which `fold serve` never runs).
+/// No other act names an intent, and each verdict names only its own endpoints: endpoints from anywhere but the intent's own id,
+/// an id chitin would not make, another cap, or one verdict's endpoints under the other's call (an approve dressed as a decline).
 #[test]
 fn only_an_intents_own_endpoints_name_it() {
     let of = |a: Value| fold_core::needs::intent_of(&a).map(|(i, c)| format!("{i} {c}"));
-    let pk = |c: &str, a: &str| json!({ "cap": "webauthn", "call": "approve", "args": { "challenge": c, "assertion": a } });
-    assert_eq!(of(pk(&format!("/approve/v1/challenge/{ID}"), &format!("/approve/v1/assertion/{ID}"))), Some(format!("{ID} approve")));
-    assert_eq!(of(pk(&format!("https://evil.example/approve/v1/challenge/{ID}"), &format!("/approve/v1/assertion/{ID}"))), None);
-    assert_eq!(of(pk(&format!("/approve/v1/challenge/{ID}"), "/approve/v1/assertion/bbbbbbbbbbbb")), None);
-    assert_eq!(of(pk("/approve/v1/challenge/../x", "/approve/v1/assertion/../x")), None);
-    assert_eq!(of(pk("/approve/v1/challenge/a", "/approve/v1/assertion/a")), None);
-    assert_eq!(of(json!({ "cap": "intent", "call": "decline", "args": { "intent": ID } })), Some(format!("{ID} decline")));
-    assert_eq!(of(json!({ "cap": "chitin", "call": "decline", "args": { "intent": ID } })), None);
-    assert_eq!(of(json!({ "cap": "intent", "call": "approve", "args": { "intent": ID } })), None);
+    let pk = |call: &str, c: &str, a: &str| json!({ "cap": "webauthn", "call": call, "args": { "challenge": c, "assertion": a } });
+    let (ac, aa) = (format!("/approve/v1/challenge/{ID}"), format!("/approve/v1/assertion/{ID}"));
+    let dc = format!("/approve/v1/decline/{ID}");
+    assert_eq!(of(pk("approve", &ac, &aa)), Some(format!("{ID} approve")));
+    assert_eq!(of(pk("decline", &dc, &dc)), Some(format!("{ID} decline")));
+    assert_eq!(
+        of(json!({ "cap": "approve", "call": "sign", "args": { "challenge": ac, "assertion": aa } })),
+        Some(format!("{ID} approve"))
+    );
+    assert_eq!(of(pk("decline", &ac, &aa)), None, "an approve's endpoints under decline");
+    assert_eq!(of(pk("approve", &dc, &dc)), None, "a decline's endpoints under approve");
+    assert_eq!(of(pk("approve", &format!("https://evil.example{ac}"), &aa)), None);
+    assert_eq!(of(pk("approve", &ac, "/approve/v1/assertion/bbbbbbbbbbbb")), None);
+    assert_eq!(of(pk("approve", "/approve/v1/challenge/../x", "/approve/v1/assertion/../x")), None);
+    assert_eq!(of(pk("approve", "/approve/v1/challenge/a", "/approve/v1/assertion/a")), None);
+    assert_eq!(of(pk("ack", &ac, &aa)), None);
+    assert_eq!(of(json!({ "cap": "chitin", "call": "decline", "args": { "challenge": dc, "assertion": dc } })), None);
+    assert_eq!(of(json!({ "cap": "intent", "call": "decline", "args": { "intent": ID } })), None, "no unsigned decline");
 }
 
-/// The actor the serve goldens give the server: chitin's pending list (or a failure), and a record of each decline.
+/// The actor the serve goldens give the server: chitin's pending list (or a failure), each read recorded.
 #[derive(Clone, Default)]
 struct Stub {
     calls: Arc<Mutex<Vec<String>>>,
@@ -203,10 +217,6 @@ impl Actor for Stub {
             return Err("chitin: state dir unreadable".into());
         }
         Ok(pending())
-    }
-    fn decline(&self, id: &str) -> Result<Done, String> {
-        self.calls.lock().unwrap().push(format!("decline {id}"));
-        Ok(Done::Ok)
     }
 }
 
@@ -255,11 +265,10 @@ fn from_me(method: &str, target: &str, body: &str, change: &[(&str, Option<&str>
 }
 
 #[test]
-fn needs_json_and_decline_refuse_all_but_the_one_login() {
+fn needs_json_refuses_all_but_the_one_login_and_nothing_declines_here() {
     let stub = Stub::default();
     let down = Stub { down: true, ..Default::default() };
     let (s, off, broken) = (served(&stub, Some("bobby")), served(&stub, None), served(&down, Some("bobby")));
-    let dec = format!("/decline/{ID}");
     let mut far = from_me("GET", "/needs.json", "", &[]);
     far.peer = Some("10.0.0.9".parse().unwrap());
     let cases: Vec<(&str, &Site, Request)> = vec![
@@ -272,32 +281,10 @@ fn needs_json_and_decline_refuse_all_but_the_one_login() {
         ("cross-site (a page elsewhere reading it)", &s, from_me("GET", "/needs.json", "", &[("Sec-Fetch-Site", Some("cross-site"))])),
         ("posted to", &s, from_me("POST", "/needs.json", "{}", &[])),
         ("chitin can't list them: 502, and why", &broken, from_me("GET", "/needs.json", "", &[])),
-        ("decline: got, not posted", &s, from_me("GET", &dec, "", &[])),
-        ("decline: without --needs-as", &off, from_me("POST", &dec, "{}", &[])),
-        ("decline: another login", &s, from_me("POST", &dec, "{}", &[("Tailscale-User-Login", Some("eve@example.com"))])),
-        ("decline: cross-site", &s, from_me("POST", &dec, "{}", &[("Sec-Fetch-Site", Some("cross-site"))])),
         (
-            "decline: no Sec-Fetch-Site, another Origin",
+            "no unsigned decline: a POST to decline/<id> is a read-only server's 405, and chitin is not run",
             &s,
-            from_me("POST", &dec, "{}", &[("Sec-Fetch-Site", None), ("Origin", Some("https://evil.example"))]),
-        ),
-        (
-            "decline: a form (a cross-site form could send one): JSON only",
-            &s,
-            from_me("POST", &dec, "x=1", &[("Content-Type", Some("application/x-www-form-urlencoded"))]),
-        ),
-        ("decline: not an intent id", &s, from_me("POST", "/decline/..%2Fetc", "{}", &[])),
-        ("decline: an id chitin would not make", &s, from_me("POST", "/decline/0123456789AB", "{}", &[])),
-        ("decline: declined already", &s, from_me("POST", "/decline/bbbbbbbbbbbb", "{}", &[])),
-        ("decline: expired", &s, from_me("POST", "/decline/cccccccccccc", "{}", &[])),
-        ("decline: another title's intent", &s, from_me("POST", "/decline/dddddddddddd", "{}", &[])),
-        ("decline: no such intent", &s, from_me("POST", "/decline/abcabcabcabc", "{}", &[])),
-        ("decline: chitin can't list them, so nothing is declined", &broken, from_me("POST", &dec, "{}", &[])),
-        ("decline: one that waits for the title, declined", &s, from_me("POST", &dec, "{}", &[])),
-        (
-            "decline: no Sec-Fetch-Site, its own Origin (an older browser)",
-            &s,
-            from_me("POST", &dec, "{}", &[("Sec-Fetch-Site", None), ("Origin", Some("https://phobos.example.ts.net"))]),
+            from_me("POST", &format!("/decline/{ID}"), "{}", &[]),
         ),
     ];
     let got: Vec<Value> = cases
@@ -320,9 +307,9 @@ fn needs_json_and_decline_refuse_all_but_the_one_login() {
             })
         })
         .collect();
-    let declined: Vec<String> = stub.calls.lock().unwrap().iter().filter(|c| c.starts_with("decline")).cloned().collect();
-    assert_eq!(declined, [format!("decline {ID}"), format!("decline {ID}")], "chitin declined only what passed every check");
-    assert!(down.calls.lock().unwrap().iter().all(|c| !c.starts_with("decline")));
+    // chitin was only ever read, and only for what passed every check
+    assert_eq!(*stub.calls.lock().unwrap(), ["pending --as bobby", "pending --as bobby"]);
+    assert_eq!(*down.calls.lock().unwrap(), ["pending --as bobby"]);
     bless_or_hold("serve.json", &Value::Array(got));
     for site in [s, off, broken] {
         let _ = fs::remove_dir_all(&site.root);

@@ -52,13 +52,13 @@
 // derives the DOM from that tree alone; this file only routes, follows the data and moves the cursor.
 // Keys are Allie's (vim): j/k move, l or Enter goes in, h goes back out; ]] and [[ go to the next and previous fold beside this one
 // (the next group from a group, the next item from an item: vim's section motions); Enter on a fold with no rows to go into runs its
-// first act (a Needs-you item's passkey, or its ack): the rotor's action.
+// first act (a Needs-you item's Approve, or its ack): the rotor's first action. Decline is the item's second act, its own button.
 // As a deck (#slides/<path>, or a page whose folds say present "slides" opened with no path) the same fold is a slide: → and ← go to
 // the next and previous slide in reading order; l or Enter still goes into the point under the cursor, h back out.
 import { core } from "./fold-core.js";
 import { toDom, liveLine } from "./fold-dom.js";
 import { at, beside, dataOf, docId, haecceityOf, href as link, modeOf, open, pathOf, since, viewOf } from "./view.js";
-import { approve, decline, intentOk, readNeeds } from "./sign.js";
+import { ENDPOINTS, intentOk, readNeeds, sign } from "./sign.js";
 import { embed } from "./clax.js";
 const zone = Intl.DateTimeFormat().resolvedOptions().timeZone;
 const meta = document.querySelector('meta[name="fold-data"]');
@@ -153,7 +153,7 @@ addEventListener("hashchange", () => {
   if (needsUrl && pathOf(location.hash)[0] === "needs") load().then((changed) => { if (changed) render(false); });
 });
 // An act on an intent (src/ax.rs act_form: data-intent, data-call), taken here; every other act submits natively (allie-lead 968825b4).
-// The passkey runs against chitin-approve (sign.js), its words from the challenge; the decline posts to fold serve. Either way, what
+// Both are passkey verdicts (BRIEF addendum 1), run against chitin-approve (sign.js), their words from the challenge. Either way, what
 // waits is read again, and an item that has gone takes you back to its group, where what was done is said.
 document.addEventListener("submit", async (e) => {
   const f = e.target, id = f?.dataset?.intent, call = f?.dataset?.call;
@@ -163,11 +163,10 @@ document.addEventListener("submit", async (e) => {
   const at = pathOf(location.hash), tell = (m) => { const s = document.getElementById("did"); if (s) s.textContent = m; };
   f.setAttribute("aria-busy", "true");
   let r;
-  if (call === "approve") {
+  if (Object.hasOwn(ENDPOINTS, call)) {
     const shown = (live?.needs?.waiting ?? []).find((w) => w.id === id);
-    r = shown ? await approve(id, { to: shown.to, text: shown.text }, { say: tell }) : { ok: false, changed: true, said: "Not signed: this isn't waiting for you now." };
-  } else if (call === "decline") r = await decline(id, new URL(`decline/${id}`, document.baseURI).href);
-  else { f.removeAttribute("aria-busy"); return; }
+    r = shown ? await sign(id, call, { to: shown.to, text: shown.text }, { say: tell }) : { ok: false, changed: true, said: "Nothing was signed: this isn't waiting for you now." };
+  } else { f.removeAttribute("aria-busy"); return; }
   f.removeAttribute("aria-busy");
   if (!r.ok && !r.changed) { tell(r.said); return; }
   await load();

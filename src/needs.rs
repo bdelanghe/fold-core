@@ -6,10 +6,11 @@
 //! - **Waiting:** each intent `chitin pending --as <title> --json` lists that is queued as the title, neither declined nor expired,
 //!   with a 12-hex id (chitin's pending.ts `ID`), a recipient and its text ([`waiting`]). The text shown here is for reading it;
 //!   what is signed is shown again from chitin-approve's own challenge, the answer the passkey signs (viewer/sign.js).
-//! - **An item** is sign.ts's (home programs/fleet-map), so its fold has the producer's id (`needs/sign-<id>`), with two acts: its
-//!   passkey (`webauthn`/`approve`, the one authority barrier, and the item's first act: Enter and the rotor's action run it) and a
-//!   decline (`intent`/`decline`, unsigned: RECOMMEND decision 1). Both are named by the intent alone ([`intent_of`]); the endpoints
-//!   are built from that id, never read from a document.
+//! - **An item** is sign.ts's (home programs/fleet-map), so its fold has the producer's id (`needs/sign-<id>`), with two acts, both
+//!   the passkey (`webauthn`), each a verdict on the item (BRIEF addendum 1, Bobby: "we should add a decline with passkey in the
+//!   approval flow"): Approve (`approve`, the item's first act: Enter and the rotor's first action run it) and Decline (`decline`,
+//!   its second). chitin-approve binds each assertion to its verdict and the item's h, so one can't be replayed as the other. Both
+//!   are named by the intent alone ([`intent_of`]); the endpoints are built from that id, never read from a document.
 //! - **The overlay** takes the producer's sign items out of the Needs-you section and puts the live ones first, in a titled group,
 //!   "Approvals" (a fold of its own: its heading is the rotor's group heading, `]]`/`[[` step to it). When the live read failed, the
 //!   group says why and holds nothing to sign, so a stale page never offers a signature. The other items stay where the producer
@@ -31,13 +32,20 @@ pub fn intent_ok(id: &str) -> bool {
     id.len() == 12 && id.bytes().all(|b| b.is_ascii_digit() || (b'a'..=b'f').contains(&b))
 }
 
-/// chitin-approve's two endpoints for one intent (its PROTOCOL.md: `GET /approve/v1/challenge/<id>`, `POST …/assertion/<id>`).
-pub fn challenge_url(id: &str) -> String {
-    format!("/approve/v1/challenge/{id}")
+/// chitin-approve's endpoints for one verdict on one intent: the challenge (GET) and where its assertion is posted. Approve is its
+/// PROTOCOL.md's `/approve/v1/challenge/<id>` and `…/assertion/<id>`; decline is addendum 1's `/approve/v1/decline/<id>`, "the same
+/// challenge/assertion flow", so GET for its challenge and POST for its assertion at the one path. viewer/sign.js `ENDPOINTS` is
+/// the same table.
+pub fn endpoints(id: &str, verdict: &str) -> Option<(String, String)> {
+    match verdict {
+        "approve" => Some((format!("/approve/v1/challenge/{id}"), format!("/approve/v1/assertion/{id}"))),
+        "decline" => Some((format!("/approve/v1/decline/{id}"), format!("/approve/v1/decline/{id}"))),
+        _ => None,
+    }
 }
-pub fn assertion_url(id: &str) -> String {
-    format!("/approve/v1/assertion/{id}")
-}
+
+/// The two verdicts a Needs-you item takes, in its acts' order: Enter runs the first.
+pub const VERDICTS: [(&str, &str); 2] = [("approve", "Approve with passkey"), ("decline", "Decline with passkey")];
 
 fn text<'a>(o: &'a Value, k: &str) -> Option<&'a str> {
     o.get(k).and_then(Value::as_str)
@@ -92,39 +100,39 @@ pub fn item(w: &Value, now_ms: i64) -> Value {
     m.insert("text".into(), text(w, "text").unwrap_or("").into());
     m.insert("quoted".into(), true.into());
     m.insert("why".into(), format!("Waits for your signature. Queued by {by}; intent {id}{hash}.").into());
-    m.insert("action".into(), "Approve with your passkey, or decline it.".into());
+    m.insert("action".into(), "Approve or decline it with your passkey.".into());
     // when it was queued: chitin's own time, so the item reads the same on every read; else its age at `now_ms`, as sign.ts
     let queued =
         text(w, "created_at").and_then(|c| chrono::DateTime::parse_from_rfc3339(c).ok()).and_then(|t| iso_ms(t.timestamp_millis()));
     if let Some(at) = queued.or_else(|| w.get("age_s").and_then(Value::as_f64).and_then(|s| iso_ms(now_ms - (s * 1000.0).round() as i64))) {
         m.insert("at".into(), at.into());
     }
-    m.insert(
-        "act".into(),
-        json!({ "cap": "webauthn", "call": "approve", "label": "Approve with passkey",
-            "args": { "challenge": challenge_url(id), "assertion": assertion_url(id) } }),
-    );
-    m.insert("acts".into(), json!([{ "cap": "intent", "call": "decline", "label": "Decline", "args": { "intent": id } }]));
+    let act = |(verdict, label): (&str, &str)| {
+        let (c, a) = endpoints(id, verdict).unwrap_or_default();
+        json!({ "cap": "webauthn", "call": verdict, "label": label, "args": { "challenge": c, "assertion": a } })
+    };
+    m.insert("act".into(), act(VERDICTS[0]));
+    m.insert("acts".into(), json!([act(VERDICTS[1])]));
     Value::Object(m)
 }
 
-/// The intent an act is on, and its verb, when it is one of the two this module makes: the passkey (`webauthn` or `approve`, its
-/// args the two endpoints of one intent) or the decline (`intent`/`decline`, `args.intent`). None for anything else, so no other
-/// act's args can point the ceremony anywhere.
+/// The intent an act is on, and its verdict, when it is one this module makes: the passkey (`webauthn`, or `approve` as sign.ts's
+/// older cap) whose call is a verdict ([`VERDICTS`]; an `approve` cap's call may be `sign`) and whose args are exactly that
+/// verdict's two endpoints for one intent. None for anything else, so no other act's args can point the ceremony anywhere.
 pub fn intent_of(act: &Value) -> Option<(String, &'static str)> {
     let cap = text(act, "cap")?.trim();
-    let args = act.get("args")?;
-    match cap {
-        "webauthn" | "approve" => {
-            let c = text(args, "challenge")?.strip_prefix("/approve/v1/challenge/")?;
-            let a = text(args, "assertion")?.strip_prefix("/approve/v1/assertion/")?;
-            (c == a && intent_ok(c)).then(|| (c.to_string(), "approve"))
-        }
-        "intent" if text(act, "call").map(str::trim) == Some("decline") => {
-            text(args, "intent").filter(|i| intent_ok(i)).map(|i| (i.to_string(), "decline"))
-        }
-        _ => None,
+    if cap != "webauthn" && cap != "approve" {
+        return None;
     }
+    let verdict = match text(act, "call").map(str::trim) {
+        Some("decline") => "decline",
+        Some("approve") | Some("sign") => "approve",
+        _ => return None,
+    };
+    let args = act.get("args")?;
+    let c = text(args, "challenge")?;
+    let id = c.rsplit('/').next().filter(|i| intent_ok(i))?;
+    (endpoints(id, verdict)? == (c.to_string(), text(args, "assertion")?.to_string())).then(|| (id.to_string(), verdict))
 }
 
 /// What the live read gave: the waiting intents, or why there are none to show.

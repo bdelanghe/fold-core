@@ -1,17 +1,24 @@
-// The sign act, in the page (BRIEF-stint-2026-11-02-approve-into-fold; RECOMMEND-consultant-2026-11-01-reversible-no-approval-and-
-// sign-in-basis S3b): a Needs-you item's passkey runs here, against chitin-approve's own API, unchanged (its PROTOCOL.md):
-//   GET  /approve/v1/challenge/<id>  -> {ok, intent: {to, text, …}, frame: {hash, …}, publicKey}
-//   POST /approve/v1/assertion/<id>  -> {ok, message} | {ok: false, reason}
-// Find/Say/Do: signing is the Do barrier. What is signed is never read from the document the page folds: the text, the recipient
-// and the hash said before the passkey are the challenge's own, the answer the passkey signs, and the ceremony stops when they are
-// not what the item showed. The endpoints are built from the intent's id (12 hex, chitin's), never taken from a document. The
-// seats verify the assertion themselves; nothing here holds a key.
-// The decline is fold serve's (src/serve.rs `decline`): unsigned, as declining narrows.
+// The sign acts, in the page (BRIEF-stint-2026-11-02-approve-into-fold and its addendum 1; RECOMMEND-consultant-2026-11-01-reversible-
+// no-approval-and-sign-in-basis S3b): a Needs-you item's two verdicts, Approve and Decline, are each a passkey, run here against
+// chitin-approve's own API (its PROTOCOL.md; the decline is addendum 1's, "the same challenge/assertion flow"):
+//   approve: GET /approve/v1/challenge/<id>, POST /approve/v1/assertion/<id>
+//   decline: GET /approve/v1/decline/<id>,   POST /approve/v1/decline/<id>
+// Each challenge answers {ok, intent: {id, to, text, text_hash?}, frame?: {hash}, verdict?, publicKey}; an assertion {ok, message} or
+// {ok: false, reason}. chitin binds each assertion to its verdict and the item's h, so one can't be replayed as the other.
+// Find/Say/Do: signing is the Do barrier. What is signed is never read from the document the page folds: the verdict, recipient,
+// text and h said before the passkey are the challenge's own, the answer the passkey signs, and the ceremony stops when they are not
+// what the item showed, or when a decline's challenge does not say it is one. The endpoints are built from the intent's id (12 hex,
+// chitin's), never taken from a document. The seats (and chitin, for a decline) verify the assertion; nothing here holds a key.
 
 /** chitin's intent id (pending.ts `ID`). */
 export const intentOk = (id) => typeof id === "string" && /^[0-9a-f]{12}$/.test(id);
-export const challengeUrl = (id) => `/approve/v1/challenge/${id}`;
-export const assertionUrl = (id) => `/approve/v1/assertion/${id}`;
+/** Each verdict's challenge and assertion paths (src/needs.rs `endpoints`: the same table). */
+export const ENDPOINTS = {
+  approve: (id) => [`/approve/v1/challenge/${id}`, `/approve/v1/assertion/${id}`],
+  decline: (id) => [`/approve/v1/decline/${id}`, `/approve/v1/decline/${id}`],
+};
+const DONE = { approve: (to) => `Sent to ${to}.`, decline: () => "Declined." };
+const VERB = { approve: "Approving", decline: "Declining" };
 
 /** base64url to bytes, and bytes to base64url (chitin-approve's page's `dec`/`enc`). */
 export const dec = (s) => { const b = atob(s.replace(/-/g, "+").replace(/_/g, "/") + "===".slice((s.length + 3) % 4)); const u = new Uint8Array(b.length); for (let i = 0; i < b.length; i++) u[i] = b.charCodeAt(i); return u.buffer; };
@@ -32,41 +39,38 @@ async function again(send, also, wait) {
 /** Why a ceremony stopped, in words. */
 export const why = (e) => (e && e.name === "NotAllowedError") ? "the passkey was cancelled or timed out" : typeof e === "string" ? e : (e && e.message) || String(e);
 
+/** The item's h, as the challenge gives it: its frame's hash (approve), else the intent's text hash. */
+const hOf = (c) => (typeof c.frame?.hash === "string" ? c.frame.hash : typeof c.intent?.text_hash === "string" ? c.intent.text_hash : null);
+
 /**
- * Approve one intent with the passkey. `shown` is what the item showed ({to, text}); `say(line)` is told each step, the challenge's
- * own words before the passkey is asked. Resolves to {ok: true, said} or {ok: false, said}. Nothing is signed when the challenge's
- * intent is not the one shown.
+ * One verdict on one intent with the passkey: `verdict` is "approve" or "decline". `shown` is what the item showed ({to, text});
+ * `say(line)` is told the challenge's own words before the passkey is asked. Resolves to {ok: true, said} or {ok: false, said,
+ * changed?}. Nothing is signed when the challenge's intent is not the one shown, or its verdict is not the one asked for.
  */
-export async function approve(id, shown, { fetch = globalThis.fetch, credentials = globalThis.navigator?.credentials, say = () => {}, wait = (ms) => new Promise((z) => setTimeout(z, ms)) } = {}) {
-  if (!intentOk(id)) return { ok: false, said: "Not signed: that is not an intent." };
+export async function sign(id, verdict, shown, { fetch = globalThis.fetch, credentials = globalThis.navigator?.credentials, say = () => {}, wait = (ms) => new Promise((z) => setTimeout(z, ms)) } = {}) {
+  const not = verdict === "decline" ? "Not declined" : "Not signed";
+  if (typeof verdict !== "string" || !Object.hasOwn(ENDPOINTS, verdict)) return { ok: false, said: "Not signed: that is not a verdict." };
+  if (!intentOk(id)) return { ok: false, said: `${not}: that is not an intent.` };
+  const [challenge, assertion] = ENDPOINTS[verdict](id);
   try {
-    const c = await again(() => fetch(challengeUrl(id), { cache: "no-store" }), 504, wait);
+    const c = await again(() => fetch(challenge, { cache: "no-store" }), 504, wait);
     if (!c.ok) throw c.reason ?? "the challenge was refused";
-    const it = c.intent ?? {}, hash = c.frame?.hash;
+    // a decline's challenge must say it is one (addendum 1's binding); an approve's may say so, and may not say otherwise
+    if (verdict === "decline" ? c.verdict !== "decline" : c.verdict !== undefined && c.verdict !== "approve") throw `the challenge is not for ${verdict === "decline" ? "a decline" : "an approval"}`;
+    const it = c.intent ?? {}, h = hOf(c);
     if (it.id !== undefined && it.id !== id) throw "the challenge is for another intent";
-    if (typeof it.text !== "string" || typeof it.to !== "string" || typeof hash !== "string") throw "the challenge did not say what it signs";
-    if (it.to !== shown?.to || it.text !== shown?.text) return { ok: false, changed: true, said: `Not signed: this changed since you opened it. Read it again: to ${it.to}, “${it.text}”.` };
-    say(`Signing for ${it.to}, #${hash}: “${it.text}”. Your passkey asks next.`);
+    if (typeof it.text !== "string" || typeof it.to !== "string" || !h) throw "the challenge did not say what it signs";
+    if (it.to !== shown?.to || it.text !== shown?.text) return { ok: false, changed: true, said: `${not}: this changed since you opened it. Read it again: to ${it.to}, “${it.text}”.` };
+    say(`${VERB[verdict]} for ${it.to}, #${h}: “${it.text}”. Your passkey asks next.`);
     const pk = c.publicKey;
     const cred = await credentials.get({ publicKey: { challenge: dec(pk.challenge), rpId: pk.rpId, allowCredentials: (pk.allowCredentials ?? []).map((x) => ({ type: "public-key", id: dec(x.id) })), userVerification: "required", timeout: pk.timeout } });
     const r = cred.response;
     const body = { id: cred.id, rawId: enc(cred.rawId), type: cred.type, response: { clientDataJSON: enc(r.clientDataJSON), authenticatorData: enc(r.authenticatorData), signature: enc(r.signature), userHandle: r.userHandle ? enc(r.userHandle) : null } };
-    const v = await again(() => fetch(assertionUrl(id), { method: "POST", cache: "no-store", headers: { "content-type": "application/json" }, body: JSON.stringify(body) }), 0, wait);
+    const v = await again(() => fetch(assertion, { method: "POST", cache: "no-store", headers: { "content-type": "application/json" }, body: JSON.stringify(body) }), 0, wait);
     if (!v.ok) throw v.reason ?? "the assertion was refused";
-    return { ok: true, said: `Sent to ${it.to}.${v.message ? ` ${v.message}` : ""}` };
+    return { ok: true, said: `${DONE[verdict](it.to)}${v.message ? ` ${v.message}` : ""}` };
   } catch (e) {
-    return { ok: false, said: `Not signed: ${why(e)}.` };
-  }
-}
-
-/** Decline one intent: fold serve's `decline/<id>` (`url` is it, under the viewer's mount), as JSON. */
-export async function decline(id, url, { fetch = globalThis.fetch } = {}) {
-  if (!intentOk(id)) return { ok: false, said: "Not declined: that is not an intent." };
-  try {
-    const v = await answerOf(await fetch(url, { method: "POST", cache: "no-store", headers: { "content-type": "application/json" }, body: "{}" }));
-    return v.ok ? { ok: true, said: `Declined. ${v.message ?? ""}`.trim() } : { ok: false, said: `Not declined: ${v.reason ?? "refused"}.` };
-  } catch (e) {
-    return { ok: false, said: `Not declined: ${why(e)}.` };
+    return { ok: false, said: `${not}: ${why(e)}.` };
   }
 }
 

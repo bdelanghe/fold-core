@@ -16,6 +16,6 @@ in: Everything › Needs you › Approvals
 # To personal-assistant
 Route the plan to the hubs.
 Fri 11:57
-What to do: Approve with your passkey, or decline it.
+What to do: Approve or decline it with your passkey.
 Waits for your signature. Queued by claude-break-glass; intent 0123456789ab, text hash deadbeefcafe.
-act: Approve with passkey [approve 0123456789ab] · Decline [decline 0123456789ab]
+act: Approve with passkey [approve 0123456789ab] · Decline with passkey [decline 0123456789ab]

@@ -4,9 +4,8 @@
 # tailscale serve's headers, read the ack form's token, and POST it: 303 to the fold with did=ack&as=ok, and the stub saw exactly
 # one ack. The same POST again: 303 as=already. A typed say (Bobby 07c5f8dc) the same way: its line sent once, as one argument, and
 # never logged. After the act map changes under the page: 409, and nothing more is sent. At the end the key and the act log are 0600.
-# Then Needs you read live (--needs-as, src/needs.rs): needs.json lists the stub's waiting intent, never stored; a decline from
-# another login, cross-site, as a form, or of an intent that isn't waiting is refused and declines nothing; the one that waits is
-# declined once, and needs.json no longer lists it.
+# Then Needs you read live (--needs-as, src/needs.rs): needs.json lists the stub's waiting intent, never stored, and is refused to
+# another login; a decline posted here is refused unread (413), since a decline is a passkey verdict at chitin-approve, and chitin is not run.
 set -euo pipefail
 fold=$1 src=$2
 work=$(mktemp -d)
@@ -23,7 +22,7 @@ case "$1" in
     if [ -f "$STUB_RECORD.declined" ]; then echo '[]'; else
       echo '[{"id":"0123456789ab","as":"bobby","to":"personal-assistant","text":"Route the plan.","text_hash":"deadbeefcafe","age_s":5,"queued_by":"stub","declined":false,"expired":false},{"id":"bbbbbbbbbbbb","as":"bobby","to":"seat-b","text":"x","declined":true,"expired":false}]'; fi
     exit 0 ;;
-  decline) echo "$*" >> "$STUB_RECORD.needs"; touch "$STUB_RECORD.declined"; echo "$2 declined"; exit 0 ;;
+  decline) echo "$*" >> "$STUB_RECORD.needs"; echo "$2 declined"; exit 0 ;;
 esac
 echo "$*" >> "$STUB_RECORD"
 if [ "$(grep -cxF -- "$*" "$STUB_RECORD")" -gt 1 ]; then echo "refused: already acting"; exit 1; fi
@@ -99,19 +98,9 @@ grep -qi '^cache-control: no-store' "$work/needs.h" || fail "needs.json may be s
 grep -qi '^etag' "$work/needs.h" && fail "needs.json has a validator"
 code=$(curl -sS -o /dev/null -w '%{http_code}' -H "Tailscale-User-Login: eve@example.com" -H "X-Forwarded-Proto: https" -H "X-Forwarded-Host: $host" -H "Sec-Fetch-Site: same-origin" "$base/needs.json")
 [ "$code" = 403 ] || fail "needs.json for another login: $code"
-dec() { curl -sS -o "$work/dec.out" -w '%{http_code}' "$@"; }
-j=(-H "Content-Type: application/json" --data '{}')
-[ "$(dec -H "Tailscale-User-Login: eve@example.com" -H "X-Forwarded-Proto: https" -H "X-Forwarded-Host: $host" -H "Sec-Fetch-Site: same-origin" "${j[@]}" "$base/decline/0123456789ab")" = 403 ] || fail "a decline from another login"
-[ "$(dec -H "Tailscale-User-Login: $login" -H "X-Forwarded-Proto: https" -H "X-Forwarded-Host: $host" -H "Sec-Fetch-Site: cross-site" "${j[@]}" "$base/decline/0123456789ab")" = 403 ] || fail "a cross-site decline"
-[ "$(dec "${serve[@]}" --data "x=1" "$base/decline/0123456789ab")" = 415 ] || fail "a decline as a form"
-[ "$(dec "${serve[@]}" "${j[@]}" "$base/decline/bbbbbbbbbbbb")" = 409 ] || fail "a decline of one already declined: $(cat "$work/dec.out")"
-grep -q '^decline' "$STUB_RECORD.needs" && fail "chitin declined after a refusal: $(cat "$STUB_RECORD.needs")"
-[ "$(dec "${serve[@]}" "${j[@]}" "$base/decline/0123456789ab")" = 200 ] || fail "the decline: $(cat "$work/dec.out")"
-grep -q '"ok":true' "$work/dec.out" || fail "the decline said: $(cat "$work/dec.out")"
-[ "$(grep -c '^decline' "$STUB_RECORD.needs")" = 1 ] || fail "chitin declined: $(cat "$STUB_RECORD.needs")"
-grep -qx 'decline 0123456789ab' "$STUB_RECORD.needs" || fail "chitin declined: $(cat "$STUB_RECORD.needs")"
-body=$(needs "${serve[@]}")
-echo "$body" | grep -q '"waiting":\[\]' || fail "needs.json after the decline: $body"
-grep -q '"decline":"0123456789ab".*"result":"ok"' "$work/state/acts.jsonl" || fail "the decline left no log line: $(cat "$work/state/acts.jsonl")"
+# no unsigned decline: a decline is the passkey's, at chitin-approve (BRIEF addendum 1), so this server has no route for one
+code=$(curl -sS -o /dev/null -w '%{http_code}' "${serve[@]}" -H "Content-Type: application/json" --data '{}' "$base/decline/0123456789ab")
+[ "$code" = 413 ] || fail "a decline posted here: $code (no route takes a body there, so it is refused unread)"
+grep -q '^decline' "$STUB_RECORD.needs" && fail "chitin declined: $(cat "$STUB_RECORD.needs")"
 grep -qF "Route the plan" "$work/state/acts.jsonl" "$work/serve.log" && fail "an intent's text was logged"
-echo "act-e2e: ok (303 ok, 303 already, a say sent once and a non-ASCII one refused, 409 changed; key and log 0600; no token or line logged; needs.json live and never stored, a decline refused four ways and done once)"
+echo "act-e2e: ok (303 ok, 303 already, a say sent once and a non-ASCII one refused, 409 changed; key and log 0600; no token or line logged; needs.json live and never stored, no unsigned decline)"
