@@ -10,6 +10,9 @@
 <!-- The data this viewer folds: one JSON document from a data origin the app is not served by (COGNITIVE-BROWSER-SDK-2026-10-30). -->
 <meta name="fold-data" content="/fold-data/fleet/page.json" data-source="fleet-map">
 <meta name="fold-live" content="/live" data-seat="personal-super-human">
+<!-- Needs you, read live (src/needs.rs, BRIEF-stint-2026-11-02-approve-into-fold): fold serve's needs.json, beside this page, for the
+     document whose source it names. Read on open, on going into Needs you, with each refresh and after each act on an intent. -->
+<meta name="fold-needs" content="needs.json" data-source="fleet-map">
 <!-- Clax, through @empathic/clax-sdk only (basis-clax goal): the instance's /_clax/overlay.js, as fold serve passes it through on
      this origin (clax/overlay.js, src/report.rs: the instance sends no CORS header, so a pinned script must be same-origin), with the
      SDK's version and the SRI digest of the instance's bytes. Never copied here. The version is the SDK's (clax Cargo.toml
@@ -34,6 +37,9 @@
 <body>
 <!-- Said when the fold shown is a kept copy (its host did not answer): read with the fold's heading, which describes itself by it. -->
 <p id="stale" class="stale" hidden></p>
+<!-- What an act on an intent did (sign.js), when its item has gone and the fold you are on has no status line of its own: said once,
+     cleared by the next move. A live region from the start, so it is heard when it is filled. -->
+<p id="said" class="stale said" role="status"></p>
 <main><h1 tabindex="-1">Loading…</h1></main>
 <!-- The last region, after the fold (consultant's cold read, RECOMMEND-consultant-2026-11-01-fleet-page-cold-read.md point 6):
      a way to open another document when this one fails. Where the data is from is said on every fold ("Data from …", src/ax.rs). -->
@@ -44,12 +50,15 @@
 // A fold viewer that holds no data: it fetches one JSON document from the data origin (the fold-data meta), folds it here with the
 // core's WebAssembly module, and shows one fold at a time. The core gives each fold's accessibility tree (ax_json); fold-dom.js
 // derives the DOM from that tree alone; this file only routes, follows the data and moves the cursor.
-// Keys are Allie's (vim): j/k move, l or Enter goes in, h goes back out.
+// Keys are Allie's (vim): j/k move, l or Enter goes in, h goes back out; ]] and [[ go to the next and previous fold beside this one
+// (the next group from a group, the next item from an item: vim's section motions); Enter on a fold with no rows to go into runs its
+// first act (a Needs-you item's passkey, or its ack): the rotor's action.
 // As a deck (#slides/<path>, or a page whose folds say present "slides" opened with no path) the same fold is a slide: → and ← go to
 // the next and previous slide in reading order; l or Enter still goes into the point under the cursor, h back out.
 import { core } from "./fold-core.js";
 import { toDom, liveLine } from "./fold-dom.js";
-import { at, dataOf, docId, haecceityOf, href as link, modeOf, open, pathOf, since, viewOf } from "./view.js";
+import { at, beside, dataOf, docId, haecceityOf, href as link, modeOf, open, pathOf, since, viewOf } from "./view.js";
+import { approve, decline, intentOk, readNeeds } from "./sign.js";
 import { embed } from "./clax.js";
 const zone = Intl.DateTimeFormat().resolvedOptions().timeZone;
 const meta = document.querySelector('meta[name="fold-data"]');
@@ -60,6 +69,10 @@ const data = dataOf(location.search, location.href, { path: meta.content, source
 document.getElementById("reading").value = data.path;
 document.getElementById("reading-note").textContent = data.error ? `Not read: ${data.error}` : data.source ? "" : "Named in the address";
 let nodes = new Map(), said = "", node = null, cur = 0, cameFrom = null, last = [], kept = null, clax = null, claxAt = null;
+// Needs you, live: needs.json's URL for the document it is for (none for one named in the address), and its last answer.
+const needsMeta = document.querySelector('meta[name="fold-needs"]');
+const needsUrl = needsMeta?.content && data.source && data.source === needsMeta.dataset.source ? new URL(needsMeta.content, location.href).href : null;
+let live = null, told = null, keyAt = { key: "", t: 0 };
 // Kept (sw.js answered from its copy): the note says since when and how long ago, and the heading is described by it, so a screen
 // reader hears it with the title as the page opens. Fresh again, it goes.
 function stale() {
@@ -98,12 +111,16 @@ function show(focus) {
   cameFrom = last.length > p.length && p.every((x, i) => x === last[i]) ? last[p.length] : null;
   last = p;
   render(focus);
+  document.getElementById("said").textContent = told ?? ""; told = null;
 }
 // The document, folded here. A failed read keeps the folds already shown; with none yet, the root says why.
 async function load() {
   try {
     if (data.error) throw new Error(data.error);
-    const next = await open(fold, data.url, { opts: (modified) => ({ ...(data.source ? { source: data.source } : {}), updated: modified ?? new Date().toISOString(), localTimeZone: zone }), stored: (at) => { kept = at; } });
+    // read beside the document, so it is folded with what waits now: never the producer's sign items (src/needs.rs overlay). Both
+    // at once, so a host asleep costs the one wait, not two.
+    const reading = needsUrl ? readNeeds(needsUrl) : null;
+    const next = await open(fold, data.url, { root: reading ? async (root) => { live = await reading; return needs({ root, ...live, now: Date.now() }); } : undefined, opts: (modified) => ({ ...(data.source ? { source: data.source } : {}), updated: modified ?? new Date().toISOString(), localTimeZone: zone }), stored: (at) => { kept = at; } });
     const text = JSON.stringify([...next]);
     if (text === said) { stale(); return false; }
     nodes = next; said = text; return true;
@@ -115,8 +132,13 @@ async function load() {
 addEventListener("pointerdown", () => document.body.classList.remove("keys"));
 addEventListener("keydown", e => {
   if (e.metaKey || e.ctrlKey || e.altKey || /input|textarea/i.test(e.target.tagName)) return;
+  if (e.key === "Enter" && /^(a|button|select)$/i.test(e.target.tagName)) return; // it does its own thing, once
   const p = pathOf(location.hash), k = node?.kids ?? [], deck = modeOf(location.hash, node) === "slides";
-  if (deck && (e.key === "ArrowRight" || e.key === "ArrowLeft")) { const s = node?.[e.key === "ArrowRight" ? "next" : "prev"]; if (!s) return; location.hash = href(at(s.id)); }
+  const twice = (key) => { const again = keyAt.key === key && performance.now() - keyAt.t < 800; keyAt = again ? { key: "", t: 0 } : { key, t: performance.now() }; return again; };
+  const act = !k.length && e.key === "Enter" ? document.querySelector("main form.act") : null;
+  if (e.key === "]" || e.key === "[") { const to = twice(e.key) && beside(nodes, p, e.key === "]" ? 1 : -1); if (to) location.hash = href(to); }
+  else if (act) act.requestSubmit();
+  else if (deck && (e.key === "ArrowRight" || e.key === "ArrowLeft")) { const s = node?.[e.key === "ArrowRight" ? "next" : "prev"]; if (!s) return; location.hash = href(at(s.id)); }
   else if (e.key === "j" || e.key === "ArrowDown") move(cur + 1);
   else if (e.key === "k" || e.key === "ArrowUp") move(cur - 1);
   else if ((e.key === "l" || e.key === "Enter" || e.key === "ArrowRight") && k[cur]) location.hash = href(k[cur].href?.startsWith("#/") ? pathOf(k[cur].href) : [...p, k[cur].id]); // an in-page row ("back to the top") goes where it says, in the mode you are in
@@ -125,10 +147,40 @@ addEventListener("keydown", e => {
   document.body.classList.add("keys");
   e.preventDefault();
 });
-addEventListener("hashchange", () => show(true));
+addEventListener("hashchange", () => {
+  show(true);
+  // going into Needs you reads what waits again, and shows a change in place
+  if (needsUrl && pathOf(location.hash)[0] === "needs") load().then((changed) => { if (changed) render(false); });
+});
+// An act on an intent (src/ax.rs act_form: data-intent, data-call), taken here; every other act submits natively (allie-lead 968825b4).
+// The passkey runs against chitin-approve (sign.js), its words from the challenge; the decline posts to fold serve. Either way, what
+// waits is read again, and an item that has gone takes you back to its group, where what was done is said.
+document.addEventListener("submit", async (e) => {
+  const f = e.target, id = f?.dataset?.intent, call = f?.dataset?.call;
+  if (!id) return;
+  e.preventDefault();
+  if (!intentOk(id) || f.getAttribute("aria-busy") === "true") return;
+  const at = pathOf(location.hash), tell = (m) => { const s = document.getElementById("did"); if (s) s.textContent = m; };
+  f.setAttribute("aria-busy", "true");
+  let r;
+  if (call === "approve") {
+    const shown = (live?.needs?.waiting ?? []).find((w) => w.id === id);
+    r = shown ? await approve(id, { to: shown.to, text: shown.text }, { say: tell }) : { ok: false, changed: true, said: "Not signed: this isn't waiting for you now." };
+  } else if (call === "decline") r = await decline(id, new URL(`decline/${id}`, document.baseURI).href);
+  else { f.removeAttribute("aria-busy"); return; }
+  f.removeAttribute("aria-busy");
+  if (!r.ok && !r.changed) { tell(r.said); return; }
+  await load();
+  if (nodes.has(docId(at))) { render(false); tell(r.said); return; }
+  // the nearest fold still there: its group, or Needs you when that was the group's last item
+  let up = at.slice(0, -1);
+  while (up.length && !nodes.has(docId(up))) up = up.slice(0, -1);
+  told = r.said;
+  location.hash = href(up);
+});
 // Offline: the shell and the last document read are kept (sw.js), so with the host asleep this page still opens on its last fold.
 navigator.serviceWorker?.register("sw.js").catch(() => {});
-const { fold, ax } = await core(await (await fetch("fold_core.wasm")).arrayBuffer());
+const { fold, ax, needs } = await core(await (await fetch("fold_core.wasm")).arrayBuffer());
 await load();
 // Allie's keys work on arrival: the first render focuses the title, so the page gets the arrow keys without a click first.
 show(true);

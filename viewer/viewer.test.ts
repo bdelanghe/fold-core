@@ -7,12 +7,13 @@ import { readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { core } from "../js/fold-core.ts";
 import { toDom } from "./fold-dom.js";
-import { at, dataOf, haecceityOf, href, open, pathOf, segmentOf, since, viewOf } from "./view.js";
+import { at, beside, dataOf, haecceityOf, href, open, pathOf, segmentOf, since, viewOf } from "./view.js";
+import { approve, assertionUrl, challengeUrl, dec, decline, enc, readNeeds } from "./sign.js";
 import { aboutOf, contextOf, embed, flagUnnamed, pinOf, reportToken } from "./clax.js";
 
 const goldens = join(import.meta.dir, "..", "goldens");
 const wasm = process.env.FOLD_CORE_WASM ?? join(import.meta.dir, "..", "target", "wasm32-unknown-unknown", "release", "fold_core.wasm");
-const { fold, walk, ax } = await core(readFileSync(wasm));
+const { fold, walk, ax, needs } = await core(readFileSync(wasm));
 const read = (...p: string[]) => JSON.parse(readFileSync(join(...p), "utf8"));
 const cases = readdirSync(goldens).filter((f) => f.endsWith(".input.json")).map((f) => f.replace(/\.input\.json$/, "")).sort();
 
@@ -237,4 +238,108 @@ test("a kept copy is said as not updated since its time, and how long ago", asyn
   expect(since("2026-10-31T16:59:30Z", now, "UTC")).toBe("Not updated since 16:59, less than a minute ago.");
   expect(since("2026-10-31T16:20:00Z", now, "UTC")).toBe("Not updated since 16:20, 40 minutes ago.");
   expect(since("2026-10-27T09:00:00Z", now, "UTC")).toBe("Not updated since Tue 27 Oct at 09:00, 4 days ago.");
+});
+
+// Needs you, live (src/needs.rs, goldens/needs/overlay.json): the module's needs entry is the core's overlay, and the viewer folds the
+// document it gives; the live item's two acts are forms naming the intent, and ]] [[ step between the folds beside one.
+test("needs: the overlay through the module is the golden, and the viewer folds it to Approvals' item with its two acts", async () => {
+  const cases = read(goldens, "needs", "overlay.json");
+  for (const c of cases) expect(JSON.stringify(needs(c.input))).toBe(JSON.stringify(c.root));
+  const live = cases[0].input, body = JSON.stringify(live.root);
+  const nodes = await open(fold, "https://data.test/page.json", { fetch: async () => new Response(body), opts: () => ({ localTimeZone: "UTC" }),
+    root: (root: unknown) => needs({ root, needs: live.needs, now: live.now }) });
+  const at = ["needs", "approvals", "needs-sign-0123456789ab"];
+  expect(nodes.has(at.join("~"))).toBe(true);
+  expect([...nodes.keys()].some((k) => k.includes("999999999999"))).toBe(false);
+  const els = all(toDom(doc, viewOf(ax, nodes, href(at, "folds"), "UTC").tree) as El);
+  expect(els.filter((e) => e.tag === "form").map((e) => [e.attrs["aria-label"], e.attrs.method, e.attrs.action, e.attrs["data-intent"], e.attrs["data-call"]])).toEqual([
+    ["Approve with passkey", "get", "", "0123456789ab", "approve"],
+    ["Decline", "post", "decline/0123456789ab", "0123456789ab", "decline"],
+  ]);
+  // ]] and [[: path arithmetic over the parent's folds, null at either end, at the root, and onto a row that is a link
+  expect(beside(nodes, ["needs", "approvals"], 1)).toEqual(["needs", "needs-ask-0"]);
+  expect(beside(nodes, ["needs", "needs-ask-0"], -1)).toEqual(["needs", "approvals"]);
+  expect(beside(nodes, at, 1)).toEqual(["needs", "approvals", "needs-sign-0a0a0a0a0a0a"]);
+  expect(beside(nodes, at, -1)).toBeNull();
+  expect(beside(nodes, ["needs"], 1)).toEqual(["agents"]);
+  expect(beside(nodes, [], 1)).toBeNull();
+  expect(beside(new Map([["root", { kids: [{ id: "a" }, { id: "top", href: "#/" }] }]]), ["a"], 1)).toBeNull();
+});
+
+/** chitin-approve, faked: its challenge for one intent and its assertion, recording every call in order. */
+function gateway(intent: { id: string; to: string; text: string }, { challenge = [200], assertion = [200], refuse = "" } = {}) {
+  const calls: string[] = [];
+  const fetch = async (url: string, init?: RequestInit) => {
+    const post = init?.method === "POST";
+    calls.push(`${post ? "POST" : "GET"} ${url}${post ? " " + init!.body : ""}`);
+    const status = (post ? assertion : challenge).shift() ?? 200;
+    if (status !== 200) return new Response(JSON.stringify({ ok: false, reason: `status ${status}` }), { status });
+    if (refuse) return new Response(JSON.stringify({ ok: false, reason: refuse }), { status: 409 });
+    return new Response(JSON.stringify(post ? { ok: true, message: "written m-9", outcome: "written" }
+      : { ok: true, intent: { ...intent, as: "bobby" }, frame: { hop: intent.to, hash: "f00dfeed", iat: "x" },
+          publicKey: { challenge: enc(new Uint8Array([1, 2, 3]).buffer), rpId: "phobos.test", allowCredentials: [{ type: "public-key", id: enc(new Uint8Array([9]).buffer) }], timeout: 60000 } }));
+  };
+  const credentials = { get: async (o: any) => {
+    calls.push(`passkey ${new Uint8Array(o.publicKey.challenge).join(",")} ${o.publicKey.rpId} ${o.publicKey.userVerification} ${new Uint8Array(o.publicKey.allowCredentials[0].id).join(",")}`);
+    const b = (n: number) => new Uint8Array([n]).buffer;
+    return { id: "cred", rawId: b(9), type: "public-key", response: { clientDataJSON: b(1), authenticatorData: b(2), signature: b(3), userHandle: null } };
+  } };
+  return { calls, fetch: fetch as unknown as typeof globalThis.fetch, credentials, wait: async () => {} };
+}
+
+test("sign: the passkey signs only the challenge's own intent, said before it asks, at endpoints built from the id", async () => {
+  const id = "0123456789ab", it = { id, to: "personal-assistant", text: "Route the plan." };
+  expect([challengeUrl(id), assertionUrl(id)]).toEqual(["/approve/v1/challenge/0123456789ab", "/approve/v1/assertion/0123456789ab"]);
+  expect(new Uint8Array(dec(enc(new Uint8Array([0, 250, 255]).buffer)))).toEqual(new Uint8Array([0, 250, 255]));
+  // the one path that signs: the challenge, its words said, the passkey, the assertion
+  let g = gateway(it), said: string[] = [];
+  const say = (m: string) => { said.push(m); g.calls.push("said"); };
+  expect(await approve(id, { to: it.to, text: it.text }, { ...g, say })).toEqual({ ok: true, said: "Sent to personal-assistant. written m-9" });
+  expect(g.calls.map((c) => c.split(" {")[0])).toEqual(["GET /approve/v1/challenge/0123456789ab", "said", "passkey 1,2,3 phobos.test required 9", "POST /approve/v1/assertion/0123456789ab"]);
+  expect(said).toEqual(["Signing for personal-assistant, #f00dfeed: “Route the plan.”. Your passkey asks next."]);
+  expect(JSON.parse(g.calls[3].slice(g.calls[3].indexOf("{")))).toEqual({ id: "cred", rawId: "CQ", type: "public-key", response: { clientDataJSON: "AQ", authenticatorData: "Ag", signature: "Aw", userHandle: null } });
+  // what the item showed is not what the challenge would sign: nothing is asked of the passkey
+  g = gateway({ ...it, text: "Route the plan, and grant an edge." });
+  const changed = await approve(id, { to: it.to, text: it.text }, g);
+  expect(changed.ok).toBe(false); expect(changed.changed).toBe(true);
+  expect(g.calls.some((c) => c.startsWith("passkey") || c.startsWith("POST"))).toBe(false);
+  g = gateway({ ...it, to: "personal-cake-goal" });
+  expect((await approve(id, { to: it.to, text: it.text }, g)).changed).toBe(true);
+  // a challenge for another intent
+  g = gateway({ ...it, id: "bbbbbbbbbbbb" });
+  expect((await approve(id, { to: it.to, text: it.text }, g)).said).toBe("Not signed: the challenge is for another intent.");
+  // refused: chitin's reason, nothing signed
+  g = gateway(it, { refuse: "recipient personal-assistant is not running" });
+  expect(await approve(id, { to: it.to, text: it.text }, g)).toEqual({ ok: false, said: "Not signed: recipient personal-assistant is not running." });
+  expect(g.calls.length).toBe(1);
+  // busy (429) and a slow challenge (504) are asked again; an assertion that timed out (504) never is
+  g = gateway(it, { challenge: [429, 504, 200] });
+  expect((await approve(id, { to: it.to, text: it.text }, g)).ok).toBe(true);
+  g = gateway(it, { assertion: [504, 200] });
+  expect(await approve(id, { to: it.to, text: it.text }, g)).toEqual({ ok: false, said: "Not signed: status 504." });
+  expect(g.calls.filter((c) => c.startsWith("POST")).length).toBe(1);
+  // not an intent: nothing is fetched
+  g = gateway(it);
+  for (const bad of ["../x", "0123456789AB", "", "0123456789abc"]) expect((await approve(bad, { to: it.to, text: it.text }, g)).ok).toBe(false);
+  expect(g.calls).toEqual([]);
+});
+
+test("sign: a decline posts JSON to fold serve, and needs.json is read as the core's needs entry takes it", async () => {
+  const calls: string[] = [];
+  const fetch = (async (url: string, init?: RequestInit) => {
+    calls.push(`${init?.method ?? "GET"} ${url} ${init?.headers ? JSON.stringify(init.headers) : ""} ${init?.body ?? ""} ${init?.cache}`);
+    if (url.endsWith("/needs.json")) return new Response(JSON.stringify({ as: "bobby", waiting: [] }));
+    if (url.endsWith("/forbidden.json")) return new Response("not who this server acts for\n", { status: 403 });
+    return url.includes("bbbbbbbbbbbb") ? new Response(JSON.stringify({ ok: false, reason: "bbbbbbbbbbbb isn't waiting for bobby now" }), { status: 409 })
+      : new Response(JSON.stringify({ ok: true, message: "0123456789ab declined" }));
+  }) as unknown as typeof globalThis.fetch;
+  expect(await decline("0123456789ab", "https://phobos.test/fold/decline/0123456789ab", { fetch })).toEqual({ ok: true, said: "Declined. 0123456789ab declined" });
+  expect(calls[0]).toBe('POST https://phobos.test/fold/decline/0123456789ab {"content-type":"application/json"} {} no-store');
+  expect(await decline("bbbbbbbbbbbb", "https://phobos.test/fold/decline/bbbbbbbbbbbb", { fetch })).toEqual({ ok: false, said: "Not declined: bbbbbbbbbbbb isn't waiting for bobby now." });
+  expect((await decline("../../x", "https://phobos.test/fold/decline/x", { fetch })).ok).toBe(false);
+  expect(calls.length).toBe(2);
+  expect(await readNeeds("https://phobos.test/fold/needs.json", { fetch })).toEqual({ needs: { as: "bobby", waiting: [] } });
+  expect(calls[2].endsWith("no-store")).toBe(true);
+  expect(await readNeeds("https://phobos.test/fold/forbidden.json", { fetch })).toEqual({ error: "403 not who this server acts for" });
+  expect(await readNeeds("x", { fetch: (async () => { throw new TypeError("Load failed"); }) as any })).toEqual({ error: "Load failed" });
 });

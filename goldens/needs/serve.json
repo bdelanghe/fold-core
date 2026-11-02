@@ -1,0 +1,1428 @@
+[
+  {
+    "what": "needs.json for ME: the title's waiting intents, cut to what is shown, never stored",
+    "request": {
+      "method": "GET",
+      "target": "/needs.json",
+      "peer": "127.0.0.1",
+      "headers": [
+        [
+          "Tailscale-User-Login",
+          "bobby@example.com"
+        ],
+        [
+          "X-Forwarded-For",
+          "100.64.0.2"
+        ],
+        [
+          "X-Forwarded-Proto",
+          "https"
+        ],
+        [
+          "X-Forwarded-Host",
+          "phobos.example.ts.net"
+        ],
+        [
+          "Sec-Fetch-Site",
+          "same-origin"
+        ],
+        [
+          "Content-Type",
+          "application/json"
+        ]
+      ],
+      "body": ""
+    },
+    "body_limit": 0,
+    "status": 200,
+    "headers": [
+      [
+        "Content-Type",
+        "application/json"
+      ],
+      [
+        "Cache-Control",
+        "no-store"
+      ]
+    ],
+    "body": {
+      "as": "bobby",
+      "waiting": [
+        {
+          "id": "0123456789ab",
+          "as": "bobby",
+          "declined": false,
+          "expired": false,
+          "to": "personal-assistant",
+          "text": "Route the plan to the hubs.",
+          "queued_by": "claude-break-glass",
+          "text_hash": "deadbeefcafe",
+          "created_at": "2026-10-30T11:57:55.000Z",
+          "age_s": 125
+        },
+        {
+          "id": "0a0a0a0a0a0a",
+          "as": "bobby",
+          "declined": false,
+          "expired": false,
+          "to": "personal-cake-goal",
+          "text": "Land <b>it</b> \"now\"."
+        }
+      ]
+    },
+    "actor": [
+      "pending --as bobby"
+    ],
+    "log": null
+  },
+  {
+    "what": "a HEAD: the same",
+    "request": {
+      "method": "HEAD",
+      "target": "/needs.json",
+      "peer": "127.0.0.1",
+      "headers": [
+        [
+          "Tailscale-User-Login",
+          "bobby@example.com"
+        ],
+        [
+          "X-Forwarded-For",
+          "100.64.0.2"
+        ],
+        [
+          "X-Forwarded-Proto",
+          "https"
+        ],
+        [
+          "X-Forwarded-Host",
+          "phobos.example.ts.net"
+        ],
+        [
+          "Sec-Fetch-Site",
+          "same-origin"
+        ],
+        [
+          "Content-Type",
+          "application/json"
+        ]
+      ],
+      "body": ""
+    },
+    "body_limit": 0,
+    "status": 200,
+    "headers": [
+      [
+        "Content-Type",
+        "application/json"
+      ],
+      [
+        "Cache-Control",
+        "no-store"
+      ]
+    ],
+    "body": {
+      "as": "bobby",
+      "waiting": [
+        {
+          "id": "0123456789ab",
+          "as": "bobby",
+          "declined": false,
+          "expired": false,
+          "to": "personal-assistant",
+          "text": "Route the plan to the hubs.",
+          "queued_by": "claude-break-glass",
+          "text_hash": "deadbeefcafe",
+          "created_at": "2026-10-30T11:57:55.000Z",
+          "age_s": 125
+        },
+        {
+          "id": "0a0a0a0a0a0a",
+          "as": "bobby",
+          "declined": false,
+          "expired": false,
+          "to": "personal-cake-goal",
+          "text": "Land <b>it</b> \"now\"."
+        }
+      ]
+    },
+    "actor": [
+      "pending --as bobby"
+    ],
+    "log": null
+  },
+  {
+    "what": "without --needs-as: not read live here",
+    "request": {
+      "method": "GET",
+      "target": "/needs.json",
+      "peer": "127.0.0.1",
+      "headers": [
+        [
+          "Tailscale-User-Login",
+          "bobby@example.com"
+        ],
+        [
+          "X-Forwarded-For",
+          "100.64.0.2"
+        ],
+        [
+          "X-Forwarded-Proto",
+          "https"
+        ],
+        [
+          "X-Forwarded-Host",
+          "phobos.example.ts.net"
+        ],
+        [
+          "Sec-Fetch-Site",
+          "same-origin"
+        ],
+        [
+          "Content-Type",
+          "application/json"
+        ]
+      ],
+      "body": ""
+    },
+    "body_limit": 0,
+    "status": 404,
+    "headers": [
+      [
+        "Content-Type",
+        "text/plain; charset=utf-8"
+      ],
+      [
+        "Cache-Control",
+        "no-store"
+      ]
+    ],
+    "body": "Needs you isn't read live here\n",
+    "actor": [],
+    "log": null
+  },
+  {
+    "what": "not from loopback",
+    "request": {
+      "method": "GET",
+      "target": "/needs.json",
+      "peer": "10.0.0.9",
+      "headers": [
+        [
+          "Tailscale-User-Login",
+          "bobby@example.com"
+        ],
+        [
+          "X-Forwarded-For",
+          "100.64.0.2"
+        ],
+        [
+          "X-Forwarded-Proto",
+          "https"
+        ],
+        [
+          "X-Forwarded-Host",
+          "phobos.example.ts.net"
+        ],
+        [
+          "Sec-Fetch-Site",
+          "same-origin"
+        ],
+        [
+          "Content-Type",
+          "application/json"
+        ]
+      ],
+      "body": ""
+    },
+    "body_limit": 0,
+    "status": 403,
+    "headers": [
+      [
+        "Content-Type",
+        "text/plain; charset=utf-8"
+      ],
+      [
+        "Cache-Control",
+        "no-store"
+      ],
+      [
+        "Cache-Control",
+        "no-store"
+      ]
+    ],
+    "body": "not from the tailnet front\n",
+    "actor": [],
+    "log": null
+  },
+  {
+    "what": "another login",
+    "request": {
+      "method": "GET",
+      "target": "/needs.json",
+      "peer": "127.0.0.1",
+      "headers": [
+        [
+          "X-Forwarded-For",
+          "100.64.0.2"
+        ],
+        [
+          "X-Forwarded-Proto",
+          "https"
+        ],
+        [
+          "X-Forwarded-Host",
+          "phobos.example.ts.net"
+        ],
+        [
+          "Sec-Fetch-Site",
+          "same-origin"
+        ],
+        [
+          "Content-Type",
+          "application/json"
+        ],
+        [
+          "Tailscale-User-Login",
+          "eve@example.com"
+        ]
+      ],
+      "body": ""
+    },
+    "body_limit": 0,
+    "status": 403,
+    "headers": [
+      [
+        "Content-Type",
+        "text/plain; charset=utf-8"
+      ],
+      [
+        "Cache-Control",
+        "no-store"
+      ],
+      [
+        "Cache-Control",
+        "no-store"
+      ]
+    ],
+    "body": "not who this server acts for\n",
+    "actor": [],
+    "log": null
+  },
+  {
+    "what": "not through tailscale serve",
+    "request": {
+      "method": "GET",
+      "target": "/needs.json",
+      "peer": "127.0.0.1",
+      "headers": [
+        [
+          "Tailscale-User-Login",
+          "bobby@example.com"
+        ],
+        [
+          "X-Forwarded-For",
+          "100.64.0.2"
+        ],
+        [
+          "X-Forwarded-Proto",
+          "https"
+        ],
+        [
+          "Sec-Fetch-Site",
+          "same-origin"
+        ],
+        [
+          "Content-Type",
+          "application/json"
+        ],
+        [
+          "X-Forwarded-Host",
+          "evil.example"
+        ]
+      ],
+      "body": ""
+    },
+    "body_limit": 0,
+    "status": 403,
+    "headers": [
+      [
+        "Content-Type",
+        "text/plain; charset=utf-8"
+      ],
+      [
+        "Cache-Control",
+        "no-store"
+      ],
+      [
+        "Cache-Control",
+        "no-store"
+      ]
+    ],
+    "body": "not through tailscale serve\n",
+    "actor": [],
+    "log": null
+  },
+  {
+    "what": "cross-site (a page elsewhere reading it)",
+    "request": {
+      "method": "GET",
+      "target": "/needs.json",
+      "peer": "127.0.0.1",
+      "headers": [
+        [
+          "Tailscale-User-Login",
+          "bobby@example.com"
+        ],
+        [
+          "X-Forwarded-For",
+          "100.64.0.2"
+        ],
+        [
+          "X-Forwarded-Proto",
+          "https"
+        ],
+        [
+          "X-Forwarded-Host",
+          "phobos.example.ts.net"
+        ],
+        [
+          "Content-Type",
+          "application/json"
+        ],
+        [
+          "Sec-Fetch-Site",
+          "cross-site"
+        ]
+      ],
+      "body": ""
+    },
+    "body_limit": 0,
+    "status": 403,
+    "headers": [
+      [
+        "Content-Type",
+        "text/plain; charset=utf-8"
+      ],
+      [
+        "Cache-Control",
+        "no-store"
+      ],
+      [
+        "Cache-Control",
+        "no-store"
+      ]
+    ],
+    "body": "cross-site\n",
+    "actor": [],
+    "log": null
+  },
+  {
+    "what": "posted to",
+    "request": {
+      "method": "POST",
+      "target": "/needs.json",
+      "peer": "127.0.0.1",
+      "headers": [
+        [
+          "Tailscale-User-Login",
+          "bobby@example.com"
+        ],
+        [
+          "X-Forwarded-For",
+          "100.64.0.2"
+        ],
+        [
+          "X-Forwarded-Proto",
+          "https"
+        ],
+        [
+          "X-Forwarded-Host",
+          "phobos.example.ts.net"
+        ],
+        [
+          "Sec-Fetch-Site",
+          "same-origin"
+        ],
+        [
+          "Content-Type",
+          "application/json"
+        ]
+      ],
+      "body": "{}"
+    },
+    "body_limit": 0,
+    "status": 405,
+    "headers": [
+      [
+        "Content-Type",
+        "text/plain; charset=utf-8"
+      ],
+      [
+        "Cache-Control",
+        "no-store"
+      ],
+      [
+        "Allow",
+        "GET, HEAD"
+      ]
+    ],
+    "body": "read-only: GET or HEAD\n",
+    "actor": [],
+    "log": null
+  },
+  {
+    "what": "chitin can't list them: 502, and why",
+    "request": {
+      "method": "GET",
+      "target": "/needs.json",
+      "peer": "127.0.0.1",
+      "headers": [
+        [
+          "Tailscale-User-Login",
+          "bobby@example.com"
+        ],
+        [
+          "X-Forwarded-For",
+          "100.64.0.2"
+        ],
+        [
+          "X-Forwarded-Proto",
+          "https"
+        ],
+        [
+          "X-Forwarded-Host",
+          "phobos.example.ts.net"
+        ],
+        [
+          "Sec-Fetch-Site",
+          "same-origin"
+        ],
+        [
+          "Content-Type",
+          "application/json"
+        ]
+      ],
+      "body": ""
+    },
+    "body_limit": 0,
+    "status": 502,
+    "headers": [
+      [
+        "Content-Type",
+        "application/json"
+      ],
+      [
+        "Cache-Control",
+        "no-store"
+      ]
+    ],
+    "body": {
+      "error": "chitin did not list them: chitin: state dir unreadable"
+    },
+    "actor": [
+      "pending --as bobby"
+    ],
+    "log": null
+  },
+  {
+    "what": "decline: got, not posted",
+    "request": {
+      "method": "GET",
+      "target": "/decline/0123456789ab",
+      "peer": "127.0.0.1",
+      "headers": [
+        [
+          "Tailscale-User-Login",
+          "bobby@example.com"
+        ],
+        [
+          "X-Forwarded-For",
+          "100.64.0.2"
+        ],
+        [
+          "X-Forwarded-Proto",
+          "https"
+        ],
+        [
+          "X-Forwarded-Host",
+          "phobos.example.ts.net"
+        ],
+        [
+          "Sec-Fetch-Site",
+          "same-origin"
+        ],
+        [
+          "Content-Type",
+          "application/json"
+        ]
+      ],
+      "body": ""
+    },
+    "body_limit": 0,
+    "status": 405,
+    "headers": [
+      [
+        "Content-Type",
+        "text/plain; charset=utf-8"
+      ],
+      [
+        "Cache-Control",
+        "no-store"
+      ],
+      [
+        "Allow",
+        "POST"
+      ]
+    ],
+    "body": "a decline is posted: POST\n",
+    "actor": [],
+    "log": null
+  },
+  {
+    "what": "decline: without --needs-as",
+    "request": {
+      "method": "POST",
+      "target": "/decline/0123456789ab",
+      "peer": "127.0.0.1",
+      "headers": [
+        [
+          "Tailscale-User-Login",
+          "bobby@example.com"
+        ],
+        [
+          "X-Forwarded-For",
+          "100.64.0.2"
+        ],
+        [
+          "X-Forwarded-Proto",
+          "https"
+        ],
+        [
+          "X-Forwarded-Host",
+          "phobos.example.ts.net"
+        ],
+        [
+          "Sec-Fetch-Site",
+          "same-origin"
+        ],
+        [
+          "Content-Type",
+          "application/json"
+        ]
+      ],
+      "body": "{}"
+    },
+    "body_limit": 64,
+    "status": 404,
+    "headers": [
+      [
+        "Content-Type",
+        "text/plain; charset=utf-8"
+      ],
+      [
+        "Cache-Control",
+        "no-store"
+      ]
+    ],
+    "body": "Needs you isn't read live here\n",
+    "actor": [],
+    "log": null
+  },
+  {
+    "what": "decline: another login",
+    "request": {
+      "method": "POST",
+      "target": "/decline/0123456789ab",
+      "peer": "127.0.0.1",
+      "headers": [
+        [
+          "X-Forwarded-For",
+          "100.64.0.2"
+        ],
+        [
+          "X-Forwarded-Proto",
+          "https"
+        ],
+        [
+          "X-Forwarded-Host",
+          "phobos.example.ts.net"
+        ],
+        [
+          "Sec-Fetch-Site",
+          "same-origin"
+        ],
+        [
+          "Content-Type",
+          "application/json"
+        ],
+        [
+          "Tailscale-User-Login",
+          "eve@example.com"
+        ]
+      ],
+      "body": "{}"
+    },
+    "body_limit": 64,
+    "status": 403,
+    "headers": [
+      [
+        "Content-Type",
+        "application/json"
+      ],
+      [
+        "Cache-Control",
+        "no-store"
+      ]
+    ],
+    "body": {
+      "ok": false,
+      "reason": "not who this server acts for"
+    },
+    "actor": [],
+    "log": {
+      "ts": 1793361600,
+      "login": "eve@example.com",
+      "peer": "100.64.0.2",
+      "decline": "0123456789ab",
+      "as": "bobby",
+      "result": "refused:403"
+    }
+  },
+  {
+    "what": "decline: cross-site",
+    "request": {
+      "method": "POST",
+      "target": "/decline/0123456789ab",
+      "peer": "127.0.0.1",
+      "headers": [
+        [
+          "Tailscale-User-Login",
+          "bobby@example.com"
+        ],
+        [
+          "X-Forwarded-For",
+          "100.64.0.2"
+        ],
+        [
+          "X-Forwarded-Proto",
+          "https"
+        ],
+        [
+          "X-Forwarded-Host",
+          "phobos.example.ts.net"
+        ],
+        [
+          "Content-Type",
+          "application/json"
+        ],
+        [
+          "Sec-Fetch-Site",
+          "cross-site"
+        ]
+      ],
+      "body": "{}"
+    },
+    "body_limit": 64,
+    "status": 403,
+    "headers": [
+      [
+        "Content-Type",
+        "application/json"
+      ],
+      [
+        "Cache-Control",
+        "no-store"
+      ]
+    ],
+    "body": {
+      "ok": false,
+      "reason": "cross-site"
+    },
+    "actor": [],
+    "log": {
+      "ts": 1793361600,
+      "login": "bobby@example.com",
+      "peer": "100.64.0.2",
+      "decline": "0123456789ab",
+      "as": "bobby",
+      "result": "refused:403"
+    }
+  },
+  {
+    "what": "decline: no Sec-Fetch-Site, another Origin",
+    "request": {
+      "method": "POST",
+      "target": "/decline/0123456789ab",
+      "peer": "127.0.0.1",
+      "headers": [
+        [
+          "Tailscale-User-Login",
+          "bobby@example.com"
+        ],
+        [
+          "X-Forwarded-For",
+          "100.64.0.2"
+        ],
+        [
+          "X-Forwarded-Proto",
+          "https"
+        ],
+        [
+          "X-Forwarded-Host",
+          "phobos.example.ts.net"
+        ],
+        [
+          "Content-Type",
+          "application/json"
+        ],
+        [
+          "Origin",
+          "https://evil.example"
+        ]
+      ],
+      "body": "{}"
+    },
+    "body_limit": 64,
+    "status": 403,
+    "headers": [
+      [
+        "Content-Type",
+        "application/json"
+      ],
+      [
+        "Cache-Control",
+        "no-store"
+      ]
+    ],
+    "body": {
+      "ok": false,
+      "reason": "cross-site"
+    },
+    "actor": [],
+    "log": {
+      "ts": 1793361600,
+      "login": "bobby@example.com",
+      "peer": "100.64.0.2",
+      "decline": "0123456789ab",
+      "as": "bobby",
+      "result": "refused:403"
+    }
+  },
+  {
+    "what": "decline: a form (a cross-site form could send one): JSON only",
+    "request": {
+      "method": "POST",
+      "target": "/decline/0123456789ab",
+      "peer": "127.0.0.1",
+      "headers": [
+        [
+          "Tailscale-User-Login",
+          "bobby@example.com"
+        ],
+        [
+          "X-Forwarded-For",
+          "100.64.0.2"
+        ],
+        [
+          "X-Forwarded-Proto",
+          "https"
+        ],
+        [
+          "X-Forwarded-Host",
+          "phobos.example.ts.net"
+        ],
+        [
+          "Sec-Fetch-Site",
+          "same-origin"
+        ],
+        [
+          "Content-Type",
+          "application/x-www-form-urlencoded"
+        ]
+      ],
+      "body": "x=1"
+    },
+    "body_limit": 64,
+    "status": 415,
+    "headers": [
+      [
+        "Content-Type",
+        "application/json"
+      ],
+      [
+        "Cache-Control",
+        "no-store"
+      ]
+    ],
+    "body": {
+      "ok": false,
+      "reason": "send the decline as application/json"
+    },
+    "actor": [],
+    "log": {
+      "ts": 1793361600,
+      "login": "bobby@example.com",
+      "peer": "100.64.0.2",
+      "decline": "0123456789ab",
+      "as": "bobby",
+      "result": "refused:415"
+    }
+  },
+  {
+    "what": "decline: not an intent id",
+    "request": {
+      "method": "POST",
+      "target": "/decline/..%2Fetc",
+      "peer": "127.0.0.1",
+      "headers": [
+        [
+          "Tailscale-User-Login",
+          "bobby@example.com"
+        ],
+        [
+          "X-Forwarded-For",
+          "100.64.0.2"
+        ],
+        [
+          "X-Forwarded-Proto",
+          "https"
+        ],
+        [
+          "X-Forwarded-Host",
+          "phobos.example.ts.net"
+        ],
+        [
+          "Sec-Fetch-Site",
+          "same-origin"
+        ],
+        [
+          "Content-Type",
+          "application/json"
+        ]
+      ],
+      "body": "{}"
+    },
+    "body_limit": 64,
+    "status": 400,
+    "headers": [
+      [
+        "Content-Type",
+        "application/json"
+      ],
+      [
+        "Cache-Control",
+        "no-store"
+      ]
+    ],
+    "body": {
+      "ok": false,
+      "reason": "not an intent id"
+    },
+    "actor": [],
+    "log": {
+      "ts": 1793361600,
+      "login": "bobby@example.com",
+      "peer": "100.64.0.2",
+      "decline": "..%2Fetc",
+      "as": "bobby",
+      "result": "refused:400"
+    }
+  },
+  {
+    "what": "decline: an id chitin would not make",
+    "request": {
+      "method": "POST",
+      "target": "/decline/0123456789AB",
+      "peer": "127.0.0.1",
+      "headers": [
+        [
+          "Tailscale-User-Login",
+          "bobby@example.com"
+        ],
+        [
+          "X-Forwarded-For",
+          "100.64.0.2"
+        ],
+        [
+          "X-Forwarded-Proto",
+          "https"
+        ],
+        [
+          "X-Forwarded-Host",
+          "phobos.example.ts.net"
+        ],
+        [
+          "Sec-Fetch-Site",
+          "same-origin"
+        ],
+        [
+          "Content-Type",
+          "application/json"
+        ]
+      ],
+      "body": "{}"
+    },
+    "body_limit": 64,
+    "status": 400,
+    "headers": [
+      [
+        "Content-Type",
+        "application/json"
+      ],
+      [
+        "Cache-Control",
+        "no-store"
+      ]
+    ],
+    "body": {
+      "ok": false,
+      "reason": "not an intent id"
+    },
+    "actor": [],
+    "log": {
+      "ts": 1793361600,
+      "login": "bobby@example.com",
+      "peer": "100.64.0.2",
+      "decline": "0123456789AB",
+      "as": "bobby",
+      "result": "refused:400"
+    }
+  },
+  {
+    "what": "decline: declined already",
+    "request": {
+      "method": "POST",
+      "target": "/decline/bbbbbbbbbbbb",
+      "peer": "127.0.0.1",
+      "headers": [
+        [
+          "Tailscale-User-Login",
+          "bobby@example.com"
+        ],
+        [
+          "X-Forwarded-For",
+          "100.64.0.2"
+        ],
+        [
+          "X-Forwarded-Proto",
+          "https"
+        ],
+        [
+          "X-Forwarded-Host",
+          "phobos.example.ts.net"
+        ],
+        [
+          "Sec-Fetch-Site",
+          "same-origin"
+        ],
+        [
+          "Content-Type",
+          "application/json"
+        ]
+      ],
+      "body": "{}"
+    },
+    "body_limit": 64,
+    "status": 409,
+    "headers": [
+      [
+        "Content-Type",
+        "application/json"
+      ],
+      [
+        "Cache-Control",
+        "no-store"
+      ]
+    ],
+    "body": {
+      "ok": false,
+      "reason": "bbbbbbbbbbbb isn't waiting for bobby now, so nothing was declined"
+    },
+    "actor": [
+      "pending --as bobby"
+    ],
+    "log": {
+      "ts": 1793361600,
+      "login": "bobby@example.com",
+      "peer": "100.64.0.2",
+      "decline": "bbbbbbbbbbbb",
+      "as": "bobby",
+      "result": "refused:409"
+    }
+  },
+  {
+    "what": "decline: expired",
+    "request": {
+      "method": "POST",
+      "target": "/decline/cccccccccccc",
+      "peer": "127.0.0.1",
+      "headers": [
+        [
+          "Tailscale-User-Login",
+          "bobby@example.com"
+        ],
+        [
+          "X-Forwarded-For",
+          "100.64.0.2"
+        ],
+        [
+          "X-Forwarded-Proto",
+          "https"
+        ],
+        [
+          "X-Forwarded-Host",
+          "phobos.example.ts.net"
+        ],
+        [
+          "Sec-Fetch-Site",
+          "same-origin"
+        ],
+        [
+          "Content-Type",
+          "application/json"
+        ]
+      ],
+      "body": "{}"
+    },
+    "body_limit": 64,
+    "status": 409,
+    "headers": [
+      [
+        "Content-Type",
+        "application/json"
+      ],
+      [
+        "Cache-Control",
+        "no-store"
+      ]
+    ],
+    "body": {
+      "ok": false,
+      "reason": "cccccccccccc isn't waiting for bobby now, so nothing was declined"
+    },
+    "actor": [
+      "pending --as bobby"
+    ],
+    "log": {
+      "ts": 1793361600,
+      "login": "bobby@example.com",
+      "peer": "100.64.0.2",
+      "decline": "cccccccccccc",
+      "as": "bobby",
+      "result": "refused:409"
+    }
+  },
+  {
+    "what": "decline: another title's intent",
+    "request": {
+      "method": "POST",
+      "target": "/decline/dddddddddddd",
+      "peer": "127.0.0.1",
+      "headers": [
+        [
+          "Tailscale-User-Login",
+          "bobby@example.com"
+        ],
+        [
+          "X-Forwarded-For",
+          "100.64.0.2"
+        ],
+        [
+          "X-Forwarded-Proto",
+          "https"
+        ],
+        [
+          "X-Forwarded-Host",
+          "phobos.example.ts.net"
+        ],
+        [
+          "Sec-Fetch-Site",
+          "same-origin"
+        ],
+        [
+          "Content-Type",
+          "application/json"
+        ]
+      ],
+      "body": "{}"
+    },
+    "body_limit": 64,
+    "status": 409,
+    "headers": [
+      [
+        "Content-Type",
+        "application/json"
+      ],
+      [
+        "Cache-Control",
+        "no-store"
+      ]
+    ],
+    "body": {
+      "ok": false,
+      "reason": "dddddddddddd isn't waiting for bobby now, so nothing was declined"
+    },
+    "actor": [
+      "pending --as bobby"
+    ],
+    "log": {
+      "ts": 1793361600,
+      "login": "bobby@example.com",
+      "peer": "100.64.0.2",
+      "decline": "dddddddddddd",
+      "as": "bobby",
+      "result": "refused:409"
+    }
+  },
+  {
+    "what": "decline: no such intent",
+    "request": {
+      "method": "POST",
+      "target": "/decline/abcabcabcabc",
+      "peer": "127.0.0.1",
+      "headers": [
+        [
+          "Tailscale-User-Login",
+          "bobby@example.com"
+        ],
+        [
+          "X-Forwarded-For",
+          "100.64.0.2"
+        ],
+        [
+          "X-Forwarded-Proto",
+          "https"
+        ],
+        [
+          "X-Forwarded-Host",
+          "phobos.example.ts.net"
+        ],
+        [
+          "Sec-Fetch-Site",
+          "same-origin"
+        ],
+        [
+          "Content-Type",
+          "application/json"
+        ]
+      ],
+      "body": "{}"
+    },
+    "body_limit": 64,
+    "status": 409,
+    "headers": [
+      [
+        "Content-Type",
+        "application/json"
+      ],
+      [
+        "Cache-Control",
+        "no-store"
+      ]
+    ],
+    "body": {
+      "ok": false,
+      "reason": "abcabcabcabc isn't waiting for bobby now, so nothing was declined"
+    },
+    "actor": [
+      "pending --as bobby"
+    ],
+    "log": {
+      "ts": 1793361600,
+      "login": "bobby@example.com",
+      "peer": "100.64.0.2",
+      "decline": "abcabcabcabc",
+      "as": "bobby",
+      "result": "refused:409"
+    }
+  },
+  {
+    "what": "decline: chitin can't list them, so nothing is declined",
+    "request": {
+      "method": "POST",
+      "target": "/decline/0123456789ab",
+      "peer": "127.0.0.1",
+      "headers": [
+        [
+          "Tailscale-User-Login",
+          "bobby@example.com"
+        ],
+        [
+          "X-Forwarded-For",
+          "100.64.0.2"
+        ],
+        [
+          "X-Forwarded-Proto",
+          "https"
+        ],
+        [
+          "X-Forwarded-Host",
+          "phobos.example.ts.net"
+        ],
+        [
+          "Sec-Fetch-Site",
+          "same-origin"
+        ],
+        [
+          "Content-Type",
+          "application/json"
+        ]
+      ],
+      "body": "{}"
+    },
+    "body_limit": 64,
+    "status": 502,
+    "headers": [
+      [
+        "Content-Type",
+        "application/json"
+      ],
+      [
+        "Cache-Control",
+        "no-store"
+      ]
+    ],
+    "body": {
+      "ok": false,
+      "reason": "chitin did not list them: chitin: state dir unreadable"
+    },
+    "actor": [
+      "pending --as bobby"
+    ],
+    "log": {
+      "ts": 1793361600,
+      "login": "bobby@example.com",
+      "peer": "100.64.0.2",
+      "decline": "0123456789ab",
+      "as": "bobby",
+      "result": "chitin:pending"
+    }
+  },
+  {
+    "what": "decline: one that waits for the title, declined",
+    "request": {
+      "method": "POST",
+      "target": "/decline/0123456789ab",
+      "peer": "127.0.0.1",
+      "headers": [
+        [
+          "Tailscale-User-Login",
+          "bobby@example.com"
+        ],
+        [
+          "X-Forwarded-For",
+          "100.64.0.2"
+        ],
+        [
+          "X-Forwarded-Proto",
+          "https"
+        ],
+        [
+          "X-Forwarded-Host",
+          "phobos.example.ts.net"
+        ],
+        [
+          "Sec-Fetch-Site",
+          "same-origin"
+        ],
+        [
+          "Content-Type",
+          "application/json"
+        ]
+      ],
+      "body": "{}"
+    },
+    "body_limit": 64,
+    "status": 200,
+    "headers": [
+      [
+        "Content-Type",
+        "application/json"
+      ],
+      [
+        "Cache-Control",
+        "no-store"
+      ]
+    ],
+    "body": {
+      "ok": true,
+      "message": "0123456789ab declined"
+    },
+    "actor": [
+      "pending --as bobby",
+      "decline 0123456789ab"
+    ],
+    "log": {
+      "ts": 1793361600,
+      "login": "bobby@example.com",
+      "peer": "100.64.0.2",
+      "decline": "0123456789ab",
+      "as": "bobby",
+      "result": "ok"
+    }
+  },
+  {
+    "what": "decline: no Sec-Fetch-Site, its own Origin (an older browser)",
+    "request": {
+      "method": "POST",
+      "target": "/decline/0123456789ab",
+      "peer": "127.0.0.1",
+      "headers": [
+        [
+          "Tailscale-User-Login",
+          "bobby@example.com"
+        ],
+        [
+          "X-Forwarded-For",
+          "100.64.0.2"
+        ],
+        [
+          "X-Forwarded-Proto",
+          "https"
+        ],
+        [
+          "X-Forwarded-Host",
+          "phobos.example.ts.net"
+        ],
+        [
+          "Content-Type",
+          "application/json"
+        ],
+        [
+          "Origin",
+          "https://phobos.example.ts.net"
+        ]
+      ],
+      "body": "{}"
+    },
+    "body_limit": 64,
+    "status": 200,
+    "headers": [
+      [
+        "Content-Type",
+        "application/json"
+      ],
+      [
+        "Cache-Control",
+        "no-store"
+      ]
+    ],
+    "body": {
+      "ok": true,
+      "message": "0123456789ab declined"
+    },
+    "actor": [
+      "pending --as bobby",
+      "decline 0123456789ab"
+    ],
+    "log": {
+      "ts": 1793361600,
+      "login": "bobby@example.com",
+      "peer": "100.64.0.2",
+      "decline": "0123456789ab",
+      "as": "bobby",
+      "result": "ok"
+    }
+  }
+]

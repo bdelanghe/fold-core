@@ -60,3 +60,5 @@ ol.rows li.stale,ol.rows .hint.alert{color:var(--warn)}
 main.slide{max-width:56rem}
 main.slide h1{font-size:var(--s3);margin-top:1.5rem}
 main.slide ol.rows li.prop{font-size:var(--s1)}
+/* what an act on an intent did, said beside #stale (index.html): nothing shown while it says nothing, but always in the tree */
+p.said:empty{padding:0;margin:0;border:0}

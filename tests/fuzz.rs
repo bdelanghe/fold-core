@@ -258,7 +258,7 @@ fn the_act_route_never_acts_without_every_check() {
     fs::write(root.join("_acts.json"), map).unwrap();
     let calls = Arc::new(AtomicUsize::new(0));
     let acting =
-        Acting { login: "bobby@example.com".into(), host: "phobos.ts.net".into(), key: vec![3; 32], actor: Box::new(Count(calls.clone())), spent: Default::default() };
+        Acting { login: "bobby@example.com".into(), host: "phobos.ts.net".into(), key: vec![3; 32], actor: Box::new(Count(calls.clone())), spent: Default::default(), needs_as: None };
     let site = Site { root: root.clone(), mount: "/fold".into(), no_store: vec![], acting: Some(acting), reporting: None };
     let listing = |p: &std::path::Path| {
         let mut v: Vec<_> = fs::read_dir(p).unwrap().map(|e| e.unwrap().file_name()).collect();

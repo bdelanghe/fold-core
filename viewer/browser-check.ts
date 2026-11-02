@@ -1,6 +1,9 @@
 // The built viewer in a real browser (checks.viewer-browser): the package served at /fold/ and a golden page at
 // /fold-data/fleet/page.json, as on phobos, and headless Chromium at the phone's and the iPad's size. Each location must render the
 // fold the core folds there: the page loaded the module, fetched the document, folded it and derived the DOM, all in the browser.
+// Needs you is read live beside it (/fold/needs.json, two intents waiting), so every run shows Approvals; then one intent is approved
+// with Enter (chitin-approve's API faked here, the passkey a stub: nothing real is signed) and the other declined with its button,
+// and each leaves, its result said where you land.
 //   VIEWER=<packages.viewer> CHROMIUM=<chromium binary> bun viewer/browser-check.ts <golden case>
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
@@ -16,11 +19,32 @@ const reading: Record<string, string[][]> = JSON.parse(readFileSync(join(import.
 const page = JSON.stringify(input.root), demo = JSON.stringify({ ...input.root, title: "Demo" });
 // Asleep, the host answers nothing, as phobos asleep: no refusal, no reply.
 let asleep = false;
+// Needs you, live: what fold serve's needs.json would list, and chitin-approve's two endpoints, faked; every call to them is kept.
+const intent = (id: string, to: string, text: string) => ({ id, as: "bobby", declined: false, expired: false, to, text, queued_by: "claude-break-glass", text_hash: "deadbeefcafe", created_at: "2026-10-30T11:57:55.000Z" });
+let waiting = [intent("0123456789ab", "personal-assistant", "Route the plan to the hubs."), intent("0a0a0a0a0a0a", "personal-cake-goal", "Land the edge grant.")];
+const seen: string[] = [];
+const answer = (v: unknown) => new Response(JSON.stringify(v), { headers: { "content-type": "application/json", "cache-control": "no-store" } });
+async function live(req: Request, p: string): Promise<Response | null> {
+  if (p === "/fold/needs.json") return answer({ as: "bobby", waiting });
+  const m = p.match(/^\/(approve\/v1\/challenge|approve\/v1\/assertion|fold\/decline)\/([0-9a-f]{12})$/);
+  if (!m) return null;
+  const [, what, id] = m, it = waiting.find((w) => w.id === id);
+  seen.push(`${req.method} ${p}${req.method === "POST" ? " " + req.headers.get("content-type") : ""}`);
+  if (!it) return answer({ ok: false, reason: `${id} is not waiting` });
+  if (what.endsWith("challenge")) return answer({ ok: true, intent: it, frame: { hop: it.to, hash: "f00dfeed", iat: "2026-11-02T00:00:00.000Z" },
+    publicKey: { challenge: "AQID", rpId: "127.0.0.1", allowCredentials: [{ type: "public-key", id: "CQ" }], userVerification: "required", timeout: 60000 } });
+  const body = await req.json().catch(() => null);
+  if (what.endsWith("assertion") && body?.response?.signature !== "Aw") return answer({ ok: false, reason: "not the stub's assertion" });
+  waiting = waiting.filter((w) => w.id !== id);
+  return answer(what.endsWith("assertion") ? { ok: true, message: "written m-9", outcome: "written" } : { ok: true, message: `${id} declined` });
+}
 const server = Bun.serve({
   hostname: "127.0.0.1", port: 0,
   fetch(req) {
     if (asleep) return new Promise<Response>(() => {});
     const p = new URL(req.url).pathname;
+    const l = live(req, p);
+    if (p === "/fold/needs.json" || /^\/(approve|fold\/decline)\//.test(p)) return l.then((r) => r ?? new Response("", { status: 404 }));
     if (p === "/fold-data/fleet/page.json") return new Response(page, { headers: { "content-type": "application/json" } });
     if (p === "/fold-data/demo/page.json") return new Response(demo, { headers: { "content-type": "application/json" } });
     // /fold, with no slash, is the page too (as a static server or a proxy may answer it): the page must go on to /fold/
@@ -31,8 +55,9 @@ const server = Bun.serve({
     return new Response("", { status: 404 });
   },
 });
-const { fold } = await core(readFileSync(join(viewer, "fold_core.wasm")));
-const nodes = new Map(fold({ root: input.root, files: {}, opts: { localTimeZone: "UTC" } }));
+const { fold, needs } = await core(readFileSync(join(viewer, "fold_core.wasm")));
+// the fleet's page as the viewer folds it: with Needs you read live
+const nodes = new Map(fold({ root: needs({ root: input.root, needs: { as: "bobby", waiting }, now: Date.now() }), files: {}, opts: { localTimeZone: "UTC" } }));
 const root = nodes.get("root") as { title: string; kids: { id: string }[] };
 const places = [["root", root], ...[root.kids[0]].filter(Boolean).map((k) => [k.id, nodes.get(k.id)])] as [string, { title: string; kids?: unknown[] }][];
 
@@ -111,6 +136,46 @@ for (const [w, h] of [[390, 844], [1024, 1366]]) {
   const ok = first && kept && again && said && h1.length === 1 && h1[0][0] === root.title && h1[0][1] === note && objs === root.kids.length;
   console.log(`${ok ? "ok  " : "FAIL"} ${w}x${h} /fold/ with its host asleep: opened ${[first, kept, again]}, heading ${JSON.stringify(h1)}, ${objs} rows, note ${JSON.stringify(note)} (want ${JSON.stringify(root.title)}, ${root.kids.length})`);
   if (!ok) { failed++; console.log(err.slice(-2000)); }
+}
+// Needs you, live, in the browser: the item's two acts are form landmarks named by their labels; Enter on the item runs its passkey
+// (the stub authenticator; the words said before it are the challenge's), it leaves, and its group says what was done; ]] then steps
+// from Approvals to the next fold beside it; the other item's Decline button declines it, Approvals goes, and Needs you says so.
+async function signs(w: number, h: number) {
+  const c = await chrome(chromium, w, h, `chromium-needs-${w}`), { send, value } = c;
+  const until = Date.now() + 30_000, wait = async (e: string) => { while (!(await value(e)) && Date.now() < until) await Bun.sleep(100); return !!(await value(e)); };
+  const key = async (k: string, code: string, vk: number) => { for (const type of ["keyDown", "keyUp"]) await send("Input.dispatchKeyEvent", { type, key: k, code, windowsVirtualKeyCode: vk, ...(type === "keyDown" && k.length === 1 ? { text: k } : {}) }); };
+  try {
+    await send("Page.enable");
+    await send("Page.navigate", { url: `http://127.0.0.1:${server.port}/fold/#/needs/approvals/needs-sign-0123456789ab` });
+    const ready = await wait(`document.body?.dataset.ready === "1" && document.querySelector("main h1")?.textContent === "To personal-assistant"`);
+    // the passkey, stubbed: what it was asked for is kept on the page
+    await value(`navigator.credentials.get = async (o) => { window.__asked = [...new Uint8Array(o.publicKey.challenge)].join(",") + " " + o.publicKey.userVerification;
+      const b = (n) => new Uint8Array([n]).buffer; return { id: "cred", rawId: b(9), type: "public-key", response: { clientDataJSON: b(1), authenticatorData: b(2), signature: b(3), userHandle: null } }; }`);
+    const { nodes: ax } = await send("Accessibility.getFullAXTree");
+    const forms = ax.filter((x: any) => !x.ignored && x.role?.value === "form").map((x: any) => x.name?.value);
+    await value(`document.querySelector("main h1").focus()`);
+    await key("Enter", "Enter", 13);
+    const approved = await wait(`location.hash === "#/needs/approvals" && document.getElementById("said").textContent.startsWith("Sent to personal-assistant")`);
+    const asked = await value("window.__asked");
+    const said1 = await value(`document.getElementById("said").textContent`);
+    await value(`document.querySelector("main h1").focus()`);
+    await key("]", "BracketRight", 221); await key("]", "BracketRight", 221);
+    const stepped = await wait(`location.hash === "#/needs/needs-ask-0"`);
+    await send("Page.navigate", { url: `http://127.0.0.1:${server.port}/fold/#/needs/approvals/needs-sign-0a0a0a0a0a0a` });
+    await wait(`document.querySelector("main h1")?.textContent === "To personal-cake-goal"`);
+    await value(`document.querySelector('form[data-call="decline"] button').click()`);
+    const declined = await wait(`location.hash === "#/needs" && document.getElementById("said").textContent.startsWith("Declined.")`);
+    const groups = await value(`[...document.querySelectorAll("ol.rows > li.obj > a")].map((a) => a.textContent).join("|")`);
+    return { ready, forms, approved, asked, said1, stepped, declined, groups, err: c.err() };
+  } finally { await c.close(); }
+}
+{
+  const r = await signs(390, 844);
+  const ok = r.ready && JSON.stringify(r.forms) === JSON.stringify(["Approve with passkey", "Decline"]) && r.approved && r.asked === "1,2,3 required"
+    && r.stepped && r.declined && !r.groups.includes("Approvals") && waiting.length === 0
+    && JSON.stringify(seen) === JSON.stringify(["GET /approve/v1/challenge/0123456789ab", "POST /approve/v1/assertion/0123456789ab application/json", "POST /fold/decline/0a0a0a0a0a0a application/json"]);
+  console.log(`${ok ? "ok  " : "FAIL"} 390x844 Needs you: forms ${JSON.stringify(r.forms)}, approved by Enter ${r.approved} (passkey asked ${JSON.stringify(r.asked)}, said ${JSON.stringify(r.said1)}), ]] ${r.stepped}, declined ${r.declined}, rows ${JSON.stringify(r.groups)}, calls ${JSON.stringify(seen)}`);
+  if (!ok) { failed++; console.log(r.err.slice(-2000)); }
 }
 server.stop(true);
 process.exit(failed ? 1 : 0);

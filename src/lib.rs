@@ -17,6 +17,7 @@ pub mod html;
 pub mod http;
 pub mod id;
 mod js;
+pub mod needs;
 pub mod page;
 #[cfg(not(target_arch = "wasm32"))]
 pub mod report;

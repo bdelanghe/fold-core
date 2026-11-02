@@ -143,16 +143,23 @@ pub fn acts_of(node: &Value) -> Vec<(String, Value)> {
 pub const TOKEN_FIELD: &str = "token";
 
 /// A fold's act as an HTML form (BRIEF-basis-forms-push-signing-2026-10-31 §1): it posts its token (empty until served), cap,
-/// call and args as hidden fields to `act/<act id>` under the viewer's mount, with a native submit button. No script. The
-/// passkey (`webauthn`, or `approve`) is the exception: WebAuthn runs only in a document, so where the fold links its sign page,
-/// the form GETs that page (its `#i-<intent>` kept, as a GET form keeps the action's fragment), which runs the ceremony and
-/// comes back. A form is named by the fold's title when it is the fold's one act, else by its own label.
+/// call and args as hidden fields to `act/<act id>` under the viewer's mount, with a native submit button. No script. Two acts
+/// on an intent (src/needs.rs `intent_of`) are the exception, and carry the intent's id and their call for the viewer's script
+/// (viewer/sign.js), which takes them in the page (BRIEF-stint-2026-11-02-approve-into-fold):
+/// - the passkey (`webauthn`, or `approve`): WebAuthn runs only in a document. With no script, where the fold links its sign
+///   page, the form GETs that page (its `#i-<intent>` kept, as a GET form keeps the action's fragment).
+/// - the decline (`intent`/`decline`): a POST to `decline/<intent>` (src/serve.rs), sent by the script as JSON.
+///
+/// A form is named by the fold's title when it is the fold's one act, else by its own label.
 fn act_form(node: &Value, act: &Value, path: &[String], key: &str, one: bool) -> Value {
     let label = get(act, "label").cloned();
     let cap = js::string(get(act, "cap"));
-    let passkey = matches!(cap.trim(), "webauthn" | "approve") && truthy(get(node, "href"));
+    let intent = crate::needs::intent_of(act);
+    let passkey = matches!(cap.trim(), "webauthn" | "approve") && (truthy(get(node, "href")) || intent.is_some());
     let (method, action, fields) = if passkey {
-        ("get", node["href"].clone(), vec![])
+        ("get", present(get(node, "href")).cloned().unwrap_or_else(|| "".into()), vec![])
+    } else if let Some((id, "decline")) = &intent {
+        ("post", format!("decline/{id}").into(), vec![])
     } else {
         let mut f = vec![json!([TOKEN_FIELD, ""]), json!(["cap", cap]), json!(["call", js::string(get(act, "call"))])];
         match present(get(act, "args")) {
@@ -176,6 +183,8 @@ fn act_form(node: &Value, act: &Value, path: &[String], key: &str, one: bool) ->
         ("cls", Some("act".into())),
         ("method", Some(method.into())),
         ("action", Some(action)),
+        ("intent", intent.as_ref().map(|(id, _)| id.clone().into())),
+        ("call", intent.as_ref().map(|(_, call)| (*call).into())),
         ("fields", (!fields.is_empty()).then(|| fields.into())),
         ("children", Some(kids.into())),
     ])

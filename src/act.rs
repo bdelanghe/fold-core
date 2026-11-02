@@ -303,6 +303,18 @@ pub trait Actor: Send + Sync {
     /// Say `text` to the seat `to` (in reply to `in_reply_to`, when the act names one), by the act `act`. The route has checked
     /// `text` against the act's input ([`typed`]) and spent the form's token, so one form sends once.
     fn say(&self, to: &str, text: &str, in_reply_to: Option<&str>, act: &str) -> Result<Done, String>;
+    /// What waits for `title`'s signature, as `chitin pending --as <title> --json` lists it (src/needs.rs filters it). Read for
+    /// `needs.json` and again before a decline; an actor that can't read it says why.
+    fn pending(&self, title: &str) -> Result<serde_json::Value, String> {
+        let _ = title;
+        Err("this server reads no pending list".into())
+    }
+    /// Decline one waiting intent (`chitin decline <id>`): unsigned, as declining narrows (RECOMMEND-consultant-2026-11-01-…
+    /// decision 1). The route has checked, just before, that the id waits for the title this server reads for.
+    fn decline(&self, id: &str) -> Result<Done, String> {
+        let _ = id;
+        Err("this server declines nothing".into())
+    }
 }
 
 /// The one chitin seat a typed say speaks as (Bobby 38e765d3, signed ebe199a4: S2 42184457 widened to typed say "as seat
@@ -352,6 +364,29 @@ impl Actor for Chitin {
             Ok(Done::Ok)
         } else {
             Err(line)
+        }
+    }
+
+    /// `chitin pending --as <title> --json`: its stdout, a JSON list.
+    fn pending(&self, title: &str) -> Result<serde_json::Value, String> {
+        let out = Command::new(&self.bin)
+            .args(["pending", "--as", title, "--json"])
+            .output()
+            .map_err(|e| format!("could not run chitin: {e}"))?;
+        if !out.status.success() {
+            let e = String::from_utf8_lossy(&out.stderr);
+            return Err(e.lines().map(str::trim).find(|l| !l.is_empty()).unwrap_or("chitin pending failed").chars().take(200).collect());
+        }
+        serde_json::from_slice(&out.stdout).map_err(|e| format!("chitin pending did not answer JSON: {e}"))
+    }
+
+    /// `chitin decline <id>`: `<id> declined` is done; `no waiting item <id>` is gone already; anything else is chitin's reason.
+    fn decline(&self, id: &str) -> Result<Done, String> {
+        let (ok, line) = first_line(Command::new(&self.bin).args(["decline", id]))?;
+        match (ok, line.as_str()) {
+            (true, l) if l.ends_with(" declined") => Ok(Done::Ok),
+            (_, l) if l.starts_with("no waiting item") => Ok(Done::Already),
+            _ => Err(line),
         }
     }
 }

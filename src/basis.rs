@@ -11,7 +11,8 @@
 //! - `# <heading>`;
 //! - one line per row, its spoken words joined by ` · `, and `  → <path>` when the row goes in to a fold (that fold's path,
 //!   what `basis read` takes and the page's row anchor), or `  ↗ <href>` when its link is one the data carries;
-//! - `act: <name> [<act id>] · …` for a row of acts (page.rs `acts`, the id `fold serve` takes an act's post at).
+//! - `act: <name> [<act id>] · …` for a row of acts (page.rs `acts`, the id `fold serve` takes an act's post at); an act on an
+//!   intent (needs.rs: the passkey, the decline) as `[<call> <intent id>]`.
 
 use std::collections::HashMap;
 
@@ -122,7 +123,13 @@ fn links_in(ax: &Value, links: &mut Vec<(bool, String)>, acts: &mut Vec<(String,
         }
         Some("form") => {
             let a = s("action");
-            acts.push((s("name"), a.strip_prefix("act/").unwrap_or(&a).to_string()));
+            // an act on an intent (needs.rs) is named by its call and the intent: `approve <id>`, `decline <id>`
+            let id = if ax.get("intent").is_some() {
+                format!("{} {}", s("call"), s("intent"))
+            } else {
+                a.strip_prefix("act/").unwrap_or(&a).to_string()
+            };
+            acts.push((s("name"), id));
             return;
         }
         _ => {}

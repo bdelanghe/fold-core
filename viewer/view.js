@@ -23,8 +23,10 @@ export const froms = (o) =>
  * The document at `url` (absolute), folded: its `from` files are fetched relative to it, and one that cannot be fetched is left out,
  * so the core notes it as fold.ts does. `opts(modified)` gives the fold's options from the document's Last-Modified (an ISO time, or
  * null when it has none). `stored(at)` is told when the copy read was kept (sw.js's Fold-Stored, an ISO time), or null for a fresh one.
+ * `root(r)` is given the document before it is folded, and what it returns (or resolves to) is folded (Needs you read live: the core's
+ * `needs`, which may wait for its own read, begun beside this one).
  */
-export async function open(fold, url, { fetch = globalThis.fetch, opts = () => ({}), stored = () => {} } = {}) {
+export async function open(fold, url, { fetch = globalThis.fetch, opts = () => ({}), stored = () => {}, root: live = (r) => r } = {}) {
   const r = await fetch(url, { cache: "no-cache" });
   if (!r.ok) throw new Error(`${url}: ${r.status} ${r.statusText ?? ""}`.trim());
   const kept = r.headers?.get?.("fold-stored");
@@ -35,7 +37,8 @@ export async function open(fold, url, { fetch = globalThis.fetch, opts = () => (
     try { const f = await fetch(new URL(p, url).href, { cache: "no-cache" }); if (f.ok) files[p] = await f.text(); } catch {}
   }));
   const modified = r.headers?.get?.("last-modified");
-  return new Map(fold({ root, files, opts: opts(modified && !Number.isNaN(Date.parse(modified)) ? new Date(modified).toISOString() : null) }));
+  const whole = await live(root);
+  return new Map(fold({ root: whole, files, opts: opts(modified && !Number.isNaN(Date.parse(modified)) ? new Date(modified).toISOString() : null) }));
 }
 
 /** The document this viewer reads: the fold-data meta's (`{path, source}`), or one named in the address (`?data=<path>`, as the
@@ -46,6 +49,18 @@ export function dataOf(search, base, meta) {
   const u = new URL(named, base);
   if (!/^\/(?![/\\])/.test(named) || u.origin !== new URL(base).origin) return { path: named, error: "only a path on this site, from /, is read" };
   return { path: u.pathname + u.search, url: u.href, source: null };
+}
+
+/** The fold beside the one at `path` (`dir` 1 the next, -1 the previous), among its parent's child folds: `]]` and `[[`, vim's section
+ * motions (RECOMMEND-consultant-2026-11-01-reversible-no-approval-and-sign-in-basis S5). From a group (Needs you › Approvals) that is
+ * the next group; from an item, the next item. Path arithmetic only: no cursor is kept. Null at either end, at the root, or where
+ * the parent's next row is not a fold of its own (a "back to the top" link). */
+export function beside(nodes, path, dir) {
+  if (!path.length) return null;
+  const up = path.slice(0, -1), kids = nodes.get(docId(up))?.kids ?? [];
+  const i = kids.findIndex((k) => k.id === path[path.length - 1]);
+  const k = i < 0 ? null : kids[i + dir];
+  return k && !k.href ? [...up, k.id] : null;
 }
 
 /** A source id as one segment of a haecceity (src/id.rs `segment_of`): every UTF-8 byte but `[A-Za-z0-9._-]` as `%XX`, uppercase. */

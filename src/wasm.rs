@@ -11,6 +11,8 @@
 //!                               (ax_json's output): `{"html": "<main>…"}`, or `{"error": "fold-ax: …"}` where toDom refuses
 //!   site_json(ptr, len) -> u64  every fold of a folded document as a whole page at its real path (src/page.rs), from
 //!                               `{nodes, source, base?, localTimeZone?}`: `[{id, mode, href, file, html | error}, ...]`
+//!   needs_json(ptr, len) -> u64 a document with Needs you read live (src/needs.rs), from `{root, needs?, error?, now}`: the
+//!                               root to fold, its sign items those of `needs` (fold serve's `needs.json`), first, as Approvals
 //!   dealloc(ptr, len)           frees either buffer
 //!
 //! `files` maps each `from` path to its text; a path not in it reads as missing, with fold.ts's ENOENT note.
@@ -91,6 +93,11 @@ pub fn ax_text(input: &str) -> String {
     })
 }
 
+/// A document with Needs you read live (src/needs.rs `overlay_case`), from `{root, needs?, error?, now}`: the root to fold.
+pub fn needs_text(input: &str) -> String {
+    json_call(input, |case| serde_json::to_string(&crate::needs::overlay_case(&case)?).map_err(|e| e.to_string()))
+}
+
 /// One fold's HTML, from its accessibility tree: `{"html": ...}`.
 pub fn html_text(input: &str) -> String {
     json_call(input, |ax| Ok(json!({ "html": crate::html::html(&ax)? }).to_string()))
@@ -155,4 +162,11 @@ pub unsafe extern "C" fn html_json(ptr: *const u8, len: usize) -> u64 {
 #[no_mangle]
 pub unsafe extern "C" fn site_json(ptr: *const u8, len: usize) -> u64 {
     call(ptr, len, site_text)
+}
+
+/// # Safety
+/// `ptr` and `len` are UTF-8 the host wrote into a buffer from `alloc(len)`.
+#[no_mangle]
+pub unsafe extern "C" fn needs_json(ptr: *const u8, len: usize) -> u64 {
+    call(ptr, len, needs_text)
 }

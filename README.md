@@ -36,7 +36,37 @@ It reads the document again each minute. Served as is: at `/fold/` on phobos by 
 `checks.viewer` runs `viewer/viewer.test.ts` on every golden: the document fetched from a data URL folds to the golden folds; every
 location the viewer links to shows the golden tree; every fold derives its DOM with no refusal (the AX gate); the walk over what it
 shows is the golden walk (the load gate). `checks.viewer-browser` (Linux) serves the package at `/fold/` and the `sample` page as its
-data, and loads it in headless Chromium at 390×844 and 1024×1366: each location must show the fold the core folds there.
+data, and loads it in headless Chromium at 390×844 and 1024×1366: each location must show the fold the core folds there. It also
+fakes `needs.json` and chitin-approve's API, stubs the passkey, and runs the Needs-you flow described next: Enter approves one item,
+`]]` steps, and Decline declines the other.
+
+### Needs you, live, and the sign act
+
+Needs you is read live, not from the page the producer wrote minutes ago (BRIEF-stint-2026-11-02-approve-into-fold;
+RECOMMEND-consultant-2026-11-01-reversible-no-approval-and-sign-in-basis S3 and S5). Before folding the fleet's document, the
+viewer reads `needs.json` beside it (fold serve's route, below). The core's `needs` entry (src/needs.rs) then:
+- takes the producer's sign items out of the Needs-you section;
+- puts what waits now first, in a titled group, Approvals. That group is a fold of its own, so it has its own heading.
+
+The other items stay where the producer put them: no group is invented from an id. When the read fails (the host asleep, another
+login, no `--needs-as`), Approvals says why and offers nothing to sign. The viewer reads `needs.json` again in four cases: on open,
+on going into Needs you, with each minute's refresh, and after every act on an intent.
+
+Each live item is sign.ts's (`needs/sign-<id>`) and has two acts. Both are forms carrying `data-intent` and `data-call`, and
+`viewer/sign.js` takes them in the page:
+- **Approve with passkey** is the item's first act, so Enter on the item runs it, as the rotor's action does. The script sends
+  `GET /approve/v1/challenge/<id>` to chitin-approve, unchanged. It then says the challenge's own recipient, text and frame hash.
+  If those are not what the item showed, it stops before the passkey; otherwise it runs `navigator.credentials.get` and posts the
+  assertion. It retries 429, and a 504 on the challenge. It never retries an assertion. The endpoints are built from the intent's
+  12-hex id, never read from a document, and nothing signed comes from the page's data. The seats verify the assertion themselves.
+- **Decline** posts `{}` as JSON to fold serve's `decline/<id>`. It is unsigned, because declining narrows.
+
+An item that has gone takes you back to its group, or to Needs you if it was the last. There a status line (`#said`) says what was
+done. Keys: j/k move, Enter goes in (or, on an item, runs its act), h goes back, and `]]`/`[[` step to the next or previous fold
+beside the one you are in. From a group that is the next group; from an item, the next item. This is vim's section motion, and it is
+path arithmetic (`view.js` `beside`), with no cursor kept. The rotor is the page's own structure: the fold's `main` landmark,
+each group's heading and each item's named forms. The worker (`sw.js`) leaves `no-store` requests and `/approve/` to the
+network: a kept challenge or a kept list must never answer.
 
 ## Pages at real paths
 
@@ -51,7 +81,7 @@ presents as slides also has `…/@slides/`.
   `fold sink` deployed, every followed link would POST into a 405; it comes back only when a sink is deployed for a real write.
 - **Acts:** a fold's act is a `<form>` named by the fold, posting its cap, call and args as hidden fields to `<base>act/<path>/<act key>`
   with a native submit button, and no script (BRIEF-basis-forms-push-signing-2026-10-31 §1). The passkey (`webauthn`, `approve`)
-  GETs the fold's sign page instead, which runs the ceremony.
+  GETs the fold's sign page instead, where it has one; with JS on, the viewer runs it in the page (Needs you, live, above).
 - **A way back:** a missing fold, one whose data failed to load (`failed`), and a root with nothing in it each show the path (to the
   root at least), one line saying what was asked for and why there is nothing, and, off the root, a link back to it (§5).
 - **Ids:** the h1 and each child row have the HTML id of their path under the document; a row is an RDFa `schema:WebPageElement` (`resource="#<id>"`) whose `schema:about` (an empty span's `resource`) is the IRI of the thing it shows (id.rs, brief item 20). The id is the element's; the IRI is the data's; the row is never the data.
@@ -77,7 +107,8 @@ The same test writes the fold.css block and `native/Colors.xcassets` (any, dark 
 ## fold serve and fold sink
 
 Two processes (src/bin/fold.rs), each on 127.0.0.1 for `tailscale serve` to put at a mount, neither run as root (brief item 27: one
-binary holding every read and write was the riskiest call). Approvals go through neither; they stay chitin's `/approve`.
+binary holding every read and write was the riskiest call). Neither holds or signs an approval. The viewer runs the passkey in the
+page against chitin-approve's `/approve/v1/*` (above), and fold serve only lists what waits and declines.
 
 `fold serve --root <dir> --mount /fold --port <n> [--no-store <prefix>]...` (src/serve.rs) is read-only: GET and HEAD of one
 directory's files, and nothing else. It writes nothing, takes no body (413), and answers every other method 405. The one body it
@@ -91,7 +122,7 @@ with `call` ack, defer or decline runs (`chitin ack <msg> acting|deferred|declin
 id>`), and so does `chitin`/`say` (Bobby 38e765d3, which widens S2 42184457): its act carries an `input`, and the form's one typed line
 must be printable ASCII within that input's `maxlength`. Free text on an ack, defer or decline is 422, and so is a bad line. It is
 sent once per token, always as seat `fold-act` (`chitin say --as fold-act --meta ref=fold:<act id> <to> <line>`), whatever
-`--act-seat` says. Every other pair is 422, the passkey (`approve`/`sign`, which stays on chitin's `/approve`) among them. Before
+`--act-seat` says. Every other pair is 422, including the passkey (`approve`/`sign`, which the viewer runs against chitin-approve). Before
 the actor runs, every check must pass:
 - the peer is loopback;
 - `Tailscale-User-Login` is the login;
@@ -103,7 +134,14 @@ The act comes from the site's act map (`_acts.json`, written by `site()` and nev
 back to the fold, whose status line then says what was done. A stale token, or a fold that changed, gets the page back with
 fresh tokens and nothing done. Each POST leaves one line in `acts.jsonl` (0600); for a say, that line has the text's length and
 sha-256, never the text. goldens/serve/acts.json holds every refusal and success, and tools/act-e2e.sh (`checks.act-e2e`) runs
-one ack and one say end to end with curl and a stub chitin. It replaces
+one ack and one say end to end with curl and a stub chitin. With `--needs-as <title>`, two more routes run under the same checks
+(loopback, the login, through serve, same-origin):
+- `GET <mount>/needs.json` is `{as, waiting}`: the title's waiting intents from `chitin pending --as <title> --json`, read on
+  each request and cut to what is shown (`no-store`, no validator).
+- `POST <mount>/decline/<id>` takes JSON only. It checks the id as chitin's, then reads the list again just before
+  `chitin decline <id>`, which would rename any id. So only an intent that waits for that title is declined (409 otherwise).
+
+goldens/needs/serve.json holds both routes' refusals and successes, and act-e2e runs them with the stub. The act tools replace
 fold-serve's darkhttpd agents (brief items 23-24), which send no ETag, no per-file Cache-Control and no custom headers.
 
 | Resource | Cache-Control | Validator |
@@ -136,6 +174,10 @@ document the way the viewer does and writes nothing (src/basis.rs, src/bin/basis
 
     basis read [<path>]... [--doc <file>] [--json]
     basis needs [--doc <file>] [--json]     # basis read "Needs you"
+    … [--needs <needs.json>]                # Needs you read live, as the viewer reads it
+
+With `--needs` (a saved `needs.json` answer), the document gets the same overlay the viewer gives it, so
+`Needs you/Approvals/<item>` is the same path in both. An act on an intent reads `act: Approve with passkey [approve <id>]`.
 
 The document is `--doc`, else `$BASIS_DOC`, else fleet-map's `~/.local/state/fold-data/fleet/page.json`. A path is a list of
 steps joined by `/`. Each step is a fold's id, as written or as its page's anchor writes it, or else its title (case folded),
@@ -147,7 +189,7 @@ so `needs`, `"Needs you"` and `needs/needs-ask-0` all reach the same fold. The t
 - one line per row, holding the row's spoken words (ax.rs `spoken`, the words a screen reader says);
 - `→ <path>` on a row that goes into a fold. That path is the page's row anchor, and `basis read` takes it.
 - `↗ <href>` on a row whose link comes from the data;
-- `act: <name> [<act id>]` for acts.
+- `act: <name> [<act id>]` for acts (`[<call> <intent>]` for an act on an intent).
 
 `--json` prints the fold's accessibility tree instead. `tests/basis.rs` holds every walk golden's folds against
 `goldens/basis/<case>.txt`, and checks that every `→` path resolves and is an anchor its page writes.
