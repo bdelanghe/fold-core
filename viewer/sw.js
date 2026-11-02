@@ -1,7 +1,8 @@
 // The viewer's service worker (COGNITIVE-BROWSER-SDK-2026-10-30 step 3; brief items 10 and 22). phobos sleeps while Bobby is away,
 // so with its host asleep /fold must still open and show the last fold it read, said as not updated since then (index.html).
-// - The shell (this build's files) is kept in a cache named by the build's digest (@VERSION@, set by packages.viewer) and answered
-//   from it; a new build installs a new cache and drops the old.
+// - The shell (this build's files) is kept in a cache named by the build's digest (@VERSION@, set by packages.viewer); like the page, it goes
+//   to the network first and is answered from that cache only when the network is late or down (shellFile). A new build installs a new
+//   cache and drops the old.
 // - A page (a navigation) and the data (the document and its `from` files, any other GET on this origin) go to the network first.
 //   What comes back is kept; with no answer within WAIT ms, or none at all, the kept copy answers, marked `Fold-Stored: <ISO time>`
 //   (when it was kept), which is how the viewer knows it is showing the past. Nothing is kept that was not a 200.
@@ -36,9 +37,21 @@ async function fresh(req) {
   return kept ?? net;
 }
 
+// A shell file: the network's answer within WAIT ms, else this build's kept copy, else the network's late answer or its failure.
+// Not cache-first: the page itself goes to the network first (fresh), so a cache-first shell paired a new index.html with the last
+// build's modules until the new worker installed, and the page died on an import ("view.js does not provide an export named
+// 'haecceityOf'", stuck at Loading…, 2026-11-02). The page and its shell now come from the same place: both from the network while
+// the host is up, both from the kept copies while it sleeps.
+async function shellFile(req, key) {
+  const net = fetch(req);
+  const late = new Promise((r) => setTimeout(r, WAIT, null));
+  const first = await Promise.race([net.then((r) => (r.ok ? r : null), () => null), late]);
+  return first ?? (await caches.match(key, { cacheName: SHELL })) ?? net;
+}
+
 self.addEventListener("fetch", (e) => {
   const req = e.request, u = new URL(req.url);
   if (req.method !== "GET" || u.origin !== self.location.origin || req.headers.get("accept") === "text/event-stream") return;
-  if (shell.has(u.origin + u.pathname)) e.respondWith(caches.match(u.origin + u.pathname, { cacheName: SHELL }).then((r) => r ?? fetch(req)));
+  if (shell.has(u.origin + u.pathname)) e.respondWith(shellFile(req, u.origin + u.pathname));
   else e.respondWith(fresh(req));
 });
