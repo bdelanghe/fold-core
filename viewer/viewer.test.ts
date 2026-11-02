@@ -8,7 +8,7 @@ import { join } from "node:path";
 import { core } from "../js/fold-core.ts";
 import { toDom } from "./fold-dom.js";
 import { at, beside, dataOf, haecceityOf, href, open, pathOf, segmentOf, since, viewOf } from "./view.js";
-import { ENDPOINTS, dec, enc, readNeeds, sign } from "./sign.js";
+import { ENDPOINTS, dec, enc, notifyHere, readNeeds, sign } from "./sign.js";
 import { aboutOf, contextOf, embed, flagUnnamed, pinOf, reportToken } from "./clax.js";
 
 const goldens = join(import.meta.dir, "..", "goldens");
@@ -363,4 +363,74 @@ test("sign: needs.json is read as the core's needs entry takes it, never stored 
   expect(calls[0]).toBe("GET https://phobos.test/fold/needs.json no-store signal");
   expect(await readNeeds("https://phobos.test/fold/forbidden.json", { fetch })).toEqual({ error: "403 not who this server acts for" });
   expect(await readNeeds("x", { fetch: (async () => { throw new TypeError("Load failed"); }) as any })).toEqual({ error: "Load failed" });
+});
+
+// Notifications (BRIEF addendum 2): Notify me asks the browser, then hands the subscription to fold serve's push/subscribe; Stop
+// takes it off both. A browser without push (an iPhone page not on the Home Screen) is told how, and nothing is asked.
+test("notify: this device subscribes with the server's key, and stops", async () => {
+  const calls: string[] = [];
+  let sub: any = null, perm = "granted";
+  const reg = { pushManager: {
+    getSubscription: async () => sub,
+    subscribe: async (o: any) => { calls.push(`subscribe ${o.userVisibleOnly} ${new Uint8Array(o.applicationServerKey).join(",")}`); sub = { endpoint: "https://web.push.apple.com/x", toJSON: () => ({ endpoint: "https://web.push.apple.com/x", keys: { p256dh: "P", auth: "A" } }), unsubscribe: async () => { calls.push("browser unsubscribe"); sub = null; } }; return sub; },
+  } };
+  const env = {
+    navigator: { serviceWorker: { ready: Promise.resolve(reg) } }, PushManager: function () {},
+    Notification: { requestPermission: async () => { calls.push("permission"); return perm; } },
+    fetch: (async (url: string, init?: RequestInit) => {
+      calls.push(`${init?.method ?? "GET"} ${url}${init?.body ? " " + init.body : ""}`);
+      return new Response(url.endsWith("/push/key") ? JSON.stringify({ key: enc(new Uint8Array([4, 1, 2]).buffer) }) : JSON.stringify({ ok: true }));
+    }) as any,
+  };
+  const base = "https://phobos.test/fold/#/needs";
+  expect(await notifyHere("subscribe", base, env)).toEqual({ ok: true, said: "This device will be notified when something waits for your signature." });
+  expect(calls).toEqual(["permission", "GET https://phobos.test/fold/push/key", "subscribe true 4,1,2",
+    'POST https://phobos.test/fold/push/subscribe {"endpoint":"https://web.push.apple.com/x","keys":{"p256dh":"P","auth":"A"}}']);
+  calls.length = 0;
+  expect((await notifyHere("unsubscribe", base, env)).said).toBe("This device won't be notified any more.");
+  expect(calls).toEqual(['POST https://phobos.test/fold/push/unsubscribe {"endpoint":"https://web.push.apple.com/x"}', "browser unsubscribe"]);
+  expect((await notifyHere("unsubscribe", base, env)).said).toBe("This device wasn't being notified.");
+  // permission refused: nothing subscribed, nothing sent
+  calls.length = 0; perm = "denied";
+  expect((await notifyHere("subscribe", base, env)).ok).toBe(false);
+  expect(calls).toEqual(["permission"]);
+  // no push in this browser: told how, nothing asked
+  calls.length = 0;
+  expect((await notifyHere("subscribe", base, { ...env, PushManager: undefined } as any)).said).toContain("Home Screen");
+  expect(calls).toEqual([]);
+});
+
+/** sw.js run in a fake worker: its listeners, and what they did. */
+function worker() {
+  const on: Record<string, (e: any) => void> = {}, did: any[] = [];
+  const self: any = { location: new URL("https://phobos.test/fold/sw.js"), addEventListener: (k: string, f: any) => { on[k] = f; },
+    registration: { showNotification: async (t: string, o: any) => { did.push(["show", t, o]); } }, clients: { claim: async () => {} }, skipWaiting: () => {} };
+  new Function("self", "caches", "fetch", readFileSync(join(import.meta.dir, "sw.js"), "utf8").replace("@VERSION@", "t"))(self, {}, () => {});
+  const fire = async (k: string, e: any) => { let w: Promise<unknown> = Promise.resolve(); on[k]({ ...e, waitUntil: (p: Promise<unknown>) => { w = p; } }); await w; };
+  return { self, did, fire };
+}
+
+test("sw: a push shows the item's one line, tagged by it, and a tap opens its fold in the viewer", async () => {
+  const w = worker(), push = (d: unknown) => w.fire("push", { data: { json: () => d } });
+  await push({ text: "To personal-assistant", path: "/fold/needs/approvals/needs-sign-0123456789ab/" });
+  await push({ title: "To x", url: "/fold/../../etc/", tag: "t1" });
+  await push({ text: "", path: "https://evil.test/fold/x/" });
+  await w.fire("push", { data: { json: () => { throw new Error("not JSON"); } } });
+  expect(w.did).toEqual([
+    ["show", "To personal-assistant", { tag: "https://phobos.test/fold/#/needs/approvals/needs-sign-0123456789ab", data: { url: "https://phobos.test/fold/#/needs/approvals/needs-sign-0123456789ab" } }],
+    ["show", "To x", { tag: "t1", data: { url: "https://phobos.test/fold/#/needs" } }],
+    ["show", "Something needs you", { tag: "https://phobos.test/fold/#/needs", data: { url: "https://phobos.test/fold/#/needs" } }],
+    ["show", "Something needs you", { tag: "https://phobos.test/fold/#/needs", data: { url: "https://phobos.test/fold/#/needs" } }],
+  ]);
+  // no sound, vibration or renotify of its own
+  for (const [, , o] of w.did) expect(Object.keys(o).sort()).toEqual(["data", "tag"]);
+  // a tap: an open window of this app goes there; with none, one opens there
+  const opened: string[] = [], url = "https://phobos.test/fold/#/needs/approvals/needs-sign-0123456789ab";
+  const note = { close: () => opened.push("closed"), data: { url } };
+  w.self.clients.matchAll = async () => [{ url: "https://phobos.test/fold/#/", focus: async () => opened.push("focus"), navigate: async (u: string) => opened.push(`navigate ${u}`) }];
+  await w.fire("notificationclick", { notification: note });
+  w.self.clients.matchAll = async () => [];
+  w.self.clients.openWindow = async (u: string) => opened.push(`open ${u}`);
+  await w.fire("notificationclick", { notification: note });
+  expect(opened).toEqual(["closed", "focus", `navigate ${url}`, "closed", `open ${url}`]);
 });

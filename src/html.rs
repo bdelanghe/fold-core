@@ -147,6 +147,10 @@ fn node(ax: &Value, n: &mut usize, row: Option<&str>) -> Result<(El, Option<Stri
             e.attrs.push(("data-intent", i.to_string()));
             e.attrs.push(("data-call", c.to_string()));
         }
+        // a notification act (ax.rs act_form): its call
+        if let Some(p) = get(ax, "push").and_then(Value::as_str) {
+            e.attrs.push(("data-push", p.to_string()));
+        }
         for f in get(ax, "fields").and_then(Value::as_array).into_iter().flatten() {
             let (k, v) = (js::string(f.get(0)), js::string(f.get(1)));
             e.body.push_str(&format!("<input type=\"hidden\" name=\"{}\" value=\"{}\">", attr(&k), attr(&v)));

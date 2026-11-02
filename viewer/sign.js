@@ -85,3 +85,33 @@ export async function readNeeds(url, { fetch = globalThis.fetch, wait = 4000 } =
     return { error: why(e) };
   }
 }
+
+/**
+ * Notifications on this device (BRIEF addendum 2): `call` "subscribe" asks the browser for permission and a push subscription with
+ * fold serve's VAPID public key (`push/key`), and hands it to `push/subscribe`, which hands it to chitin; "unsubscribe" takes it off
+ * both. `base` is the viewer's own URL (the push routes are beside it). Resolves to {ok, said}. Never throws. On an iPhone a web page
+ * gets pushes only once it is on the Home Screen: then PushManager is there.
+ */
+export async function notifyHere(call, base, { navigator: nav = globalThis.navigator, fetch = globalThis.fetch, Notification: N = globalThis.Notification, PushManager: P = globalThis.PushManager } = {}) {
+  const url = (p) => new URL(p, base).href;
+  const post = async (p, body) => answerOf(await fetch(url(p), { method: "POST", cache: "no-store", headers: { "content-type": "application/json" }, body: JSON.stringify(body) }));
+  try {
+    if (!nav?.serviceWorker || !P || !N) return { ok: false, said: "This browser can't notify you from this page. On an iPhone, add Basis to the Home Screen and open it from there." };
+    const reg = await nav.serviceWorker.ready, had = await reg.pushManager.getSubscription();
+    if (call === "unsubscribe") {
+      if (!had) return { ok: true, said: "This device wasn't being notified." };
+      const v = await post("push/unsubscribe", { endpoint: had.endpoint });
+      await had.unsubscribe();
+      return v.ok ? { ok: true, said: "This device won't be notified any more." } : { ok: false, said: `Stopped on this device, but the server said: ${v.reason ?? "no"}.` };
+    }
+    if (call !== "subscribe") return { ok: false, said: "That is not a notification act." };
+    if ((await N.requestPermission()) !== "granted") return { ok: false, said: "Notifications are off for this site in the browser, so nothing changed." };
+    const k = await answerOf(await fetch(url("push/key"), { cache: "no-store" }));
+    if (typeof k.key !== "string") return { ok: false, said: `Not on: ${k.error ?? k.reason ?? "no key"}.` };
+    const sub = had ?? (await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: dec(k.key) }));
+    const v = await post("push/subscribe", sub.toJSON ? sub.toJSON() : sub);
+    return v.ok ? { ok: true, said: "This device will be notified when something waits for your signature." } : { ok: false, said: `Not on: ${v.reason ?? "refused"}.` };
+  } catch (e) {
+    return { ok: false, said: `Not on: ${why(e)}.` };
+  }
+}

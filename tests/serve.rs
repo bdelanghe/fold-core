@@ -220,7 +220,7 @@ fn acting_site(name: &str, stub: &Stub) -> Site {
         fs::create_dir_all(f.parent().unwrap()).unwrap();
         fs::write(&f, p["html"].as_str().or(p["json"].as_str()).unwrap()).unwrap();
     }
-    let acting = Acting { login: ME.into(), host: HOST.into(), key: KEY.to_vec(), actor: Box::new(stub.clone()), spent: Default::default(), needs_as: None };
+    let acting = Acting { login: ME.into(), host: HOST.into(), key: KEY.to_vec(), actor: Box::new(stub.clone()), spent: Default::default(), needs_as: None, notify_as: None };
     Site { root, mount: "/fold".into(), no_store: vec![], acting: Some(acting), reporting: None }
 }
 

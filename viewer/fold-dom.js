@@ -53,6 +53,8 @@ export function toDom(doc, ax, ids = { n: 0 }, row = null) {
     e.setAttribute("aria-label", ax.name); e.setAttribute("method", String(ax.method)); e.setAttribute("action", String(ax.action));
     // An act on an intent (the passkey, the decline): its id and call, for the script that takes it in the page (sign.js).
     if (typeof ax.intent === "string" && typeof ax.call === "string") { e.setAttribute("data-intent", ax.intent); e.setAttribute("data-call", ax.call); }
+    // A notification act (subscribe this device, or stop): its call, for the script that asks the browser (index.html).
+    if (typeof ax.push === "string") e.setAttribute("data-push", ax.push);
     for (const [k, v] of ax.fields ?? []) { const i = doc.createElement("input"); i.setAttribute("type", "hidden"); i.setAttribute("name", k); i.setAttribute("value", v); e.append(i); }
   }
   // A comment's box (src/serve.rs's comment page): named by its label, posted as `field`, never prefilled.

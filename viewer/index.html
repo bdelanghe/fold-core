@@ -58,7 +58,7 @@
 import { core } from "./fold-core.js";
 import { toDom, liveLine } from "./fold-dom.js";
 import { at, beside, dataOf, docId, haecceityOf, href as link, modeOf, open, pathOf, since, viewOf } from "./view.js";
-import { ENDPOINTS, intentOk, readNeeds, sign } from "./sign.js";
+import { ENDPOINTS, intentOk, notifyHere, readNeeds, sign } from "./sign.js";
 import { embed } from "./clax.js";
 const zone = Intl.DateTimeFormat().resolvedOptions().timeZone;
 const meta = document.querySelector('meta[name="fold-data"]');
@@ -157,6 +157,16 @@ addEventListener("hashchange", () => {
 // waits is read again, and an item that has gone takes you back to its group, where what was done is said.
 document.addEventListener("submit", async (e) => {
   const f = e.target, id = f?.dataset?.intent, call = f?.dataset?.call;
+  // Notify me on this device, or stop (BRIEF addendum 2): only a page can ask the browser, so the script takes it; said in the fold's status line.
+  if (f?.dataset?.push) {
+    e.preventDefault();
+    if (f.getAttribute("aria-busy") === "true") return;
+    f.setAttribute("aria-busy", "true");
+    const r = await notifyHere(f.dataset.push, location.href);
+    f.removeAttribute("aria-busy");
+    const s = document.getElementById("did"); if (s) s.textContent = r.said;
+    return;
+  }
   if (!id) return;
   e.preventDefault();
   if (!intentOk(id) || f.getAttribute("aria-busy") === "true") return;

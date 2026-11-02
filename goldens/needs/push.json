@@ -1,0 +1,241 @@
+[
+  {
+    "what": "needs.json says notifications are sent here",
+    "target": "/needs.json",
+    "method": "GET",
+    "body_limit": 0,
+    "status": 200,
+    "body": {
+      "as": "bobby",
+      "waiting": [
+        {
+          "id": "0123456789ab",
+          "as": "bobby",
+          "declined": false,
+          "expired": false,
+          "to": "personal-assistant",
+          "text": "Route the plan to the hubs.",
+          "queued_by": "claude-break-glass",
+          "text_hash": "deadbeefcafe",
+          "created_at": "2026-10-30T11:57:55.000Z",
+          "age_s": 125
+        },
+        {
+          "id": "0a0a0a0a0a0a",
+          "as": "bobby",
+          "declined": false,
+          "expired": false,
+          "to": "personal-cake-goal",
+          "text": "Land <b>it</b> \"now\"."
+        }
+      ],
+      "push": true
+    },
+    "actor": [
+      "pending --as bobby"
+    ],
+    "log": null
+  },
+  {
+    "what": "the key a device subscribes with",
+    "target": "/push/key",
+    "method": "GET",
+    "body_limit": 0,
+    "status": 200,
+    "body": {
+      "key": "BPub_key-0"
+    },
+    "actor": [
+      "push Key"
+    ],
+    "log": null
+  },
+  {
+    "what": "not sent here: no route",
+    "target": "/push/key",
+    "method": "GET",
+    "body_limit": 0,
+    "status": 404,
+    "body": "Needs you sends no notifications here\n",
+    "actor": [],
+    "log": null
+  },
+  {
+    "what": "subscribe: handed to chitin cut to endpoint and keys",
+    "target": "/push/subscribe",
+    "method": "POST",
+    "body_limit": 4096,
+    "status": 200,
+    "body": {
+      "ok": true,
+      "said": "subscribed"
+    },
+    "actor": [
+      "push Subscribe(\"{\\\"endpoint\\\":\\\"https://web.push.apple.com/QGx-abc\\\",\\\"keys\\\":{\\\"p256dh\\\":\\\"BNcR\\\",\\\"auth\\\":\\\"tBHI\\\"}}\")"
+    ],
+    "log": {
+      "ts": 1793361600,
+      "login": "bobby@example.com",
+      "push": "subscribe",
+      "service": "web.push.apple.com",
+      "result": "ok"
+    }
+  },
+  {
+    "what": "subscribe: another login",
+    "target": "/push/subscribe",
+    "method": "POST",
+    "body_limit": 4096,
+    "status": 403,
+    "body": {
+      "ok": false,
+      "reason": "not who this server acts for"
+    },
+    "actor": [],
+    "log": {
+      "ts": 1793361600,
+      "login": "eve@example.com",
+      "push": "subscribe",
+      "service": null,
+      "result": "refused:403"
+    }
+  },
+  {
+    "what": "subscribe: cross-site",
+    "target": "/push/subscribe",
+    "method": "POST",
+    "body_limit": 4096,
+    "status": 403,
+    "body": {
+      "ok": false,
+      "reason": "cross-site"
+    },
+    "actor": [],
+    "log": {
+      "ts": 1793361600,
+      "login": "bobby@example.com",
+      "push": "subscribe",
+      "service": null,
+      "result": "refused:403"
+    }
+  },
+  {
+    "what": "subscribe: a form: JSON only",
+    "target": "/push/subscribe",
+    "method": "POST",
+    "body_limit": 4096,
+    "status": 415,
+    "body": {
+      "ok": false,
+      "reason": "send it as application/json"
+    },
+    "actor": [],
+    "log": {
+      "ts": 1793361600,
+      "login": "bobby@example.com",
+      "push": "subscribe",
+      "service": null,
+      "result": "refused:415"
+    }
+  },
+  {
+    "what": "subscribe: not https",
+    "target": "/push/subscribe",
+    "method": "POST",
+    "body_limit": 4096,
+    "status": 400,
+    "body": {
+      "ok": false,
+      "reason": "no https endpoint"
+    },
+    "actor": [],
+    "log": {
+      "ts": 1793361600,
+      "login": "bobby@example.com",
+      "push": "subscribe",
+      "service": null,
+      "result": "refused:400"
+    }
+  },
+  {
+    "what": "subscribe: no keys",
+    "target": "/push/subscribe",
+    "method": "POST",
+    "body_limit": 4096,
+    "status": 400,
+    "body": {
+      "ok": false,
+      "reason": "no keys.p256dh and keys.auth"
+    },
+    "actor": [],
+    "log": {
+      "ts": 1793361600,
+      "login": "bobby@example.com",
+      "push": "subscribe",
+      "service": null,
+      "result": "refused:400"
+    }
+  },
+  {
+    "what": "subscribe: chitin refuses it, and says why",
+    "target": "/push/subscribe",
+    "method": "POST",
+    "body_limit": 4096,
+    "status": 502,
+    "body": {
+      "ok": false,
+      "reason": "chitin did not take it: refused: the endpoint is not an https URL on a known push service"
+    },
+    "actor": [
+      "push Subscribe(\"{\\\"endpoint\\\":\\\"https://evil.example/x\\\",\\\"keys\\\":{\\\"p256dh\\\":\\\"a\\\",\\\"auth\\\":\\\"b\\\"}}\")"
+    ],
+    "log": {
+      "ts": 1793361600,
+      "login": "bobby@example.com",
+      "push": "subscribe",
+      "service": "evil.example",
+      "result": "chitin:failed"
+    }
+  },
+  {
+    "what": "subscribe: got, not posted",
+    "target": "/push/subscribe",
+    "method": "GET",
+    "body_limit": 0,
+    "status": 405,
+    "body": "push/subscribe is POST\n",
+    "actor": [],
+    "log": null
+  },
+  {
+    "what": "unsubscribe",
+    "target": "/push/unsubscribe",
+    "method": "POST",
+    "body_limit": 4096,
+    "status": 200,
+    "body": {
+      "ok": true,
+      "said": "removed"
+    },
+    "actor": [
+      "push Unsubscribe(\"https://web.push.apple.com/QGx-abc\")"
+    ],
+    "log": {
+      "ts": 1793361600,
+      "login": "bobby@example.com",
+      "push": "unsubscribe",
+      "service": "web.push.apple.com",
+      "result": "ok"
+    }
+  },
+  {
+    "what": "no such verb",
+    "target": "/push/list",
+    "method": "POST",
+    "body_limit": 4096,
+    "status": 404,
+    "body": "no such push route\n",
+    "actor": [],
+    "log": null
+  }
+]

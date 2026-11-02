@@ -38,7 +38,7 @@ location the viewer links to shows the golden tree; every fold derives its DOM w
 shows is the golden walk (the load gate). `checks.viewer-browser` (Linux) serves the package at `/fold/` and the `sample` page as its
 data, and loads it in headless Chromium at 390×844 and 1024×1366: each location must show the fold the core folds there. It also
 fakes `needs.json` and chitin-approve's API, stubs the passkey, and runs the Needs-you flow described next: Enter approves one item,
-`]]` steps, and Decline declines the other.
+`]]` steps, and Decline with passkey declines the other.
 
 ### Needs you, live, and the sign act
 
@@ -52,14 +52,27 @@ The other items stay where the producer put them: no group is invented from an i
 login, no `--needs-as`), Approvals says why and offers nothing to sign. The viewer reads `needs.json` again in four cases: on open,
 on going into Needs you, with each minute's refresh, and after every act on an intent.
 
-Each live item is sign.ts's (`needs/sign-<id>`) and has two acts. Both are forms carrying `data-intent` and `data-call`, and
-`viewer/sign.js` takes them in the page:
-- **Approve with passkey** is the item's first act, so Enter on the item runs it, as the rotor's action does. The script sends
-  `GET /approve/v1/challenge/<id>` to chitin-approve, unchanged. It then says the challenge's own recipient, text and frame hash.
-  If those are not what the item showed, it stops before the passkey; otherwise it runs `navigator.credentials.get` and posts the
-  assertion. It retries 429, and a 504 on the challenge. It never retries an assertion. The endpoints are built from the intent's
-  12-hex id, never read from a document, and nothing signed comes from the page's data. The seats verify the assertion themselves.
-- **Decline** posts `{}` as JSON to fold serve's `decline/<id>`. It is unsigned, because declining narrows.
+Each live item is sign.ts's (`needs/sign-<id>`) and has two acts, both the passkey, each a verdict on the item (the brief's
+addendum 1). Both are forms carrying `data-intent` and `data-call`, and `viewer/sign.js` `sign` takes them in the page:
+- **Approve with passkey** is the item's first act, so Enter on the item runs it, as the rotor's first action does. It uses
+  chitin-approve's `GET /approve/v1/challenge/<id>` and `POST /approve/v1/assertion/<id>`, unchanged.
+- **Decline with passkey** is the item's second act, its own button. It uses `GET` and `POST /approve/v1/decline/<id>`, the
+  path addendum 1 names for chitin-approve's decline. It is signed only when the challenge says `verdict: "decline"`, and an
+  approval is never signed when the challenge says otherwise. chitin binds each assertion to its verdict and the item's h, so
+  neither can be replayed as the other.
+
+Either way, the script first says the challenge's own recipient, text and h (the frame hash, else the intent's text hash). If those
+are not what the item showed, it stops before the passkey; otherwise it runs `navigator.credentials.get` and posts the assertion.
+It retries 429, and a 504 on the challenge, but never an assertion. The endpoints are built from the intent's 12-hex id
+(`src/needs.rs` `endpoints` and `sign.js` `ENDPOINTS` are one table), never read from a document, and nothing signed comes from the
+page's data. fold serve takes no verdict at all.
+
+**Notifications** (addendum 2). When fold serve sends them (`--notify-as`, so `needs.json` says `push: true`), Needs you itself
+has two more acts: **Notify me on this device** and **Stop notifying this device**. The script (`sign.js` `notifyHere`) asks the
+browser's permission, subscribes with fold serve's VAPID public key (`push/key`), and hands the subscription to `push/subscribe`.
+On an iPhone a page gets pushes only once Basis is on the Home Screen, and the act says so. A push shows the item's one line
+(`To <recipient>`, never its text), tagged by the item, with no sound or vibration of its own. A tap opens the item's fold in the
+viewer, where Approve and Decline are (`sw.js`).
 
 An item that has gone takes you back to its group, or to Needs you if it was the last. There a status line (`#said`) says what was
 done. Keys: j/k move, Enter goes in (or, on an item, runs its act), h goes back, and `]]`/`[[` step to the next or previous fold
@@ -108,7 +121,7 @@ The same test writes the fold.css block and `native/Colors.xcassets` (any, dark 
 
 Two processes (src/bin/fold.rs), each on 127.0.0.1 for `tailscale serve` to put at a mount, neither run as root (brief item 27: one
 binary holding every read and write was the riskiest call). Neither holds or signs an approval. The viewer runs the passkey in the
-page against chitin-approve's `/approve/v1/*` (above), and fold serve only lists what waits and declines.
+page against chitin-approve's `/approve/v1/*` (above), and fold serve only lists what waits.
 
 `fold serve --root <dir> --mount /fold --port <n> [--no-store <prefix>]...` (src/serve.rs) is read-only: GET and HEAD of one
 directory's files, and nothing else. It writes nothing, takes no body (413), and answers every other method 405. The one body it
@@ -134,14 +147,23 @@ The act comes from the site's act map (`_acts.json`, written by `site()` and nev
 back to the fold, whose status line then says what was done. A stale token, or a fold that changed, gets the page back with
 fresh tokens and nothing done. Each POST leaves one line in `acts.jsonl` (0600); for a say, that line has the text's length and
 sha-256, never the text. goldens/serve/acts.json holds every refusal and success, and tools/act-e2e.sh (`checks.act-e2e`) runs
-one ack and one say end to end with curl and a stub chitin. With `--needs-as <title>`, two more routes run under the same checks
-(loopback, the login, through serve, same-origin):
-- `GET <mount>/needs.json` is `{as, waiting}`: the title's waiting intents from `chitin pending --as <title> --json`, read on
-  each request and cut to what is shown (`no-store`, no validator).
-- `POST <mount>/decline/<id>` takes JSON only. It checks the id as chitin's, then reads the list again just before
-  `chitin decline <id>`, which would rename any id. So only an intent that waits for that title is declined (409 otherwise).
+one ack and one say end to end with curl and a stub chitin. More routes run under the same checks (loopback, the login, through
+serve, same-origin):
+- With `--needs-as <title>`: `GET <mount>/needs.json` is `{as, waiting, push}`. It lists the title's waiting intents from
+  `chitin pending --as <title> --json`, read on each request and cut to what is shown (`no-store`, no validator). There is no
+  decline route: a decline is a passkey verdict at chitin-approve.
+- With `--notify-as <seat>` too (addendum 2), fold serve sends notifications through chitin and keeps no key or subscription
+  itself:
+  - `GET <mount>/push/key` is chitin's VAPID public key (`chitin push vapid-public`).
+  - `POST <mount>/push/subscribe` and `push/unsubscribe` take JSON only. They hand the subscription, cut to
+    `{endpoint, keys}`, to `chitin push subscribe`, or take it off with `chitin push unsubscribe`.
+  - Every 30 s a watcher reads what waits. For each new intent it publishes one Needs-you record:
+    `chitin notify --as <seat> --dedupe needs-you:sign-<id> --url https://<host>/fold/needs/approvals/needs-sign-<id>/ "To <recipient>"`.
+    Nothing is sent for an item that leaves. chitin's notify-sink sends the Web Push: VAPID, RFC 8291, one push per item ever,
+    coalesced, quiet hours.
+  - Each line in the log names the intent, or the push service's host, never the text or an endpoint's path.
 
-goldens/needs/serve.json holds both routes' refusals and successes, and act-e2e runs them with the stub. The act tools replace
+goldens/needs/serve.json and push.json hold these routes' refusals and successes, and act-e2e runs them with the stub. The act tools replace
 fold-serve's darkhttpd agents (brief items 23-24), which send no ETag, no per-file Cache-Control and no custom headers.
 
 | Resource | Cache-Control | Validator |

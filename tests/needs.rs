@@ -6,7 +6,7 @@ use std::fs;
 use std::path::PathBuf;
 use std::sync::{Arc, Mutex};
 
-use fold_core::act::{Actor, Done};
+use fold_core::act::{Actor, Done, Push};
 use fold_core::serve::{answer, limit, Acting, Request, Site};
 use serde_json::{json, Value};
 
@@ -202,6 +202,10 @@ fn only_an_intents_own_endpoints_name_it() {
 struct Stub {
     calls: Arc<Mutex<Vec<String>>>,
     down: bool,
+    /// a notify chitin refuses once for this intent (its record is tried again at the next look)
+    refuse_once: Arc<Mutex<Option<String>>>,
+    /// the pending list, when not the fixture's
+    list: Arc<Mutex<Option<Value>>>,
 }
 
 impl Actor for Stub {
@@ -216,12 +220,39 @@ impl Actor for Stub {
         if self.down {
             return Err("chitin: state dir unreadable".into());
         }
-        Ok(pending())
+        Ok(self.list.lock().unwrap().clone().unwrap_or_else(pending))
+    }
+    fn notify(&self, seat: &str, title: &str, url: &str, dedupe: &str) -> Result<(), String> {
+        self.calls.lock().unwrap().push(format!("notify --as {seat} --dedupe {dedupe} --url {url} {title}"));
+        let mut r = self.refuse_once.lock().unwrap();
+        if r.as_deref().is_some_and(|id| dedupe.ends_with(id)) {
+            *r = None;
+            return Err("timeout: router did not answer".into());
+        }
+        Ok(())
+    }
+    fn push(&self, op: &Push) -> Result<String, String> {
+        self.calls.lock().unwrap().push(format!("push {op:?}"));
+        match op {
+            Push::Key => Ok("BPub_key-0".into()),
+            Push::Subscribe(s) if s.contains("evil") => Err("refused: the endpoint is not an https URL on a known push service".into()),
+            Push::Subscribe(_) => Ok("subscribed".into()),
+            Push::Unsubscribe(_) => Ok("removed".into()),
+        }
     }
 }
 
 fn served(stub: &Stub, needs_as: Option<&str>) -> Site {
-    let root = std::env::temp_dir().join(format!("fold-needs-{}-{}", needs_as.unwrap_or("none"), std::process::id()));
+    served_as(stub, needs_as, None)
+}
+
+fn served_as(stub: &Stub, needs_as: Option<&str>, notify_as: Option<&str>) -> Site {
+    let root = std::env::temp_dir().join(format!(
+        "fold-needs-{}-{}-{}",
+        needs_as.unwrap_or("none"),
+        notify_as.unwrap_or("none"),
+        std::process::id()
+    ));
     let _ = fs::remove_dir_all(&root);
     fs::create_dir_all(root.join("needs")).unwrap();
     fs::write(root.join("needs/index.html"), "<!doctype html><title>Needs you</title><main><h1>Needs you</h1></main>\n").unwrap();
@@ -232,6 +263,7 @@ fn served(stub: &Stub, needs_as: Option<&str>) -> Site {
         actor: Box::new(stub.clone()),
         spent: Default::default(),
         needs_as: needs_as.map(str::to_string),
+        notify_as: notify_as.map(str::to_string),
     };
     Site { root, mount: "/fold".into(), no_store: vec![], acting: Some(acting), reporting: None }
 }
@@ -312,6 +344,141 @@ fn needs_json_refuses_all_but_the_one_login_and_nothing_declines_here() {
     assert_eq!(*down.calls.lock().unwrap(), ["pending --as bobby"]);
     bless_or_hold("serve.json", &Value::Array(got));
     for site in [s, off, broken] {
+        let _ = fs::remove_dir_all(&site.root);
+    }
+}
+
+/// Notifications (BRIEF addendum 2): what is pushed for a new item is its one line and its fold, never its text; the overlay gives
+/// Needs you its two device acts only when the server sends them; and the forms are the script's (data-push).
+#[test]
+fn a_notice_is_the_items_line_and_fold_and_the_acts_appear_only_when_sent() {
+    let w = &fold_core::needs::waiting(&pending(), "bobby")[0];
+    assert_eq!(
+        fold_core::needs::notice(w, "phobos.tail556f5b.ts.net"),
+        Some((
+            "To personal-assistant".into(),
+            "https://phobos.tail556f5b.ts.net/fold/needs/approvals/needs-sign-0123456789ab/".into(),
+            "needs-you:sign-0123456789ab".into()
+        ))
+    );
+    // the url is the fold the viewer folds the item to
+    let root = overlay(json!({ "root": page(), "needs": { "as": "bobby", "waiting": pending() }, "now": NOW_MS }));
+    let folds: Value = serde_json::from_str(&fold_core::wasm::fold_text(&json!({ "root": root, "opts": {} }).to_string())).unwrap();
+    assert!(folds.as_array().unwrap().iter().any(|p| p[0] == "needs~approvals~needs-sign-0123456789ab"));
+    assert_eq!(fold_core::needs::notice(w, "evil host/x"), None);
+    assert_eq!(fold_core::needs::notice(&json!({ "id": "../x", "to": "a" }), "h"), None);
+    assert!(!fold_core::needs::notice(w, "h").unwrap().0.contains("Route the plan"), "never the text");
+    // the acts: only with push: true
+    let acts = |push: bool| {
+        let r = overlay(json!({ "root": page(), "needs": { "as": "bobby", "waiting": pending(), "push": push }, "now": NOW_MS }));
+        r["sections"][0].get("acts").cloned()
+    };
+    assert_eq!(acts(false), None);
+    assert_eq!(
+        acts(true),
+        Some(json!([
+            { "cap": "push", "call": "subscribe", "label": "Notify me on this device", "args": {} },
+            { "cap": "push", "call": "unsubscribe", "label": "Stop notifying this device", "args": {} }
+        ]))
+    );
+    let root = overlay(json!({ "root": page(), "needs": { "as": "bobby", "waiting": pending(), "push": true }, "now": NOW_MS }));
+    let folds: Value = serde_json::from_str(&fold_core::wasm::fold_text(&json!({ "root": root, "opts": {} }).to_string())).unwrap();
+    let node = folds.as_array().unwrap().iter().find(|p| p[0] == "needs").unwrap()[1].clone();
+    let tree: Value = serde_json::from_str(&fold_core::wasm::ax_text(
+        &json!({ "node": node, "path": ["needs"], "mode": "folds", "href": "viewer" }).to_string(),
+    ))
+    .unwrap();
+    let html: Value = serde_json::from_str(&fold_core::wasm::html_text(&tree.to_string())).unwrap();
+    let html = html["html"].as_str().unwrap();
+    assert!(html.contains(r#"aria-label="Notify me on this device" method="get" action="" data-push="subscribe">"#), "{html}");
+    assert!(html.contains(r#"aria-label="Stop notifying this device" method="get" action="" data-push="unsubscribe">"#), "{html}");
+}
+
+#[test]
+fn push_routes_hand_a_subscription_to_chitin_for_the_one_login_only() {
+    let stub = Stub::default();
+    let (on, off) = (served_as(&stub, Some("bobby"), Some("fold-notify")), served(&stub, Some("bobby")));
+    let sub = r#"{"endpoint":"https://web.push.apple.com/QGx-abc","keys":{"p256dh":"BNcR","auth":"tBHI"},"expirationTime":null,"extra":"dropped"}"#;
+    let cases: Vec<(&str, &Site, Request)> = vec![
+        ("needs.json says notifications are sent here", &on, from_me("GET", "/needs.json", "", &[])),
+        ("the key a device subscribes with", &on, from_me("GET", "/push/key", "", &[])),
+        ("not sent here: no route", &off, from_me("GET", "/push/key", "", &[])),
+        ("subscribe: handed to chitin cut to endpoint and keys", &on, from_me("POST", "/push/subscribe", sub, &[])),
+        ("subscribe: another login", &on, from_me("POST", "/push/subscribe", sub, &[("Tailscale-User-Login", Some("eve@example.com"))])),
+        ("subscribe: cross-site", &on, from_me("POST", "/push/subscribe", sub, &[("Sec-Fetch-Site", Some("cross-site"))])),
+        (
+            "subscribe: a form: JSON only",
+            &on,
+            from_me("POST", "/push/subscribe", "endpoint=x", &[("Content-Type", Some("application/x-www-form-urlencoded"))]),
+        ),
+        (
+            "subscribe: not https",
+            &on,
+            from_me("POST", "/push/subscribe", r#"{"endpoint":"http://web.push.apple.com/x","keys":{"p256dh":"a","auth":"b"}}"#, &[]),
+        ),
+        ("subscribe: no keys", &on, from_me("POST", "/push/subscribe", r#"{"endpoint":"https://web.push.apple.com/x"}"#, &[])),
+        (
+            "subscribe: chitin refuses it, and says why",
+            &on,
+            from_me("POST", "/push/subscribe", r#"{"endpoint":"https://evil.example/x","keys":{"p256dh":"a","auth":"b"}}"#, &[]),
+        ),
+        ("subscribe: got, not posted", &on, from_me("GET", "/push/subscribe", "", &[])),
+        ("unsubscribe", &on, from_me("POST", "/push/unsubscribe", r#"{"endpoint":"https://web.push.apple.com/QGx-abc"}"#, &[])),
+        ("no such verb", &on, from_me("POST", "/push/list", "{}", &[])),
+    ];
+    let got: Vec<Value> = cases
+        .iter()
+        .map(|(what, site, r)| {
+            let b = stub.calls.lock().unwrap().len();
+            let (res, log) = answer(site, r, NOW);
+            let body = String::from_utf8_lossy(&res.body).to_string();
+            json!({ "what": what, "target": r.target, "method": r.method, "body_limit": limit(&r.method, &r.target), "status": res.status,
+                "body": serde_json::from_str::<Value>(&body).unwrap_or(Value::String(body)), "actor": stub.calls.lock().unwrap()[b..].to_vec(), "log": log })
+        })
+        .collect();
+    let subs: Vec<String> = stub.calls.lock().unwrap().iter().filter(|c| c.starts_with("push Subscribe")).cloned().collect();
+    assert_eq!(subs.len(), 2, "chitin saw the good one and the one it refused: {subs:?}");
+    assert!(!subs[0].contains("extra") && !subs[0].contains("expirationTime"), "{}", subs[0]);
+    bless_or_hold("push.json", &Value::Array(got));
+    for site in [on, off] {
+        let _ = fs::remove_dir_all(&site.root);
+    }
+}
+
+/// The sender: one notify per new waiting intent, none again, none for one that left, and one chitin did not take is tried again.
+#[test]
+fn the_watcher_notifies_once_per_new_item() {
+    let stub = Stub::default();
+    *stub.refuse_once.lock().unwrap() = Some("0a0a0a0a0a0a".into());
+    let s = served_as(&stub, Some("bobby"), Some("fold-notify"));
+    let mut seen = std::collections::HashSet::new();
+    let notes = |stub: &Stub| stub.calls.lock().unwrap().iter().filter(|c| c.starts_with("notify")).cloned().collect::<Vec<_>>();
+    let first = fold_core::serve::watch(&s, &mut seen, NOW);
+    assert_eq!(
+        first.iter().map(|l| l["result"].as_str().unwrap().to_string()).collect::<Vec<_>>(),
+        ["ok", "chitin:timeout: router did not answer"]
+    );
+    assert_eq!(
+        notes(&stub),
+        [
+            "notify --as fold-notify --dedupe needs-you:sign-0123456789ab --url https://phobos.example.ts.net/fold/needs/approvals/needs-sign-0123456789ab/ To personal-assistant",
+            "notify --as fold-notify --dedupe needs-you:sign-0a0a0a0a0a0a --url https://phobos.example.ts.net/fold/needs/approvals/needs-sign-0a0a0a0a0a0a/ To personal-cake-goal",
+        ]
+    );
+    // the refused one again, and nothing for the one already sent
+    let again = fold_core::serve::watch(&s, &mut seen, NOW + 30);
+    assert_eq!(again.len(), 1);
+    assert_eq!(again[0]["notify"], "0a0a0a0a0a0a");
+    assert!(fold_core::serve::watch(&s, &mut seen, NOW + 60).is_empty());
+    // one leaves (approved): nothing is sent; were it queued again, it is new again
+    *stub.list.lock().unwrap() = Some(json!([pending()[0]]));
+    assert!(fold_core::serve::watch(&s, &mut seen, NOW + 90).is_empty());
+    assert_eq!(seen.len(), 1);
+    assert!(first.iter().chain(again.iter()).all(|l| !l.to_string().contains("Route the plan")), "a log line never holds the text");
+    // without --notify-as nothing is watched
+    let quiet = served(&stub, Some("bobby"));
+    assert!(fold_core::serve::watch(&quiet, &mut std::collections::HashSet::new(), NOW).is_empty());
+    for site in [s, quiet] {
         let _ = fs::remove_dir_all(&site.root);
     }
 }

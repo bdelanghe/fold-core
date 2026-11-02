@@ -51,6 +51,37 @@ async function shellFile(req, key) {
   return first ?? (await caches.match(key, { cacheName: SHELL })) ?? net;
 }
 
+// Needs you's notifications (BRIEF addendum 2): chitin's notify-sink pushes {text, path} (its webpush.ts; {title, url, tag} is read
+// too), the item's one line and its fold's page path (/fold/needs/approvals/<item>/). Shown with that line and nothing else, tagged
+// by the item, and with no sound or vibration of its own: the system's settings decide. A tap opens the item in the viewer
+// (#/needs/approvals/<item>), where Approve and Decline are, in a window already open on this app if there is one.
+const NEEDS = "#/needs";
+/** A pushed fold path as the viewer's location: only a path under this app's own, each step plain; anything else is Needs you. */
+function itemUrl(p) {
+  const root = new URL(scope).pathname;
+  if (typeof p !== "string" || !p.startsWith(root)) return scope + NEEDS;
+  const steps = p.slice(root.length).split("/").filter(Boolean);
+  if (!steps.length || steps.length > 8 || !steps.every((s) => /^[A-Za-z0-9._~-]{1,80}$/.test(s) && s !== "." && s !== "..")) return scope + NEEDS;
+  return scope + "#/" + steps.join("/");
+}
+self.addEventListener("push", (e) => {
+  let d = {};
+  try { d = e.data ? e.data.json() : {}; } catch {}
+  const line = [d.title, d.text].find((t) => typeof t === "string" && t.trim()) ?? "Something needs you";
+  const url = itemUrl(d.url ?? d.path);
+  e.waitUntil(self.registration.showNotification(line.trim().slice(0, 120), { tag: typeof d.tag === "string" ? d.tag : url, data: { url } }));
+});
+self.addEventListener("notificationclick", (e) => {
+  e.notification.close();
+  const url = e.notification.data?.url ?? scope + NEEDS;
+  e.waitUntil(self.clients.matchAll({ type: "window", includeUncontrolled: true }).then(async (cs) => {
+    const c = cs.find((x) => x.url.startsWith(scope));
+    if (!c) return self.clients.openWindow(url);
+    await c.focus();
+    return c.navigate ? c.navigate(url) : undefined;
+  }));
+});
+
 self.addEventListener("fetch", (e) => {
   const req = e.request, u = new URL(req.url);
   if (req.method !== "GET" || u.origin !== self.location.origin || req.headers.get("accept") === "text/event-stream") return;

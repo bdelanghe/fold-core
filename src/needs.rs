@@ -15,6 +15,9 @@
 //!   "Approvals" (a fold of its own: its heading is the rotor's group heading, `]]`/`[[` step to it). When the live read failed, the
 //!   group says why and holds nothing to sign, so a stale page never offers a signature. The other items stay where the producer
 //!   put them: no group is invented from an id's prefix.
+//! - **Notifications** (BRIEF addendum 2, Bobby: "can this page have notifications"): when `fold serve` sends them (its answer's
+//!   `push: true`), Needs you itself gets two acts, "Notify me on this device" and "Stop notifying this device" (`push`/`subscribe`,
+//!   `push`/`unsubscribe`), which the viewer takes. What is pushed for a new item is [`notice`]: its one line and its fold's path.
 
 use serde_json::{json, Map, Value};
 
@@ -148,6 +151,14 @@ fn is_sign_item(v: &Value) -> bool {
 /// `root` with its Needs-you section's sign items replaced by `live`'s, first, in the titled group [`APPROVALS`]. A document with
 /// no Needs-you section is returned as it is.
 pub fn overlay(root: &Value, live: Live, now_ms: i64) -> Value {
+    overlay_with(root, live, now_ms, false)
+}
+
+/// The two acts Needs you gets when this server sends notifications: subscribe this device, and stop.
+pub const PUSH_ACTS: [(&str, &str); 2] = [("subscribe", "Notify me on this device"), ("unsubscribe", "Stop notifying this device")];
+
+/// [`overlay`], and with `push` the section's two notification acts ([`PUSH_ACTS`]).
+pub fn overlay_with(root: &Value, live: Live, now_ms: i64, push: bool) -> Value {
     let mut root = root.clone();
     let Some(sections) = root.get_mut("sections").and_then(Value::as_array_mut) else { return root };
     let Some(section) = sections.iter_mut().find(|s| text(s, "id") == Some(SECTION)) else { return root };
@@ -176,6 +187,11 @@ pub fn overlay(root: &Value, live: Live, now_ms: i64) -> Value {
     };
     groups.splice(0..0, approvals);
     sec.insert("groups".into(), groups.into());
+    if push {
+        let acts: Vec<Value> =
+            PUSH_ACTS.iter().map(|(call, label)| json!({ "cap": "push", "call": call, "label": label, "args": {} })).collect();
+        sec.insert("acts".into(), acts.into());
+    }
     root
 }
 
@@ -185,16 +201,37 @@ pub fn overlay_case(case: &Value) -> Result<Value, String> {
     let root = case.get("root").ok_or("no root")?;
     let now = case.get("now").and_then(Value::as_f64).ok_or("now: the time in ms is needed")? as i64;
     let w = case.get("needs").and_then(read_answer);
+    let push = case.get("needs").and_then(|n| n.get("push")) == Some(&Value::Bool(true));
     Ok(match (text(case, "error"), w) {
         (Some(e), _) => overlay(root, Live::Failed(e), now),
-        (None, Some(w)) => overlay(root, Live::Read(&w), now),
+        (None, Some(w)) => overlay_with(root, Live::Read(&w), now, push),
         (None, None) => overlay(root, Live::Failed("the live list was not given"), now),
     })
 }
 
-/// `needs.json`'s answer: `{as, waiting}`.
-pub fn answer(title: &str, waiting: &[Value]) -> Value {
-    json!({ "as": title, "waiting": waiting })
+/// `needs.json`'s answer: `{as, waiting, push}`, `push` whether this server sends notifications (its subscribe routes are on).
+pub fn answer(title: &str, waiting: &[Value], push: bool) -> Value {
+    json!({ "as": title, "waiting": waiting, "push": push })
+}
+
+/// What is pushed for one waiting intent, as a `chitin notify` record chitin's notify-sink turns into a Web Push (its webpush.ts
+/// `needsYou`): the item's one line (its fold's title, `To <recipient>`: never its text, which may say more than a lock screen
+/// should), the item's fold as a path on `host` with no query or fragment (`https://<host>/fold/needs/approvals/needs-sign-<id>/`;
+/// the service worker opens it as the viewer's `#/needs/approvals/needs-sign-<id>`), and `needs-you:sign-<id>`, the key chitin
+/// pushes once per item, ever. None for an intent that isn't one ([`intent_ok`]) or a host that isn't a plain name.
+pub fn notice(w: &Value, host: &str) -> Option<(String, String, String)> {
+    let id = text(w, "id").filter(|i| intent_ok(i))?;
+    let to: String = text(w, "to")?.chars().filter(|c| !c.is_control()).take(80).collect();
+    if host.is_empty() || !host.bytes().all(|b| b.is_ascii_alphanumeric() || b == b'.' || b == b'-') {
+        return None;
+    }
+    // the fold id fold() makes of the item's id (lib.rs `slug`: `/` becomes `-`)
+    let fold = format!("{}{id}", ITEM.replace('/', "-"));
+    Some((
+        format!("To {to}"),
+        format!("https://{host}/fold/{SECTION}/{}/{fold}/", APPROVALS.to_lowercase()),
+        format!("needs-you:sign-{id}"),
+    ))
 }
 
 /// A `needs.json` answer read back (`basis --needs`, the viewer): the waiting list, filtered again for its own `as`.

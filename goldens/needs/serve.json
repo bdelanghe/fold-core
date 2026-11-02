@@ -68,7 +68,8 @@
           "to": "personal-cake-goal",
           "text": "Land <b>it</b> \"now\"."
         }
-      ]
+      ],
+      "push": false
     },
     "actor": [
       "pending --as bobby"
@@ -144,7 +145,8 @@
           "to": "personal-cake-goal",
           "text": "Land <b>it</b> \"now\"."
         }
-      ]
+      ],
+      "push": false
     },
     "actor": [
       "pending --as bobby"

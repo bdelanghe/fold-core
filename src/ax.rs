@@ -149,13 +149,21 @@ pub const TOKEN_FIELD: &str = "token";
 /// verdict for the viewer's script (viewer/sign.js), which runs the ceremony in the page. With no script, where the fold links its
 /// sign page, the form GETs that page (its `#i-<intent>` kept, as a GET form keeps the action's fragment).
 ///
+/// Notifications on this device (`push`/`subscribe`, `push`/`unsubscribe`: src/needs.rs `PUSH_ACTS`, BRIEF addendum 2) are the
+/// script's too, as only a page can ask for a push subscription: they carry their call as `push`, and with no script do nothing.
+///
 /// A form is named by the fold's title when it is the fold's one act, else by its own label.
 fn act_form(node: &Value, act: &Value, path: &[String], key: &str, one: bool) -> Value {
     let label = get(act, "label").cloned();
     let cap = js::string(get(act, "cap"));
     let intent = crate::needs::intent_of(act);
     let passkey = matches!(cap.trim(), "webauthn" | "approve") && (truthy(get(node, "href")) || intent.is_some());
-    let (method, action, fields) = if passkey {
+    let push = (cap.trim() == "push")
+        .then(|| js::string(get(act, "call")))
+        .filter(|c| crate::needs::PUSH_ACTS.iter().any(|(p, _)| p == c));
+    let (method, action, fields) = if push.is_some() {
+        ("get", "".into(), vec![])
+    } else if passkey {
         ("get", present(get(node, "href")).cloned().unwrap_or_else(|| "".into()), vec![])
     } else {
         let mut f = vec![json!([TOKEN_FIELD, ""]), json!(["cap", cap]), json!(["call", js::string(get(act, "call"))])];
@@ -182,6 +190,7 @@ fn act_form(node: &Value, act: &Value, path: &[String], key: &str, one: bool) ->
         ("action", Some(action)),
         ("intent", intent.as_ref().map(|(id, _)| id.clone().into())),
         ("call", intent.as_ref().map(|(_, call)| (*call).into())),
+        ("push", push.map(Into::into)),
         ("fields", (!fields.is_empty()).then(|| fields.into())),
         ("children", Some(kids.into())),
     ])

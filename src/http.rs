@@ -217,6 +217,18 @@ fn write(s: &mut TcpStream, r: &Response, head: bool) -> std::io::Result<()> {
 /// What answers one request at a time, and the record it leaves, if any.
 pub type Handler = dyn Fn(&Request, DateTime<Utc>) -> (Response, Option<Value>) + Send + Sync;
 
+/// One record appended to `log` as a JSON line. A log is the server's own record (acts.jsonl names who acted): readable by its owner
+/// only. One line is one append, so a writer outside [`run`] (serve.rs's watcher) never splits another's line.
+pub fn append(log: &std::path::Path, rec: &serde_json::Value) {
+    let mut o = fs::OpenOptions::new();
+    o.create(true).append(true);
+    #[cfg(unix)]
+    std::os::unix::fs::OpenOptionsExt::mode(&mut o, 0o600);
+    if let Ok(mut f) = o.open(log) {
+        let _ = f.write_all(format!("{rec}\n").as_bytes());
+    }
+}
+
 /// Answer on `listener` for ever, one thread per connection. A `Server-Timing` the handler sends gets `serve;dur=<ms>`. Each
 /// record is one JSON line appended to `log`; a handler with no log leaves none.
 pub fn run(listener: TcpListener, limit: Arc<Limit>, log: Option<PathBuf>, handle: Arc<Handler>) -> std::io::Result<()> {
@@ -244,14 +256,7 @@ pub fn run(listener: TcpListener, limit: Arc<Limit>, log: Option<PathBuf>, handl
             let _ = write(&mut s, &r, head);
             if let (Some(rec), Some(log)) = (rec, log) {
                 let _g = lock.lock();
-                // A log is the server's own record (acts.jsonl names who acted): readable by its owner only.
-                let mut o = fs::OpenOptions::new();
-                o.create(true).append(true);
-                #[cfg(unix)]
-                std::os::unix::fs::OpenOptionsExt::mode(&mut o, 0o600);
-                if let Ok(mut f) = o.open(&log) {
-                    let _ = writeln!(f, "{rec}");
-                }
+                append(&log, &rec);
             }
         });
     }
