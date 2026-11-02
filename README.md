@@ -49,7 +49,7 @@ viewer reads `needs.json` beside it (fold serve's route, below). The core's `nee
 - puts what waits now first, in a titled group, Approvals. That group is a fold of its own, so it has its own heading.
 
 The other items stay where the producer put them: no group is invented from an id. When the read fails (the host asleep, another
-login, no `--needs-as`), Approvals says why and offers nothing to sign. The viewer reads `needs.json` again in four cases: on open,
+login, no `--needs-as`), Approvals offers nothing to sign, and the notices zone (below) says why. The viewer reads `needs.json` again in four cases: on open,
 on going into Needs you, with each minute's refresh, and after every act on an intent.
 
 Each live item is sign.ts's (`needs/sign-<id>`) and has two acts, both the passkey, each a verdict on the item (the brief's
