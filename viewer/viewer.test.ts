@@ -432,5 +432,8 @@ test("sw: a push shows the item's one line, tagged by it, and a tap opens its fo
   w.self.clients.matchAll = async () => [];
   w.self.clients.openWindow = async (u: string) => opened.push(`open ${u}`);
   await w.fire("notificationclick", { notification: note });
-  expect(opened).toEqual(["closed", "focus", `navigate ${url}`, "closed", `open ${url}`]);
+  // a window this worker doesn't control: navigate refuses, so one opens instead
+  w.self.clients.matchAll = async () => [{ url: "https://phobos.test/fold/#/", focus: async () => opened.push("focus"), navigate: async () => { throw new TypeError("not controlled"); } }];
+  await w.fire("notificationclick", { notification: note });
+  expect(opened).toEqual(["closed", "focus", `navigate ${url}`, "closed", `open ${url}`, "closed", "focus", `open ${url}`]);
 });

@@ -24,6 +24,9 @@ use serde_json::{json, Map, Value};
 /// The id of the section the overlay writes into (home fleet_map.ts's Needs you).
 pub const SECTION: &str = "needs";
 
+/// What Approvals says when the live read failed. Why it failed is a notice, the viewer's to say in its notices zone.
+pub const UNREAD: &str = "Nothing can be signed from here right now.";
+
 /// The live group's title.
 pub const APPROVALS: &str = "Approvals";
 
@@ -182,8 +185,8 @@ pub fn overlay_with(root: &Value, live: Live, now_ms: i64, push: bool) -> Value 
     let approvals = match live {
         Live::Read([]) => None,
         Live::Read(w) => Some(json!({ "title": APPROVALS, "items": w.iter().map(|w| item(w, now_ms)).collect::<Vec<_>>() })),
-        Live::Failed(why) => Some(json!({ "title": APPROVALS, "items": [],
-            "empty": format!("What waits for your signature could not be read here, so nothing here can be signed: {why}") })),
+        // why is a notice, said in the viewer's notices zone (index.html), never in the fold: the fold only says what is so
+        Live::Failed(_) => Some(json!({ "title": APPROVALS, "items": [], "empty": UNREAD })),
     };
     groups.splice(0..0, approvals);
     sec.insert("groups".into(), groups.into());
@@ -216,20 +219,25 @@ pub fn answer(title: &str, waiting: &[Value], push: bool) -> Value {
 
 /// What is pushed for one waiting intent, as a `chitin notify` record chitin's notify-sink turns into a Web Push (its webpush.ts
 /// `needsYou`): the item's one line (its fold's title, `To <recipient>`: never its text, which may say more than a lock screen
-/// should), the item's fold as a path on `host` with no query or fragment (`https://<host>/fold/needs/approvals/needs-sign-<id>/`;
+/// should), the item's fold as a path on `host` under the site's `mount`, with no query or fragment
+/// (`https://<host><mount>/needs/approvals/needs-sign-<id>/`;
 /// the service worker opens it as the viewer's `#/needs/approvals/needs-sign-<id>`), and `needs-you:sign-<id>`, the key chitin
 /// pushes once per item, ever. None for an intent that isn't one ([`intent_ok`]) or a host that isn't a plain name.
-pub fn notice(w: &Value, host: &str) -> Option<(String, String, String)> {
+pub fn notice(w: &Value, host: &str, mount: &str) -> Option<(String, String, String)> {
     let id = text(w, "id").filter(|i| intent_ok(i))?;
     let to: String = text(w, "to")?.chars().filter(|c| !c.is_control()).take(80).collect();
     if host.is_empty() || !host.bytes().all(|b| b.is_ascii_alphanumeric() || b == b'.' || b == b'-') {
+        return None;
+    }
+    let mount = mount.trim_end_matches('/');
+    if !mount.starts_with('/') || !mount[1..].split('/').all(|s| !s.is_empty() && s != "." && s != ".." && s.bytes().all(|b| b.is_ascii_alphanumeric() || b == b'-' || b == b'_')) {
         return None;
     }
     // the fold id fold() makes of the item's id (lib.rs `slug`: `/` becomes `-`)
     let fold = format!("{}{id}", ITEM.replace('/', "-"));
     Some((
         format!("To {to}"),
-        format!("https://{host}/fold/{SECTION}/{}/{fold}/", APPROVALS.to_lowercase()),
+        format!("https://{host}{mount}/{SECTION}/{}/{fold}/", APPROVALS.to_lowercase()),
         format!("needs-you:sign-{id}"),
     ))
 }

@@ -247,8 +247,11 @@ fn served(stub: &Stub, needs_as: Option<&str>) -> Site {
 }
 
 fn served_as(stub: &Stub, needs_as: Option<&str>, notify_as: Option<&str>) -> Site {
+    // one directory per site: tests run at once, and two may serve the same flags
+    static N: std::sync::atomic::AtomicUsize = std::sync::atomic::AtomicUsize::new(0);
+    let n = N.fetch_add(1, std::sync::atomic::Ordering::SeqCst);
     let root = std::env::temp_dir().join(format!(
-        "fold-needs-{}-{}-{}",
+        "fold-needs-{}-{}-{}-{n}",
         needs_as.unwrap_or("none"),
         notify_as.unwrap_or("none"),
         std::process::id()
@@ -354,7 +357,7 @@ fn needs_json_refuses_all_but_the_one_login_and_nothing_declines_here() {
 fn a_notice_is_the_items_line_and_fold_and_the_acts_appear_only_when_sent() {
     let w = &fold_core::needs::waiting(&pending(), "bobby")[0];
     assert_eq!(
-        fold_core::needs::notice(w, "phobos.tail556f5b.ts.net"),
+        fold_core::needs::notice(w, "phobos.tail556f5b.ts.net", "/fold"),
         Some((
             "To personal-assistant".into(),
             "https://phobos.tail556f5b.ts.net/fold/needs/approvals/needs-sign-0123456789ab/".into(),
@@ -365,9 +368,11 @@ fn a_notice_is_the_items_line_and_fold_and_the_acts_appear_only_when_sent() {
     let root = overlay(json!({ "root": page(), "needs": { "as": "bobby", "waiting": pending() }, "now": NOW_MS }));
     let folds: Value = serde_json::from_str(&fold_core::wasm::fold_text(&json!({ "root": root, "opts": {} }).to_string())).unwrap();
     assert!(folds.as_array().unwrap().iter().any(|p| p[0] == "needs~approvals~needs-sign-0123456789ab"));
-    assert_eq!(fold_core::needs::notice(w, "evil host/x"), None);
-    assert_eq!(fold_core::needs::notice(&json!({ "id": "../x", "to": "a" }), "h"), None);
-    assert!(!fold_core::needs::notice(w, "h").unwrap().0.contains("Route the plan"), "never the text");
+    assert_eq!(fold_core::needs::notice(w, "evil host/x", "/fold"), None);
+    assert_eq!(fold_core::needs::notice(w, "h", "/../x"), None);
+    assert_eq!(fold_core::needs::notice(w, "h", "/basis/").unwrap().1, "https://h/basis/needs/approvals/needs-sign-0123456789ab/");
+    assert_eq!(fold_core::needs::notice(&json!({ "id": "../x", "to": "a" }), "h", "/fold"), None);
+    assert!(!fold_core::needs::notice(w, "h", "/fold").unwrap().0.contains("Route the plan"), "never the text");
     // the acts: only with push: true
     let acts = |push: bool| {
         let r = overlay(json!({ "root": page(), "needs": { "as": "bobby", "waiting": pending(), "push": push }, "now": NOW_MS }));
@@ -445,13 +450,14 @@ fn push_routes_hand_a_subscription_to_chitin_for_the_one_login_only() {
     }
 }
 
-/// The sender: one notify per new waiting intent, none again, none for one that left, and one chitin did not take is tried again.
+/// The sender: one notify per new waiting intent, none again, none for one that left; one chitin did not take is tried again at
+/// each look, and its failure is logged when it starts or changes, not every look.
 #[test]
 fn the_watcher_notifies_once_per_new_item() {
     let stub = Stub::default();
     *stub.refuse_once.lock().unwrap() = Some("0a0a0a0a0a0a".into());
     let s = served_as(&stub, Some("bobby"), Some("fold-notify"));
-    let mut seen = std::collections::HashSet::new();
+    let mut seen = fold_core::serve::Watched::default();
     let notes = |stub: &Stub| stub.calls.lock().unwrap().iter().filter(|c| c.starts_with("notify")).cloned().collect::<Vec<_>>();
     let first = fold_core::serve::watch(&s, &mut seen, NOW);
     assert_eq!(
@@ -473,11 +479,18 @@ fn the_watcher_notifies_once_per_new_item() {
     // one leaves (approved): nothing is sent; were it queued again, it is new again
     *stub.list.lock().unwrap() = Some(json!([pending()[0]]));
     assert!(fold_core::serve::watch(&s, &mut seen, NOW + 90).is_empty());
-    assert_eq!(seen.len(), 1);
+    assert_eq!(seen.seen.len(), 1);
     assert!(first.iter().chain(again.iter()).all(|l| !l.to_string().contains("Route the plan")), "a log line never holds the text");
     // without --notify-as nothing is watched
     let quiet = served(&stub, Some("bobby"));
-    assert!(fold_core::serve::watch(&quiet, &mut std::collections::HashSet::new(), NOW).is_empty());
+    assert!(fold_core::serve::watch(&quiet, &mut Default::default(), NOW).is_empty());
+    // chitin down: one line when it starts, none while it stays down, one when it changes
+    let down = Stub { down: true, ..Default::default() };
+    let d = served_as(&down, Some("bobby"), Some("fold-notify"));
+    let mut dw = fold_core::serve::Watched::default();
+    assert_eq!(fold_core::serve::watch(&d, &mut dw, NOW).len(), 1);
+    assert!(fold_core::serve::watch(&d, &mut dw, NOW + 30).is_empty());
+    let _ = fs::remove_dir_all(&d.root);
     for site in [s, quiet] {
         let _ = fs::remove_dir_all(&site.root);
     }

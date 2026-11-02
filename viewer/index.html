@@ -37,9 +37,11 @@
 <body>
 <!-- The notices zone (BRIEF addendum, Bobby: "we have a spot for notifactiuons even if there are none ... we avoid moving content
      bewteen semantic zones"): one landmark, always here, the same size whether it says nothing ("No notices") or something, so a
-     notice never moves the fold. Every notice this page makes is said here and nowhere else: the kept copy's note (which the heading
-     is described by), what a passkey ceremony is doing and what it did, notification results. The polite live region is #notice. -->
-<aside id="notices" class="notices" aria-label="Notices"><p id="stale" class="stale"></p><p id="notice" role="status">No notices</p></aside>
+     notice never moves the fold. Every notice this page makes is said here and nowhere else. Three lines say what is so while it is
+     so: the kept copy's note (which the heading is described by), why what waits could not be read (so nothing can be signed), and
+     why the document named in the address was not read. #notice, the polite live region, says what was just done: a passkey
+     ceremony's steps and result, a notification result. -->
+<aside id="notices" class="notices" aria-label="Notices"><p id="stale" class="stale"></p><p id="unread"></p><p id="not-read"></p><p id="notice" role="status">No notices</p></aside>
 <main><h1 tabindex="-1">Loading…</h1></main>
 <!-- The last region, after the fold (consultant's cold read, RECOMMEND-consultant-2026-11-01-fleet-page-cold-read.md point 6):
      a way to open another document when this one fails. Where the data is from is said on every fold ("Data from …", src/ax.rs). -->
@@ -67,7 +69,8 @@ const meta = document.querySelector('meta[name="fold-data"]');
 // named it. Its source is not said here: every fold says "Data from <source>, <when>" (src/ax.rs).
 const data = dataOf(location.search, location.href, { path: meta.content, source: meta.dataset.source });
 document.getElementById("reading").value = data.path;
-document.getElementById("reading-note").textContent = data.error ? `Not read: ${data.error}` : data.source ? "" : "Named in the address";
+// why it was not read is a notice (the notices zone); the box's own note only says whose path it holds
+document.getElementById("reading-note").textContent = data.error || data.source ? "" : "Named in the address";
 let nodes = new Map(), said = "", node = null, cur = 0, cameFrom = null, last = [], kept = null, clax = null, claxAt = null;
 // Needs you, live: needs.json's URL for the document it is for (none for one named in the address), and its last answer.
 const needsMeta = document.querySelector('meta[name="fold-needs"]');
@@ -79,13 +82,17 @@ function stale() {
   const p = document.getElementById("stale"), h = document.querySelector("main h1");
   p.textContent = kept ? since(kept, new Date(), zone) : "";
   if (kept) h?.setAttribute("aria-describedby", "stale"); else h?.removeAttribute("aria-describedby");
+  const line = (id, t) => { const e = document.getElementById(id); if (e.textContent !== t) e.textContent = t; };
+  line("unread", needsUrl && live?.error ? `What waits for your signature could not be read here, so nothing can be signed: ${live.error}` : "");
+  line("not-read", data.error ? `Not read: ${data.error}` : "");
   say(said_);
 }
 // The one place a notice is said (the notices zone): `m`, or "No notices" when there is none and no kept-copy note either.
 let said_ = null;
 function say(m) {
   said_ = m || null;
-  const n = document.getElementById("notice"), t = said_ ?? (kept ? "" : "No notices");
+  const quiet = !kept && !document.getElementById("unread").textContent && !document.getElementById("not-read").textContent;
+  const n = document.getElementById("notice"), t = said_ ?? (quiet ? "No notices" : "");
   if (n.textContent !== t) n.textContent = t;
 }
 const href = (p, m = modeOf(location.hash, node)) => link(p, m);

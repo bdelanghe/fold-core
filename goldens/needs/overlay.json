@@ -275,7 +275,7 @@
             {
               "title": "Approvals",
               "items": [],
-              "empty": "What waits for your signature could not be read here, so nothing here can be signed: 403 not who this server acts for"
+              "empty": "Nothing can be signed from here right now."
             },
             {
               "title": "",
@@ -386,7 +386,7 @@
             {
               "title": "Approvals",
               "items": [],
-              "empty": "What waits for your signature could not be read here, so nothing here can be signed: the live list was not given"
+              "empty": "Nothing can be signed from here right now."
             },
             {
               "title": "",
@@ -1096,7 +1096,7 @@
             {
               "title": "Approvals",
               "items": [],
-              "empty": "What waits for your signature could not be read here, so nothing here can be signed: the live list was not given"
+              "empty": "Nothing can be signed from here right now."
             },
             {
               "title": "",

@@ -595,29 +595,55 @@ fn push(site: &Site, req: &Request, now: i64) -> (Response, Option<Value>) {
     chitin(Push::Subscribe(sub), Some(&endpoint))
 }
 
-/// One look at what waits (BRIEF addendum 2's sender): each waiting intent not in `seen` gets one `chitin notify` Needs-you record
-/// (src/needs.rs `notice`) and joins `seen`; one that has left is dropped from it, so nothing is sent for an item that leaves. A
-/// record chitin did not take stays out of `seen`, to be tried at the next look. The log lines name the intent, never its text.
-pub fn watch(site: &Site, seen: &mut std::collections::HashSet<String>, now: i64) -> Vec<Value> {
+/// What [`watch`] keeps between looks: the intents notified, and the last result said for each look's failures, so a failure is
+/// logged when it starts or changes, not every look.
+#[derive(Default)]
+pub struct Watched {
+    pub seen: std::collections::HashSet<String>,
+    said: std::collections::HashMap<String, String>,
+}
+
+/// One look at what waits (BRIEF addendum 2's sender): each waiting intent not yet notified gets one `chitin notify` Needs-you record
+/// (src/needs.rs `notice`) and is remembered; one that has left is forgotten, so nothing is sent for an item that leaves. A record
+/// chitin did not take is tried again at the next look. A log line is returned only for a send, or when a failure starts or
+/// changes. They name the intent, never its text.
+pub fn watch(site: &Site, w: &mut Watched, now: i64) -> Vec<Value> {
     let (Some((a, title)), Some(seat)) = (needs_for(site), site.acting.as_ref().and_then(|a| a.notify_as.as_deref())) else { return vec![] };
-    let waiting = match a.actor.pending(title) {
-        Ok(p) => crate::needs::waiting(&p, title),
-        Err(e) => return vec![json!({ "ts": now, "notify": null, "result": format!("chitin:pending {}", e.chars().take(120).collect::<String>()) })],
-    };
-    let ids: std::collections::HashSet<String> = waiting.iter().filter_map(|w| w["id"].as_str().map(str::to_string)).collect();
-    seen.retain(|id| ids.contains(id));
     let mut out = vec![];
-    for w in &waiting {
-        let Some(id) = w["id"].as_str().filter(|id| !seen.contains(*id)) else { continue };
-        let Some((line, url, dedupe)) = crate::needs::notice(w, &a.host) else { continue };
-        let result = match a.actor.notify(seat, &line, &url, &dedupe) {
+    fn once(w: &mut Watched, out: &mut Vec<Value>, key: &str, line: Value) {
+        let r = line["result"].as_str().unwrap_or("").to_string();
+        if w.said.get(key) != Some(&r) {
+            w.said.insert(key.to_string(), r);
+            out.push(line);
+        }
+    }
+    let waiting = match a.actor.pending(title) {
+        Ok(p) => {
+            w.said.remove("");
+            crate::needs::waiting(&p, title)
+        }
+        Err(e) => {
+            once(w, &mut out, "", json!({ "ts": now, "notify": null, "result": format!("chitin:pending {}", e.chars().filter(|c| !c.is_control()).take(120).collect::<String>()) }));
+            return out;
+        }
+    };
+    let ids: std::collections::HashSet<String> = waiting.iter().filter_map(|x| x["id"].as_str().map(str::to_string)).collect();
+    w.seen.retain(|id| ids.contains(id));
+    w.said.retain(|id, _| id.is_empty() || ids.contains(id));
+    for x in &waiting {
+        let Some(id) = x["id"].as_str().filter(|id| !w.seen.contains(*id)) else { continue };
+        let Some((line, url, dedupe)) = crate::needs::notice(x, &a.host, &site.mount) else { continue };
+        match a.actor.notify(seat, &line, &url, &dedupe) {
             Ok(()) => {
-                seen.insert(id.to_string());
-                "ok".to_string()
+                w.seen.insert(id.to_string());
+                w.said.remove(id);
+                out.push(json!({ "ts": now, "notify": id, "as": seat, "result": "ok" }));
             }
-            Err(e) => format!("chitin:{}", e.chars().filter(|c| !c.is_control()).take(120).collect::<String>()),
-        };
-        out.push(json!({ "ts": now, "notify": id, "as": seat, "result": result }));
+            Err(e) => {
+                let r = format!("chitin:{}", e.chars().filter(|c| !c.is_control()).take(120).collect::<String>());
+                once(w, &mut out, id, json!({ "ts": now, "notify": id, "as": seat, "result": r }));
+            }
+        }
     }
     out
 }
@@ -895,7 +921,7 @@ pub fn run(listener: TcpListener, site: Site, log: Option<PathBuf>) -> std::io::
     if site.acting.as_ref().is_some_and(|a| a.notify_as.is_some() && a.needs_as.is_some()) {
         let (w, log) = (site.clone(), log.clone());
         std::thread::spawn(move || {
-            let mut seen = std::collections::HashSet::new();
+            let mut seen = Watched::default();
             loop {
                 let now = DateTime::<Utc>::from(SystemTime::now());
                 for mut l in watch(&w, &mut seen, now.timestamp()) {

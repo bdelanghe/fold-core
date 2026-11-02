@@ -75,10 +75,13 @@ self.addEventListener("notificationclick", (e) => {
   e.notification.close();
   const url = e.notification.data?.url ?? scope + NEEDS;
   e.waitUntil(self.clients.matchAll({ type: "window", includeUncontrolled: true }).then(async (cs) => {
+    // a window of this app goes there; navigate() refuses a window this worker doesn't control (and some browsers lack it), so
+    // then a window opens there instead: a tap always lands on the item
     const c = cs.find((x) => x.url.startsWith(scope));
-    if (!c) return self.clients.openWindow(url);
-    await c.focus();
-    return c.navigate ? c.navigate(url) : undefined;
+    if (c?.navigate) {
+      try { await c.focus(); return await c.navigate(url); } catch {}
+    }
+    return self.clients.openWindow(url);
   }));
 });
 

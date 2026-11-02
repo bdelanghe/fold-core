@@ -395,13 +395,14 @@ impl Actor for Chitin {
         serde_json::from_slice(&out.stdout).map_err(|e| format!("chitin pending did not answer JSON: {e}"))
     }
 
-    /// `chitin notify --as <seat> --severity attention --dedupe <key> --url <url> -- <title>`: `written` or `suppressed` (sent
-    /// already) is done; anything else is chitin's reason.
+    /// `chitin notify --as <seat> --severity attention --dedupe <key> --url <url> <title>`: `written`, or `suppressed: <key> was
+    /// sent …` (sent already), is done; anything else, the hourly cap's `suppressed: … over …` among it, is chitin's reason, so
+    /// the record is tried again at the next look.
     fn notify(&self, seat: &str, title: &str, url: &str, dedupe: &str) -> Result<(), String> {
         let mut c = Command::new(&self.bin);
         c.args(["notify", "--as", seat, "--severity", "attention", "--dedupe", dedupe, "--url", url, title]);
         let (ok, line) = first_line(&mut c)?;
-        if (ok && line.starts_with("written")) || line.starts_with("suppressed") {
+        if (ok && line.starts_with("written")) || (line.starts_with("suppressed: ") && line.contains(" was sent less than ")) {
             Ok(())
         } else {
             Err(line)
