@@ -15,9 +15,9 @@
 // the object's properties (its own words, its link, when its data is from: plain rows, read in order) and then its child objects
 // (numbered rows you go into). No paragraph, footer, status line or banner exists outside it: toDom refuses them.
 const ELEMENT = {
-  main: "main", navigation: "nav", heading: "h1", list: "ol", listitem: "li", link: "a", button: "button", form: "form", textbox: "textarea", status: "span", text: "span", decoration: "span",
+  main: "main", navigation: "nav", heading: "h1", list: "ol", listitem: "li", link: "a", button: "button", form: "form", textbox: "textarea", searchbox: "input", status: "span", text: "span", decoration: "span",
 };
-const NEEDS_NAME = new Set(["navigation", "heading", "list", "link", "button", "form", "textbox"]);
+const NEEDS_NAME = new Set(["navigation", "heading", "list", "link", "button", "form", "textbox", "searchbox"]);
 // What a fold's main may hold, in order: the path (its scope, as links), its heading, its one list.
 const MAIN_ROLES = ["navigation", "heading", "list"];
 
@@ -49,7 +49,9 @@ export function toDom(doc, ax, ids = { n: 0 }, row = null) {
   if (ax.role === "list") { e.setAttribute("role", "list"); e.setAttribute("aria-label", ax.name); } // WebKit drops list semantics under list-style:none without it
   if (ax.role === "navigation") e.setAttribute("aria-label", ax.name);
   // An act (src/ax.rs act_form): named, so it is a form landmark; its cap, call and args ride as hidden fields, ahead of its button.
+  // A search form (Basis's add-a-source box) is the search landmark as well as a form.
   if (ax.role === "form") {
+    if (ax.search) e.setAttribute("role", "search");
     e.setAttribute("aria-label", ax.name); e.setAttribute("method", String(ax.method)); e.setAttribute("action", String(ax.action));
     for (const [k, v] of ax.fields ?? []) { const i = doc.createElement("input"); i.setAttribute("type", "hidden"); i.setAttribute("name", k); i.setAttribute("value", v); e.append(i); }
   }
@@ -57,6 +59,13 @@ export function toDom(doc, ax, ids = { n: 0 }, row = null) {
   if (ax.role === "textbox") {
     e.setAttribute("aria-label", ax.name); e.setAttribute("name", String(ax.field)); e.setAttribute("required", "");
     if (ax.maxlength != null) e.setAttribute("maxlength", String(ax.maxlength));
+  }
+  // A search field (Basis's add-a-source box): one line, sent as `field`, holding `value` when given, described by `describedby`.
+  if (ax.role === "searchbox") {
+    e.setAttribute("aria-label", ax.name); e.setAttribute("type", "search"); e.setAttribute("name", String(ax.field));
+    if (ax.value) e.setAttribute("value", String(ax.value));
+    e.setAttribute("spellcheck", "false"); e.setAttribute("autocomplete", "off");
+    if (ax.describedby) e.setAttribute("aria-describedby", String(ax.describedby));
   }
   if (ax.role === "heading" && ax.focus) e.tabIndex = -1;
   if (ax.role === "link") e.href = ax.href;
@@ -67,7 +76,7 @@ export function toDom(doc, ax, ids = { n: 0 }, row = null) {
   // A link to another fold's page (`local`, src/page.rs) is a move within the fold, as a `#` one is.
   if (ax.role === "link" && !ax.href.startsWith("#") && !ax.local) { e.target = "_blank"; e.rel = "noopener"; }
   if (ax.index != null) e.dataset.i = ax.index;
-  if (ax.name && !(ax.children ?? []).length && ax.role !== "list" && ax.role !== "navigation" && ax.role !== "textbox") e.textContent = ax.name;
+  if (ax.name && !(ax.children ?? []).length && ax.role !== "list" && ax.role !== "navigation" && ax.role !== "textbox" && ax.role !== "searchbox") e.textContent = ax.name;
   for (const c of ax.children ?? []) { const x = toDom(doc, c, ids, ax.id || row); e.append(x); if (x._desc) e.append(x._desc); }
   if (ax.role === "link" && ax.description) {
     // The hint is read after the link's name, as its description, and shown under it.

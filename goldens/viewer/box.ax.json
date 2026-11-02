@@ -1,0 +1,64 @@
+{
+ "/fold/?data=/fold-data/demo/page.json#basis": [
+  [
+   "search",
+   "Add a source"
+  ],
+  [
+   "searchbox",
+   "Add a source",
+   "A fold document's path on this site, from /. Feeds (RSS, podcasts) are not read yet."
+  ],
+  [
+   "button",
+   "Open"
+  ]
+ ],
+ "/fold/#basis": [
+  [
+   "search",
+   "Add a source"
+  ],
+  [
+   "searchbox",
+   "Add a source",
+   "A fold document's path on this site, from /. Feeds (RSS, podcasts) are not read yet."
+  ],
+  [
+   "button",
+   "Open"
+  ]
+ ],
+ "/fold/?data=https://evil.test/page.json#basis": [
+  [
+   "search",
+   "Add a source"
+  ],
+  [
+   "searchbox",
+   "Add a source",
+   "https://evil.test/page.json",
+   "Not read: only a path on this site, from /, is read"
+  ],
+  [
+   "button",
+   "Open"
+  ]
+ ],
+ "/fold/?data=https://example.test/podcast.rss#basis": [
+  [
+   "search",
+   "Add a source"
+  ],
+  [
+   "searchbox",
+   "Add a source",
+   "https://example.test/podcast.rss",
+   "Not read: a feed (RSS, Atom or a podcast) is not read yet; only a fold document is"
+  ],
+  [
+   "button",
+   "Open"
+  ]
+ ]
+}

@@ -22,13 +22,14 @@ pub fn element(role: &str) -> Option<&'static str> {
         "button" => "button",
         "form" => "form",
         "textbox" => "textarea",
+        "searchbox" => "input",
         "status" | "text" | "decoration" => "span",
         _ => return None,
     })
 }
 
 /// The roles that refuse to render without a name (fold-dom.js NEEDS_NAME).
-pub const NEEDS_NAME: [&str; 7] = ["navigation", "heading", "list", "link", "button", "form", "textbox"];
+pub const NEEDS_NAME: [&str; 8] = ["navigation", "heading", "list", "link", "button", "form", "textbox", "searchbox"];
 
 /// What a fold's main may hold, in order: the path (its scope, as links), its heading, its one list.
 pub const MAIN_ROLES: [&str; 3] = ["navigation", "heading", "list"];
@@ -83,6 +84,9 @@ struct El {
 impl El {
     fn write(&self) -> String {
         let attrs: String = self.attrs.iter().map(|(k, v)| format!(" {k}=\"{}\"", attr(v))).collect();
+        if self.tag == "input" {
+            return format!("<input{attrs}>"); // a void element: no body, no end tag
+        }
         format!("<{t}{attrs}>{}</{t}>", self.body, t = self.tag)
     }
 }
@@ -138,7 +142,11 @@ fn node(ax: &Value, n: &mut usize, row: Option<&str>) -> Result<(El, Option<Stri
         e.attrs.push(("aria-label", named.clone()));
     }
     // An act (ax.rs act_form): named, so it is a form landmark; its cap, call and args ride as hidden fields, ahead of its button.
+    // A search form (Basis's add-a-source box) is the search landmark as well as a form.
     if r == "form" {
+        if truthy(get(ax, "search")) {
+            e.attrs.push(("role", "search".into()));
+        }
         e.attrs.push(("aria-label", named.clone()));
         e.attrs.push(("method", js::string(get(ax, "method"))));
         e.attrs.push(("action", js::string(get(ax, "action"))));
@@ -154,6 +162,20 @@ fn node(ax: &Value, n: &mut usize, row: Option<&str>) -> Result<(El, Option<Stri
         e.attrs.push(("required", String::new()));
         if let Some(m) = get(ax, "maxlength").filter(|v| !v.is_null()) {
             e.attrs.push(("maxlength", js::string(Some(m))));
+        }
+    }
+    // A search field (Basis's add-a-source box): one line, sent as `field`, holding `value` when given, described by `describedby`.
+    if r == "searchbox" {
+        e.attrs.push(("aria-label", named.clone()));
+        e.attrs.push(("type", "search".into()));
+        e.attrs.push(("name", js::string(get(ax, "field"))));
+        if truthy(get(ax, "value")) {
+            e.attrs.push(("value", js::string(get(ax, "value"))));
+        }
+        e.attrs.push(("spellcheck", "false".into()));
+        e.attrs.push(("autocomplete", "off".into()));
+        if truthy(get(ax, "describedby")) {
+            e.attrs.push(("aria-describedby", js::string(get(ax, "describedby"))));
         }
     }
     if r == "heading" && truthy(get(ax, "focus")) {
@@ -182,7 +204,7 @@ fn node(ax: &Value, n: &mut usize, row: Option<&str>) -> Result<(El, Option<Stri
     if let Some(i) = get(ax, "index").filter(|v| !v.is_null()) {
         e.attrs.push(("data-i", js::string(Some(i))));
     }
-    if truthy(get(ax, "name")) && kids.is_empty() && r != "list" && r != "navigation" && r != "textbox" {
+    if truthy(get(ax, "name")) && kids.is_empty() && r != "list" && r != "navigation" && r != "textbox" && r != "searchbox" {
         e.body.push_str(&text(&named));
     }
     for c in kids {

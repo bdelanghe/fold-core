@@ -7,7 +7,7 @@ import { readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { core } from "../js/fold-core.ts";
 import { toDom } from "./fold-dom.js";
-import { at, dataOf, haecceityOf, href, open, pathOf, segmentOf, since, viewOf } from "./view.js";
+import { at, basisOf, BOX_NOTE, dataOf, framed, haecceityOf, href, isBasis, keep, KINDS, kindOf, named, nameOf, open, pathOf, segmentOf, since, viewOf } from "./view.js";
 import { aboutOf, contextOf, embed, flagUnnamed, pinOf, reportToken } from "./clax.js";
 
 const goldens = join(import.meta.dir, "..", "goldens");
@@ -237,4 +237,96 @@ test("a kept copy is said as not updated since its time, and how long ago", asyn
   expect(since("2026-10-31T16:59:30Z", now, "UTC")).toBe("Not updated since 16:59, less than a minute ago.");
   expect(since("2026-10-31T16:20:00Z", now, "UTC")).toBe("Not updated since 16:20, 40 minutes ago.");
   expect(since("2026-10-27T09:00:00Z", now, "UTC")).toBe("Not updated since Tue 27 Oct at 09:00, 4 days ago.");
+});
+
+// Basis (Bobby 11-02): a document's root is named by the document, Basis is the level above it, and the Reading box is Basis's
+// add-a-source box, search-like, with a named seam for feeds.
+test("a document's root is named by the document: its own title, or its path, never the generic Everything", () => {
+  expect(nameOf("/fold-data/fleet/page.json", "Everything")).toBe("Fleet");
+  expect(nameOf("/fold-data/demo/page.json", "Demo")).toBe("Demo");
+  expect(nameOf("/fold-data/work-notes/page.json", "Everything")).toBe("Work notes");
+  expect(nameOf("/fold-data/x/weekly_plan.json", "")).toBe("Weekly plan");
+  expect(nameOf("/fold-data/caf%C3%A9/index.json", undefined)).toBe("Café");
+  expect(nameOf("/", "Everything")).toBe("Everything");
+});
+
+test("named: the root's title and every place a fold says the root, without changing the folds given", async () => {
+  const input = read(goldens, "everything.input.json"), { url, fetch } = origin("fleet", input);
+  const nodes = await open(fold, url, { fetch, opts: () => input.opts }), before = JSON.stringify([...nodes]);
+  const n = named(nodes, "Fleet");
+  expect(JSON.stringify([...nodes])).toBe(before);
+  expect(n.get("root").title).toBe("Fleet");
+  for (const [id, x] of n) if (id !== "root" && x.trail?.length) expect(x.trail[0]).toBe("Fleet");
+  expect(JSON.stringify([...n])).not.toContain('"trail":["Everything"');
+  // a deck's step back to the root says its name too
+  const deck = named(new Map([["root", { title: "Everything", trail: [] }], ["a", { title: "A", trail: ["Everything"], prev: { id: "root", title: "Everything" } }]]), "Talk");
+  expect(deck.get("a")).toEqual({ title: "A", trail: ["Talk"], prev: { id: "root", title: "Talk" } });
+});
+
+test("framed: every fold's path starts at Basis, and a missing fold's way back says the document's name", () => {
+  const nodes = named(new Map([["root", { title: "Everything", trail: [], kids: [{ id: "a", title: "A" }] }], ["a", { title: "A", trail: ["Everything"], kids: [] }]]), "Fleet");
+  const crumbs = (t: any) => t.children[0].children[0].children.map((li: any) => li.children[0]);
+  const root = framed(viewOf(ax, nodes, "#/", "UTC").tree, "Fleet");
+  expect(root.children.map((c: any) => c.role)).toEqual(["navigation", "heading", "list"]);
+  expect(crumbs(root)).toEqual([{ role: "link", name: "Basis", href: "#basis" }]);
+  expect(crumbs(framed(viewOf(ax, nodes, "#/a", "UTC").tree, "Fleet"))).toEqual([{ role: "link", name: "Basis", href: "#basis" }, { role: "link", name: "Fleet", href: "#/" }]);
+  const gone = framed(viewOf(ax, nodes, "#/gone", "UTC").tree, "Fleet");
+  expect(crumbs(gone).map((l: any) => l.name)).toEqual(["Basis", "Fleet"]);
+  expect(gone.children[2].children.map((r: any) => r.children[0].name)).toEqual(["You asked for gone, and no fold has that path.", "Back to Fleet"]);
+  // a root that could not be read: its way out is Basis, not a link to itself
+  const failed = new Map([["root", { title: "Could not read the data", trail: [], failed: "Could not read x: 404" }]]);
+  const lost = framed(viewOf(ax, failed, "", "UTC").tree, null, []);
+  expect(crumbs(viewOf(ax, failed, "", "UTC").tree).map((l: any) => l.name)).toEqual(["Everything"]);
+  expect(crumbs(lost)).toEqual([{ role: "link", name: "Basis", href: "#basis" }]);
+  for (const t of [root, gone, lost]) toDom(doc, t);
+  // Basis is no path: the hash names it alone
+  expect([isBasis("#basis"), isBasis("#/basis"), isBasis("")]).toEqual([true, false, false]);
+});
+
+test("Basis: the box first, then the site's document and each other kept, entered in this tab", () => {
+  let kept = keep([], { kind: "fold", path: "/fold-data/fleet/page.json", name: "Fleet" });
+  kept = keep(kept, { kind: "fold", path: "/fold-data/demo/page.json", name: "Demo" });
+  kept = keep(kept, { kind: "fold", path: "/fold-data/fleet/page.json", name: "Fleet 2" });
+  expect(kept.map((s) => s.name)).toEqual(["Fleet 2", "Demo"]);
+  expect(keep([null, { path: 1 }, "x"] as any, { kind: "fold", path: "/p.json", name: "P" })).toEqual([{ kind: "fold", path: "/p.json", name: "P" }]);
+  const b = basisOf(ax, kept, "/fold-data/fleet/page.json", "Fleet", {}, "UTC");
+  expect(b.node.kids.map((k: any) => [k.title, k.href])).toEqual([["Fleet", "./#/"], ["Demo", "./?data=%2Ffold-data%2Fdemo%2Fpage.json#/"]]);
+  const main = toDom(doc, b.tree) as El, els = all(main);
+  expect(els.filter((e) => e.tag === "h1").map((e) => e.textContent)).toEqual(["Basis"]);
+  expect(els.some((e) => e.tag === "nav")).toBe(false); // the top: no path above it
+  const form = els.find((e) => e.tag === "form")!;
+  expect(form.attrs).toMatchObject({ role: "search", "aria-label": "Add a source", method: "get", action: "./" });
+  const box = els.find((e) => e.tag === "input")!;
+  expect(box.attrs).toEqual({ "aria-label": "Add a source", type: "search", name: "data", spellcheck: "false", autocomplete: "off", "aria-describedby": "source-note" });
+  expect(els.find((e) => e.id === "source-note")!.textContent).toBe(BOX_NOTE);
+  // the box is the first row, then one row per source; no source link opens another tab
+  const list = main.kids.find((e) => e.tag === "ol")!;
+  expect(list.kids.map((li) => li.className)).toEqual(["prop source", "obj", "obj"]);
+  expect(els.filter((e) => e.tag === "a").every((a) => a.target == null)).toBe(true);
+  // an address refused comes back in the box, and the note says why
+  const no = all(toDom(doc, basisOf(ax, kept, "/fold-data/fleet/page.json", "Fleet", { value: "https://evil.test/x.json", error: "only a path on this site, from /, is read" }, "UTC").tree) as El);
+  expect(no.find((e) => e.tag === "input")!.attrs.value).toBe("https://evil.test/x.json");
+  expect(no.find((e) => e.id === "source-note")!.textContent).toBe("Not read: only a path on this site, from /, is read");
+});
+
+test("a feed is a kind of source named, not read yet: the box says so, and nothing is fetched", () => {
+  const meta = { path: "/fold-data/fleet/page.json", source: "fleet-map" }, base = "https://phobos.test/fold/";
+  for (const feed of ["https://example.test/podcast.rss", "/fold-data/news/feed.xml", "https://blog.test/feed", "https://blog.test/atom/", "feed:https://x.test/", "podcast://x.test/show"]) {
+    expect(kindOf(feed)).toBe("feed");
+    expect(dataOf(`?data=${encodeURIComponent(feed)}`, base, meta)).toEqual({ path: feed, kind: "feed", error: `${KINDS.feed} is not read yet; only a fold document is` });
+  }
+  for (const f of ["/fold-data/demo/page.json", "/fold-data/feeds/page.json", "/fold-data/rss-notes/page.json"]) expect(kindOf(f)).toBe("fold");
+});
+
+// Basis's tree as the viewer gives it, held in goldens/viewer/basis.ax.json (FOLD_BLESS=1 writes it from this output): src/html.rs
+// writes its HTML (tests/html.rs), and js/html.test.ts holds toDom and lone to that, as for every golden fold.
+test("Basis's tree is the golden one (goldens/viewer/basis.ax.json)", () => {
+  const kept = [{ kind: "fold", path: "/fold-data/fleet/page.json", name: "Fleet" }, { kind: "fold", path: "/fold-data/demo/page.json", name: "Demo" }];
+  const trees = {
+    sources: basisOf(ax, kept, "/fold-data/fleet/page.json", "Fleet", {}, "UTC").tree,
+    refused: basisOf(ax, kept, "/fold-data/fleet/page.json", "Fleet", { value: "https://example.test/podcast.rss", error: `${KINDS.feed} is not read yet; only a fold document is` }, "UTC").tree,
+  };
+  const f = join(goldens, "viewer", "basis.ax.json"), text = JSON.stringify(trees, null, 1) + "\n";
+  if (process.env.FOLD_BLESS) require("node:fs").writeFileSync(f, text);
+  expect(text).toBe(readFileSync(f, "utf8"));
 });

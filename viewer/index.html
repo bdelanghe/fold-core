@@ -35,31 +35,32 @@
 <!-- Said when the fold shown is a kept copy (its host did not answer): read with the fold's heading, which describes itself by it. -->
 <p id="stale" class="stale" hidden></p>
 <main><h1 tabindex="-1">Loading…</h1></main>
-<!-- The last region, after the fold (consultant's cold read, RECOMMEND-consultant-2026-11-01-fleet-page-cold-read.md point 6):
-     a way to open another document when this one fails. Where the data is from is said on every fold ("Data from …", src/ax.rs). -->
-<form class="reading" role="search" aria-label="Reading"><label for="reading">Reading</label>
-<input id="reading" name="data" type="search" spellcheck="false" autocomplete="off" aria-describedby="reading-note">
-<button type="submit">Open</button><span id="reading-note" class="note"></span></form>
+<!-- Another document is opened from Basis (#basis, the level above every document, Bobby 11-02): its add-a-source box, the first
+     row of its one list, where the Reading box at the foot of every fold used to be. Every fold's path starts at Basis. -->
 <script type="module">
 // A fold viewer that holds no data: it fetches one JSON document from the data origin (the fold-data meta), folds it here with the
 // core's WebAssembly module, and shows one fold at a time. The core gives each fold's accessibility tree (ax_json); fold-dom.js
 // derives the DOM from that tree alone; this file only routes, follows the data and moves the cursor.
-// Keys are Allie's (vim): j/k move, l or Enter goes in, h goes back out.
+// Keys are Allie's (vim): j/k move, l or Enter goes in, h goes back out (from a document's root, out to Basis); / goes to Basis's
+// add-a-source box, and Escape leaves it.
 // As a deck (#slides/<path>, or a page whose folds say present "slides" opened with no path) the same fold is a slide: → and ← go to
 // the next and previous slide in reading order; l or Enter still goes into the point under the cursor, h back out.
 import { core } from "./fold-core.js";
 import { toDom, liveLine } from "./fold-dom.js";
-import { at, dataOf, docId, haecceityOf, href as link, modeOf, open, pathOf, since, viewOf } from "./view.js";
+import { at, basisOf, dataOf, docId, framed, haecceityOf, href as link, isBasis, keep, BASIS, modeOf, named, nameOf, open, pathOf, since, viewOf } from "./view.js";
 import { embed } from "./clax.js";
 const zone = Intl.DateTimeFormat().resolvedOptions().timeZone;
 const meta = document.querySelector('meta[name="fold-data"]');
-// The document read, always said in the Reading box: the meta's, or one named in the address by an absolute path on this site
-// (?data=/fold-data/demo/page.json, as Open submits it). The box holds its path; the note says why it was not read, or that the address
-// named it. Its source is not said here: every fold says "Data from <source>, <when>" (src/ax.rs).
+// The document read: the meta's, or one named in the address by an absolute path on this site (?data=/fold-data/demo/page.json, as
+// Basis's box submits it). One refused (another site's, a feed) is said on Basis, its address back in the box to mend.
+// Its source is not said here: every fold says "Data from <source>, <when>" (src/ax.rs).
 const data = dataOf(location.search, location.href, { path: meta.content, source: meta.dataset.source });
-document.getElementById("reading").value = data.path;
-document.getElementById("reading-note").textContent = data.error ? `Not read: ${data.error}` : data.source ? "" : "Named in the address";
+// The sources Basis lists, kept on this device between visits: each document read here, by its path, with its name.
+const KEPT = "basis.sources";
+const kept0 = () => { try { return JSON.parse(localStorage.getItem(KEPT) ?? "[]"); } catch { return []; } };
+let sources = kept0(), name = null;
 let nodes = new Map(), said = "", node = null, cur = 0, cameFrom = null, last = [], kept = null, clax = null, claxAt = null;
+const route = () => (isBasis(location.hash) ? "basis" : pathOf(location.hash).join("/"));
 // Kept (sw.js answered from its copy): the note says since when and how long ago, and the heading is described by it, so a screen
 // reader hears it with the title as the page opens. Fresh again, it goes.
 function stale() {
@@ -69,14 +70,21 @@ function stale() {
 }
 const href = (p, m = modeOf(location.hash, node)) => link(p, m);
 const rows = () => [...document.querySelectorAll("ol.rows > li.obj")]; // the child objects; property rows are read, not entered
+// Basis: the site's own document first (named as last read, or by its path), then each other source kept; the box holds an
+// address that was refused, and says why.
+function basis() {
+  const homeName = (name && !data.error && data.url === new URL(meta.content, location.href).href ? name : null)
+    ?? sources.find((s) => s.path === meta.content)?.name ?? nameOf(meta.content, null);
+  return basisOf(ax, sources, meta.content, homeName, data.error ? { value: data.path, error: data.error } : {}, zone);
+}
 function render(focus) {
   // Each row carries its thing's haecceity (schema:about), from the document's source: what a Clax report is about.
-  const v = viewOf(ax, nodes, location.hash, zone, data.source);
+  const v = isBasis(location.hash) ? basis() : viewOf(ax, nodes, location.hash, zone, data.source);
   node = v.node;
-  const main = toDom(document, v.tree);
+  const main = toDom(document, isBasis(location.hash) ? v.tree : framed(v.tree, name, v.path));
   document.querySelector("main").replaceWith(main);
   // Clax says the fold in view: reopened with its haecceity and its rows' (clax.js embed), never left on the last fold.
-  if (clax?.mounted && v.path.join("/") !== claxAt) { claxAt = v.path.join("/"); clax.reopen(); }
+  if (clax?.mounted && route() !== claxAt) { claxAt = route(); clax.reopen(); }
   document.title = node?.title ?? "Basis";
   for (const li of rows()) li.addEventListener("click", e => { if (e.target.tagName !== "A") li.querySelector("a").click(); });
   // A fold's acts are forms (src/ax.rs act_form) and submit as forms, natively, in every host, Allie's too: no script takes
@@ -86,24 +94,38 @@ function render(focus) {
   if (back >= 0) { cur = back; cameFrom = null; }
   move(Math.min(cur, Math.max(0, rows().length - 1)));
   stale();
-  if (focus) main.querySelector("h1").focus();
+  if (focus === "box") main.querySelector('input[type="search"]')?.focus();
+  else if (focus) main.querySelector("h1").focus();
 }
 function move(i) {
   const rs = rows(); if (!rs.length) return;
   cur = Math.max(0, Math.min(rs.length - 1, i));
   rs.forEach((r, j) => r.classList.toggle("cur", j === cur));
 }
+let toBox = false;
 function show(focus) {
-  const p = pathOf(location.hash); cur = 0;
-  cameFrom = last.length > p.length && p.every((x, i) => x === last[i]) ? last[p.length] : null;
-  last = p;
-  render(focus);
+  cur = 0;
+  if (isBasis(location.hash)) {
+    // Out to Basis from a document: the cursor on that document's row, as backing out lands on the row you came from.
+    cameFrom = null; last = null;
+    const i = data.error ? -1 : basis().sources.findIndex((s) => new URL(s.path, location.href).href === data.url);
+    cur = Math.max(0, i);
+  } else {
+    const p = pathOf(location.hash);
+    cameFrom = last && last.length > p.length && p.every((x, i) => x === last[i]) ? last[p.length] : null;
+    last = p;
+  }
+  render(toBox ? "box" : focus); toBox = false;
 }
 // The document, folded here. A failed read keeps the folds already shown; with none yet, the root says why.
 async function load() {
   try {
     if (data.error) throw new Error(data.error);
-    const next = await open(fold, data.url, { opts: (modified) => ({ ...(data.source ? { source: data.source } : {}), updated: modified ?? new Date().toISOString(), localTimeZone: zone }), stored: (at) => { kept = at; } });
+    const read = await open(fold, data.url, { opts: (modified) => ({ ...(data.source ? { source: data.source } : {}), updated: modified ?? new Date().toISOString(), localTimeZone: zone }), stored: (at) => { kept = at; } });
+    // Its root named by the document (its own title, or its path: "Fleet"), never "Everything"; and kept on Basis by that name.
+    name = nameOf(data.path, read.get("root")?.title);
+    const next = named(read, name);
+    if (!kept) { sources = keep(sources, { kind: "fold", path: data.path, name }); try { localStorage.setItem(KEPT, JSON.stringify(sources)); } catch {} }
     const text = JSON.stringify([...next]);
     if (text === said) { stale(); return false; }
     nodes = next; said = text; return true;
@@ -114,9 +136,18 @@ async function load() {
 }
 addEventListener("pointerdown", () => document.body.classList.remove("keys"));
 addEventListener("keydown", e => {
-  if (e.metaKey || e.ctrlKey || e.altKey || /input|textarea/i.test(e.target.tagName)) return;
-  const p = pathOf(location.hash), k = node?.kids ?? [], deck = modeOf(location.hash, node) === "slides";
-  if (deck && (e.key === "ArrowRight" || e.key === "ArrowLeft")) { const s = node?.[e.key === "ArrowRight" ? "next" : "prev"]; if (!s) return; location.hash = href(at(s.id)); }
+  if (e.metaKey || e.ctrlKey || e.altKey) return;
+  // In a field, keys are the field's; Escape leaves Basis's box for the fold's heading, where j/k move again.
+  if (e.key === "Enter" && e.target.tagName === "BUTTON") return; // a focused button is pressed, as a button is
+  if (/input|textarea/i.test(e.target.tagName)) { if (e.key === "Escape" && e.target.type === "search") { e.preventDefault(); document.querySelector("main h1")?.focus(); } return; }
+  const top = isBasis(location.hash), p = top ? [] : pathOf(location.hash), k = node?.kids ?? [], deck = !top && modeOf(location.hash, node) === "slides";
+  if (e.key === "/") { if (top) document.querySelector('main input[type="search"]')?.focus(); else { toBox = true; location.hash = BASIS; } }
+  // On Basis a row is a source: entering it opens that document at its own address, in this tab.
+  else if (top && (e.key === "l" || e.key === "Enter" || e.key === "ArrowRight")) { if (!k[cur]) return; location.assign(k[cur].href); }
+  else if (top && (e.key === "h" || e.key === "Backspace" || e.key === "ArrowLeft")) return;
+  // Out of a document's root is Basis.
+  else if (!p.length && (e.key === "h" || e.key === "Backspace" || (!deck && e.key === "ArrowLeft"))) location.hash = BASIS;
+  else if (deck && (e.key === "ArrowRight" || e.key === "ArrowLeft")) { const s = node?.[e.key === "ArrowRight" ? "next" : "prev"]; if (!s) return; location.hash = href(at(s.id)); }
   else if (e.key === "j" || e.key === "ArrowDown") move(cur + 1);
   else if (e.key === "k" || e.key === "ArrowUp") move(cur - 1);
   else if ((e.key === "l" || e.key === "Enter" || e.key === "ArrowRight") && k[cur]) location.hash = href(k[cur].href?.startsWith("#/") ? pathOf(k[cur].href) : [...p, k[cur].id]); // an in-page row ("back to the top") goes where it says, in the mode you are in
@@ -135,11 +166,13 @@ show(true);
 document.body.dataset.ready = "1";
 // Clax, once the fold is up and never ahead of it: the pinned overlay, mounted only where fold serve mints this reader a token.
 // It is told the fold in view: its haecceity (null for a document named in the address) and its rows.
-embed({ at: () => ({ fold: data.source ? haecceityOf(data.source, pathOf(location.hash)) : null, rows: rows() }) })
-  .then((r) => { clax = r; claxAt = pathOf(location.hash).join("/"); document.body.dataset.clax = r.mounted ? "on" : r.why; })
+// Basis is no document's fold: it claims no haecceity.
+embed({ at: () => ({ fold: data.source && !isBasis(location.hash) ? haecceityOf(data.source, pathOf(location.hash)) : null, rows: rows() }) })
+  .then((r) => { clax = r; claxAt = route(); document.body.dataset.clax = r.mounted ? "on" : r.why; })
   .catch((e) => { document.body.dataset.clax = `failed: ${e?.message ?? e}`; });
 // The producer rewrites the document every few minutes: read it again each minute, and show a change in place (focus stays).
-setInterval(async () => { if (await load()) render(false); }, 60_000);
+// Not on Basis: it shows none of the document's folds, and a render there would rebuild its box under a half-typed address.
+setInterval(async () => { if ((await load()) && !isBasis(location.hash)) render(false); }, 60_000);
 // The live state (fold-live meta's stream) as the hint of its seat's row, never a line of its own (01M620P439). `snapshot` and
 // `tick` (10 s) carry it all, `seat` one seat; a dropped stream reads as offline since the last tick.
 const liveMeta = document.querySelector('meta[name="fold-live"]');

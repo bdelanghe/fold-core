@@ -38,11 +38,21 @@ export async function open(fold, url, { fetch = globalThis.fetch, opts = () => (
   return new Map(fold({ root, files, opts: opts(modified && !Number.isNaN(Date.parse(modified)) ? new Date(modified).toISOString() : null) }));
 }
 
-/** The document this viewer reads: the fold-data meta's (`{path, source}`), or one named in the address (`?data=<path>`, as the
- * Reading box submits it) by an absolute path on this origin. Anything else is refused, never fetched: `{path, error}`. */
+/** The kinds of source Basis knows (Bobby 11-02: "think like adding a podcast or rss feed"). Only a fold document is read today; a
+ * feed (RSS, Atom, a podcast's) is named so the box can say it is not read yet, never fetched as if it were a fold. */
+export const KINDS = { fold: "a fold document", feed: "a feed (RSS, Atom or a podcast)" };
+/** The kind of source a typed address is: a feed by its scheme or its look (`feed:`, `podcast:`, `.rss`, `.atom`, `.xml`, a
+ * `/feed` or `/rss` path), else a fold document. */
+export const kindOf = (text) =>
+  /^(feed|podcast|itpc|pcast):/i.test(text) || /(\.(rss|atom|xml)|\/(feed|rss|atom))\/?(\?.*)?$/i.test(text) ? "feed" : "fold";
+
+/** The document this viewer reads: the fold-data meta's (`{path, source}`), or one named in the address (`?data=<path>`, as Basis's
+ * add-a-source box submits it) by an absolute path on this origin. Anything else is refused, never fetched: `{path, error}`. */
 export function dataOf(search, base, meta) {
   const named = new URLSearchParams(search).get("data")?.trim();
   if (named == null || named === "") return { path: meta.path, url: new URL(meta.path, base).href, source: meta.source };
+  const kind = kindOf(named);
+  if (kind !== "fold") return { path: named, kind, error: `${KINDS[kind]} is not read yet; only a fold document is` };
   const u = new URL(named, base);
   if (!/^\/(?![/\\])/.test(named) || u.origin !== new URL(base).origin) return { path: named, error: "only a path on this site, from /, is read" };
   return { path: u.pathname + u.search, url: u.href, source: null };
@@ -81,4 +91,90 @@ export function since(at, now, timeZone) {
   const m = Math.max(0, Math.floor((now - t) / 60_000)), rel = new Intl.RelativeTimeFormat("en", { numeric: "always" });
   const age = m < 1 ? "less than a minute ago" : m < 60 ? rel.format(-m, "minute") : m < 48 * 60 ? rel.format(-Math.floor(m / 60), "hour") : rel.format(-Math.floor(m / 1440), "day");
   return `Not updated since ${when}, ${age}.`;
+}
+
+// Basis, the level above every document (Bobby 11-02: "top level is basis and lists the folds"): its own fold, at #basis, listing
+// the sources kept, with the add-a-source box as its first row. A document's root is named by the document, not "Everything".
+export const BASIS = "#basis";
+export const isBasis = (hash) => hash === BASIS;
+/** The core's name for a root that names nothing of its own (src/ax.rs ROOT), which the fleet's producer writes as its root's title. */
+export const GENERIC = "Everything";
+const decoded = (s) => { try { return decodeURIComponent(s); } catch { return s; } };
+
+/** A document's name: its root's own title, unless that is the generic one; else its folder ("/fold-data/fleet/page.json" is
+ * "Fleet"), or, for a file not named page.json or index.json, the file's stem. */
+export function nameOf(path, title) {
+  const t = String(title ?? "").trim();
+  if (t && t !== GENERIC) return t;
+  const parts = new URL(path, "https://basis.invalid/").pathname.split("/").filter(Boolean).map(decoded);
+  const file = parts.at(-1) ?? "", stem = /^(page|index)\.json$/i.test(file) ? parts.at(-2) : file.replace(/\.[^.]*$/, "");
+  const w = (stem ?? "").replace(/[-_]+/g, " ").trim();
+  return w ? w[0].toUpperCase() + w.slice(1) : t || GENERIC;
+}
+
+/** A document's folds with its root named `name`: the root's title, and the root wherever another fold says it (the first step of
+ * its trail, a slide's previous or next). The folds given are not changed. */
+export function named(nodes, name) {
+  const root = nodes.get("root");
+  if (!root || !name) return nodes;
+  const was = root.title, step = (s) => (s?.id === "root" ? { ...s, title: name } : s);
+  return new Map([...nodes].map(([id, n]) => {
+    const m = { ...n, ...(id === "root" ? { title: name } : {}) };
+    if (Array.isArray(n.trail) && n.trail.length && n.trail[0] === was) m.trail = [name, ...n.trail.slice(1)];
+    for (const k of ["prev", "next"]) if (n[k]) m[k] = step(n[k]);
+    return [id, m];
+  }));
+}
+
+/** A fold's tree with Basis above it: its path starts at Basis (the root's path is just that), and a link to the root that the core
+ * could only name generically (a missing fold's) says the document's name. On the root itself (`path` empty), the core's way back to
+ * the root (a failed or empty root's) would go nowhere: Basis is the way out, so it goes. */
+export function framed(tree, name, path = null) {
+  const toRoot = (h) => h === "#/" || h === "#slides/";
+  const rename = (n) => {
+    let m = n;
+    if (name && n.role === "link" && toRoot(n.href)) {
+      if (n.name === GENERIC) m = { ...n, name };
+      else if (n.name === `Back to ${GENERIC}`) m = { ...n, name: `Back to ${name}` };
+    }
+    return m.children ? { ...m, children: m.children.map(rename) } : m;
+  };
+  const t = rename(tree), kids = [...(t.children ?? [])];
+  const crumb = { role: "listitem", children: [{ role: "link", name: "Basis", href: BASIS }] };
+  if (kids[0]?.role === "navigation") {
+    const list = kids[0].children[0], rest = list.children.filter((li) => !(path?.length === 0 && toRoot(li.children?.[0]?.href)));
+    kids[0] = { ...kids[0], children: [{ ...list, children: [crumb, ...rest] }, ...kids[0].children.slice(1)] };
+  } else kids.unshift({ role: "navigation", name: "Path", children: [{ role: "list", name: "Path", children: [crumb] }] });
+  return { ...t, children: kids };
+}
+
+/** The sources kept, with `s` (`{kind, path, name}`, one just read) in it: once, by its path, where it was, with its latest name. */
+export function keep(list, s) {
+  const ok = (Array.isArray(list) ? list : []).filter((x) => x && typeof x.path === "string" && typeof x.name === "string");
+  return ok.some((x) => x.path === s.path) ? ok.map((x) => (x.path === s.path ? s : x)) : [...ok, s];
+}
+
+/** Where a source opens, in this tab: the site's own document at its root, any other named in the address. */
+export const sourceHref = (s, home) => (s.path === home ? "./#/" : `./?data=${encodeURIComponent(s.path)}#/`);
+
+/** What Basis's box says under it: why the last address was not read, or what it takes. */
+export const BOX_NOTE = "A fold document's path on this site, from /. Feeds (RSS, podcasts) are not read yet.";
+
+/** Basis as a fold: `{node, tree}`. The site's own document (`home`, its path) first, then every other source kept, each entered
+ * at its own address in this tab; the box first of all, holding `box.value` (an address not read) and saying `box.error`. */
+export function basisOf(ax, kept, home, homeName, box = {}, localTimeZone) {
+  const sources = [{ kind: "fold", path: home, name: homeName }, ...(kept ?? []).filter((s) => s.path !== home)];
+  const node = { title: "Basis", trail: [], kids: sources.map((s, i) => ({ id: String(i), title: s.name, hint: s.path, href: sourceHref(s, home) })) };
+  const local = (n) => ({ ...n, ...(n.role === "link" ? { local: true } : {}), ...(n.children ? { children: n.children.map(local) } : {}) });
+  const tree = local(ax({ node, path: [], mode: "folds", href: "viewer", localTimeZone }));
+  const row = { role: "listitem", cls: "prop source", children: [
+    { role: "form", name: "Add a source", search: true, method: "get", action: "./", children: [
+      { role: "searchbox", name: "Add a source", field: "data", ...(box.value ? { value: box.value } : {}), describedby: "source-note" },
+      { role: "button", name: "Open" },
+    ] },
+    { role: "text", id: "source-note", cls: box.error ? "note alert" : "note", name: box.error ? `Not read: ${box.error}` : BOX_NOTE },
+  ] };
+  const list = tree.children.findIndex((c) => c.role === "list");
+  tree.children[list] = { ...tree.children[list], children: [row, ...tree.children[list].children] };
+  return { node, sources, tree };
 }
