@@ -97,3 +97,16 @@ test("serve act.html: lone blesses the page an act's form gets, with zero findin
   const d = parseHTML(readFileSync(join(goldens, "serve", "act.html"), "utf8")).document;
   expect((await bless(d.querySelector("main") as any)).findings.map((x: any) => x.code)).toEqual([]);
 });
+
+// Basis (viewer/view.js basisOf, goldens/viewer/basis.ax.json): toDom derives what src/html.rs wrote (goldens/viewer/basis.html.json),
+// and lone blesses it with no finding: its add-a-source box is a named search landmark with a named field.
+test("Basis: toDom derives the HTML html.rs writes, and lone blesses it", async () => {
+  const trees = read(goldens, "viewer", "basis.ax.json"), want = read(goldens, "viewer", "basis.html.json");
+  expect(Object.keys(want)).toEqual(Object.keys(trees));
+  for (const k of Object.keys(trees)) {
+    expect(parsed(toDom(dom, trees[k]).outerHTML), k).toEqual(parsed(want[k]));
+    const { document: d } = parseHTML(`<!doctype html><html lang="en"><head><title>Basis</title></head><body>${want[k]}</body></html>`);
+    const r = await bless(d.querySelector("main") as any);
+    expect(r.findings.map((x: any) => `${k}: ${x.severity} ${x.code} ${x.path} ${x.message.slice(0, 100)}`)).toEqual([]);
+  }
+});

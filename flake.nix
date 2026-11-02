@@ -70,6 +70,8 @@
           cp -r ${self}/js ${self}/goldens ${self}/viewer .
           export HOME=$TMPDIR FONTCONFIG_FILE=${pkgs.makeFontsConf { fontDirectories = [ ]; }}
           VIEWER=${self.packages.${pkgs.stdenv.hostPlatform.system}.viewer} CHROMIUM=${pkgs.chromium}/bin/chromium bun viewer/browser-check.ts sample
+          # a root titled the generic "Everything", as the fleet's producer writes it: named "Fleet" by its path
+          VIEWER=${self.packages.${pkgs.stdenv.hostPlatform.system}.viewer} CHROMIUM=${pkgs.chromium}/bin/chromium bun viewer/browser-check.ts everything
           touch $out
         '';
         # every golden fold's pre-rendered page (goldens/pages, src/page.rs) in headless Chromium with JavaScript off, light and dark:

@@ -73,3 +73,22 @@ fn it_escapes_text_and_attributes() {
         r##"<a href="#/x?a=1&amp;b=&quot;2&quot;" aria-describedby="d1">a &lt; b &amp; "c"</a><span class="hint" id="d1">&lt;i&gt;</span>"##
     );
 }
+
+/// Basis, the viewer's level above every document (viewer/view.js `basisOf`, held in goldens/viewer/basis.ax.json): its add-a-source
+/// box is a search form and a search field, so html.rs writes them as toDom does (js/html.test.ts holds the two to this file).
+#[test]
+fn basis_writes_its_golden_html() {
+    let dir = Path::new(env!("CARGO_MANIFEST_DIR")).join("goldens/viewer");
+    let trees: serde_json::Map<String, Value> = serde_json::from_str(&fs::read_to_string(dir.join("basis.ax.json")).unwrap()).unwrap();
+    let got: serde_json::Map<String, Value> = trees.iter().map(|(k, t)| (k.clone(), Value::from(html(t).unwrap()))).collect();
+    let text = serde_json::to_string_pretty(&got).unwrap() + "\n";
+    let f = dir.join("basis.html.json");
+    if std::env::var("FOLD_BLESS").is_ok() {
+        fs::write(&f, &text).unwrap();
+    }
+    assert_eq!(fs::read_to_string(&f).unwrap(), text, "goldens/viewer/basis.html.json differs (FOLD_BLESS=1 rewrites it)");
+    let sources = got["sources"].as_str().unwrap();
+    assert!(sources.contains(r#"<form role="search" aria-label="Add a source" method="get" action="./">"#), "{sources}");
+    assert!(sources.contains(r#"<input aria-label="Add a source" type="search" name="data" spellcheck="false" autocomplete="off" aria-describedby="source-note">"#), "{sources}");
+    assert!(!sources.contains("</input>"));
+}

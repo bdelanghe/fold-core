@@ -21,12 +21,14 @@
   --s0:18px;--r:1.2;--s-1:calc(var(--s0) / var(--r));--s1:calc(var(--s0) * var(--r));--s2:calc(var(--s0) * var(--r) * var(--r));--s3:calc(var(--s2) * var(--r))}
 *{box-sizing:border-box}
 body{margin:0;background:var(--paper);color:var(--ink);font:var(--s0)/1.45 var(--face);font-variant-numeric:tabular-nums}
-main,form.reading{max-width:42rem;margin:0 auto;padding:16px}
-/* The document read, as a search box (Bobby 10-30): its path, editable; Open reads another on this site. */
-form.reading{display:flex;flex-wrap:wrap;gap:.5rem;align-items:center;padding-top:0;font-size:var(--s-1)}
-form.reading input{flex:1;min-width:12ch;min-height:44px;font:var(--s-1) ui-monospace,monospace;color:var(--ink);background:var(--card);border:1px solid var(--line);border-radius:.4em;padding:0 .5em}
-form.reading button{font:inherit;min-height:44px;color:var(--paper);background:var(--accent);border:1px solid var(--accent);border-radius:.4em;padding:0 1em}
-form.reading .note{flex-basis:100%;color:var(--soft);overflow-wrap:anywhere}
+main{max-width:42rem;margin:0 auto;padding:16px}
+/* Basis's add-a-source box (Bobby 11-02: "kinda google search like"): one field, Enter or Open reads it; the note says what it takes,
+   or why the last address was not read. */
+ol.rows li.source form{display:flex;gap:.5rem;align-items:center}
+ol.rows li.source input{flex:1;min-width:12ch;min-height:44px;font:var(--s0) var(--face);color:var(--ink);background:var(--card);border:1px solid var(--line);border-radius:.4em;padding:0 .6em}
+ol.rows li.source button{font:inherit;min-height:44px;color:var(--paper);background:var(--accent);border:1px solid var(--accent);border-radius:.4em;padding:0 1em}
+ol.rows li.source .note{display:block;margin-top:.35rem;color:var(--soft);font-size:var(--s-1);overflow-wrap:anywhere}
+ol.rows li.source .note.alert{color:var(--warn)}
 /* The notices zone (index.html): above the fold, always there, one fixed height whatever it says (a long notice scrolls inside it),
    so a notice never moves the fold. In ink, not soft. */
 aside.notices{box-sizing:border-box;max-width:42rem;height:4.8em;margin:16px auto 0;padding:.4em 16px;overflow-y:auto;color:var(--ink);background:var(--card);border-left:4px solid var(--accent)}

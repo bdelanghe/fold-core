@@ -59,16 +59,16 @@
 <!-- The rotor's drawer (r, rotor.js): the kinds as a listbox, Allie's. Fixed over the page, out of its flow, so opening it never moves
      the fold or the notices zone; what the rotor says is said in the notices zone (#notice), the page's one live region. -->
 <section id="rotor" class="rotor" aria-label="Kinds" hidden><ol id="rotor-kinds" role="listbox" aria-label="Kinds" tabindex="-1"></ol></section>
-<!-- The last region, after the fold (consultant's cold read, RECOMMEND-consultant-2026-11-01-fleet-page-cold-read.md point 6):
-     a way to open another document when this one fails. Where the data is from is said on every fold ("Data from …", src/ax.rs). -->
-<form class="reading" role="search" aria-label="Reading"><label for="reading">Reading</label>
-<input id="reading" name="data" type="search" spellcheck="false" autocomplete="off" aria-describedby="reading-note">
-<button type="submit">Open</button><span id="reading-note" class="note"></span></form>
+<!-- Another document is opened from Basis (#basis, the level above every document, Bobby 11-02): its add-a-source box, the first
+     row of its one list, where the Reading box at the foot of every fold used to be (the consultant's cold-read point 6, a way to open
+     another document when this one fails, is Basis's box now: out of a document's root, h goes there). Where the data is from is said
+     on every fold ("Data from …", src/ax.rs). -->
 <script type="module">
 // A fold viewer that holds no data: it fetches one JSON document from the data origin (the fold-data meta), folds it here with the
 // core's WebAssembly module, and shows one fold at a time. The core gives each fold's accessibility tree (ax_json); fold-dom.js
 // derives the DOM from that tree alone; this file only routes, follows the data and moves the cursor.
-// Keys are Allie's (vim): j/k move, l or Enter goes in, h goes back out; ]] and [[ go to the next and previous fold beside this one
+// Keys are Allie's (vim): j/k move, l or Enter goes in, h goes back out (from a document's root, out to Basis); / goes to Basis's
+// add-a-source box, and Escape leaves it; ]] and [[ go to the next and previous fold beside this one
 // (the next group from a group, the next item from an item: vim's section motions); Enter on a fold with no rows to go into runs its
 // first act (a Needs-you item's Approve, or its ack): the rotor's first action. Decline is the item's second act, its own button.
 // As a deck (#slides/<path>, or a page whose folds say present "slides" opened with no path) the same fold is a slide: → and ← go to
@@ -78,18 +78,20 @@
 import { core } from "./fold-core.js";
 import { KINDS, kindView, rotorKey, rotorStart } from "./rotor.js";
 import { toDom, liveLine } from "./fold-dom.js";
-import { at, beside, dataOf, docId, foldNodes, graft, haecceityOf, href as link, liveFolds, liveNodes, manifestRoot, modeOf, open, pathOf, shows, since, stamp, viewOf } from "./view.js";
+import { at, basisOf, beside, BASIS, dataOf, docId, foldNodes, framed, graft, haecceityOf, href as link, isBasis, keep, liveFolds, liveNodes, manifestRoot, modeOf, named, nameOf, open, pathOf, shows, since, stamp, viewOf } from "./view.js";
 import { ENDPOINTS, intentOk, notifyHere, notifyRefresh, notifyState, readNeeds, sign } from "./sign.js";
 import { embed } from "./clax.js";
 const zone = Intl.DateTimeFormat().resolvedOptions().timeZone;
 const meta = document.querySelector('meta[name="fold-data"]');
-// The document read, always said in the Reading box: the meta's, or one named in the address by an absolute path on this site
-// (?data=/fold-data/demo/page.json, as Open submits it). The box holds its path; the note says why it was not read, or that the address
-// named it. Its source is not said here: every fold says "Data from <source>, <when>" (src/ax.rs).
+// The document read: the meta's, or one named in the address by an absolute path on this site (?data=/fold-data/demo/page.json, as
+// Basis's box submits it). Why it was not read is a notice (the notices zone) and is said on Basis too, its address back in the box
+// to mend. Its source is not said here: every fold says "Data from <source>, <when>" (src/ax.rs).
 const data = dataOf(location.search, location.href, { path: meta.content, source: meta.dataset.source });
-document.getElementById("reading").value = data.path;
-// why it was not read is a notice (the notices zone); the box's own note only says whose path it holds
-document.getElementById("reading-note").textContent = data.error || data.source ? "" : "Named in the address";
+// The sources Basis lists, kept on this device between visits: each document read here, by its path, with its name.
+const KEPT = "basis.sources";
+const kept0 = () => { try { return JSON.parse(localStorage.getItem(KEPT) ?? "[]"); } catch { return []; } };
+let sources = kept0(), name = null;
+const route = () => (isBasis(location.hash) ? "basis" : pathOf(location.hash).join("/"));
 let nodes = new Map(), said = "", node = null, cur = 0, cameFrom = null, last = [], kept = null, clax = null, claxAt = null;
 // Needs you, live: needs.json's URL for the document it is for (none for one named in the address), and its last answer.
 const needsMeta = document.querySelector('meta[name="fold-needs"]');
@@ -181,15 +183,24 @@ async function notifyToggle() {
   say(r.said);
   setTimeout(() => { if (said_ === r.said) say(null); }, 8000);
 }
+// Basis, the level above every document (#basis): the site's own document first (named as last read, or by its path), then each other
+// source kept; its add-a-source box holds an address that was refused, and says why.
+function basis() {
+  const homeName = (name && !data.error && data.url === new URL(meta.content, location.href).href ? name : null)
+    ?? sources.find((s) => s.path === meta.content)?.name ?? nameOf(meta.content, null);
+  return basisOf(ax, sources, meta.content, homeName, data.error ? { value: data.path, error: data.error } : {}, zone);
+}
 function render(focus) {
-  // In a kind (the rotor): its view of the fold you came from, drawn as any fold is. Else the fold the location names.
+  // On Basis: its own fold. In a kind (the rotor): its view of the fold you came from, drawn as any fold is. Else the fold the location names,
+  // with Basis above it (its path starts there) and its root named by the document, not "Everything".
   // Each row carries its thing's haecceity (schema:about), from the document's source: what a Clax report is about.
-  const v = rot.kind
+  const top = isBasis(location.hash) && !rot.kind;
+  const v = top ? basis() : rot.kind
     ? { path: rot.from?.path ?? [], node: kindView(nodes, rot.kind, rot.from?.path ?? [], { href: href(rot.from?.path ?? []), title: rot.from?.title }) }
     : viewOf(ax, nodes, location.hash, zone, data.source);
   if (rot.kind) v.tree = ax({ node: v.node, path: [], mode: "folds", href: "viewer", localTimeZone: zone });
   node = v.node;
-  const main = toDom(document, v.tree);
+  const main = toDom(document, top || rot.kind ? v.tree : framed(v.tree, name, v.path));
   // The notification acts are the rotor's, not the fold's: one action in the drawer at the foot, its word following state (pageActs).
   for (const f of main.querySelectorAll("form[data-push]")) f.remove();
   // An item that can't be signed is not drawn as signable (reports H30CX6, H5HTME, H60AWS, H6QXDQ, H8F5FC, H663EV, HV9H73): a passkey form
@@ -201,7 +212,7 @@ function render(focus) {
   }
   document.querySelector("main").replaceWith(main);
   // Clax says the fold in view: reopened with its haecceity and its rows' (clax.js embed), never left on the last fold.
-  if (clax?.mounted && v.path.join("/") !== claxAt) { claxAt = v.path.join("/"); clax.reopen(); }
+  if (clax?.mounted && route() !== claxAt) { claxAt = route(); clax.reopen(); }
   document.title = node?.title ?? "Basis";
   for (const li of rows()) li.addEventListener("click", e => { if (e.target.tagName !== "A") li.querySelector("a").click(); });
   // a kind's row back to the fold it was entered from names the location already, so no hashchange comes: it leaves the kind here
@@ -217,7 +228,8 @@ function render(focus) {
   move(Math.min(cur, Math.max(0, rows().length - 1)), focus);
   stale();
   // (in a kind, focus is on its item already: move put it there)
-  if (focus && !rot.kind) main.querySelector("h1").focus();
+  if (focus === "box") main.querySelector('input[type="search"]')?.focus();
+  else if (focus && !rot.kind) main.querySelector("h1").focus();
 }
 // In a kind, the item under the cursor takes focus, so it says itself (its title, then where it is); on a fold, the cursor is drawn only.
 function move(i, focus = true) {
@@ -226,12 +238,21 @@ function move(i, focus = true) {
   rs.forEach((r, j) => r.classList.toggle("cur", j === cur));
   if (rot.kind && focus) rs[cur].querySelector("a")?.focus({ preventScroll: false });
 }
+let toBox = false;
 function show(focus) {
   if (rot.kind || rot.drawer) { rot = { ...rot, kind: "", from: null, drawer: false }; rotBox.hidden = true; } // a move to a fold leaves the kind
-  const p = pathOf(location.hash); cur = 0;
-  cameFrom = last.length > p.length && p.every((x, i) => x === last[i]) ? last[p.length] : null;
-  last = p;
-  render(focus);
+  cur = 0;
+  if (isBasis(location.hash)) {
+    // Out to Basis from a document: the cursor on that document's row, as backing out lands on the row you came from.
+    cameFrom = null; last = null;
+    const i = data.error ? -1 : basis().sources.findIndex((s) => new URL(s.path, location.href).href === data.url);
+    cur = Math.max(0, i);
+  } else {
+    const p = pathOf(location.hash);
+    cameFrom = last && last.length > p.length && p.every((x, i) => x === last[i]) ? last[p.length] : null;
+    last = p;
+  }
+  render(toBox ? "box" : focus); toBox = false;
   say(told); told = null; // a move clears the last notice, unless the move is what a notice was for
 }
 // The document, folded here. A failed read keeps the folds already shown; with none yet, the root says why.
@@ -250,7 +271,11 @@ async function load() {
       placed = refs ? foldNodes(r, refs.folds()) : [];
       return withNeeds(graft(graft(r, held), placed));
     };
-    const next = stamp(await open(fold, data.url, { root: top, opts: (modified) => ({ ...(data.source ? { source: data.source } : {}), updated: modified ?? new Date().toISOString(), localTimeZone: zone }), stored: (at) => { kept = at; } }), [...held, ...placed]);
+    const read = stamp(await open(fold, data.url, { root: top, opts: (modified) => ({ ...(data.source ? { source: data.source } : {}), updated: modified ?? new Date().toISOString(), localTimeZone: zone }), stored: (at) => { kept = at; } }), [...held, ...placed]);
+    // Its root named by the document (its own title, or its path: "Fleet"), never "Everything"; and kept on Basis by that name.
+    name = nameOf(data.path, read.get("root")?.title);
+    const next = named(read, name);
+    if (!kept) { sources = keep(sources, { kind: "fold", path: data.path, name }); try { localStorage.setItem(KEPT, JSON.stringify(sources)); } catch {} }
     const text = JSON.stringify([...next]);
     if (text === said) { stale(); return false; }
     nodes = next; said = text; return true;
@@ -261,15 +286,23 @@ async function load() {
 }
 addEventListener("pointerdown", () => document.body.classList.remove("keys"));
 addEventListener("keydown", e => {
-  if (e.metaKey || e.ctrlKey || e.altKey || /input|textarea/i.test(e.target.tagName)) return;
+  if (e.metaKey || e.ctrlKey || e.altKey) return;
+  // In a field, keys are the field's; Escape leaves Basis's box for the fold's heading, where j/k move again.
+  if (/input|textarea/i.test(e.target.tagName)) { if (e.key === "Escape" && e.target.type === "search") { e.preventDefault(); document.querySelector("main h1")?.focus(); } return; }
   // the rotor first: r, the drawer's keys, and in a kind ] [ h (rotor.js rotorKey); j k l Enter go on to the viewer's own
   const r = rotorKey(rot, e.key, here(), pageActs());
   if (r) { rotorDo(r); document.body.classList.add("keys"); e.preventDefault(); e.stopPropagation(); return; }
   if (e.key === "Enter" && /^(a|button|select)$/i.test(e.target.tagName)) return; // it does its own thing, once
-  const p = pathOf(location.hash), k = node?.kids ?? [], deck = modeOf(location.hash, node) === "slides";
+  const onBasis = isBasis(location.hash), p = onBasis ? [] : pathOf(location.hash), k = node?.kids ?? [], deck = !onBasis && modeOf(location.hash, node) === "slides";
   const twice = (key) => { const again = keyAt.key === key && performance.now() - keyAt.t < 800; keyAt = again ? { key: "", t: 0 } : { key, t: performance.now() }; return again; };
   const act = !k.length && e.key === "Enter" ? document.querySelector("main form.act") : null;
-  if (e.key === "]" || e.key === "[") { const to = twice(e.key) && beside(nodes, p, e.key === "]" ? 1 : -1); if (to) location.hash = href(to); }
+  if (e.key === "/") { if (onBasis) document.querySelector('main input[type="search"]')?.focus(); else { toBox = true; location.hash = BASIS; } }
+  // On Basis a row is a source: entering it opens that document at its own address, in this tab.
+  else if (onBasis && (e.key === "l" || e.key === "Enter" || e.key === "ArrowRight")) { if (!k[cur]) return; location.assign(k[cur].href); }
+  else if (onBasis && (e.key === "h" || e.key === "Backspace" || e.key === "ArrowLeft")) return;
+  // Out of a document's root is Basis (and not in a kind: there h leaves the kind, the rotor's, handled above).
+  else if (!p.length && !rot.kind && (e.key === "h" || e.key === "Backspace" || (!deck && e.key === "ArrowLeft"))) location.hash = BASIS;
+  else if (e.key === "]" || e.key === "[") { const to = !onBasis && twice(e.key) && beside(nodes, p, e.key === "]" ? 1 : -1); if (to) location.hash = href(to); }
   else if (act) act.requestSubmit();
   else if (deck && (e.key === "ArrowRight" || e.key === "ArrowLeft")) { const s = node?.[e.key === "ArrowRight" ? "next" : "prev"]; if (!s) return; location.hash = href(at(s.id)); }
   else if (e.key === "j" || e.key === "ArrowDown") move(cur + 1);
@@ -343,7 +376,7 @@ document.body.dataset.ready = "1";
 // Clax, once the fold is up and never ahead of it: the pinned overlay, mounted only where fold serve mints this reader a token.
 // It is told the fold in view: its haecceity (null for a document named in the address) and its rows.
 embed({ at: () => ({ fold: data.source ? haecceityOf(data.source, pathOf(location.hash)) : null, rows: rows() }) })
-  .then((r) => { clax = r; claxAt = pathOf(location.hash).join("/"); document.body.dataset.clax = r.mounted ? "on" : r.why; })
+  .then((r) => { clax = r; claxAt = route(); document.body.dataset.clax = r.mounted ? "on" : r.why; })
   .catch((e) => { document.body.dataset.clax = `failed: ${e?.message ?? e}`; });
 // The producer rewrites the document every few minutes: read it again each minute, and show a change in place (focus stays).
 setInterval(async () => { if (await load()) render(false); }, 60_000);

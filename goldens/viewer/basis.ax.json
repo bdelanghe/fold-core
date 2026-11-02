@@ -1,0 +1,215 @@
+{
+ "sources": {
+  "role": "main",
+  "children": [
+   {
+    "role": "heading",
+    "name": "Basis",
+    "focus": true
+   },
+   {
+    "role": "list",
+    "name": "Basis",
+    "cls": "rows",
+    "children": [
+     {
+      "role": "listitem",
+      "cls": "prop source",
+      "children": [
+       {
+        "role": "form",
+        "name": "Add a source",
+        "search": true,
+        "method": "get",
+        "action": "./",
+        "children": [
+         {
+          "role": "searchbox",
+          "name": "Add a source",
+          "field": "data",
+          "describedby": "source-note"
+         },
+         {
+          "role": "button",
+          "name": "Open"
+         }
+        ]
+       },
+       {
+        "role": "text",
+        "id": "source-note",
+        "cls": "note",
+        "name": "A fold document's path on this site, from /. Feeds (RSS, podcasts) are not read yet."
+       }
+      ]
+     },
+     {
+      "role": "listitem",
+      "index": 0,
+      "cls": "obj",
+      "children": [
+       {
+        "role": "decoration",
+        "cls": "n",
+        "name": "1"
+       },
+       {
+        "role": "link",
+        "name": "Fleet",
+        "href": "./#/",
+        "description": "/fold-data/fleet/page.json",
+        "local": true
+       },
+       {
+        "role": "decoration",
+        "cls": "go",
+        "name": "›"
+       },
+       {
+        "role": "decoration",
+        "cls": "enter",
+        "name": "⏎ go in to Fleet"
+       }
+      ]
+     },
+     {
+      "role": "listitem",
+      "index": 1,
+      "cls": "obj",
+      "children": [
+       {
+        "role": "decoration",
+        "cls": "n",
+        "name": "2"
+       },
+       {
+        "role": "link",
+        "name": "Demo",
+        "href": "./?data=%2Ffold-data%2Fdemo%2Fpage.json#/",
+        "description": "/fold-data/demo/page.json",
+        "local": true
+       },
+       {
+        "role": "decoration",
+        "cls": "go",
+        "name": "›"
+       },
+       {
+        "role": "decoration",
+        "cls": "enter",
+        "name": "⏎ go in to Demo"
+       }
+      ]
+     }
+    ]
+   }
+  ]
+ },
+ "refused": {
+  "role": "main",
+  "children": [
+   {
+    "role": "heading",
+    "name": "Basis",
+    "focus": true
+   },
+   {
+    "role": "list",
+    "name": "Basis",
+    "cls": "rows",
+    "children": [
+     {
+      "role": "listitem",
+      "cls": "prop source",
+      "children": [
+       {
+        "role": "form",
+        "name": "Add a source",
+        "search": true,
+        "method": "get",
+        "action": "./",
+        "children": [
+         {
+          "role": "searchbox",
+          "name": "Add a source",
+          "field": "data",
+          "value": "https://example.test/podcast.rss",
+          "describedby": "source-note"
+         },
+         {
+          "role": "button",
+          "name": "Open"
+         }
+        ]
+       },
+       {
+        "role": "text",
+        "id": "source-note",
+        "cls": "note alert",
+        "name": "Not read: a feed (RSS, Atom or a podcast) is not read yet; only a fold document is"
+       }
+      ]
+     },
+     {
+      "role": "listitem",
+      "index": 0,
+      "cls": "obj",
+      "children": [
+       {
+        "role": "decoration",
+        "cls": "n",
+        "name": "1"
+       },
+       {
+        "role": "link",
+        "name": "Fleet",
+        "href": "./#/",
+        "description": "/fold-data/fleet/page.json",
+        "local": true
+       },
+       {
+        "role": "decoration",
+        "cls": "go",
+        "name": "›"
+       },
+       {
+        "role": "decoration",
+        "cls": "enter",
+        "name": "⏎ go in to Fleet"
+       }
+      ]
+     },
+     {
+      "role": "listitem",
+      "index": 1,
+      "cls": "obj",
+      "children": [
+       {
+        "role": "decoration",
+        "cls": "n",
+        "name": "2"
+       },
+       {
+        "role": "link",
+        "name": "Demo",
+        "href": "./?data=%2Ffold-data%2Fdemo%2Fpage.json#/",
+        "description": "/fold-data/demo/page.json",
+        "local": true
+       },
+       {
+        "role": "decoration",
+        "cls": "go",
+        "name": "›"
+       },
+       {
+        "role": "decoration",
+        "cls": "enter",
+        "name": "⏎ go in to Demo"
+       }
+      ]
+     }
+    ]
+   }
+  ]
+ }
+}
