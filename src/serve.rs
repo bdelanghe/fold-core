@@ -979,7 +979,7 @@ pub fn nodes_index(dir: &Path) -> String {
             let Ok(bytes) = fs::read(&p) else { continue };
             let hex: String = Sha256::digest(&bytes).iter().map(|b| format!("{b:02x}")).collect();
             let id = format!("{under}{stem}");
-            let href = format!("{under}{name}").split('/').map(|s| segment_of(s)).collect::<Vec<_>>().join("/");
+            let href = format!("{under}{name}").split('/').map(segment_of).collect::<Vec<_>>().join("/");
             let mut row = json!({ "id": id, "href": href, "etag": format!("\"sha-256:{hex}\"") });
             match serde_json::from_slice::<Value>(&bytes) {
                 Ok(Value::Object(n)) => {
