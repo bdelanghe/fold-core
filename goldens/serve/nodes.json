@@ -1,0 +1,297 @@
+[
+  {
+    "what": "a fold's node: always revalidated, its bytes' digest the ETag",
+    "request": {
+      "method": "GET",
+      "target": "/nodes/needs.json",
+      "headers": []
+    },
+    "status": 200,
+    "headers": [
+      [
+        "Content-Type",
+        "application/json"
+      ],
+      [
+        "Cache-Control",
+        "no-cache"
+      ],
+      [
+        "ETag",
+        "\"sha-256:1ce072c6954054b532b5c78babda26675c3753433ea08ca59cab6e85bb3ba5f6\""
+      ],
+      [
+        "Last-Modified",
+        "Fri, 30 Oct 2026 12:00:00 GMT"
+      ],
+      [
+        "Content-Digest",
+        "sha-256=:HOByxpVAVLUytceLq9omZ1w3U0M+oIylnKtuhbs7pfY=:"
+      ],
+      [
+        "Server-Timing",
+        "digest;desc=\"sha-256:1ce072c6954054b532b5c78babda26675c3753433ea08ca59cab6e85bb3ba5f6\", asof;desc=\"2026-10-30T12:00:00Z\""
+      ]
+    ],
+    "body": {
+      "id": "needs",
+      "source": "chitin pending --as bobby",
+      "updated": "2026-10-30T12:00:00Z",
+      "ok": true,
+      "stale_since": null,
+      "cadence_s": 30,
+      "data": {
+        "title": "Needs you"
+      }
+    }
+  },
+  {
+    "what": "its ETag again: 304, no body",
+    "request": {
+      "method": "GET",
+      "target": "/nodes/needs.json",
+      "headers": [
+        [
+          "If-None-Match",
+          "\"sha-256:1ce072c6954054b532b5c78babda26675c3753433ea08ca59cab6e85bb3ba5f6\""
+        ]
+      ]
+    },
+    "status": 304,
+    "headers": [
+      [
+        "Cache-Control",
+        "no-cache"
+      ],
+      [
+        "ETag",
+        "\"sha-256:1ce072c6954054b532b5c78babda26675c3753433ea08ca59cab6e85bb3ba5f6\""
+      ],
+      [
+        "Last-Modified",
+        "Fri, 30 Oct 2026 12:00:00 GMT"
+      ],
+      [
+        "Server-Timing",
+        "digest;desc=\"sha-256:1ce072c6954054b532b5c78babda26675c3753433ea08ca59cab6e85bb3ba5f6\", asof;desc=\"2026-10-30T12:00:00Z\""
+      ]
+    ],
+    "body": null
+  },
+  {
+    "what": "an older ETag: the whole node",
+    "request": {
+      "method": "GET",
+      "target": "/nodes/needs.json",
+      "headers": [
+        [
+          "If-None-Match",
+          "\"sha-256:00\""
+        ]
+      ]
+    },
+    "status": 200,
+    "headers": [
+      [
+        "Content-Type",
+        "application/json"
+      ],
+      [
+        "Cache-Control",
+        "no-cache"
+      ],
+      [
+        "ETag",
+        "\"sha-256:1ce072c6954054b532b5c78babda26675c3753433ea08ca59cab6e85bb3ba5f6\""
+      ],
+      [
+        "Last-Modified",
+        "Fri, 30 Oct 2026 12:00:00 GMT"
+      ],
+      [
+        "Content-Digest",
+        "sha-256=:HOByxpVAVLUytceLq9omZ1w3U0M+oIylnKtuhbs7pfY=:"
+      ],
+      [
+        "Server-Timing",
+        "digest;desc=\"sha-256:1ce072c6954054b532b5c78babda26675c3753433ea08ca59cab6e85bb3ba5f6\", asof;desc=\"2026-10-30T12:00:00Z\""
+      ]
+    ],
+    "body": {
+      "id": "needs",
+      "source": "chitin pending --as bobby",
+      "updated": "2026-10-30T12:00:00Z",
+      "ok": true,
+      "stale_since": null,
+      "cadence_s": 30,
+      "data": {
+        "title": "Needs you"
+      }
+    }
+  },
+  {
+    "what": "a node whose id holds a slash, from its subdirectory",
+    "request": {
+      "method": "GET",
+      "target": "/nodes/fleet/inbox.json",
+      "headers": []
+    },
+    "status": 200,
+    "headers": [
+      [
+        "Content-Type",
+        "application/json"
+      ],
+      [
+        "Cache-Control",
+        "no-cache"
+      ],
+      [
+        "ETag",
+        "\"sha-256:61627e239688be44f6363c943fe3ce6d5e6d68ec3f63f9a84fc9a9d467dd3a6d\""
+      ],
+      [
+        "Last-Modified",
+        "Fri, 30 Oct 2026 12:00:00 GMT"
+      ],
+      [
+        "Content-Digest",
+        "sha-256=:YWJ+I5aIvkT2NjyUP+PObV5taOw/Y/moT8mp1GfdOm0=:"
+      ],
+      [
+        "Server-Timing",
+        "digest;desc=\"sha-256:61627e239688be44f6363c943fe3ce6d5e6d68ec3f63f9a84fc9a9d467dd3a6d\", asof;desc=\"2026-10-30T12:00:00Z\""
+      ]
+    ],
+    "body": {
+      "id": "fleet/inbox",
+      "source": "chitin inbox",
+      "updated": "2026-10-30T11:59:00Z",
+      "ok": false,
+      "stale_since": "2026-10-30T11:50:00Z",
+      "cadence_s": 60,
+      "data": {
+        "title": "Inbox"
+      }
+    }
+  },
+  {
+    "what": "the index of nodes: each node's id, href and ETag, and its freshness",
+    "request": {
+      "method": "GET",
+      "target": "/nodes/",
+      "headers": []
+    },
+    "status": 200,
+    "headers": [
+      [
+        "Content-Type",
+        "application/json"
+      ],
+      [
+        "Cache-Control",
+        "no-cache"
+      ],
+      [
+        "ETag",
+        "\"sha-256:f6edb3a225e360dfd545d0193229c6e385da809333a124f8d5866495b096c82a\""
+      ],
+      [
+        "Last-Modified",
+        "Fri, 30 Oct 2026 12:00:00 GMT"
+      ],
+      [
+        "Content-Digest",
+        "sha-256=:9u2zoiXjYN/VRdAZMinG44XagJMzoST41YZklbCWyCo=:"
+      ],
+      [
+        "Server-Timing",
+        "digest;desc=\"sha-256:f6edb3a225e360dfd545d0193229c6e385da809333a124f8d5866495b096c82a\", asof;desc=\"2026-10-30T12:00:00Z\""
+      ]
+    ],
+    "body": {
+      "nodes": [
+        {
+          "id": "broken",
+          "href": "broken.json",
+          "etag": "\"sha-256:3c48773b404d850071dff4006d4ef0d7302d1343aefc58fbc84d730753de8831\"",
+          "ok": false,
+          "error": "not a JSON object"
+        },
+        {
+          "id": "fleet/inbox",
+          "href": "fleet/inbox.json",
+          "etag": "\"sha-256:61627e239688be44f6363c943fe3ce6d5e6d68ec3f63f9a84fc9a9d467dd3a6d\"",
+          "source": "chitin inbox",
+          "updated": "2026-10-30T11:59:00Z",
+          "ok": false,
+          "stale_since": "2026-10-30T11:50:00Z",
+          "cadence_s": 60
+        },
+        {
+          "id": "needs",
+          "href": "needs.json",
+          "etag": "\"sha-256:1ce072c6954054b532b5c78babda26675c3753433ea08ca59cab6e85bb3ba5f6\"",
+          "source": "chitin pending --as bobby",
+          "updated": "2026-10-30T12:00:00Z",
+          "ok": true,
+          "stale_since": null,
+          "cadence_s": 30
+        }
+      ]
+    }
+  },
+  {
+    "what": "the index unchanged: 304",
+    "request": {
+      "method": "GET",
+      "target": "/nodes/",
+      "headers": [
+        [
+          "If-None-Match",
+          "\"sha-256:f6edb3a225e360dfd545d0193229c6e385da809333a124f8d5866495b096c82a\""
+        ]
+      ]
+    },
+    "status": 304,
+    "headers": [
+      [
+        "Cache-Control",
+        "no-cache"
+      ],
+      [
+        "ETag",
+        "\"sha-256:f6edb3a225e360dfd545d0193229c6e385da809333a124f8d5866495b096c82a\""
+      ],
+      [
+        "Last-Modified",
+        "Fri, 30 Oct 2026 12:00:00 GMT"
+      ],
+      [
+        "Server-Timing",
+        "digest;desc=\"sha-256:f6edb3a225e360dfd545d0193229c6e385da809333a124f8d5866495b096c82a\", asof;desc=\"2026-10-30T12:00:00Z\""
+      ]
+    ],
+    "body": null
+  },
+  {
+    "what": "the index without its slash moves to it",
+    "request": {
+      "method": "GET",
+      "target": "/nodes",
+      "headers": []
+    },
+    "status": 301,
+    "headers": [
+      [
+        "Location",
+        "/fold/nodes/"
+      ],
+      [
+        "Cache-Control",
+        "no-store"
+      ]
+    ],
+    "body": null
+  }
+]

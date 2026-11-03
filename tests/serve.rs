@@ -115,6 +115,124 @@ fn every_resource_class_has_its_headers() {
     let _ = fs::remove_dir_all(&s.root);
 }
 
+/// Live nodes (BRIEF-stint-2026-11-03-basis-live-folds Part A): each fold's `nodes/<id>.json` and their index `nodes/`, revalidated
+/// always, a strong ETag of the bytes, 304 on `If-None-Match`; held in goldens/serve/nodes.json.
+#[test]
+fn each_live_node_and_their_index_revalidate_by_etag() {
+    let s = site("nodes");
+    let t = SystemTime::UNIX_EPOCH + Duration::from_secs(1_793_361_600);
+    let needs = "{\"id\":\"needs\",\"source\":\"chitin pending --as bobby\",\"updated\":\"2026-10-30T12:00:00Z\",\"ok\":true,\"stale_since\":null,\"cadence_s\":30,\"data\":{\"title\":\"Needs you\"}}\n";
+    let inbox = "{\"id\":\"fleet/inbox\",\"source\":\"chitin inbox\",\"updated\":\"2026-10-30T11:59:00Z\",\"ok\":false,\"stale_since\":\"2026-10-30T11:50:00Z\",\"cadence_s\":60,\"data\":{\"title\":\"Inbox\"}}\n";
+    for (p, body) in [
+        ("nodes/needs.json", needs),
+        ("nodes/fleet/inbox.json", inbox),
+        ("nodes/broken.json", "not json\n"),
+        ("nodes/.needs.json.tmp", "{"),
+    ] {
+        let f = s.root.join(p);
+        fs::create_dir_all(f.parent().unwrap()).unwrap();
+        fs::write(&f, body).unwrap();
+        fs::File::options().write(true).open(&f).unwrap().set_modified(t).unwrap();
+    }
+    for d in ["nodes/fleet", "nodes"] {
+        fs::File::open(s.root.join(d)).unwrap().set_modified(t).unwrap();
+    }
+    let etag = |target: &str| respond(&s, &req("GET", target, &[], "")).header("ETag").unwrap().to_string();
+    let (node_etag, index_etag) = (etag("/nodes/needs.json"), etag("/nodes/"));
+    let cases: Vec<(&str, Request)> = vec![
+        ("a fold's node: always revalidated, its bytes' digest the ETag", req("GET", "/nodes/needs.json", &[], "")),
+        ("its ETag again: 304, no body", req("GET", "/nodes/needs.json", &[("If-None-Match", &node_etag)], "")),
+        ("an older ETag: the whole node", req("GET", "/nodes/needs.json", &[("If-None-Match", "\"sha-256:00\"")], "")),
+        ("a node whose id holds a slash, from its subdirectory", req("GET", "/nodes/fleet/inbox.json", &[], "")),
+        ("the index of nodes: each node's id, href and ETag, and its freshness", req("GET", "/nodes/", &[], "")),
+        ("the index unchanged: 304", req("GET", "/nodes/", &[("If-None-Match", &index_etag)], "")),
+        ("the index without its slash moves to it", req("GET", "/nodes", &[], "")),
+    ];
+    let got: Vec<Value> = cases
+        .iter()
+        .map(|(what, r)| {
+            let res = respond(&s, r);
+            let body: Value = serde_json::from_slice(&res.body).unwrap_or(Value::Null);
+            json!({ "what": what, "request": { "method": r.method, "target": r.target, "headers": r.headers }, "status": res.status, "headers": res.headers, "body": body })
+        })
+        .collect();
+    let path = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("goldens/serve/nodes.json");
+    let text = serde_json::to_string_pretty(&got).unwrap() + "\n";
+    if std::env::var("FOLD_BLESS").is_ok() {
+        fs::write(&path, &text).unwrap();
+    }
+    assert!(
+        text == fs::read_to_string(&path).unwrap_or_default(),
+        "goldens/serve/nodes.json is stale (FOLD_BLESS=1 cargo test --test serve)"
+    );
+    // the index's ETag for a node is the one the node itself answers with, and it moves when the node does
+    let index: Value = serde_json::from_slice(&respond(&s, &req("GET", "/nodes/", &[], "")).body).unwrap();
+    assert_eq!(index["nodes"].as_array().unwrap().iter().find(|n| n["id"] == "needs").unwrap()["etag"], json!(node_etag));
+    fs::write(s.root.join("nodes/needs.json"), needs.replace("12:00:00Z", "12:01:00Z")).unwrap();
+    assert_ne!(etag("/nodes/needs.json"), node_etag);
+    assert_ne!(etag("/nodes/"), index_etag);
+    assert_eq!(respond(&s, &req("GET", "/nodes/needs.json", &[("If-None-Match", &node_etag)], "")).status, 200);
+    let _ = fs::remove_dir_all(&s.root);
+}
+
+/// One fold per file (Addendum 2): a fold's JSON-LD (`<id>.jsonld`, written by rename) is served as `application/ld+json`, always
+/// revalidated, its bytes' digest the ETag; a manifest the same. Held in goldens/serve/folds.json. Then the long poll: `?wait=`
+/// with the held ETag answers 304 when the time runs out and 200 as soon as the file is renamed over.
+#[test]
+fn each_fold_file_revalidates_by_etag_and_a_wait_answers_when_it_moves() {
+    let s = site("folds");
+    let t = SystemTime::UNIX_EPOCH + Duration::from_secs(1_793_361_600);
+    let needs = "{\"@id\":\"fold:fleet/needs\",\"@type\":\"Fold\",\"id\":\"needs\",\"title\":\"Needs you\",\"updated\":\"2026-10-30T12:00:00Z\",\"madeBy\":{\"query\":\"needs\",\"version\":1,\"href\":\"/fold-data/fleet/needs.cypher\"},\"data\":[]}\n";
+    let every = "{\"@id\":\"fold:fleet/everything\",\"@type\":\"FoldManifest\",\"id\":\"everything\",\"parts\":[{\"@id\":\"fold:fleet/needs\",\"@type\":\"FoldRef\",\"url\":\"/fold-data/fleet/needs.jsonld\",\"etag\":null,\"updated\":null}]}\n";
+    for (p, body) in [("fleet/needs.jsonld", needs), ("fleet/everything.jsonld", every)] {
+        let f = s.root.join(p);
+        fs::write(&f, body).unwrap();
+        fs::File::options().write(true).open(&f).unwrap().set_modified(t).unwrap();
+    }
+    let etag = respond(&s, &req("GET", "/fleet/needs.jsonld", &[], "")).header("ETag").unwrap().to_string();
+    let cases: Vec<(&str, Request)> = vec![
+        ("a fold's own file: JSON-LD, always revalidated, its bytes' digest the ETag", req("GET", "/fleet/needs.jsonld", &[], "")),
+        ("its ETag again: 304, no body", req("GET", "/fleet/needs.jsonld", &[("If-None-Match", &etag)], "")),
+        ("a manifest: the same rule", req("GET", "/fleet/everything.jsonld", &[], "")),
+        ("a wait with nothing held to wait against: answered at once", req("GET", "/fleet/needs.jsonld?wait=25", &[], "")),
+    ];
+    let got: Vec<Value> = cases
+        .iter()
+        .map(|(what, r)| {
+            let res = respond(&s, r);
+            let body: Value = serde_json::from_slice(&res.body).unwrap_or(Value::Null);
+            json!({ "what": what, "request": { "method": r.method, "target": r.target, "headers": r.headers }, "status": res.status, "headers": res.headers, "body": body })
+        })
+        .collect();
+    let path = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("goldens/serve/folds.json");
+    let text = serde_json::to_string_pretty(&got).unwrap() + "\n";
+    if std::env::var("FOLD_BLESS").is_ok() {
+        fs::write(&path, &text).unwrap();
+    }
+    assert!(text == fs::read_to_string(&path).unwrap_or_default(), "goldens/serve/folds.json is stale (FOLD_BLESS=1 cargo test --test serve)");
+
+    // Unchanged for the whole wait: one 304, after the wait and not before.
+    let held = [("If-None-Match", etag.as_str())];
+    let t0 = std::time::Instant::now();
+    assert_eq!(respond(&s, &req("GET", "/fleet/needs.jsonld?wait=1", &held, "")).status, 304);
+    assert!(t0.elapsed() >= Duration::from_millis(900), "a wait is held for its time");
+    // Renamed over while waiting: answered with the new bytes as soon as it is seen, long before the wait is up.
+    let root = s.root.clone();
+    let writer = std::thread::spawn(move || {
+        std::thread::sleep(Duration::from_millis(300));
+        let tmp = root.join("fleet/needs.jsonld.tmp");
+        fs::write(&tmp, needs.replace("12:00:00Z", "12:01:00Z")).unwrap();
+        fs::rename(&tmp, root.join("fleet/needs.jsonld")).unwrap();
+    });
+    let t0 = std::time::Instant::now();
+    let r = respond(&s, &req("GET", "/fleet/needs.jsonld?wait=20", &held, ""));
+    writer.join().unwrap();
+    assert_eq!(r.status, 200);
+    assert!(t0.elapsed() < Duration::from_secs(5), "a moved file ends the wait");
+    assert_ne!(r.header("ETag").unwrap(), etag);
+    let _ = fs::remove_dir_all(&s.root);
+}
+
 /// One raw request to the real loop, and its whole answer.
 fn over_the_wire(port: u16, raw: &[u8]) -> String {
     let mut c = TcpStream::connect(("127.0.0.1", port)).unwrap();

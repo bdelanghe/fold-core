@@ -284,6 +284,19 @@ pub fn ax_of(node: Option<&Value>, path: &[String], href: Href, mode: &str, cloc
         };
         tail.push(prop(vec![json!({ "role": "text", "name": format!("Data from {from}, {when}") })], "prop when"));
     }
+    // The named query that made this fold (BRIEF-stint-2026-11-03-basis-live-folds Addendum 1), linked to its text when it says where.
+    if let Some(m) = get(node, "madeBy").filter(|m| present(get(m, "query")).is_some()) {
+        let q = js::string(get(m, "query"));
+        let name = match present(get(m, "version")) {
+            Some(v) => format!("Made by {q}, version {}", js::string(Some(v))),
+            None => format!("Made by {q}"),
+        };
+        let row = match present(get(m, "href")) {
+            Some(h) => json!({ "role": "link", "name": name, "href": h }),
+            None => json!({ "role": "text", "name": name }),
+        };
+        tail.push(prop(vec![row], "prop made"));
+    }
 
     let objs = kids.iter().enumerate().map(|(i, k)| {
         let id = js::string(get(k, "id"));

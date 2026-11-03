@@ -7,7 +7,7 @@ import { readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { core } from "../js/fold-core.ts";
 import { toDom } from "./fold-dom.js";
-import { at, beside, dataOf, haecceityOf, href, open, pathOf, segmentOf, since, viewOf } from "./view.js";
+import { at, beside, dataOf, foldNodes, graft, haecceityOf, href, liveFolds, liveNodes, manifestRoot, open, pathOf, placeIn, revalidate, segmentOf, shows, since, stamp, underived, viewOf } from "./view.js";
 import { ENDPOINTS, dec, enc, notifyHere, readNeeds, sign } from "./sign.js";
 import { aboutOf, contextOf, embed, flagUnnamed, pinOf, reportToken } from "./clax.js";
 
@@ -438,4 +438,201 @@ test("sw: a push shows the item's one line, tagged by it, and a tap opens its fo
   w.self.clients.matchAll = async () => [{ url: "https://phobos.test/fold/#/", focus: async () => opened.push("focus"), navigate: async () => { throw new TypeError("not controlled"); } }];
   await w.fire("notificationclick", { notification: note });
   expect(opened).toEqual(["closed", "focus", `navigate ${url}`, "closed", `open ${url}`, "closed", "focus", `open ${url}`]);
+});
+
+/** fold serve's nodes/ and its nodes, as src/serve.rs answers them: a strong ETag of the bytes, 304 on If-None-Match. Every request
+ * is recorded with the answer's status. */
+function nodeHost(base: string) {
+  const files = new Map<string, string>(), asked: string[] = [];
+  const etag = (t: string) => `"sha-256:${new Bun.CryptoHasher("sha256").update(t).digest("hex")}"`;
+  const index = () => JSON.stringify({ nodes: [...files].sort(([a], [b]) => (a < b ? -1 : 1)).map(([u, t]) => ({ id: JSON.parse(t).id, href: u.slice(base.length), etag: etag(t) })) });
+  const fetch = async (url: string, o: { cache?: string; headers?: Record<string, string> } = {}) => {
+    expect(o.cache).toBe("no-store");
+    const t = url === base ? index() : files.get(url);
+    if (t == null) { asked.push(`404 ${url}`); return { ok: false, status: 404, statusText: "Not Found" }; }
+    if (o.headers?.["If-None-Match"] === etag(t)) { asked.push(`304 ${url}`); return { ok: false, status: 304 }; }
+    asked.push(`200 ${url}`);
+    return { ok: true, status: 200, headers: new Headers({ etag: etag(t) }), json: async () => JSON.parse(t) };
+  };
+  const put = (id: string, node: object) => files.set(`${base}${id}.json`, JSON.stringify({ id, ...node }));
+  return { fetch: fetch as unknown as typeof globalThis.fetch, put, asked, etag };
+}
+
+test("live folds: a node is revalidated by its ETag, a 304 is nothing, a 200 is that node alone", async () => {
+  const base = "https://phobos.test/fold-data/fleet/nodes/", host = nodeHost(base);
+  host.put("needs", { source: "chitin pending", updated: "2026-11-03T18:00:00Z", ok: true, cadence_s: 30, data: { title: "Needs you", items: [{ id: "a", title: "Sign A" }] } });
+  host.put("desk", { source: "desk.sh", updated: "2026-11-03T17:00:00Z", ok: true, data: { title: "Desk" } });
+  const r = await revalidate(`${base}needs.json`, null, { fetch: host.fetch });
+  expect(r.status).toBe(200);
+  expect(await revalidate(`${base}needs.json`, r.etag, { fetch: host.fetch })).toEqual({ status: 304 });
+  const timers: [() => void, number][] = [], seen: string[][] = [];
+  const live = liveNodes(base, { fetch: host.fetch, later: (f, ms) => timers.push([f, ms]), changed: (ids) => seen.push(ids) });
+  host.asked.length = 0;
+  expect(await live.check()).toEqual(["desk", "needs"]);
+  expect(host.asked).toEqual([`200 ${base}`, `200 ${base}desk.json`, `200 ${base}needs.json`]);
+  // each node on its own cadence: needs its 30 s, desk the 60 s default
+  expect(timers.map(([, ms]) => ms)).toEqual([60_000, 30_000]);
+  // nothing changed: the index alone, a 304, and no change said
+  host.asked.length = 0; seen.length = 0;
+  expect(await live.check()).toEqual([]);
+  expect(host.asked).toEqual([`304 ${base}`]);
+  expect(seen).toEqual([]);
+  // needs changed: the index, then needs alone; desk is not asked
+  host.put("needs", { source: "chitin pending", updated: "2026-11-03T18:01:00Z", ok: true, cadence_s: 30, data: { title: "Needs you", items: [{ id: "b", title: "Sign B" }] } });
+  host.asked.length = 0;
+  expect(await live.check()).toEqual(["needs"]);
+  expect(host.asked).toEqual([`200 ${base}`, `200 ${base}needs.json`]);
+  expect(seen).toEqual([["needs"]]);
+  // its own cadence: a 304, and no change said; a failed read keeps the last good node
+  host.asked.length = 0; seen.length = 0;
+  await timers[1][0]();
+  expect(host.asked).toEqual([`304 ${base}needs.json`]);
+  expect(seen).toEqual([]);
+  expect(live.nodes().find((n: any) => n.id === "needs").data.items[0].id).toBe("b");
+});
+
+test("live folds: a 304 leaves the DOM untouched; a 200 replaces only the fold that shows that node", async () => {
+  const base = "https://phobos.test/fold-data/fleet/nodes/", host = nodeHost(base);
+  const root = { title: "Fleet", sections: [{ id: "needs", title: "Needs you", items: [{ id: "old", title: "From page.json" }] }, { id: "desk", title: "Desk", items: [{ id: "x", title: "Desk row" }] }] };
+  const doc_ = origin("live", { root });
+  host.put("needs", { source: "chitin pending --as bobby", updated: "2026-11-03T18:00:00Z", ok: true, data: { title: "Needs you", items: [{ id: "a", title: "Sign A" }] } });
+  const opts = () => ({ source: "fleet-map", updated: "2026-11-03T12:00:00Z", localTimeZone: "UTC" });
+  const live = liveNodes(base, { fetch: host.fetch, later: () => {} });
+  await live.check();
+  const folded = async () => stamp(await open(fold, doc_.url, { fetch: doc_.fetch, root: (r: unknown) => graft(r, live.nodes()), opts }), live.nodes());
+  // the viewer's render: the fold at `hash` drawn again only when the change shows there (index.html's `changed`)
+  let nodes = await folded();
+  const drawn: Record<string, El> = {};
+  const draw = (hash: string) => (drawn[hash] = toDom(doc, viewOf(ax, nodes, hash, "UTC").tree) as El);
+  const text = (e: El) => all(e).map((x) => x.textContent).filter(Boolean);
+  for (const h of ["#/needs", "#/desk", "#/"]) draw(h);
+  // the node's data is the fold, and the fold says the node's source and time, not the document's
+  expect(text(drawn["#/needs"])).toContain("Sign A");
+  expect(text(drawn["#/needs"])).not.toContain("From page.json");
+  expect(text(drawn["#/needs"]).some((t) => t.startsWith("Data from chitin pending --as bobby, "))).toBe(true);
+  expect(text(drawn["#/desk"]).some((t) => t.startsWith("Data from fleet-map, "))).toBe(true);
+  const before = { ...drawn }, deskText = JSON.stringify(text(drawn["#/desk"]));
+  const apply = async (ids: string[]) => {
+    if (!ids.length) return;
+    nodes = await folded();
+    for (const h of Object.keys(drawn)) if (ids.some((id) => shows(id, pathOf(h)))) draw(h);
+  };
+  // unchanged: a 304, nothing re-folded, every fold's DOM the same object
+  await apply(await live.check());
+  for (const h of Object.keys(drawn)) expect(drawn[h]).toBe(before[h]);
+  // needs changed: its fold and its parent's (the row that names it) are drawn again; desk's is the same object, the same words
+  host.put("needs", { source: "chitin pending --as bobby", updated: "2026-11-03T18:05:00Z", ok: false, stale_since: "2026-11-03T18:04:00Z", data: { title: "Needs you", items: [{ id: "b", title: "Sign B" }] } });
+  await apply(await live.check());
+  expect(drawn["#/desk"]).toBe(before["#/desk"]);
+  expect(JSON.stringify(text(drawn["#/desk"]))).toBe(deskText);
+  expect(drawn["#/needs"]).not.toBe(before["#/needs"]);
+  expect(text(drawn["#/needs"])).toContain("Sign B");
+  expect(text(drawn["#/needs"])).toContain("Stale since 2026-11-03T18:04:00Z");
+  expect(drawn["#/"]).not.toBe(before["#/"]);
+});
+
+test("live folds: a node goes where its id says, and only there", () => {
+  const root = { title: "Fleet", sections: [{ id: "fleet", title: "Fleet", items: [{ id: "inbox", title: "Old" }, { id: "other", title: "Other" }] }] };
+  const out = graft(root, [{ id: "fleet/inbox", data: { title: "Inbox" } }, { id: "new", data: { title: "New" } }, { id: "gone/x", data: { title: "X" } }]) as any;
+  expect(out.sections[0].items).toEqual([{ title: "Inbox", id: "inbox" }, { id: "other", title: "Other" }]);
+  expect(out.sections[1]).toEqual({ title: "New", id: "new" });
+  expect(out.sections.length).toBe(2);
+  expect(root.sections[0].items[0].title).toBe("Old"); // the document itself is not changed
+  expect([shows("fleet/inbox", ["fleet", "inbox"]), shows("fleet/inbox", ["fleet"]), shows("fleet/inbox", []), shows("fleet/inbox", ["fleet", "other"])]).toEqual([true, true, false, false]);
+});
+
+/** fold serve's per-fold JSON-LD files (src/serve.rs: strong ETag of the bytes, 304 on If-None-Match), each request recorded. A
+ * `hold(url)` makes that file's next answer wait until `release()`. */
+function foldHost(base: string) {
+  const files = new Map<string, string>(), asked: string[] = [], holds = new Map<string, Promise<void>>();
+  const etag = (t: string) => `"sha-256:${new Bun.CryptoHasher("sha256").update(t).digest("hex")}"`;
+  const fetch = async (url: string, o: { cache?: string; headers?: Record<string, string> } = {}) => {
+    expect(o.cache).toBe("no-store");
+    const u = url.split("?")[0];
+    if (holds.has(u)) await holds.get(u);
+    const t = files.get(u);
+    if (t == null) { asked.push(`404 ${u}`); return { ok: false, status: 404, statusText: "Not Found" }; }
+    if (o.headers?.["If-None-Match"] === etag(t)) { asked.push(`304 ${u}`); return { ok: false, status: 304 }; }
+    asked.push(`200 ${u}`);
+    return { ok: true, status: 200, headers: new Headers({ etag: etag(t) }), json: async () => JSON.parse(t) };
+  };
+  const put = (id: string, doc: object) => files.set(`${base}${id}.jsonld`, JSON.stringify({ "@id": `fold:fleet/${id}`, id, ...doc }));
+  const ref = (id: string) => ({ "@id": `fold:fleet/${id}`, "@type": "FoldRef", url: `${id}.jsonld`, etag: files.has(`${base}${id}.jsonld`) ? etag(files.get(`${base}${id}.jsonld`)!) : null, updated: null });
+  const hold = (id: string) => { let release = () => {}; holds.set(`${base}${id}.jsonld`, new Promise<void>((r) => { release = () => { holds.delete(`${base}${id}.jsonld`); r(); }; })); return release; };
+  return { fetch: fetch as unknown as typeof globalThis.fetch, put, ref, hold, asked };
+}
+const made = (query: string) => ({ query, version: 1, href: `/fold-data/fleet/${query}.cypher` });
+
+test("folds by reference: each part read on its own, a ref's ETag spares a read, a slow part never holds the rest", async () => {
+  const base = "https://phobos.test/fold-data/fleet/", host = foldHost(base), top = `${base}everything.jsonld`;
+  host.put("needs", { "@type": "Fold", title: "Needs you", source: "chitin pending --as bobby", updated: "2026-11-03T18:00:00Z", ok: true, madeBy: made("needs"), data: [{ id: "a", title: "Sign A" }] });
+  host.put("inbox", { "@type": "Fold", title: "Messages to you", source: "chitin inbox --as bobby", updated: "2026-11-03T18:00:00Z", ok: true, madeBy: made("inbox"), data: [{ id: "m1", title: "Hello" }] });
+  host.put("everything", { "@type": "FoldManifest", title: "Everything", parts: [host.ref("needs"), host.ref("inbox")] });
+  const seen: string[][] = [];
+  const live = liveFolds(top, { fetch: host.fetch, changed: (k) => seen.push(k) });
+  // inbox is slow: needs lands, and is said changed, while inbox is still being read
+  const release = host.hold("inbox");
+  const first = live.check();
+  await new Promise((r) => setTimeout(r, 10));
+  expect(seen).toEqual([["needs"]]);
+  release();
+  expect((await first).sort()).toEqual(["everything", "inbox", "needs"]);
+  expect(seen).toEqual([["needs"], ["inbox"]]);
+  // nothing changed: the manifest alone, a 304; its refs name the ETags held, so no part is asked
+  host.asked.length = 0; seen.length = 0;
+  expect(await live.check()).toEqual([]);
+  expect(host.asked).toEqual([`304 ${top}`]);
+  // on focus (deep), each part is asked too: a 304 each, still no change
+  host.asked.length = 0;
+  expect(await live.check({ deep: true })).toEqual([]);
+  expect(host.asked.sort()).toEqual([`304 ${top}`, `304 ${base}inbox.jsonld`, `304 ${base}needs.jsonld`]);
+  // inbox changed (renamed over, the manifest rewritten with its new ETag): the manifest and inbox alone are read
+  host.put("inbox", { "@type": "Fold", title: "Messages to you", source: "chitin inbox --as bobby", updated: "2026-11-03T18:02:00Z", ok: true, madeBy: made("inbox"), data: [{ id: "m2", title: "Later" }] });
+  host.put("everything", { "@type": "FoldManifest", title: "Everything", parts: [host.ref("needs"), host.ref("inbox")] });
+  host.asked.length = 0; seen.length = 0;
+  expect((await live.check()).sort()).toEqual(["everything", "inbox"]);
+  expect(host.asked).toEqual([`200 ${top}`, `200 ${base}inbox.jsonld`]);
+  expect(seen).toEqual([["inbox"]]);
+});
+
+test("folds by reference: placed where page.json has them, drawn with 'Made by', and a fold no query made is not drawn", async () => {
+  const base = "https://phobos.test/fold-data/fleet/", host = foldHost(base), top = `${base}everything.jsonld`;
+  host.put("needs", { "@type": "Fold", title: "Needs you", source: "chitin pending --as bobby", updated: "2026-11-03T18:00:00Z", ok: true, madeBy: made("needs"), data: [{ id: "a", title: "Sign A" }] });
+  host.put("inbox", { "@type": "Fold", title: "Messages to you", source: "chitin inbox", updated: "2026-11-03T18:00:00Z", ok: true, data: [{ id: "m1", title: "Unproven" }] }); // no madeBy
+  host.put("loop", { "@type": "FoldManifest", title: "Loop", parts: [{ "@id": "fold:fleet/everything", "@type": "FoldRef", url: "everything.jsonld", etag: null, updated: null }] });
+  host.put("everything", { "@type": "FoldManifest", title: "Everything", parts: [host.ref("needs"), host.ref("inbox"), host.ref("gone"), host.ref("loop")] });
+  const live = liveFolds(top, { fetch: host.fetch });
+  await live.check();
+  // page.json as it is today: Needs you at the top, Messages to you under Agent fleet
+  const root = { title: "Fleet", sections: [
+    { id: "needs", title: "Needs you", purpose: "What the agents need from you.", groups: [{ title: "", items: [{ id: "old", title: "Scraped row" }] }] },
+    { id: "fleet", title: "Agent fleet", sections: [{ id: "inbox", title: "Messages to you", items: [{ id: "s", title: "Scraped message" }] }] },
+  ] };
+  expect(placeIn(root, "inbox")).toEqual(["fleet", "inbox"]);
+  const placed = foldNodes(root, live.folds());
+  expect(placed.map((n: any) => n.id).sort()).toEqual(["fleet/inbox", "gone", "loop", "loop/everything", "needs"]);
+  const doc_ = origin("refs", { root: graft(root, placed) });
+  const nodes = stamp(await open(fold, doc_.url, { fetch: doc_.fetch, opts: () => ({ source: "fleet-map", updated: "2026-11-03T12:00:00Z", localTimeZone: "UTC" }) }), placed);
+  const text = (h: string) => all(toDom(doc, viewOf(ax, nodes, h, "UTC").tree) as El).map((x) => x.textContent).filter(Boolean);
+  const links = (h: string) => all(toDom(doc, viewOf(ax, nodes, h, "UTC").tree) as El).filter((x) => x.tag === "a").map((x) => [x.textContent, x.href ?? x.attrs.href]);
+  // needs: the query's rows, not page.json's; its purpose kept; its source and the query that made it said, linked to the query text
+  expect(text("#/needs")).toContain("Sign A");
+  expect(text("#/needs")).not.toContain("Scraped row");
+  expect(text("#/needs")).toContain("What the agents need from you.");
+  expect(text("#/needs").some((t) => t.startsWith("Data from chitin pending --as bobby, "))).toBe(true);
+  expect(links("#/needs")).toContainEqual(["Made by needs, version 1", "/fold-data/fleet/needs.cypher"]);
+  // inbox has no derivation: not drawn at all, neither its rows nor page.json's, and the slot says why
+  expect(text("#/fleet/inbox")).not.toContain("Unproven");
+  expect(text("#/fleet/inbox")).not.toContain("Scraped message");
+  expect(text("#/fleet/inbox").some((t) => t.startsWith("Not shown: it names no query that made it"))).toBe(true);
+  // a missing part and a cycle: a notice in their own slots, never a crash
+  expect(text("#/gone").some((t) => t.startsWith("Not read: 404"))).toBe(true);
+  expect(text("#/loop/everything").some((t) => t.startsWith("Not followed: it refers back to itself"))).toBe(true);
+  // the derivation rule on its own
+  expect(underived({ madeBy: made("needs"), updated: "2026-11-03T18:00:00Z" })).toBeNull();
+  expect(underived({ madeBy: { query: "needs", href: "x" }, updated: "2026-11-03T18:00:00Z" })).toBe("its query needs has no version");
+  expect(underived({ madeBy: { ...made("needs"), frame: { id: "bobby" } }, updated: "2026-11-03T18:00:00Z" })).toBe("its frame has no id and version");
+  expect(underived({ "@type": "FoldManifest" })).toBeNull();
+  // a manifest opened as the document: one placeholder per part, in its order, until each lands
+  expect(manifestRoot({ title: "Everything", parts: [host.ref("needs"), host.ref("inbox")] }).sections.map((s: any) => [s.id, s.text])).toEqual([["needs", "Not read yet."], ["inbox", "Not read yet."]]);
 });
