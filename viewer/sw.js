@@ -6,9 +6,11 @@
 // - A page (a navigation) and the data (the document and its `from` files, any other GET on this origin) go to the network first.
 //   What comes back is kept; with no answer within WAIT ms, or none at all, the kept copy answers, marked `Fold-Stored: <ISO time>`
 //   (when it was kept), which is how the viewer knows it is showing the past. Nothing is kept that was not a 200.
-// - Nothing but GET on this origin is touched: no write goes through here (brief item 27).
+// - Nothing but GET on this origin is touched: no write goes through here (brief item 27). Nor is live state: a request the page
+//   makes with `cache: "no-store"` (Needs you's needs.json, sign.js) or anything under /approve/ (chitin-approve's challenge, which a
+//   kept copy must never answer) goes to the network alone, as if this worker were not here.
 const SHELL = "fold-shell-@VERSION@", DATA = "fold-data", WAIT = 3000;
-const FILES = ["./", "view.js", "fold-dom.js", "clax.js", "theme.tokens.json", "fold-core.js", "fold_core.wasm", "fold.css", "fonts/atkinson-hyperlegible-next.woff2", "manifest.webmanifest",
+const FILES = ["./", "view.js", "fold-dom.js", "sign.js", "clax.js", "theme.tokens.json", "fold-core.js", "fold_core.wasm", "fold.css", "fonts/atkinson-hyperlegible-next.woff2", "manifest.webmanifest",
   "favicon.svg", "apple-touch-icon.png", "icon-192.png", "icon-512.png", "icon-maskable-512.png"];
 const scope = new URL("./", self.location).href;
 const shell = new Set(FILES.filter((f) => f !== "./").map((f) => new URL(f, scope).href));
@@ -49,9 +51,44 @@ async function shellFile(req, key) {
   return first ?? (await caches.match(key, { cacheName: SHELL })) ?? net;
 }
 
+// Needs you's notifications (BRIEF addendum 2): chitin's notify-sink pushes {text, path} (its webpush.ts; {title, url, tag} is read
+// too), the item's one line and its fold's page path (/fold/needs/approvals/<item>/). Shown with that line and nothing else, tagged
+// by the item, and with no sound or vibration of its own: the system's settings decide. A tap opens the item in the viewer
+// (#/needs/approvals/<item>), where Approve and Decline are, in a window already open on this app if there is one.
+const NEEDS = "#/needs";
+/** A pushed fold path as the viewer's location: only a path under this app's own, each step plain; anything else is Needs you. */
+function itemUrl(p) {
+  const root = new URL(scope).pathname;
+  if (typeof p !== "string" || !p.startsWith(root)) return scope + NEEDS;
+  const steps = p.slice(root.length).split("/").filter(Boolean);
+  if (!steps.length || steps.length > 8 || !steps.every((s) => /^[A-Za-z0-9._~-]{1,80}$/.test(s) && s !== "." && s !== "..")) return scope + NEEDS;
+  return scope + "#/" + steps.join("/");
+}
+self.addEventListener("push", (e) => {
+  let d = {};
+  try { d = e.data ? e.data.json() : {}; } catch {}
+  const line = [d.title, d.text].find((t) => typeof t === "string" && t.trim()) ?? "Something needs you";
+  const url = itemUrl(d.url ?? d.path);
+  e.waitUntil(self.registration.showNotification(line.trim().slice(0, 120), { tag: typeof d.tag === "string" ? d.tag : url, data: { url } }));
+});
+self.addEventListener("notificationclick", (e) => {
+  e.notification.close();
+  const url = e.notification.data?.url ?? scope + NEEDS;
+  e.waitUntil(self.clients.matchAll({ type: "window", includeUncontrolled: true }).then(async (cs) => {
+    // a window of this app goes there; navigate() refuses a window this worker doesn't control (and some browsers lack it), so
+    // then a window opens there instead: a tap always lands on the item
+    const c = cs.find((x) => x.url.startsWith(scope));
+    if (c?.navigate) {
+      try { await c.focus(); return await c.navigate(url); } catch {}
+    }
+    return self.clients.openWindow(url);
+  }));
+});
+
 self.addEventListener("fetch", (e) => {
   const req = e.request, u = new URL(req.url);
   if (req.method !== "GET" || u.origin !== self.location.origin || req.headers.get("accept") === "text/event-stream") return;
+  if (req.cache === "no-store" || u.pathname.startsWith("/approve/")) return;
   if (shell.has(u.origin + u.pathname)) e.respondWith(shellFile(req, u.origin + u.pathname));
   else e.respondWith(fresh(req));
 });

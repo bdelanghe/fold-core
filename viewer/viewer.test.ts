@@ -7,12 +7,13 @@ import { readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { core } from "../js/fold-core.ts";
 import { toDom } from "./fold-dom.js";
-import { at, dataOf, haecceityOf, href, open, pathOf, segmentOf, since, viewOf } from "./view.js";
+import { at, beside, dataOf, haecceityOf, href, open, pathOf, segmentOf, since, viewOf } from "./view.js";
+import { ENDPOINTS, dec, enc, notifyHere, readNeeds, sign } from "./sign.js";
 import { aboutOf, contextOf, embed, flagUnnamed, pinOf, reportToken } from "./clax.js";
 
 const goldens = join(import.meta.dir, "..", "goldens");
 const wasm = process.env.FOLD_CORE_WASM ?? join(import.meta.dir, "..", "target", "wasm32-unknown-unknown", "release", "fold_core.wasm");
-const { fold, walk, ax } = await core(readFileSync(wasm));
+const { fold, walk, ax, needs } = await core(readFileSync(wasm));
 const read = (...p: string[]) => JSON.parse(readFileSync(join(...p), "utf8"));
 const cases = readdirSync(goldens).filter((f) => f.endsWith(".input.json")).map((f) => f.replace(/\.input\.json$/, "")).sort();
 
@@ -237,4 +238,202 @@ test("a kept copy is said as not updated since its time, and how long ago", asyn
   expect(since("2026-10-31T16:59:30Z", now, "UTC")).toBe("Not updated since 16:59, less than a minute ago.");
   expect(since("2026-10-31T16:20:00Z", now, "UTC")).toBe("Not updated since 16:20, 40 minutes ago.");
   expect(since("2026-10-27T09:00:00Z", now, "UTC")).toBe("Not updated since Tue 27 Oct at 09:00, 4 days ago.");
+});
+
+// Needs you, live (src/needs.rs, goldens/needs/overlay.json): the module's needs entry is the core's overlay, and the viewer folds the
+// document it gives; the live item's two acts are forms naming the intent, and ]] [[ step between the folds beside one.
+test("needs: the overlay through the module is the golden, and the viewer folds it to Approvals' item with its two acts", async () => {
+  const cases = read(goldens, "needs", "overlay.json");
+  for (const c of cases) expect(JSON.stringify(needs(c.input))).toBe(JSON.stringify(c.root));
+  const live = cases[0].input, body = JSON.stringify(live.root);
+  const nodes = await open(fold, "https://data.test/page.json", { fetch: async () => new Response(body), opts: () => ({ localTimeZone: "UTC" }),
+    root: (root: unknown) => needs({ root, needs: live.needs, now: live.now }) });
+  const at = ["needs", "approvals", "needs-sign-0123456789ab"];
+  expect(nodes.has(at.join("~"))).toBe(true);
+  expect([...nodes.keys()].some((k) => k.includes("999999999999"))).toBe(false);
+  const els = all(toDom(doc, viewOf(ax, nodes, href(at, "folds"), "UTC").tree) as El);
+  expect(els.filter((e) => e.tag === "form").map((e) => [e.attrs["aria-label"], e.attrs.method, e.attrs.action, e.attrs["data-intent"], e.attrs["data-call"]])).toEqual([
+    ["Approve with passkey", "get", "", "0123456789ab", "approve"],
+    ["Decline with passkey", "get", "", "0123456789ab", "decline"],
+  ]);
+  // ]] and [[: path arithmetic over the parent's folds, null at either end, at the root, and onto a row that is a link
+  expect(beside(nodes, ["needs", "approvals"], 1)).toEqual(["needs", "needs-ask-0"]);
+  expect(beside(nodes, ["needs", "needs-ask-0"], -1)).toEqual(["needs", "approvals"]);
+  expect(beside(nodes, at, 1)).toEqual(["needs", "approvals", "needs-sign-0a0a0a0a0a0a"]);
+  expect(beside(nodes, at, -1)).toBeNull();
+  expect(beside(nodes, ["needs"], 1)).toEqual(["agents"]);
+  expect(beside(nodes, [], 1)).toBeNull();
+  expect(beside(new Map([["root", { kids: [{ id: "a" }, { id: "top", href: "#/" }] }]]), ["a"], 1)).toBeNull();
+});
+
+/** chitin-approve, faked: one verdict's challenge for one intent and its assertion, recording every call in order. `verdict` is what the
+ * challenge says it is for (absent: says nothing). */
+function gateway(intent: { id: string; to: string; text: string }, { challenge = [200], assertion = [200], refuse = "", verdict = undefined as string | undefined } = {}) {
+  const calls: string[] = [];
+  const fetch = async (url: string, init?: RequestInit) => {
+    const post = init?.method === "POST";
+    calls.push(`${post ? "POST" : "GET"} ${url}${post ? " " + init!.body : ""}`);
+    const status = (post ? assertion : challenge).shift() ?? 200;
+    if (status !== 200) return new Response(JSON.stringify({ ok: false, reason: `status ${status}` }), { status });
+    if (refuse) return new Response(JSON.stringify({ ok: false, reason: refuse }), { status: 409 });
+    return new Response(JSON.stringify(post ? { ok: true, message: "written m-9", outcome: "written" }
+      : { ok: true, ...(verdict ? { verdict } : {}), intent: { ...intent, as: "bobby", text_hash: "deadbeefcafe" }, ...(verdict === "decline" ? {} : { frame: { hop: intent.to, hash: "f00dfeed", iat: "x" } }),
+          publicKey: { challenge: enc(new Uint8Array([1, 2, 3]).buffer), rpId: "phobos.test", allowCredentials: [{ type: "public-key", id: enc(new Uint8Array([9]).buffer) }], timeout: 60000 } }));
+  };
+  const credentials = { get: async (o: any) => {
+    calls.push(`passkey ${new Uint8Array(o.publicKey.challenge).join(",")} ${o.publicKey.rpId} ${o.publicKey.userVerification} ${new Uint8Array(o.publicKey.allowCredentials[0].id).join(",")}`);
+    const b = (n: number) => new Uint8Array([n]).buffer;
+    return { id: "cred", rawId: b(9), type: "public-key", response: { clientDataJSON: b(1), authenticatorData: b(2), signature: b(3), userHandle: null } };
+  } };
+  return { calls, fetch: fetch as unknown as typeof globalThis.fetch, credentials, wait: async () => {} };
+}
+
+test("sign: approve signs only the challenge's own intent, said before it asks, at endpoints built from the id", async () => {
+  const id = "0123456789ab", it = { id, to: "personal-assistant", text: "Route the plan." }, shown = { to: it.to, text: it.text };
+  expect(ENDPOINTS.approve(id)).toEqual(["/approve/v1/challenge/0123456789ab", "/approve/v1/assertion/0123456789ab"]);
+  expect(new Uint8Array(dec(enc(new Uint8Array([0, 250, 255]).buffer)))).toEqual(new Uint8Array([0, 250, 255]));
+  // the one path that signs: the challenge, its words said, the passkey, the assertion
+  let g = gateway(it), said: string[] = [];
+  const say = (m: string) => { said.push(m); g.calls.push("said"); };
+  expect(await sign(id, "approve", shown, { ...g, say })).toEqual({ ok: true, said: "Sent to personal-assistant. written m-9" });
+  expect(g.calls.map((c) => c.split(" {")[0])).toEqual(["GET /approve/v1/challenge/0123456789ab", "said", "passkey 1,2,3 phobos.test required 9", "POST /approve/v1/assertion/0123456789ab"]);
+  expect(said).toEqual(["Approving for personal-assistant, #f00dfeed: “Route the plan.”. Your passkey asks next."]);
+  expect(JSON.parse(g.calls[3].slice(g.calls[3].indexOf("{")))).toEqual({ id: "cred", rawId: "CQ", type: "public-key", response: { clientDataJSON: "AQ", authenticatorData: "Ag", signature: "Aw", userHandle: null } });
+  // a challenge that says it is for a decline is never signed as an approval
+  g = gateway(it, { verdict: "decline" });
+  expect(await sign(id, "approve", shown, g)).toEqual({ ok: false, said: "Not signed: the challenge is not for an approval." });
+  expect(g.calls.length).toBe(1);
+  // what the item showed is not what the challenge would sign: nothing is asked of the passkey
+  g = gateway({ ...it, text: "Route the plan, and grant an edge." });
+  const changed = await sign(id, "approve", shown, g);
+  expect(changed.ok).toBe(false); expect(changed.changed).toBe(true);
+  expect(g.calls.some((c) => c.startsWith("passkey") || c.startsWith("POST"))).toBe(false);
+  g = gateway({ ...it, to: "personal-cake-goal" });
+  expect((await sign(id, "approve", shown, g)).changed).toBe(true);
+  // a challenge for another intent
+  g = gateway({ ...it, id: "bbbbbbbbbbbb" });
+  expect((await sign(id, "approve", shown, g)).said).toBe("Not signed: the challenge is for another intent.");
+  // refused: chitin's reason, nothing signed
+  g = gateway(it, { refuse: "recipient personal-assistant is not running" });
+  expect(await sign(id, "approve", shown, g)).toEqual({ ok: false, said: "Not signed: recipient personal-assistant is not running." });
+  expect(g.calls.length).toBe(1);
+  // busy (429) and a slow challenge (504) are asked again; an assertion that timed out (504) never is
+  g = gateway(it, { challenge: [429, 504, 200] });
+  expect((await sign(id, "approve", shown, g)).ok).toBe(true);
+  g = gateway(it, { assertion: [504, 200] });
+  expect(await sign(id, "approve", shown, g)).toEqual({ ok: false, said: "Not signed: status 504." });
+  expect(g.calls.filter((c) => c.startsWith("POST")).length).toBe(1);
+  // not an intent, or not a verdict: nothing is fetched
+  g = gateway(it);
+  for (const bad of ["../x", "0123456789AB", "", "0123456789abc"]) expect((await sign(bad, "approve", shown, g)).ok).toBe(false);
+  for (const v of ["ack", "toString", "__proto__", ""]) expect((await sign(id, v, shown, g)).ok).toBe(false);
+  expect(g.calls).toEqual([]);
+});
+
+// Addendum 1 (Bobby: "we should add a decline with passkey in the approval flow"): a decline is the passkey too, at its own endpoint,
+// and only a challenge that says it is a decline is signed as one, so an approval can never be passed off as a decline or back.
+test("sign: decline is a passkey verdict at its own endpoint, bound to a challenge that says it is one, and the item's h", async () => {
+  const id = "0123456789ab", it = { id, to: "personal-assistant", text: "Route the plan." }, shown = { to: it.to, text: it.text };
+  expect(ENDPOINTS.decline(id)).toEqual(["/approve/v1/decline/0123456789ab", "/approve/v1/decline/0123456789ab"]);
+  let g = gateway(it, { verdict: "decline" }), said: string[] = [];
+  expect(await sign(id, "decline", shown, { ...g, say: (m: string) => said.push(m) })).toEqual({ ok: true, said: "Declined. written m-9" });
+  expect(g.calls.map((c) => c.split(" {")[0])).toEqual(["GET /approve/v1/decline/0123456789ab", "passkey 1,2,3 phobos.test required 9", "POST /approve/v1/decline/0123456789ab"]);
+  // with no frame (nothing is sent), the h said is the intent's text hash
+  expect(said).toEqual(["Declining for personal-assistant, #deadbeefcafe: “Route the plan.”. Your passkey asks next."]);
+  // a challenge that does not say it is a decline (an approve's, or one that says nothing) is never signed as one
+  for (const verdict of [undefined, "approve"]) {
+    g = gateway(it, { verdict });
+    expect(await sign(id, "decline", shown, g)).toEqual({ ok: false, said: "Not declined: the challenge is not for a decline." });
+    expect(g.calls.length).toBe(1);
+  }
+  // changed since it was shown: nothing asked of the passkey
+  g = gateway({ ...it, text: "something else" }, { verdict: "decline" });
+  expect((await sign(id, "decline", shown, g)).changed).toBe(true);
+  expect(g.calls.length).toBe(1);
+});
+
+test("sign: needs.json is read as the core's needs entry takes it, never stored and never waited on long", async () => {
+  const calls: string[] = [];
+  const fetch = (async (url: string, init?: RequestInit) => {
+    calls.push(`${init?.method ?? "GET"} ${url} ${init?.cache} ${init?.signal ? "signal" : ""}`);
+    if (url.endsWith("/needs.json")) return new Response(JSON.stringify({ as: "bobby", waiting: [] }));
+    return new Response("not who this server acts for\n", { status: 403 });
+  }) as unknown as typeof globalThis.fetch;
+  expect(await readNeeds("https://phobos.test/fold/needs.json", { fetch })).toEqual({ needs: { as: "bobby", waiting: [] } });
+  expect(calls[0]).toBe("GET https://phobos.test/fold/needs.json no-store signal");
+  expect(await readNeeds("https://phobos.test/fold/forbidden.json", { fetch })).toEqual({ error: "403 not who this server acts for" });
+  expect(await readNeeds("x", { fetch: (async () => { throw new TypeError("Load failed"); }) as any })).toEqual({ error: "Load failed" });
+});
+
+// Notifications (BRIEF addendum 2): Notify me asks the browser, then hands the subscription to fold serve's push/subscribe; Stop
+// takes it off both. A browser without push (an iPhone page not on the Home Screen) is told how, and nothing is asked.
+test("notify: this device subscribes with the server's key, and stops", async () => {
+  const calls: string[] = [];
+  let sub: any = null, perm = "granted";
+  const reg = { pushManager: {
+    getSubscription: async () => sub,
+    subscribe: async (o: any) => { calls.push(`subscribe ${o.userVisibleOnly} ${new Uint8Array(o.applicationServerKey).join(",")}`); sub = { endpoint: "https://web.push.apple.com/x", toJSON: () => ({ endpoint: "https://web.push.apple.com/x", keys: { p256dh: "P", auth: "A" } }), unsubscribe: async () => { calls.push("browser unsubscribe"); sub = null; } }; return sub; },
+  } };
+  const env = {
+    navigator: { serviceWorker: { ready: Promise.resolve(reg) } }, PushManager: function () {},
+    Notification: { requestPermission: async () => { calls.push("permission"); return perm; } },
+    fetch: (async (url: string, init?: RequestInit) => {
+      calls.push(`${init?.method ?? "GET"} ${url}${init?.body ? " " + init.body : ""}`);
+      return new Response(url.endsWith("/push/key") ? JSON.stringify({ key: enc(new Uint8Array([4, 1, 2]).buffer) }) : JSON.stringify({ ok: true }));
+    }) as any,
+  };
+  const base = "https://phobos.test/fold/#/needs";
+  expect(await notifyHere("subscribe", base, env)).toEqual({ ok: true, said: "This device will be notified when something waits for your signature." });
+  expect(calls).toEqual(["permission", "GET https://phobos.test/fold/push/key", "subscribe true 4,1,2",
+    'POST https://phobos.test/fold/push/subscribe {"endpoint":"https://web.push.apple.com/x","keys":{"p256dh":"P","auth":"A"}}']);
+  calls.length = 0;
+  expect((await notifyHere("unsubscribe", base, env)).said).toBe("This device won't be notified any more.");
+  expect(calls).toEqual(['POST https://phobos.test/fold/push/unsubscribe {"endpoint":"https://web.push.apple.com/x"}', "browser unsubscribe"]);
+  expect((await notifyHere("unsubscribe", base, env)).said).toBe("This device wasn't being notified.");
+  // permission refused: nothing subscribed, nothing sent
+  calls.length = 0; perm = "denied";
+  expect((await notifyHere("subscribe", base, env)).ok).toBe(false);
+  expect(calls).toEqual(["permission"]);
+  // no push in this browser: told how, nothing asked
+  calls.length = 0;
+  expect((await notifyHere("subscribe", base, { ...env, PushManager: undefined } as any)).said).toContain("Home Screen");
+  expect(calls).toEqual([]);
+});
+
+/** sw.js run in a fake worker: its listeners, and what they did. */
+function worker() {
+  const on: Record<string, (e: any) => void> = {}, did: any[] = [];
+  const self: any = { location: new URL("https://phobos.test/fold/sw.js"), addEventListener: (k: string, f: any) => { on[k] = f; },
+    registration: { showNotification: async (t: string, o: any) => { did.push(["show", t, o]); } }, clients: { claim: async () => {} }, skipWaiting: () => {} };
+  new Function("self", "caches", "fetch", readFileSync(join(import.meta.dir, "sw.js"), "utf8").replace("@VERSION@", "t"))(self, {}, () => {});
+  const fire = async (k: string, e: any) => { let w: Promise<unknown> = Promise.resolve(); on[k]({ ...e, waitUntil: (p: Promise<unknown>) => { w = p; } }); await w; };
+  return { self, did, fire };
+}
+
+test("sw: a push shows the item's one line, tagged by it, and a tap opens its fold in the viewer", async () => {
+  const w = worker(), push = (d: unknown) => w.fire("push", { data: { json: () => d } });
+  await push({ text: "To personal-assistant", path: "/fold/needs/approvals/needs-sign-0123456789ab/" });
+  await push({ title: "To x", url: "/fold/../../etc/", tag: "t1" });
+  await push({ text: "", path: "https://evil.test/fold/x/" });
+  await w.fire("push", { data: { json: () => { throw new Error("not JSON"); } } });
+  expect(w.did).toEqual([
+    ["show", "To personal-assistant", { tag: "https://phobos.test/fold/#/needs/approvals/needs-sign-0123456789ab", data: { url: "https://phobos.test/fold/#/needs/approvals/needs-sign-0123456789ab" } }],
+    ["show", "To x", { tag: "t1", data: { url: "https://phobos.test/fold/#/needs" } }],
+    ["show", "Something needs you", { tag: "https://phobos.test/fold/#/needs", data: { url: "https://phobos.test/fold/#/needs" } }],
+    ["show", "Something needs you", { tag: "https://phobos.test/fold/#/needs", data: { url: "https://phobos.test/fold/#/needs" } }],
+  ]);
+  // no sound, vibration or renotify of its own
+  for (const [, , o] of w.did) expect(Object.keys(o).sort()).toEqual(["data", "tag"]);
+  // a tap: an open window of this app goes there; with none, one opens there
+  const opened: string[] = [], url = "https://phobos.test/fold/#/needs/approvals/needs-sign-0123456789ab";
+  const note = { close: () => opened.push("closed"), data: { url } };
+  w.self.clients.matchAll = async () => [{ url: "https://phobos.test/fold/#/", focus: async () => opened.push("focus"), navigate: async (u: string) => opened.push(`navigate ${u}`) }];
+  await w.fire("notificationclick", { notification: note });
+  w.self.clients.matchAll = async () => [];
+  w.self.clients.openWindow = async (u: string) => opened.push(`open ${u}`);
+  await w.fire("notificationclick", { notification: note });
+  // a window this worker doesn't control: navigate refuses, so one opens instead
+  w.self.clients.matchAll = async () => [{ url: "https://phobos.test/fold/#/", focus: async () => opened.push("focus"), navigate: async () => { throw new TypeError("not controlled"); } }];
+  await w.fire("notificationclick", { notification: note });
+  expect(opened).toEqual(["closed", "focus", `navigate ${url}`, "closed", `open ${url}`, "closed", "focus", `open ${url}`]);
 });

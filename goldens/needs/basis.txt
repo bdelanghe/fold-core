@@ -1,0 +1,21 @@
+@ needs
+in: Everything
+# Needs you
+What the agents need from you, each with what to do.
+Approvals  → needs/approvals
+Answer cake's question.  → needs/needs-ask-0
+
+@ needs/approvals
+in: Everything › Needs you
+# Approvals
+To personal-assistant · Waits for your signature.  → needs/approvals/needs-sign-0123456789ab
+To personal-cake-goal · Waits for your signature. Queued by an unknown seat; intent 0a0a0a0a0a0a.  → needs/approvals/needs-sign-0a0a0a0a0a0a
+
+@ needs/approvals/needs-sign-0123456789ab
+in: Everything › Needs you › Approvals
+# To personal-assistant
+Route the plan to the hubs.
+Fri 11:57
+What to do: Approve or decline it with your passkey.
+Waits for your signature. Queued by claude-break-glass; intent 0123456789ab, text hash deadbeefcafe.
+act: Approve with passkey [approve 0123456789ab] · Decline with passkey [decline 0123456789ab]

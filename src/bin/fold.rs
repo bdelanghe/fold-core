@@ -5,7 +5,12 @@
 //!   <bin> [--act-seat <seat>] [--act-log <file>]`, an act's form may ack, defer or decline a chitin message for that one login
 //!   (S2: allie-s2-fold-act-write), or say its one typed line as seat `fold-act` (act.rs `SAY_SEAT`, whatever `--act-seat` says):
 //!   the key is made if missing (0600), an ack's seat is `fold-act` unless named, and each act's line goes
-//!   to `--act-log`, by default `acts.jsonl` beside the key. With `--report-config <file>` (src/report.rs), `POST report-token`
+//!   to `--act-log`, by default `acts.jsonl` beside the key. With `--needs-as <title>` too, `GET needs.json` lists what waits for
+//!   that chitin title's signature, read live (`chitin pending --as <title> --json`): Needs you's Approvals (src/needs.rs). Its
+//!   verdicts, approve and decline, are each a passkey the viewer runs against chitin-approve, never this server. With
+//!   `--notify-as <seat>` too (BRIEF addendum 2), each new waiting intent becomes one `chitin notify --as <seat>` Needs-you record,
+//!   which chitin's notify-sink sends as a Web Push, and `push/key`, `push/subscribe`, `push/unsubscribe` hand a device's
+//!   subscription to `chitin push` (src/serve.rs `push`, `watch`). With `--report-config <file>` (src/report.rs), `POST report-token`
 //!   gets Clax reporter tokens for the config's one login from the instance beside it, and `GET clax/overlay.js` passes its
 //!   overlay through: the queue's grant (token and key) is read at start by the config's `grant_cmd` and `grant_key_cmd` and
 //!   kept in memory only, and a config inside `--root` is refused (it would be served). For Basis (queue `basis`, its grant in
@@ -26,7 +31,7 @@ use std::process::exit;
 
 use fold_core::{act, check, report, serve, sink};
 
-const USAGE: &str = "usage: fold check <page.html|doc.json>...\n       fold serve --root <dir> --mount </fold> --port <n> [--no-store <prefix>]...\n                  [--act-as <login> --act-host <host> --act-key <file> --chitin <bin> [--act-seat <seat>] [--act-log <file>]]\n                  [--report-config <file>]\n       fold sink --port <n> --log <file> [--per-minute <n>]";
+const USAGE: &str = "usage: fold check <page.html|doc.json>...\n       fold serve --root <dir> --mount </fold> --port <n> [--no-store <prefix>]...\n                  [--act-as <login> --act-host <host> --act-key <file> --chitin <bin> [--act-seat <seat>] [--act-log <file>] [--needs-as <title> [--notify-as <seat>]]]\n                  [--report-config <file>]\n       fold sink --port <n> --log <file> [--per-minute <n>]";
 
 extern "C" {
     fn geteuid() -> u32;
@@ -58,6 +63,8 @@ fn main() {
     let (mut act_as, mut act_host, mut act_key, mut chitin, mut act_seat, mut act_log) =
         (None, None, None, None, "fold-act".to_string(), None);
     let mut report_config: Option<PathBuf> = None;
+    let mut needs_as: Option<String> = None;
+    let mut notify_as: Option<String> = None;
     let mut it = args[1..].iter();
     while let Some(a) = it.next() {
         let v = it.next().unwrap_or_else(|| die(&format!("fold {cmd}: {a} needs a value"), 2));
@@ -71,6 +78,8 @@ fn main() {
             ("serve", "--chitin") => chitin = Some(v.clone()),
             ("serve", "--act-seat") => act_seat = v.clone(),
             ("serve", "--act-log") => act_log = Some(PathBuf::from(v)),
+            ("serve", "--needs-as") => needs_as = Some(v.clone()),
+            ("serve", "--notify-as") => notify_as = Some(v.clone()),
             ("serve", "--report-config") => report_config = Some(PathBuf::from(v)),
             ("sink", "--log") => log = Some(PathBuf::from(v)),
             ("sink", "--per-minute") => per_minute = num(cmd, a, v),
@@ -83,6 +92,10 @@ fn main() {
     let done = if cmd == "serve" {
         let root = root.unwrap_or_else(|| die("fold serve: --root is needed", 2));
         let (acting, log) = match (act_as, act_host, act_key, chitin) {
+            _ if notify_as.is_some() && needs_as.is_none() => die("fold serve: --notify-as notifies of what --needs-as reads: give both", 2),
+            (None, None, None, None) if needs_as.is_some() => {
+                die("fold serve: --needs-as reads for the acting login: give it with --act-as, --act-host, --act-key and --chitin", 2)
+            }
             (None, None, None, None) => (None, None),
             (Some(login), Some(host), Some(kf), Some(bin)) => {
                 let key = act::key(&kf).unwrap_or_else(|e| die(&format!("fold serve: --act-key: {e}"), 1));
@@ -92,8 +105,14 @@ fn main() {
                     act::SAY_SEAT,
                     log.display()
                 );
+                if let Some(t) = &needs_as {
+                    eprintln!("fold serve: Needs you read live for chitin title {t} at https://{host}{mount}{}", serve::NEEDS);
+                }
+                if let Some(s) = &notify_as {
+                    eprintln!("fold serve: a new waiting intent is a Needs-you record from chitin seat {s}, pushed by chitin's notify-sink; devices subscribe at https://{host}{mount}{}subscribe", serve::PUSH);
+                }
                 let actor = Box::new(act::Chitin { bin, seat: act_seat });
-                (Some(serve::Acting { login, host, key, actor, spent: Default::default() }), Some(log))
+                (Some(serve::Acting { login, host, key, actor, spent: Default::default(), needs_as, notify_as }), Some(log))
             }
             _ => die("fold serve: --act-as, --act-host, --act-key and --chitin go together", 2),
         };

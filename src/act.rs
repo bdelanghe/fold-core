@@ -303,6 +303,33 @@ pub trait Actor: Send + Sync {
     /// Say `text` to the seat `to` (in reply to `in_reply_to`, when the act names one), by the act `act`. The route has checked
     /// `text` against the act's input ([`typed`]) and spent the form's token, so one form sends once.
     fn say(&self, to: &str, text: &str, in_reply_to: Option<&str>, act: &str) -> Result<Done, String>;
+    /// What waits for `title`'s signature, as `chitin pending --as <title> --json` lists it (src/needs.rs filters it). Read for
+    /// `needs.json`; an actor that can't read it says why. A verdict on one (approve, decline) is the passkey's, never this server's.
+    fn pending(&self, title: &str) -> Result<serde_json::Value, String> {
+        let _ = title;
+        Err("this server reads no pending list".into())
+    }
+    /// One Needs-you record for chitin's notify-sink to push (`chitin notify --as <seat> --severity attention --dedupe <key> --url <url>
+    /// <title>`, BRIEF addendum 2): src/needs.rs `notice` gives the three. Its Web Push sender (VAPID, quiet hours, one push per
+    /// item ever) is chitin's, not this server's.
+    fn notify(&self, seat: &str, title: &str, url: &str, dedupe: &str) -> Result<(), String> {
+        let _ = (seat, title, url, dedupe);
+        Err("this server sends no notifications".into())
+    }
+    /// One of chitin's push subscription verbs (`chitin push vapid-public | subscribe | unsubscribe <endpoint>`): its stdout's first line.
+    fn push(&self, op: &Push) -> Result<String, String> {
+        let _ = op;
+        Err("this server keeps no push subscriptions".into())
+    }
+}
+
+/// A push subscription verb, as chitin's `push` takes it. The subscription is the browser's PushSubscription JSON, cut to
+/// `{endpoint, keys: {p256dh, auth}}`; chitin checks it (an https endpoint on a known push service, a P-256 point) and keeps it 0600.
+#[derive(Debug, Clone, PartialEq)]
+pub enum Push {
+    Key,
+    Subscribe(String),
+    Unsubscribe(String),
 }
 
 /// The one chitin seat a typed say speaks as (Bobby 38e765d3, signed ebe199a4: S2 42184457 widened to typed say "as seat
@@ -354,6 +381,58 @@ impl Actor for Chitin {
             Err(line)
         }
     }
+
+    /// `chitin pending --as <title> --json`: its stdout, a JSON list.
+    fn pending(&self, title: &str) -> Result<serde_json::Value, String> {
+        let out = Command::new(&self.bin)
+            .args(["pending", "--as", title, "--json"])
+            .output()
+            .map_err(|e| format!("could not run chitin: {e}"))?;
+        if !out.status.success() {
+            let e = String::from_utf8_lossy(&out.stderr);
+            return Err(e.lines().map(str::trim).find(|l| !l.is_empty()).unwrap_or("chitin pending failed").chars().take(200).collect());
+        }
+        serde_json::from_slice(&out.stdout).map_err(|e| format!("chitin pending did not answer JSON: {e}"))
+    }
+
+    /// `chitin notify --as <seat> --severity attention --dedupe <key> --url <url> <title>`: `written`, or `suppressed: <key> was
+    /// sent …` (sent already), is done; anything else, the hourly cap's `suppressed: … over …` among it, is chitin's reason, so
+    /// the record is tried again at the next look.
+    fn notify(&self, seat: &str, title: &str, url: &str, dedupe: &str) -> Result<(), String> {
+        let mut c = Command::new(&self.bin);
+        c.args(["notify", "--as", seat, "--severity", "attention", "--dedupe", dedupe, "--url", url, title]);
+        let (ok, line) = first_line(&mut c)?;
+        if (ok && line.starts_with("written")) || (line.starts_with("suppressed: ") && line.contains(" was sent less than ")) {
+            Ok(())
+        } else {
+            Err(line)
+        }
+    }
+
+    /// `chitin push vapid-public | subscribe (the subscription on stdin) | unsubscribe <endpoint>`.
+    fn push(&self, op: &Push) -> Result<String, String> {
+        use std::io::Write;
+        let mut c = Command::new(&self.bin);
+        match op {
+            Push::Key => c.args(["push", "vapid-public"]),
+            Push::Subscribe(_) => c.args(["push", "subscribe"]),
+            Push::Unsubscribe(e) => c.args(["push", "unsubscribe", e]),
+        };
+        c.stdin(std::process::Stdio::piped()).stdout(std::process::Stdio::piped()).stderr(std::process::Stdio::piped());
+        let mut child = c.spawn().map_err(|e| format!("could not run chitin: {e}"))?;
+        if let (Push::Subscribe(sub), Some(mut i)) = (op, child.stdin.take()) {
+            i.write_all(sub.as_bytes()).map_err(|e| format!("could not hand chitin the subscription: {e}"))?;
+        }
+        let out = child.wait_with_output().map_err(|e| format!("chitin did not finish: {e}"))?;
+        let (o, e) = (String::from_utf8_lossy(&out.stdout), String::from_utf8_lossy(&out.stderr));
+        let line: String = o.lines().chain(e.lines()).map(str::trim).find(|l| !l.is_empty()).unwrap_or("").chars().take(200).collect();
+        match (out.status.success(), op) {
+            (true, Push::Subscribe(_)) if line != "subscribed" => Err(line),
+            (true, _) => Ok(line),
+            _ => Err(if line.is_empty() { format!("chitin exited {}", out.status) } else { line }),
+        }
+    }
+
 }
 
 #[cfg(not(target_arch = "wasm32"))]

@@ -1,0 +1,1179 @@
+[
+  {
+    "what": "read live: the waiting intents, first, as Approvals; the producer's sign item gone, its ask where it was",
+    "input": {
+      "root": {
+        "title": "Everything",
+        "meta": {
+          "timeZone": "UTC"
+        },
+        "sections": [
+          {
+            "id": "needs",
+            "title": "Needs you",
+            "purpose": "What the agents need from you, each with what to do.",
+            "empty": "Nothing needs you right now.",
+            "groups": [
+              {
+                "title": "",
+                "items": [
+                  {
+                    "id": "needs/ask-0",
+                    "action": "Answer cake's question.",
+                    "link": {
+                      "href": "https://example.test/pr/1",
+                      "label": "Open PR #1"
+                    }
+                  },
+                  {
+                    "id": "needs/sign-999999999999",
+                    "name": "To a seat",
+                    "nameKind": "agent",
+                    "text": "Signed already, minutes ago.",
+                    "quoted": true,
+                    "act": {
+                      "cap": "webauthn",
+                      "call": "approve",
+                      "label": "Approve with passkey",
+                      "args": {
+                        "challenge": "/approve/v1/challenge/999999999999",
+                        "assertion": "/approve/v1/assertion/999999999999"
+                      }
+                    },
+                    "link": {
+                      "href": "https://example.test/approve/#i-999999999999",
+                      "label": "Approve on the approval page"
+                    }
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": "agents",
+            "title": "Agent fleet",
+            "items": [
+              {
+                "id": "seat-x",
+                "name": "seat-x",
+                "state": "idle"
+              }
+            ]
+          }
+        ]
+      },
+      "needs": {
+        "as": "bobby",
+        "waiting": [
+          {
+            "id": "0123456789ab",
+            "as": "bobby",
+            "declined": false,
+            "expired": false,
+            "to": "personal-assistant",
+            "text": "Route the plan to the hubs.",
+            "queued_by": "claude-break-glass",
+            "text_hash": "deadbeefcafe",
+            "created_at": "2026-10-30T11:57:55.000Z",
+            "age_s": 125
+          },
+          {
+            "id": "0a0a0a0a0a0a",
+            "as": "bobby",
+            "declined": false,
+            "expired": false,
+            "to": "personal-cake-goal",
+            "text": "Land <b>it</b> \"now\"."
+          }
+        ]
+      },
+      "now": 1793361600000
+    },
+    "root": {
+      "title": "Everything",
+      "meta": {
+        "timeZone": "UTC"
+      },
+      "sections": [
+        {
+          "id": "needs",
+          "title": "Needs you",
+          "purpose": "What the agents need from you, each with what to do.",
+          "empty": "Nothing needs you right now.",
+          "groups": [
+            {
+              "title": "Approvals",
+              "items": [
+                {
+                  "id": "needs/sign-0123456789ab",
+                  "name": "To personal-assistant",
+                  "nameKind": "agent",
+                  "text": "Route the plan to the hubs.",
+                  "quoted": true,
+                  "why": "Waits for your signature. Queued by claude-break-glass; intent 0123456789ab, text hash deadbeefcafe.",
+                  "action": "Approve or decline it with your passkey.",
+                  "at": "2026-10-30T11:57:55.000Z",
+                  "act": {
+                    "cap": "webauthn",
+                    "call": "approve",
+                    "label": "Approve with passkey",
+                    "args": {
+                      "challenge": "/approve/v1/challenge/0123456789ab",
+                      "assertion": "/approve/v1/assertion/0123456789ab"
+                    }
+                  },
+                  "acts": [
+                    {
+                      "cap": "webauthn",
+                      "call": "decline",
+                      "label": "Decline with passkey",
+                      "args": {
+                        "challenge": "/approve/v1/decline/0123456789ab",
+                        "assertion": "/approve/v1/decline/0123456789ab"
+                      }
+                    }
+                  ]
+                },
+                {
+                  "id": "needs/sign-0a0a0a0a0a0a",
+                  "name": "To personal-cake-goal",
+                  "nameKind": "agent",
+                  "text": "Land <b>it</b> \"now\".",
+                  "quoted": true,
+                  "why": "Waits for your signature. Queued by an unknown seat; intent 0a0a0a0a0a0a.",
+                  "action": "Approve or decline it with your passkey.",
+                  "act": {
+                    "cap": "webauthn",
+                    "call": "approve",
+                    "label": "Approve with passkey",
+                    "args": {
+                      "challenge": "/approve/v1/challenge/0a0a0a0a0a0a",
+                      "assertion": "/approve/v1/assertion/0a0a0a0a0a0a"
+                    }
+                  },
+                  "acts": [
+                    {
+                      "cap": "webauthn",
+                      "call": "decline",
+                      "label": "Decline with passkey",
+                      "args": {
+                        "challenge": "/approve/v1/decline/0a0a0a0a0a0a",
+                        "assertion": "/approve/v1/decline/0a0a0a0a0a0a"
+                      }
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "title": "",
+              "items": [
+                {
+                  "id": "needs/ask-0",
+                  "action": "Answer cake's question.",
+                  "link": {
+                    "href": "https://example.test/pr/1",
+                    "label": "Open PR #1"
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "agents",
+          "title": "Agent fleet",
+          "items": [
+            {
+              "id": "seat-x",
+              "name": "seat-x",
+              "state": "idle"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "what": "the read failed: Approvals says why and offers nothing to sign",
+    "input": {
+      "root": {
+        "title": "Everything",
+        "meta": {
+          "timeZone": "UTC"
+        },
+        "sections": [
+          {
+            "id": "needs",
+            "title": "Needs you",
+            "purpose": "What the agents need from you, each with what to do.",
+            "empty": "Nothing needs you right now.",
+            "groups": [
+              {
+                "title": "",
+                "items": [
+                  {
+                    "id": "needs/ask-0",
+                    "action": "Answer cake's question.",
+                    "link": {
+                      "href": "https://example.test/pr/1",
+                      "label": "Open PR #1"
+                    }
+                  },
+                  {
+                    "id": "needs/sign-999999999999",
+                    "name": "To a seat",
+                    "nameKind": "agent",
+                    "text": "Signed already, minutes ago.",
+                    "quoted": true,
+                    "act": {
+                      "cap": "webauthn",
+                      "call": "approve",
+                      "label": "Approve with passkey",
+                      "args": {
+                        "challenge": "/approve/v1/challenge/999999999999",
+                        "assertion": "/approve/v1/assertion/999999999999"
+                      }
+                    },
+                    "link": {
+                      "href": "https://example.test/approve/#i-999999999999",
+                      "label": "Approve on the approval page"
+                    }
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": "agents",
+            "title": "Agent fleet",
+            "items": [
+              {
+                "id": "seat-x",
+                "name": "seat-x",
+                "state": "idle"
+              }
+            ]
+          }
+        ]
+      },
+      "error": "403 not who this server acts for",
+      "now": 1793361600000
+    },
+    "root": {
+      "title": "Everything",
+      "meta": {
+        "timeZone": "UTC"
+      },
+      "sections": [
+        {
+          "id": "needs",
+          "title": "Needs you",
+          "purpose": "What the agents need from you, each with what to do.",
+          "empty": "Nothing needs you right now.",
+          "groups": [
+            {
+              "title": "Approvals",
+              "items": [],
+              "empty": "Nothing can be signed from here right now."
+            },
+            {
+              "title": "",
+              "items": [
+                {
+                  "id": "needs/ask-0",
+                  "action": "Answer cake's question.",
+                  "link": {
+                    "href": "https://example.test/pr/1",
+                    "label": "Open PR #1"
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "agents",
+          "title": "Agent fleet",
+          "items": [
+            {
+              "id": "seat-x",
+              "name": "seat-x",
+              "state": "idle"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "what": "no read and no reason: the same, never the producer's list",
+    "input": {
+      "root": {
+        "title": "Everything",
+        "meta": {
+          "timeZone": "UTC"
+        },
+        "sections": [
+          {
+            "id": "needs",
+            "title": "Needs you",
+            "purpose": "What the agents need from you, each with what to do.",
+            "empty": "Nothing needs you right now.",
+            "groups": [
+              {
+                "title": "",
+                "items": [
+                  {
+                    "id": "needs/ask-0",
+                    "action": "Answer cake's question.",
+                    "link": {
+                      "href": "https://example.test/pr/1",
+                      "label": "Open PR #1"
+                    }
+                  },
+                  {
+                    "id": "needs/sign-999999999999",
+                    "name": "To a seat",
+                    "nameKind": "agent",
+                    "text": "Signed already, minutes ago.",
+                    "quoted": true,
+                    "act": {
+                      "cap": "webauthn",
+                      "call": "approve",
+                      "label": "Approve with passkey",
+                      "args": {
+                        "challenge": "/approve/v1/challenge/999999999999",
+                        "assertion": "/approve/v1/assertion/999999999999"
+                      }
+                    },
+                    "link": {
+                      "href": "https://example.test/approve/#i-999999999999",
+                      "label": "Approve on the approval page"
+                    }
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": "agents",
+            "title": "Agent fleet",
+            "items": [
+              {
+                "id": "seat-x",
+                "name": "seat-x",
+                "state": "idle"
+              }
+            ]
+          }
+        ]
+      },
+      "now": 1793361600000
+    },
+    "root": {
+      "title": "Everything",
+      "meta": {
+        "timeZone": "UTC"
+      },
+      "sections": [
+        {
+          "id": "needs",
+          "title": "Needs you",
+          "purpose": "What the agents need from you, each with what to do.",
+          "empty": "Nothing needs you right now.",
+          "groups": [
+            {
+              "title": "Approvals",
+              "items": [],
+              "empty": "Nothing can be signed from here right now."
+            },
+            {
+              "title": "",
+              "items": [
+                {
+                  "id": "needs/ask-0",
+                  "action": "Answer cake's question.",
+                  "link": {
+                    "href": "https://example.test/pr/1",
+                    "label": "Open PR #1"
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "agents",
+          "title": "Agent fleet",
+          "items": [
+            {
+              "id": "seat-x",
+              "name": "seat-x",
+              "state": "idle"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "what": "nothing waits: no Approvals, and the producer's sign item still gone",
+    "input": {
+      "root": {
+        "title": "Everything",
+        "meta": {
+          "timeZone": "UTC"
+        },
+        "sections": [
+          {
+            "id": "needs",
+            "title": "Needs you",
+            "purpose": "What the agents need from you, each with what to do.",
+            "empty": "Nothing needs you right now.",
+            "groups": [
+              {
+                "title": "",
+                "items": [
+                  {
+                    "id": "needs/ask-0",
+                    "action": "Answer cake's question.",
+                    "link": {
+                      "href": "https://example.test/pr/1",
+                      "label": "Open PR #1"
+                    }
+                  },
+                  {
+                    "id": "needs/sign-999999999999",
+                    "name": "To a seat",
+                    "nameKind": "agent",
+                    "text": "Signed already, minutes ago.",
+                    "quoted": true,
+                    "act": {
+                      "cap": "webauthn",
+                      "call": "approve",
+                      "label": "Approve with passkey",
+                      "args": {
+                        "challenge": "/approve/v1/challenge/999999999999",
+                        "assertion": "/approve/v1/assertion/999999999999"
+                      }
+                    },
+                    "link": {
+                      "href": "https://example.test/approve/#i-999999999999",
+                      "label": "Approve on the approval page"
+                    }
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": "agents",
+            "title": "Agent fleet",
+            "items": [
+              {
+                "id": "seat-x",
+                "name": "seat-x",
+                "state": "idle"
+              }
+            ]
+          }
+        ]
+      },
+      "needs": {
+        "as": "bobby",
+        "waiting": []
+      },
+      "now": 1793361600000
+    },
+    "root": {
+      "title": "Everything",
+      "meta": {
+        "timeZone": "UTC"
+      },
+      "sections": [
+        {
+          "id": "needs",
+          "title": "Needs you",
+          "purpose": "What the agents need from you, each with what to do.",
+          "empty": "Nothing needs you right now.",
+          "groups": [
+            {
+              "title": "",
+              "items": [
+                {
+                  "id": "needs/ask-0",
+                  "action": "Answer cake's question.",
+                  "link": {
+                    "href": "https://example.test/pr/1",
+                    "label": "Open PR #1"
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "agents",
+          "title": "Agent fleet",
+          "items": [
+            {
+              "id": "seat-x",
+              "name": "seat-x",
+              "state": "idle"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "what": "an answer is filtered again for its own title: chitin's raw list, not only what the server cut",
+    "input": {
+      "root": {
+        "title": "Everything",
+        "meta": {
+          "timeZone": "UTC"
+        },
+        "sections": [
+          {
+            "id": "needs",
+            "title": "Needs you",
+            "purpose": "What the agents need from you, each with what to do.",
+            "empty": "Nothing needs you right now.",
+            "groups": [
+              {
+                "title": "",
+                "items": [
+                  {
+                    "id": "needs/ask-0",
+                    "action": "Answer cake's question.",
+                    "link": {
+                      "href": "https://example.test/pr/1",
+                      "label": "Open PR #1"
+                    }
+                  },
+                  {
+                    "id": "needs/sign-999999999999",
+                    "name": "To a seat",
+                    "nameKind": "agent",
+                    "text": "Signed already, minutes ago.",
+                    "quoted": true,
+                    "act": {
+                      "cap": "webauthn",
+                      "call": "approve",
+                      "label": "Approve with passkey",
+                      "args": {
+                        "challenge": "/approve/v1/challenge/999999999999",
+                        "assertion": "/approve/v1/assertion/999999999999"
+                      }
+                    },
+                    "link": {
+                      "href": "https://example.test/approve/#i-999999999999",
+                      "label": "Approve on the approval page"
+                    }
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": "agents",
+            "title": "Agent fleet",
+            "items": [
+              {
+                "id": "seat-x",
+                "name": "seat-x",
+                "state": "idle"
+              }
+            ]
+          }
+        ]
+      },
+      "needs": {
+        "as": "bobby",
+        "waiting": [
+          {
+            "id": "0123456789ab",
+            "as": "bobby",
+            "to": "personal-assistant",
+            "text": "Route the plan to the hubs.",
+            "chars": 15,
+            "text_hash": "deadbeefcafe",
+            "age_s": 125,
+            "queued_by": "claude-break-glass",
+            "created_at": "2026-10-30T11:57:55.000Z",
+            "declined": false,
+            "expired": false,
+            "brief": {
+              "ask": "route it",
+              "why": "x",
+              "effect": "y",
+              "undo": {
+                "can": true
+              }
+            }
+          },
+          {
+            "id": "bbbbbbbbbbbb",
+            "as": "bobby",
+            "to": "seat-b",
+            "text": "declined",
+            "chars": 15,
+            "text_hash": "deadbeefcafe",
+            "age_s": 125,
+            "queued_by": "claude-break-glass",
+            "created_at": "2026-10-30T11:57:55.000Z",
+            "declined": true,
+            "expired": false,
+            "brief": {
+              "ask": "route it",
+              "why": "x",
+              "effect": "y",
+              "undo": {
+                "can": true
+              }
+            }
+          },
+          {
+            "id": "cccccccccccc",
+            "as": "bobby",
+            "to": "seat-c",
+            "text": "expired",
+            "chars": 15,
+            "text_hash": "deadbeefcafe",
+            "age_s": 125,
+            "queued_by": "claude-break-glass",
+            "created_at": "2026-10-30T11:57:55.000Z",
+            "declined": false,
+            "expired": true,
+            "brief": {
+              "ask": "route it",
+              "why": "x",
+              "effect": "y",
+              "undo": {
+                "can": true
+              }
+            }
+          },
+          {
+            "id": "dddddddddddd",
+            "as": "work-assistant",
+            "to": "seat-d",
+            "text": "another title's",
+            "chars": 15,
+            "text_hash": "deadbeefcafe",
+            "age_s": 125,
+            "queued_by": "claude-break-glass",
+            "created_at": "2026-10-30T11:57:55.000Z",
+            "declined": false,
+            "expired": false,
+            "brief": {
+              "ask": "route it",
+              "why": "x",
+              "effect": "y",
+              "undo": {
+                "can": true
+              }
+            }
+          },
+          {
+            "id": "BAD",
+            "as": "bobby",
+            "to": "seat-e",
+            "text": "an id chitin would never make",
+            "chars": 15,
+            "text_hash": "deadbeefcafe",
+            "age_s": 125,
+            "queued_by": "claude-break-glass",
+            "created_at": "2026-10-30T11:57:55.000Z",
+            "declined": false,
+            "expired": false,
+            "brief": {
+              "ask": "route it",
+              "why": "x",
+              "effect": "y",
+              "undo": {
+                "can": true
+              }
+            }
+          },
+          {
+            "id": "eeeeeeeeeeee",
+            "as": "bobby",
+            "to": "",
+            "text": "no recipient",
+            "chars": 15,
+            "text_hash": "deadbeefcafe",
+            "age_s": 125,
+            "queued_by": "claude-break-glass",
+            "created_at": "2026-10-30T11:57:55.000Z",
+            "declined": false,
+            "expired": false,
+            "brief": {
+              "ask": "route it",
+              "why": "x",
+              "effect": "y",
+              "undo": {
+                "can": true
+              }
+            }
+          },
+          {
+            "id": "ffffffffffff",
+            "as": "bobby",
+            "to": "seat-f",
+            "text": 5,
+            "chars": 15,
+            "text_hash": "deadbeefcafe",
+            "age_s": 125,
+            "queued_by": "claude-break-glass",
+            "created_at": "2026-10-30T11:57:55.000Z",
+            "declined": false,
+            "expired": false,
+            "brief": {
+              "ask": "route it",
+              "why": "x",
+              "effect": "y",
+              "undo": {
+                "can": true
+              }
+            }
+          },
+          {
+            "id": "0a0a0a0a0a0a",
+            "as": "bobby",
+            "to": "personal-cake-goal",
+            "text": "Land <b>it</b> \"now\".",
+            "declined": false,
+            "expired": false
+          }
+        ]
+      },
+      "now": 1793361600000
+    },
+    "root": {
+      "title": "Everything",
+      "meta": {
+        "timeZone": "UTC"
+      },
+      "sections": [
+        {
+          "id": "needs",
+          "title": "Needs you",
+          "purpose": "What the agents need from you, each with what to do.",
+          "empty": "Nothing needs you right now.",
+          "groups": [
+            {
+              "title": "Approvals",
+              "items": [
+                {
+                  "id": "needs/sign-0123456789ab",
+                  "name": "To personal-assistant",
+                  "nameKind": "agent",
+                  "text": "Route the plan to the hubs.",
+                  "quoted": true,
+                  "why": "Waits for your signature. Queued by claude-break-glass; intent 0123456789ab, text hash deadbeefcafe.",
+                  "action": "Approve or decline it with your passkey.",
+                  "at": "2026-10-30T11:57:55.000Z",
+                  "act": {
+                    "cap": "webauthn",
+                    "call": "approve",
+                    "label": "Approve with passkey",
+                    "args": {
+                      "challenge": "/approve/v1/challenge/0123456789ab",
+                      "assertion": "/approve/v1/assertion/0123456789ab"
+                    }
+                  },
+                  "acts": [
+                    {
+                      "cap": "webauthn",
+                      "call": "decline",
+                      "label": "Decline with passkey",
+                      "args": {
+                        "challenge": "/approve/v1/decline/0123456789ab",
+                        "assertion": "/approve/v1/decline/0123456789ab"
+                      }
+                    }
+                  ]
+                },
+                {
+                  "id": "needs/sign-0a0a0a0a0a0a",
+                  "name": "To personal-cake-goal",
+                  "nameKind": "agent",
+                  "text": "Land <b>it</b> \"now\".",
+                  "quoted": true,
+                  "why": "Waits for your signature. Queued by an unknown seat; intent 0a0a0a0a0a0a.",
+                  "action": "Approve or decline it with your passkey.",
+                  "act": {
+                    "cap": "webauthn",
+                    "call": "approve",
+                    "label": "Approve with passkey",
+                    "args": {
+                      "challenge": "/approve/v1/challenge/0a0a0a0a0a0a",
+                      "assertion": "/approve/v1/assertion/0a0a0a0a0a0a"
+                    }
+                  },
+                  "acts": [
+                    {
+                      "cap": "webauthn",
+                      "call": "decline",
+                      "label": "Decline with passkey",
+                      "args": {
+                        "challenge": "/approve/v1/decline/0a0a0a0a0a0a",
+                        "assertion": "/approve/v1/decline/0a0a0a0a0a0a"
+                      }
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "title": "",
+              "items": [
+                {
+                  "id": "needs/ask-0",
+                  "action": "Answer cake's question.",
+                  "link": {
+                    "href": "https://example.test/pr/1",
+                    "label": "Open PR #1"
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "agents",
+          "title": "Agent fleet",
+          "items": [
+            {
+              "id": "seat-x",
+              "name": "seat-x",
+              "state": "idle"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "what": "an answer that names no title shows nothing to sign",
+    "input": {
+      "root": {
+        "title": "Everything",
+        "meta": {
+          "timeZone": "UTC"
+        },
+        "sections": [
+          {
+            "id": "needs",
+            "title": "Needs you",
+            "purpose": "What the agents need from you, each with what to do.",
+            "empty": "Nothing needs you right now.",
+            "groups": [
+              {
+                "title": "",
+                "items": [
+                  {
+                    "id": "needs/ask-0",
+                    "action": "Answer cake's question.",
+                    "link": {
+                      "href": "https://example.test/pr/1",
+                      "label": "Open PR #1"
+                    }
+                  },
+                  {
+                    "id": "needs/sign-999999999999",
+                    "name": "To a seat",
+                    "nameKind": "agent",
+                    "text": "Signed already, minutes ago.",
+                    "quoted": true,
+                    "act": {
+                      "cap": "webauthn",
+                      "call": "approve",
+                      "label": "Approve with passkey",
+                      "args": {
+                        "challenge": "/approve/v1/challenge/999999999999",
+                        "assertion": "/approve/v1/assertion/999999999999"
+                      }
+                    },
+                    "link": {
+                      "href": "https://example.test/approve/#i-999999999999",
+                      "label": "Approve on the approval page"
+                    }
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": "agents",
+            "title": "Agent fleet",
+            "items": [
+              {
+                "id": "seat-x",
+                "name": "seat-x",
+                "state": "idle"
+              }
+            ]
+          }
+        ]
+      },
+      "needs": {
+        "waiting": [
+          {
+            "id": "0123456789ab",
+            "as": "bobby",
+            "to": "personal-assistant",
+            "text": "Route the plan to the hubs.",
+            "chars": 15,
+            "text_hash": "deadbeefcafe",
+            "age_s": 125,
+            "queued_by": "claude-break-glass",
+            "created_at": "2026-10-30T11:57:55.000Z",
+            "declined": false,
+            "expired": false,
+            "brief": {
+              "ask": "route it",
+              "why": "x",
+              "effect": "y",
+              "undo": {
+                "can": true
+              }
+            }
+          },
+          {
+            "id": "bbbbbbbbbbbb",
+            "as": "bobby",
+            "to": "seat-b",
+            "text": "declined",
+            "chars": 15,
+            "text_hash": "deadbeefcafe",
+            "age_s": 125,
+            "queued_by": "claude-break-glass",
+            "created_at": "2026-10-30T11:57:55.000Z",
+            "declined": true,
+            "expired": false,
+            "brief": {
+              "ask": "route it",
+              "why": "x",
+              "effect": "y",
+              "undo": {
+                "can": true
+              }
+            }
+          },
+          {
+            "id": "cccccccccccc",
+            "as": "bobby",
+            "to": "seat-c",
+            "text": "expired",
+            "chars": 15,
+            "text_hash": "deadbeefcafe",
+            "age_s": 125,
+            "queued_by": "claude-break-glass",
+            "created_at": "2026-10-30T11:57:55.000Z",
+            "declined": false,
+            "expired": true,
+            "brief": {
+              "ask": "route it",
+              "why": "x",
+              "effect": "y",
+              "undo": {
+                "can": true
+              }
+            }
+          },
+          {
+            "id": "dddddddddddd",
+            "as": "work-assistant",
+            "to": "seat-d",
+            "text": "another title's",
+            "chars": 15,
+            "text_hash": "deadbeefcafe",
+            "age_s": 125,
+            "queued_by": "claude-break-glass",
+            "created_at": "2026-10-30T11:57:55.000Z",
+            "declined": false,
+            "expired": false,
+            "brief": {
+              "ask": "route it",
+              "why": "x",
+              "effect": "y",
+              "undo": {
+                "can": true
+              }
+            }
+          },
+          {
+            "id": "BAD",
+            "as": "bobby",
+            "to": "seat-e",
+            "text": "an id chitin would never make",
+            "chars": 15,
+            "text_hash": "deadbeefcafe",
+            "age_s": 125,
+            "queued_by": "claude-break-glass",
+            "created_at": "2026-10-30T11:57:55.000Z",
+            "declined": false,
+            "expired": false,
+            "brief": {
+              "ask": "route it",
+              "why": "x",
+              "effect": "y",
+              "undo": {
+                "can": true
+              }
+            }
+          },
+          {
+            "id": "eeeeeeeeeeee",
+            "as": "bobby",
+            "to": "",
+            "text": "no recipient",
+            "chars": 15,
+            "text_hash": "deadbeefcafe",
+            "age_s": 125,
+            "queued_by": "claude-break-glass",
+            "created_at": "2026-10-30T11:57:55.000Z",
+            "declined": false,
+            "expired": false,
+            "brief": {
+              "ask": "route it",
+              "why": "x",
+              "effect": "y",
+              "undo": {
+                "can": true
+              }
+            }
+          },
+          {
+            "id": "ffffffffffff",
+            "as": "bobby",
+            "to": "seat-f",
+            "text": 5,
+            "chars": 15,
+            "text_hash": "deadbeefcafe",
+            "age_s": 125,
+            "queued_by": "claude-break-glass",
+            "created_at": "2026-10-30T11:57:55.000Z",
+            "declined": false,
+            "expired": false,
+            "brief": {
+              "ask": "route it",
+              "why": "x",
+              "effect": "y",
+              "undo": {
+                "can": true
+              }
+            }
+          },
+          {
+            "id": "0a0a0a0a0a0a",
+            "as": "bobby",
+            "to": "personal-cake-goal",
+            "text": "Land <b>it</b> \"now\".",
+            "declined": false,
+            "expired": false
+          }
+        ]
+      },
+      "now": 1793361600000
+    },
+    "root": {
+      "title": "Everything",
+      "meta": {
+        "timeZone": "UTC"
+      },
+      "sections": [
+        {
+          "id": "needs",
+          "title": "Needs you",
+          "purpose": "What the agents need from you, each with what to do.",
+          "empty": "Nothing needs you right now.",
+          "groups": [
+            {
+              "title": "Approvals",
+              "items": [],
+              "empty": "Nothing can be signed from here right now."
+            },
+            {
+              "title": "",
+              "items": [
+                {
+                  "id": "needs/ask-0",
+                  "action": "Answer cake's question.",
+                  "link": {
+                    "href": "https://example.test/pr/1",
+                    "label": "Open PR #1"
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "agents",
+          "title": "Agent fleet",
+          "items": [
+            {
+              "id": "seat-x",
+              "name": "seat-x",
+              "state": "idle"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "what": "a document with no Needs you is as it was",
+    "input": {
+      "root": {
+        "title": "A deck",
+        "sections": [
+          {
+            "id": "one",
+            "title": "One"
+          }
+        ]
+      },
+      "needs": {
+        "as": "bobby",
+        "waiting": [
+          {
+            "id": "0123456789ab",
+            "as": "bobby",
+            "declined": false,
+            "expired": false,
+            "to": "personal-assistant",
+            "text": "Route the plan to the hubs.",
+            "queued_by": "claude-break-glass",
+            "text_hash": "deadbeefcafe",
+            "created_at": "2026-10-30T11:57:55.000Z",
+            "age_s": 125
+          },
+          {
+            "id": "0a0a0a0a0a0a",
+            "as": "bobby",
+            "declined": false,
+            "expired": false,
+            "to": "personal-cake-goal",
+            "text": "Land <b>it</b> \"now\"."
+          }
+        ]
+      },
+      "now": 1793361600000
+    },
+    "root": {
+      "title": "A deck",
+      "sections": [
+        {
+          "id": "one",
+          "title": "One"
+        }
+      ]
+    }
+  }
+]

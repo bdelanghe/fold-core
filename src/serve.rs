@@ -7,7 +7,11 @@
 //! it is same-origin, and the form's token (src/act.rs) is this server's, current, and for the act as it stands. The act itself
 //! is read from the site's act map (`_acts.json`, page.rs), never from the form. Without [`Acting`], such a POST is read only to
 //! be dropped and answered by a page saying acting from here isn't on ([`not_yet`]). It names no `fold sink` (sink.rs): the sink
-//! is kept but not deployed. Signing goes through neither: the passkey stays on chitin's `/approve`. [`answer`] is pure (a
+//! is kept but not deployed. With `--needs-as <title>` it also reads Needs you live ([`NEEDS`]: that title's waiting intents, from
+//! chitin, on each request), under the same checks. With `--notify-as <seat>` too, it sends Needs you's notifications (BRIEF
+//! addendum 2) through chitin, which keeps the subscriptions and VAPID key and sends the Web Push: [`PUSH`]'s three routes hand a
+//! device's subscription to `chitin push`, and [`watch`] emits one `chitin notify` Needs-you record per new waiting intent. A verdict never comes here, approve or decline: the viewer runs the passkey in
+//! the page against chitin-approve's own `/approve/v1/*` (viewer/sign.js), which binds it, and the seats verify it. [`answer`] is pure (a
 //! request, a directory and the time in; a response and its log line out), so tests/serve.rs holds every class and every refusal
 //! as goldens without a socket; [`run`] is the loopback loop around it (http.rs, src/bin/fold.rs).
 //!
@@ -36,7 +40,7 @@ use chrono::{DateTime, SecondsFormat, Utc};
 use serde_json::{json, Value};
 use sha2::{Digest, Sha256};
 
-use crate::act::{self, Actor, Bad, Done};
+use crate::act::{self, Actor, Bad, Done, Push};
 use crate::html::text;
 use crate::id::{haecceity, segment_of};
 use crate::report::{self, Reporting};
@@ -70,6 +74,12 @@ pub struct Acting {
     /// The tokens a say has spent: one form sends once (a double tap, a replay or a back-button resubmit is "Already sent."). Kept
     /// for the server's life; a token outlives a restart only by its [`act::TTL`].
     pub spent: std::sync::Mutex<std::collections::HashSet<String>>,
+    /// The chitin title whose waiting intents `needs.json` lists (`--needs-as`), if any: without it, the route says Needs you
+    /// isn't read live here.
+    pub needs_as: Option<String>,
+    /// The chitin seat Needs-you records are published as (`--notify-as`, a producer chitin's notify-sink pushes for), if any:
+    /// without it, no notification is sent and the push routes say so.
+    pub notify_as: Option<String>,
 }
 
 /// How a resource may be cached (item 23's table), by its path.
@@ -162,6 +172,8 @@ pub fn limit(method: &str, target: &str) -> usize {
         REPORT_BODY
     } else if method == "POST" && target.starts_with(COMMENT) {
         COMMENT_BODY
+    } else if method == "POST" && target.split(['?', '#']).next().is_some_and(|p| p.starts_with(PUSH)) {
+        PUSH_BODY
     } else {
         0
     }
@@ -192,6 +204,12 @@ pub fn answer(site: &Site, req: &Request, now: i64) -> (Response, Option<Value>)
     }
     if path.starts_with(COMMENT) {
         return comment(site, req, now);
+    }
+    if path == NEEDS {
+        return (needs(site, req), None);
+    }
+    if path.starts_with(PUSH) {
+        return push(site, req, now);
     }
     let to_act = path.starts_with("/act/");
     match (req.method.as_str(), &site.acting) {
@@ -490,6 +508,149 @@ fn comment(site: &Site, req: &Request, now: i64) -> (Response, Option<Value>) {
     }
 }
 
+/// Needs you, live (src/needs.rs): what waits for the title's signature, read from chitin on each request, under the mount.
+pub const NEEDS: &str = "/needs.json";
+
+/// Whom the live Needs you reads for, if anyone: the acting login and the `--needs-as` title.
+fn needs_for(site: &Site) -> Option<(&Acting, &str)> {
+    let a = site.acting.as_ref()?;
+    Some((a, a.needs_as.as_deref()?))
+}
+
+/// `GET needs.json`, for the one login this server acts for, same-origin (the act's checks, before chitin is run): `{as, waiting}`,
+/// the title's waiting intents (src/needs.rs `waiting`) as chitin lists them now. Never stored, no validator: it is live state.
+fn needs(site: &Site, req: &Request) -> Response {
+    let Some((a, title)) = needs_for(site) else {
+        return Response::text(404, "Needs you isn't read live here");
+    };
+    if req.method != "GET" && req.method != "HEAD" {
+        return Response::text(405, "read-only: GET or HEAD").with("Allow", "GET, HEAD");
+    }
+    if let Err(why) = front(req, &a.login, &a.host) {
+        return Response::text(403, why).with("Cache-Control", "no-store");
+    }
+    match a.actor.pending(title) {
+        Ok(p) => json_answer(200, &crate::needs::answer(title, &crate::needs::waiting(&p, title), a.notify_as.is_some())),
+        Err(e) => json_answer(502, &json!({ "error": format!("chitin did not list them: {}", e.chars().filter(|c| !c.is_control()).take(200).collect::<String>()) })),
+    }
+}
+
+/// Needs you's notifications, under the mount: `push/key` (GET: the VAPID public key a device subscribes with), `push/subscribe`
+/// and `push/unsubscribe` (POST, JSON).
+pub const PUSH: &str = "/push/";
+
+/// The most a push route's body may be: one PushSubscription.
+pub const PUSH_BODY: usize = 4096;
+
+/// `push/<verb>` for the one login, same-origin, JSON only (a cross-site form cannot send it): the key, a device's subscription
+/// handed to `chitin push subscribe` cut to `{endpoint, keys: {p256dh, auth}}` (chitin checks the rest), or one taken off. The
+/// log line names the push service's host, never the endpoint's path or keys.
+fn push(site: &Site, req: &Request, now: i64) -> (Response, Option<Value>) {
+    let Some(a) = site.acting.as_ref().filter(|a| a.notify_as.is_some() && a.needs_as.is_some()) else {
+        return (Response::text(404, "Needs you sends no notifications here"), None);
+    };
+    let verb = req.target.split(['?', '#']).next().and_then(|p| p.strip_prefix(PUSH)).unwrap_or("");
+    let host = |e: &str| e.strip_prefix("https://").and_then(|r| r.split('/').next()).map(str::to_string);
+    let line = |result: &str, endpoint: Option<&str>| Some(json!({ "ts": now, "login": req.header("Tailscale-User-Login"), "push": verb, "service": endpoint.and_then(host), "result": result }));
+    let no = |status: u16, reason: &str, result: &str| (json_answer(status, &json!({ "ok": false, "reason": reason })), line(result, None));
+    let want = if verb == "key" { "GET" } else { "POST" };
+    if !matches!(verb, "key" | "subscribe" | "unsubscribe") {
+        return (Response::text(404, "no such push route"), None);
+    }
+    if req.method != want && !(want == "GET" && req.method == "HEAD") {
+        return (Response::text(405, &format!("push/{verb} is {want}")).with("Allow", want), None);
+    }
+    if let Err(why) = front(req, &a.login, &a.host) {
+        return no(403, why, "refused:403");
+    }
+    let chitin = |op: Push, endpoint: Option<&str>| match a.actor.push(&op) {
+        Ok(said) => (json_answer(200, &json!({ "ok": true, "said": said })), line("ok", endpoint)),
+        Err(e) => {
+            let e: String = e.chars().filter(|c| !c.is_control()).take(200).collect();
+            (json_answer(502, &json!({ "ok": false, "reason": format!("chitin did not take it: {e}") })), line("chitin:failed", endpoint))
+        }
+    };
+    if verb == "key" {
+        return match a.actor.push(&Push::Key) {
+            Ok(k) if !k.is_empty() && k.bytes().all(|b| b.is_ascii_alphanumeric() || b == b'-' || b == b'_') => (json_answer(200, &json!({ "key": k })), None),
+            Ok(_) => (json_answer(502, &json!({ "error": "chitin's key is not base64url" })), None),
+            Err(e) => (json_answer(503, &json!({ "error": format!("notifications are off: {}", e.chars().filter(|c| !c.is_control()).take(200).collect::<String>()) })), None),
+        };
+    }
+    if req.media_type() != Some("application/json") {
+        return no(415, "send it as application/json", "refused:415");
+    }
+    let body: Option<Value> = serde_json::from_slice(&req.body).ok();
+    let s = |v: Option<&Value>| v.and_then(Value::as_str).map(str::to_string);
+    let endpoint = s(body.as_ref().and_then(|b| b.get("endpoint"))).filter(|e| e.starts_with("https://") && e.len() <= 512 && !e.chars().any(char::is_control));
+    let Some(endpoint) = endpoint else { return no(400, "no https endpoint", "refused:400") };
+    if verb == "unsubscribe" {
+        return chitin(Push::Unsubscribe(endpoint.clone()), Some(&endpoint));
+    }
+    let keys = body.as_ref().and_then(|b| b.get("keys"));
+    let (Some(p256dh), Some(auth)) = (s(keys.and_then(|k| k.get("p256dh"))), s(keys.and_then(|k| k.get("auth")))) else {
+        return no(400, "no keys.p256dh and keys.auth", "refused:400");
+    };
+    let sub = json!({ "endpoint": endpoint, "keys": { "p256dh": p256dh, "auth": auth } }).to_string();
+    chitin(Push::Subscribe(sub), Some(&endpoint))
+}
+
+/// What [`watch`] keeps between looks: the intents notified, and the last result said for each look's failures, so a failure is
+/// logged when it starts or changes, not every look.
+#[derive(Default)]
+pub struct Watched {
+    pub seen: std::collections::HashSet<String>,
+    said: std::collections::HashMap<String, String>,
+}
+
+/// One look at what waits (BRIEF addendum 2's sender): each waiting intent not yet notified gets one `chitin notify` Needs-you record
+/// (src/needs.rs `notice`) and is remembered; one that has left is forgotten, so nothing is sent for an item that leaves. A record
+/// chitin did not take is tried again at the next look. A log line is returned only for a send, or when a failure starts or
+/// changes. They name the intent, never its text.
+pub fn watch(site: &Site, w: &mut Watched, now: i64) -> Vec<Value> {
+    let (Some((a, title)), Some(seat)) = (needs_for(site), site.acting.as_ref().and_then(|a| a.notify_as.as_deref())) else { return vec![] };
+    let mut out = vec![];
+    fn once(w: &mut Watched, out: &mut Vec<Value>, key: &str, line: Value) {
+        let r = line["result"].as_str().unwrap_or("").to_string();
+        if w.said.get(key) != Some(&r) {
+            w.said.insert(key.to_string(), r);
+            out.push(line);
+        }
+    }
+    let waiting = match a.actor.pending(title) {
+        Ok(p) => {
+            w.said.remove("");
+            crate::needs::waiting(&p, title)
+        }
+        Err(e) => {
+            once(w, &mut out, "", json!({ "ts": now, "notify": null, "result": format!("chitin:pending {}", e.chars().filter(|c| !c.is_control()).take(120).collect::<String>()) }));
+            return out;
+        }
+    };
+    let ids: std::collections::HashSet<String> = waiting.iter().filter_map(|x| x["id"].as_str().map(str::to_string)).collect();
+    w.seen.retain(|id| ids.contains(id));
+    w.said.retain(|id, _| id.is_empty() || ids.contains(id));
+    for x in &waiting {
+        let Some(id) = x["id"].as_str().filter(|id| !w.seen.contains(*id)) else { continue };
+        let Some((line, url, dedupe)) = crate::needs::notice(x, &a.host, &site.mount) else { continue };
+        match a.actor.notify(seat, &line, &url, &dedupe) {
+            Ok(()) => {
+                w.seen.insert(id.to_string());
+                w.said.remove(id);
+                out.push(json!({ "ts": now, "notify": id, "as": seat, "result": "ok" }));
+            }
+            Err(e) => {
+                let r = format!("chitin:{}", e.chars().filter(|c| !c.is_control()).take(120).collect::<String>());
+                once(w, &mut out, id, json!({ "ts": now, "notify": id, "as": seat, "result": r }));
+            }
+        }
+    }
+    out
+}
+
+/// How often [`watch`] looks.
+pub const WATCH_EVERY: std::time::Duration = std::time::Duration::from_secs(30);
+
 /// `GET clax/overlay.js`: the Clax instance's overlay, fetched over loopback each time and served from this origin, so a page can
 /// load it pinned by its SRI digest with no CORS on the instance. Revalidated always; the page's digest is what pins its bytes.
 fn overlay(site: &Site, req: &Request) -> Response {
@@ -756,6 +917,23 @@ fn file(site: &Site, req: &Request, path: &str, now: i64) -> Response {
 /// Serve `site` on `listener` for ever.
 /// Serve `site` on `listener` for ever; with `log`, each act's line (with its `ms`) appended to it (S2 brief §5).
 pub fn run(listener: TcpListener, site: Site, log: Option<PathBuf>) -> std::io::Result<()> {
+    let site = Arc::new(site);
+    if site.acting.as_ref().is_some_and(|a| a.notify_as.is_some() && a.needs_as.is_some()) {
+        let (w, log) = (site.clone(), log.clone());
+        std::thread::spawn(move || {
+            let mut seen = Watched::default();
+            loop {
+                let now = DateTime::<Utc>::from(SystemTime::now());
+                for mut l in watch(&w, &mut seen, now.timestamp()) {
+                    l["ts"] = iso(now).into();
+                    if let Some(p) = &log {
+                        crate::http::append(p, &l);
+                    }
+                }
+                std::thread::sleep(WATCH_EVERY);
+            }
+        });
+    }
     crate::http::run(
         listener,
         Arc::new(limit),
