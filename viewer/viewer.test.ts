@@ -175,6 +175,8 @@ test("the overlay loads only pinned, same-origin, and mounts as Clax.overlay wit
   const shipped = readFileSync(join(import.meta.dir, "index.html"), "utf8").match(/<meta name="clax-sdk" content="([^"]*)" data-version="([^"]*)" data-integrity="([^"]*)">/);
   expect(shipped).not.toBeNull();
   expect(pinOf(meta(shipped![1], shipped![2], shipped![3]), base).src).toBe("https://phobos.test/fold/clax/overlay.js?v=0.6.0");
+  // Basis shows its reports in its own fold, so the overlay is told to leave out its Your reports button (clax OverlayOptions.reports)
+  expect(readFileSync(join(import.meta.dir, "index.html"), "utf8")).toContain('<meta name="clax-reports" content="off">');
 
   const mount = { instance: "https://clax.tail.test", queue: "basis", owner: "personal-allie-lead" };
   const minted = { token: "cxr_x", expires_at: "2026-10-31T18:15:00Z" };
