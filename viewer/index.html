@@ -13,6 +13,10 @@
 <!-- Needs you, read live (src/needs.rs, BRIEF-stint-2026-11-02-approve-into-fold): fold serve's needs.json, beside this page, for the
      document whose source it names. Read on open, on going into Needs you, with each refresh and after each act on an intent. -->
 <meta name="fold-needs" content="needs.json" data-source="fleet-map">
+<!-- Live folds (BRIEF-stint-2026-11-03-basis-live-folds): fold serve's index of the document's live nodes, one JSON node per fold, each
+     written by its own handler. Each is read on open and revalidated by ETag (on focus, on its own cadence_s): a 304 changes nothing;
+     a 200 puts that node's data in its fold and re-renders only when the fold in view shows it. For the document whose source it names. -->
+<meta name="fold-nodes" content="/fold-data/fleet/nodes/" data-source="fleet-map">
 <!-- Clax, through @empathic/clax-sdk only (basis-clax goal): the instance's /_clax/overlay.js, as fold serve passes it through on
      this origin (clax/overlay.js, src/report.rs: the instance sends no CORS header, so a pinned script must be same-origin), with the
      SDK's version and the SRI digest of the instance's bytes. Never copied here. The version is the SDK's (clax Cargo.toml
@@ -65,7 +69,7 @@
 // the next and previous slide in reading order; l or Enter still goes into the point under the cursor, h back out.
 import { core } from "./fold-core.js";
 import { toDom, liveLine } from "./fold-dom.js";
-import { at, beside, dataOf, docId, haecceityOf, href as link, modeOf, open, pathOf, since, viewOf } from "./view.js";
+import { at, beside, dataOf, docId, graft, haecceityOf, href as link, liveNodes, modeOf, open, pathOf, shows, since, stamp, viewOf } from "./view.js";
 import { ENDPOINTS, intentOk, notifyHere, readNeeds, sign } from "./sign.js";
 import { embed } from "./clax.js";
 const zone = Intl.DateTimeFormat().resolvedOptions().timeZone;
@@ -82,6 +86,15 @@ let nodes = new Map(), said = "", node = null, cur = 0, cameFrom = null, last = 
 const needsMeta = document.querySelector('meta[name="fold-needs"]');
 const needsUrl = needsMeta?.content && data.source && data.source === needsMeta.dataset.source ? new URL(needsMeta.content, location.href).href : null;
 let live = null, told = null, keyAt = { key: "", t: 0 };
+// Live folds: the document's nodes (none for one named in the address). A node that changed re-folds the document with it, and the
+// fold in view is drawn again only when it shows that node (view.js shows): every other change waits, unseen, until it is opened.
+const nodesMeta = document.querySelector('meta[name="fold-nodes"]');
+const nodesUrl = nodesMeta?.content && data.source && data.source === nodesMeta.dataset.source ? new URL(nodesMeta.content, location.href).href : null;
+let shown = false;
+const folds = nodesUrl ? liveNodes(nodesUrl, { changed: async (ids) => {
+  if (!shown) return; // the first read is folded by the first load
+  if (await load() && ids.some((id) => shows(id, pathOf(location.hash)))) render(false);
+} }) : null;
 // Kept (sw.js answered from its copy): the note says since when and how long ago, and the heading is described by it, so a screen
 // reader hears it with the title as the page opens. Fresh again, it goes.
 function stale() {
@@ -141,7 +154,10 @@ async function load() {
     // read beside the document, so it is folded with what waits now: never the producer's sign items (src/needs.rs overlay). Both
     // at once, so a host asleep costs the one wait, not two.
     const reading = needsUrl ? readNeeds(needsUrl) : null;
-    const next = await open(fold, data.url, { root: reading ? async (root) => { live = await reading; return needs({ root, ...live, now: Date.now() }); } : undefined, opts: (modified) => ({ ...(data.source ? { source: data.source } : {}), updated: modified ?? new Date().toISOString(), localTimeZone: zone }), stored: (at) => { kept = at; } });
+    // each live node's data in its fold (graft), and each such fold says its node's source and time (stamp)
+    const held = folds?.nodes() ?? [];
+    const withNeeds = reading ? async (root) => { live = await reading; return needs({ root, ...live, now: Date.now() }); } : (root) => root;
+    const next = stamp(await open(fold, data.url, { root: async (root) => withNeeds(graft(root, held)), opts: (modified) => ({ ...(data.source ? { source: data.source } : {}), updated: modified ?? new Date().toISOString(), localTimeZone: zone }), stored: (at) => { kept = at; } }), held);
     const text = JSON.stringify([...next]);
     if (text === said) { stale(); return false; }
     nodes = next; said = text; return true;
@@ -211,9 +227,14 @@ document.addEventListener("submit", async (e) => {
 // Offline: the shell and the last document read are kept (sw.js), so with the host asleep this page still opens on its last fold.
 navigator.serviceWorker?.register("sw.js").catch(() => {});
 const { fold, ax, needs } = await core(await (await fetch("fold_core.wasm")).arrayBuffer());
+await folds?.check();
 await load();
 // Allie's keys work on arrival: the first render focuses the title, so the page gets the arrow keys without a click first.
 show(true);
+shown = true;
+// Back to the page (focus, or the tab shown again): every node revalidated at once, a 304 each when nothing changed.
+addEventListener("focus", () => folds?.check());
+document.addEventListener("visibilitychange", () => { if (!document.hidden) folds?.check(); });
 document.body.dataset.ready = "1";
 // Clax, once the fold is up and never ahead of it: the pinned overlay, mounted only where fold serve mints this reader a token.
 // It is told the fold in view: its haecceity (null for a document named in the address) and its rows.

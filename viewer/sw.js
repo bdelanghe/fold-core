@@ -7,7 +7,8 @@
 //   What comes back is kept; with no answer within WAIT ms, or none at all, the kept copy answers, marked `Fold-Stored: <ISO time>`
 //   (when it was kept), which is how the viewer knows it is showing the past. Nothing is kept that was not a 200.
 // - Nothing but GET on this origin is touched: no write goes through here (brief item 27). Nor is live state: a request the page
-//   makes with `cache: "no-store"` (Needs you's needs.json, sign.js) or anything under /approve/ (chitin-approve's challenge, which a
+//   makes with `cache: "no-store"` (Needs you's needs.json, sign.js; each live fold's node and their index, view.js revalidate, so
+//   its 304 reaches the page as one) or anything under /approve/ (chitin-approve's challenge, which a
 //   kept copy must never answer) goes to the network alone, as if this worker were not here.
 const SHELL = "fold-shell-@VERSION@", DATA = "fold-data", WAIT = 3000;
 const FILES = ["./", "view.js", "fold-dom.js", "sign.js", "clax.js", "theme.tokens.json", "fold-core.js", "fold_core.wasm", "fold.css", "fonts/atkinson-hyperlegible-next.woff2", "manifest.webmanifest",

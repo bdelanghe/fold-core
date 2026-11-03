@@ -18,7 +18,9 @@
 //! - **Cache classes (item 23):** a path holding `@sha256:` (a locator, not an identity) is immutable; a page (an `.html` file, or
 //!   a directory's `index.html`) and the viewer's other files are `no-cache`, always revalidated; a data document (`.json`) is
 //!   `max-age=60, stale-while-revalidate=240, stale-if-error=86400`; a `--no-store` path (the Sign fold, pending approvals,
-//!   presence) is `no-store` with no validator, and so never bfcache-eligible. `sw.js` is `no-cache`.
+//!   presence) is `no-store` with no validator, and so never bfcache-eligible. `sw.js` is `no-cache`. A fold's live node
+//!   (`nodes/<id>.json`) and the nodes' index (`nodes/`, [`nodes_index`]) are `no-cache` too: the viewer revalidates each fold's
+//!   own node with `If-None-Match`, so an unchanged fold costs one 304 and a changed one is read at once.
 //! - **Validators:** the ETag is strong, `"sha-256:<hex>"`, the file digest (raw bytes, no canonical form: it is the bytes served),
 //!   and `If-None-Match` answers 304 with no body. `Content-Digest` carries the same digest. No weak ETag is ever sent. A path is
 //!   one file here, so nothing varies by `Accept` and no `Vary` is sent.
@@ -90,13 +92,16 @@ enum Class {
     Data,
     NoStore,
     Asset,
+    /// A fold's live node (`nodes/<id>.json`, and their index `nodes/`): revalidated every time, as a page is, so a 304 is the
+    /// whole cost of asking and a changed node is never a minute late (BRIEF-stint-2026-11-03-basis-live-folds Part A).
+    Node,
 }
 
 impl Class {
     fn cache_control(self) -> &'static str {
         match self {
             Class::Immutable => "public, max-age=31536000, immutable",
-            Class::Page | Class::Asset => "no-cache",
+            Class::Page | Class::Asset | Class::Node => "no-cache",
             Class::Data => "max-age=60, stale-while-revalidate=240, stale-if-error=86400",
             Class::NoStore => "no-store",
         }
@@ -850,6 +855,9 @@ fn file(site: &Site, req: &Request, path: &str, now: i64) -> Response {
     }
     let mut fp = site.root.clone();
     fp.extend(segs.iter().filter(|s| !s.is_empty()));
+    if segs == [NODES, ""] && fp.is_dir() && !fp.join("index.html").exists() {
+        return validated(req, Class::Node, "application/json", nodes_index(&fp).into_bytes(), dir_modified(&fp));
+    }
     if fp.is_dir() {
         if !path.ends_with('/') {
             return Response::new(301).with("Location", format!("{}{path}/", site.mount)).with("Cache-Control", "no-store");
@@ -886,17 +894,95 @@ fn file(site: &Site, req: &Request, path: &str, now: i64) -> Response {
         Class::Immutable
     } else if page {
         Class::Page
+    } else if segs.first() == Some(&NODES) && fp.extension().is_some_and(|e| e == "json") {
+        Class::Node
     } else if fp.extension().is_some_and(|e| e == "json") {
         Class::Data
     } else {
         Class::Asset
     };
+    let asof: DateTime<Utc> = meta.modified().unwrap_or(SystemTime::UNIX_EPOCH).into();
+    let mut r = validated(req, class, content_type(&fp), bytes, asof);
+    if private && class == Class::Page {
+        r.headers.iter_mut().filter(|(k, _)| k == "Cache-Control").for_each(|(_, v)| *v = "private, no-cache".into());
+    }
+    r
+}
+
+/// The live nodes' directory under the root (`nodes/<id>.json`, one per fold, each written whole by its own handler): what a viewer
+/// revalidates fold by fold. `GET nodes/` is their index ([`nodes_index`]).
+pub const NODES: &str = "nodes";
+
+/// The newest modification time in `dir` and below: when the index last changed.
+fn dir_modified(dir: &Path) -> DateTime<Utc> {
+    fn walk(d: &Path, t: &mut SystemTime) {
+        for e in fs::read_dir(d).into_iter().flatten().flatten() {
+            let p = e.path();
+            if let Ok(m) = e.metadata() {
+                *t = (*t).max(m.modified().unwrap_or(SystemTime::UNIX_EPOCH));
+                if m.is_dir() {
+                    walk(&p, t);
+                }
+            }
+        }
+    }
+    let mut t = fs::metadata(dir).and_then(|m| m.modified()).unwrap_or(SystemTime::UNIX_EPOCH);
+    walk(dir, &mut t);
+    t.into()
+}
+
+/// `GET nodes/`: every node under it (`<id>.json`, an id holding `/` a subdirectory), sorted by id, as `{nodes: [{id, href, etag,
+/// source, updated, ok, stale_since, cadence_s}]}`. The ETag listed is the one `GET <href>` answers with, so a viewer that holds it
+/// knows without asking whether that node changed; the index's own ETag changes when any node does. A file that is not a JSON object
+/// is listed with `ok: false` and why, never left out, so a broken handler shows as one.
+pub fn nodes_index(dir: &Path) -> String {
+    fn walk(d: &Path, under: &str, out: &mut Vec<Value>) {
+        let mut es: Vec<_> = fs::read_dir(d).into_iter().flatten().flatten().collect();
+        es.sort_by_key(|e| e.file_name());
+        for e in es {
+            let Some(name) = e.file_name().to_str().map(str::to_string) else { continue };
+            if name.starts_with('.') {
+                continue; // a handler's temporary file, before its rename
+            }
+            let p = e.path();
+            if p.is_dir() {
+                walk(&p, &format!("{under}{name}/"), out);
+                continue;
+            }
+            let Some(stem) = name.strip_suffix(".json") else { continue };
+            let Ok(bytes) = fs::read(&p) else { continue };
+            let hex: String = Sha256::digest(&bytes).iter().map(|b| format!("{b:02x}")).collect();
+            let id = format!("{under}{stem}");
+            let href = format!("{under}{name}").split('/').map(|s| segment_of(s)).collect::<Vec<_>>().join("/");
+            let mut row = json!({ "id": id, "href": href, "etag": format!("\"sha-256:{hex}\"") });
+            match serde_json::from_slice::<Value>(&bytes) {
+                Ok(Value::Object(n)) => {
+                    for k in ["source", "updated", "ok", "stale_since", "cadence_s"] {
+                        if let Some(v) = n.get(k) {
+                            row[k] = v.clone();
+                        }
+                    }
+                }
+                _ => {
+                    row["ok"] = false.into();
+                    row["error"] = "not a JSON object".into();
+                }
+            }
+            out.push(row);
+        }
+    }
+    let mut nodes = vec![];
+    walk(dir, "", &mut nodes);
+    json!({ "nodes": nodes }).to_string() + "\n"
+}
+
+/// `bytes` as one 200 of `class`, with its strong ETag (their sha-256), Last-Modified `asof`, Content-Digest and Server-Timing; a 304
+/// with no body when `If-None-Match` names that ETag. A `NoStore` answer carries no validator and is never a 304.
+fn validated(req: &Request, class: Class, ctype: &str, bytes: Vec<u8>, asof: DateTime<Utc>) -> Response {
     let hash = Sha256::digest(&bytes);
     let hex: String = hash.iter().map(|b| format!("{b:02x}")).collect();
     let etag = format!("\"sha-256:{hex}\"");
-    let asof: DateTime<Utc> = meta.modified().unwrap_or(SystemTime::UNIX_EPOCH).into();
-    let cache = if private && class == Class::Page { "private, no-cache" } else { class.cache_control() };
-    let mut r = Response::new(200).with("Content-Type", content_type(&fp)).with("Cache-Control", cache);
+    let mut r = Response::new(200).with("Content-Type", ctype).with("Cache-Control", class.cache_control());
     if class != Class::NoStore {
         r = r.with("ETag", etag.clone()).with("Last-Modified", http_date(asof));
     }

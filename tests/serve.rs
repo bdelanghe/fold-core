@@ -115,6 +115,66 @@ fn every_resource_class_has_its_headers() {
     let _ = fs::remove_dir_all(&s.root);
 }
 
+/// Live nodes (BRIEF-stint-2026-11-03-basis-live-folds Part A): each fold's `nodes/<id>.json` and their index `nodes/`, revalidated
+/// always, a strong ETag of the bytes, 304 on `If-None-Match`; held in goldens/serve/nodes.json.
+#[test]
+fn each_live_node_and_their_index_revalidate_by_etag() {
+    let s = site("nodes");
+    let t = SystemTime::UNIX_EPOCH + Duration::from_secs(1_793_361_600);
+    let needs = "{\"id\":\"needs\",\"source\":\"chitin pending --as bobby\",\"updated\":\"2026-10-30T12:00:00Z\",\"ok\":true,\"stale_since\":null,\"cadence_s\":30,\"data\":{\"title\":\"Needs you\"}}\n";
+    let inbox = "{\"id\":\"fleet/inbox\",\"source\":\"chitin inbox\",\"updated\":\"2026-10-30T11:59:00Z\",\"ok\":false,\"stale_since\":\"2026-10-30T11:50:00Z\",\"cadence_s\":60,\"data\":{\"title\":\"Inbox\"}}\n";
+    for (p, body) in [
+        ("nodes/needs.json", needs),
+        ("nodes/fleet/inbox.json", inbox),
+        ("nodes/broken.json", "not json\n"),
+        ("nodes/.needs.json.tmp", "{"),
+    ] {
+        let f = s.root.join(p);
+        fs::create_dir_all(f.parent().unwrap()).unwrap();
+        fs::write(&f, body).unwrap();
+        fs::File::options().write(true).open(&f).unwrap().set_modified(t).unwrap();
+    }
+    for d in ["nodes/fleet", "nodes"] {
+        fs::File::open(s.root.join(d)).unwrap().set_modified(t).unwrap();
+    }
+    let etag = |target: &str| respond(&s, &req("GET", target, &[], "")).header("ETag").unwrap().to_string();
+    let (node_etag, index_etag) = (etag("/nodes/needs.json"), etag("/nodes/"));
+    let cases: Vec<(&str, Request)> = vec![
+        ("a fold's node: always revalidated, its bytes' digest the ETag", req("GET", "/nodes/needs.json", &[], "")),
+        ("its ETag again: 304, no body", req("GET", "/nodes/needs.json", &[("If-None-Match", &node_etag)], "")),
+        ("an older ETag: the whole node", req("GET", "/nodes/needs.json", &[("If-None-Match", "\"sha-256:00\"")], "")),
+        ("a node whose id holds a slash, from its subdirectory", req("GET", "/nodes/fleet/inbox.json", &[], "")),
+        ("the index of nodes: each node's id, href and ETag, and its freshness", req("GET", "/nodes/", &[], "")),
+        ("the index unchanged: 304", req("GET", "/nodes/", &[("If-None-Match", &index_etag)], "")),
+        ("the index without its slash moves to it", req("GET", "/nodes", &[], "")),
+    ];
+    let got: Vec<Value> = cases
+        .iter()
+        .map(|(what, r)| {
+            let res = respond(&s, r);
+            let body: Value = serde_json::from_slice(&res.body).unwrap_or(Value::Null);
+            json!({ "what": what, "request": { "method": r.method, "target": r.target, "headers": r.headers }, "status": res.status, "headers": res.headers, "body": body })
+        })
+        .collect();
+    let path = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("goldens/serve/nodes.json");
+    let text = serde_json::to_string_pretty(&got).unwrap() + "\n";
+    if std::env::var("FOLD_BLESS").is_ok() {
+        fs::write(&path, &text).unwrap();
+    }
+    assert!(
+        text == fs::read_to_string(&path).unwrap_or_default(),
+        "goldens/serve/nodes.json is stale (FOLD_BLESS=1 cargo test --test serve)"
+    );
+    // the index's ETag for a node is the one the node itself answers with, and it moves when the node does
+    let index: Value = serde_json::from_slice(&respond(&s, &req("GET", "/nodes/", &[], "")).body).unwrap();
+    assert_eq!(index["nodes"].as_array().unwrap().iter().find(|n| n["id"] == "needs").unwrap()["etag"], json!(node_etag));
+    fs::write(s.root.join("nodes/needs.json"), needs.replace("12:00:00Z", "12:01:00Z")).unwrap();
+    assert_ne!(etag("/nodes/needs.json"), node_etag);
+    assert_ne!(etag("/nodes/"), index_etag);
+    assert_eq!(respond(&s, &req("GET", "/nodes/needs.json", &[("If-None-Match", &node_etag)], "")).status, 200);
+    let _ = fs::remove_dir_all(&s.root);
+}
+
 /// One raw request to the real loop, and its whole answer.
 fn over_the_wire(port: u16, raw: &[u8]) -> String {
     let mut c = TcpStream::connect(("127.0.0.1", port)).unwrap();

@@ -41,6 +41,128 @@ export async function open(fold, url, { fetch = globalThis.fetch, opts = () => (
   return new Map(fold({ root: whole, files, opts: opts(modified && !Number.isNaN(Date.parse(modified)) ? new Date(modified).toISOString() : null) }));
 }
 
+// ── Live folds (BRIEF-stint-2026-11-03-basis-live-folds Part A) ───────────────────────────────────────────────────────────────────
+// Each fold may have its own live node, `nodes/<id>.json` beside the document ({id, source, updated, ok, stale_since, cadence_s,
+// data}), written whole by its own handler and served by fold serve with a strong ETag and no-cache (src/serve.rs NODES). The viewer
+// reads each on open and revalidates it with If-None-Match: a 304 costs a round trip and nothing else (no fold, no render); a 200
+// replaces that one fold's subtree and re-renders only when the fold in view is under it.
+
+/** One JSON object read, or revalidated against `etag` (the last one held, or null): `{status: 304}` when unchanged, `{status: 200,
+ * etag, body}` when it changed, `{status, error}` when it could not be read. The browser's own cache is bypassed (`no-store`), so a
+ * 304 is seen as one and never turned into a 200 from cache. */
+export async function revalidate(url, etag, { fetch = globalThis.fetch } = {}) {
+  try {
+    const r = await fetch(url, { cache: "no-store", headers: etag ? { "If-None-Match": etag } : {} });
+    if (r.status === 304) return { status: 304 };
+    if (!r.ok) return { status: r.status, error: `${r.status} ${r.statusText ?? ""}`.trim() };
+    const body = await r.json();
+    if (!body || typeof body !== "object" || Array.isArray(body)) return { status: r.status, error: "not a JSON object" };
+    return { status: 200, etag: r.headers?.get?.("etag") ?? null, body };
+  } catch (e) {
+    return { status: 0, error: String(e?.message ?? e) };
+  }
+}
+
+const KID_KEYS = ["sections", "groups", "items", "kids", "children"];
+/** The document with each live node's `data` put where its id says (`fleet/inbox`: the child `inbox` of the root's child `fleet`),
+ * replacing the fold of that id or, when there is none, added to the parent's first list of children. The document is not changed:
+ * the path to each node is copied. A node with no data, or whose parent is not there, is left out. */
+export function graft(root, live) {
+  let out = root;
+  for (const n of live) {
+    if (!n?.data || typeof n.data !== "object" || typeof n.id !== "string") continue;
+    const ids = n.id.split("/"), put = { ...n.data, id: ids[ids.length - 1] };
+    const into = (o, i) => {
+      if (!o || typeof o !== "object") return null;
+      const c = { ...o };
+      for (const k of KID_KEYS) {
+        if (!Array.isArray(c[k])) continue;
+        const j = c[k].findIndex((x) => x && typeof x === "object" && x.id === ids[i]);
+        if (j < 0) continue;
+        const next = i === ids.length - 1 ? put : into(c[k][j], i + 1);
+        if (!next) return null;
+        c[k] = c[k].map((x, m) => (m === j ? next : x));
+        return c;
+      }
+      if (i !== ids.length - 1) return null;
+      const k = KID_KEYS.find((k) => Array.isArray(c[k])) ?? "sections";
+      c[k] = [...(c[k] ?? []), put];
+      return c;
+    };
+    out = into(out, 0) ?? out;
+  }
+  return out;
+}
+
+/** The folded map's ids at or under a live node's fold (its path as the viewer's ids, docId's `~`). */
+export const underNode = (nodeId, foldId) => {
+  const p = docId(nodeId.split("/"));
+  return foldId === p || foldId.startsWith(p + "~");
+};
+
+/** Each fold from a live node says that node's source and time ("Data from <source>, <time>", src/ax.rs), not the document's; and a
+ * node that is not ok, or stale since a time, says so on its own fold. `folds` is changed in place and returned. */
+export function stamp(folds, live) {
+  for (const n of live) {
+    if (typeof n?.id !== "string") continue;
+    for (const [id, f] of folds) {
+      if (!underNode(n.id, id)) continue;
+      if (typeof n.source === "string" && n.source.trim()) f.source = n.source;
+      if (typeof n.updated === "string" && !Number.isNaN(Date.parse(n.updated))) f.updated = new Date(n.updated).toISOString();
+      if (id === docId(n.id.split("/")) && (n.ok === false || n.stale_since)) f.stale = n.stale_since ? `Stale since ${n.stale_since}` : "Last read failed";
+    }
+  }
+  return folds;
+}
+
+/** Whether a changed node shows on the fold at `path`: that fold is under the node, or is the node's parent (whose row for it may
+ * have changed its name or hint). Any other fold is left as it is drawn. */
+export function shows(nodeId, path) {
+  const n = nodeId.split("/"), here = docId(path);
+  return underNode(nodeId, here) || here === docId(n.slice(0, -1));
+}
+
+/** How long until a node is asked again: its own `cadence_s` (at least 5 s), else 60 s. */
+export const cadenceOf = (n) => (Number.isFinite(n?.cadence_s) && n.cadence_s > 0 ? Math.max(5, n.cadence_s) : 60) * 1000;
+
+/**
+ * The live nodes under `index` (fold serve's `nodes/`, absolute): read once from the index, then each revalidated on its own cadence
+ * (`later(fn, ms)`, setTimeout by default) and whenever `check()` is called (the page's focus and visibility). `changed(ids)` is
+ * called with the ids whose node a 200 replaced, never for a 304 or a failed read (the last good node is kept, and said stale by
+ * stamp when its handler says so). `nodes()` is every node held now, for graft and stamp.
+ */
+export function liveNodes(index, { fetch = globalThis.fetch, later = (f, ms) => setTimeout(f, ms), changed = () => {} } = {}) {
+  const held = new Map(); // id -> { url, etag, node }
+  let indexEtag = null;
+  const one = async (id) => {
+    const h = held.get(id);
+    const r = await revalidate(h.url, h.etag, { fetch });
+    if (r.status !== 200 || r.body.id !== id) return false;
+    held.set(id, { ...h, etag: r.etag, node: r.body });
+    return true;
+  };
+  const tick = (id) => later(async () => { if (held.has(id)) { if (await one(id)) changed([id]); tick(id); } }, cadenceOf(held.get(id)?.node));
+  /** The index again (one request, a 304 when no node changed), then each node it lists whose ETag is not the one held. */
+  const check = async () => {
+    const r = await revalidate(index, indexEtag, { fetch });
+    if (r.status !== 200) return [];
+    indexEtag = r.etag;
+    const fresh = [];
+    for (const row of Array.isArray(r.body.nodes) ? r.body.nodes : []) {
+      if (typeof row?.id !== "string" || typeof row.href !== "string") continue;
+      const h = held.get(row.id);
+      if (h && h.etag === row.etag) continue;
+      const first = !h;
+      held.set(row.id, { url: new URL(row.href, index).href, etag: h?.etag ?? null, node: h?.node ?? null });
+      if (await one(row.id)) fresh.push(row.id);
+      if (first) tick(row.id);
+    }
+    if (fresh.length) changed(fresh);
+    return fresh;
+  };
+  return { check, nodes: () => [...held.values()].map((h) => h.node).filter(Boolean) };
+}
+
 /** The document this viewer reads: the fold-data meta's (`{path, source}`), or one named in the address (`?data=<path>`, as the
  * Reading box submits it) by an absolute path on this origin. Anything else is refused, never fetched: `{path, error}`. */
 export function dataOf(search, base, meta) {
