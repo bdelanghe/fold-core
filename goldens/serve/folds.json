@@ -1,0 +1,180 @@
+[
+  {
+    "what": "a fold's own file: JSON-LD, always revalidated, its bytes' digest the ETag",
+    "request": {
+      "method": "GET",
+      "target": "/fleet/needs.jsonld",
+      "headers": []
+    },
+    "status": 200,
+    "headers": [
+      [
+        "Content-Type",
+        "application/ld+json"
+      ],
+      [
+        "Cache-Control",
+        "no-cache"
+      ],
+      [
+        "ETag",
+        "\"sha-256:d898a95b911282cafd1d5eed82b121a6e2c54f56b3885bd60fe9c05a9d01085d\""
+      ],
+      [
+        "Last-Modified",
+        "Fri, 30 Oct 2026 12:00:00 GMT"
+      ],
+      [
+        "Content-Digest",
+        "sha-256=:2JipW5ESgsr9HV7tgrEhpuLFT1aziFvWD+nAWp0BCF0=:"
+      ],
+      [
+        "Server-Timing",
+        "digest;desc=\"sha-256:d898a95b911282cafd1d5eed82b121a6e2c54f56b3885bd60fe9c05a9d01085d\", asof;desc=\"2026-10-30T12:00:00Z\""
+      ]
+    ],
+    "body": {
+      "@id": "fold:fleet/needs",
+      "@type": "Fold",
+      "id": "needs",
+      "title": "Needs you",
+      "updated": "2026-10-30T12:00:00Z",
+      "madeBy": {
+        "query": "needs",
+        "version": 1,
+        "href": "/fold-data/fleet/needs.cypher"
+      },
+      "data": []
+    }
+  },
+  {
+    "what": "its ETag again: 304, no body",
+    "request": {
+      "method": "GET",
+      "target": "/fleet/needs.jsonld",
+      "headers": [
+        [
+          "If-None-Match",
+          "\"sha-256:d898a95b911282cafd1d5eed82b121a6e2c54f56b3885bd60fe9c05a9d01085d\""
+        ]
+      ]
+    },
+    "status": 304,
+    "headers": [
+      [
+        "Cache-Control",
+        "no-cache"
+      ],
+      [
+        "ETag",
+        "\"sha-256:d898a95b911282cafd1d5eed82b121a6e2c54f56b3885bd60fe9c05a9d01085d\""
+      ],
+      [
+        "Last-Modified",
+        "Fri, 30 Oct 2026 12:00:00 GMT"
+      ],
+      [
+        "Server-Timing",
+        "digest;desc=\"sha-256:d898a95b911282cafd1d5eed82b121a6e2c54f56b3885bd60fe9c05a9d01085d\", asof;desc=\"2026-10-30T12:00:00Z\""
+      ]
+    ],
+    "body": null
+  },
+  {
+    "what": "a manifest: the same rule",
+    "request": {
+      "method": "GET",
+      "target": "/fleet/everything.jsonld",
+      "headers": []
+    },
+    "status": 200,
+    "headers": [
+      [
+        "Content-Type",
+        "application/ld+json"
+      ],
+      [
+        "Cache-Control",
+        "no-cache"
+      ],
+      [
+        "ETag",
+        "\"sha-256:e5253b43b99000ed2f88982a987236213c57a94a7bc0ca19c44c938b7c23a78e\""
+      ],
+      [
+        "Last-Modified",
+        "Fri, 30 Oct 2026 12:00:00 GMT"
+      ],
+      [
+        "Content-Digest",
+        "sha-256=:5SU7Q7mQAO0viJgqmHI2ITxXqUp7wMoZxEyTi3wjp44=:"
+      ],
+      [
+        "Server-Timing",
+        "digest;desc=\"sha-256:e5253b43b99000ed2f88982a987236213c57a94a7bc0ca19c44c938b7c23a78e\", asof;desc=\"2026-10-30T12:00:00Z\""
+      ]
+    ],
+    "body": {
+      "@id": "fold:fleet/everything",
+      "@type": "FoldManifest",
+      "id": "everything",
+      "parts": [
+        {
+          "@id": "fold:fleet/needs",
+          "@type": "FoldRef",
+          "url": "/fold-data/fleet/needs.jsonld",
+          "etag": null,
+          "updated": null
+        }
+      ]
+    }
+  },
+  {
+    "what": "a wait with nothing held to wait against: answered at once",
+    "request": {
+      "method": "GET",
+      "target": "/fleet/needs.jsonld?wait=25",
+      "headers": []
+    },
+    "status": 200,
+    "headers": [
+      [
+        "Content-Type",
+        "application/ld+json"
+      ],
+      [
+        "Cache-Control",
+        "no-cache"
+      ],
+      [
+        "ETag",
+        "\"sha-256:d898a95b911282cafd1d5eed82b121a6e2c54f56b3885bd60fe9c05a9d01085d\""
+      ],
+      [
+        "Last-Modified",
+        "Fri, 30 Oct 2026 12:00:00 GMT"
+      ],
+      [
+        "Content-Digest",
+        "sha-256=:2JipW5ESgsr9HV7tgrEhpuLFT1aziFvWD+nAWp0BCF0=:"
+      ],
+      [
+        "Server-Timing",
+        "digest;desc=\"sha-256:d898a95b911282cafd1d5eed82b121a6e2c54f56b3885bd60fe9c05a9d01085d\", asof;desc=\"2026-10-30T12:00:00Z\""
+      ]
+    ],
+    "body": {
+      "@id": "fold:fleet/needs",
+      "@type": "Fold",
+      "id": "needs",
+      "title": "Needs you",
+      "updated": "2026-10-30T12:00:00Z",
+      "madeBy": {
+        "query": "needs",
+        "version": 1,
+        "href": "/fold-data/fleet/needs.cypher"
+      },
+      "data": []
+    }
+  }
+]

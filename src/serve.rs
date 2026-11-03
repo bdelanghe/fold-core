@@ -114,6 +114,7 @@ fn content_type(p: &Path) -> &'static str {
         "js" | "mjs" => "text/javascript; charset=utf-8",
         "css" => "text/css; charset=utf-8",
         "json" => "application/json",
+        "jsonld" => "application/ld+json",
         "wasm" => "application/wasm",
         "woff2" => "font/woff2",
         "svg" => "image/svg+xml",
@@ -220,7 +221,7 @@ pub fn answer(site: &Site, req: &Request, now: i64) -> (Response, Option<Value>)
     match (req.method.as_str(), &site.acting) {
         ("POST", Some(a)) if to_act => post(site, a, req, now),
         (_, Some(_)) if to_act => (Response::text(405, "an act is posted: POST").with("Allow", "POST"), None),
-        ("GET" | "HEAD", _) => (file(site, req, path, now), None),
+        ("GET" | "HEAD", _) => (waited(site, req, path, now), None),
         ("POST", None) => match act(&req.target) {
             Some((fold, _)) => (not_yet(site, &fold), None),
             None => (Response::text(405, "read-only: GET or HEAD").with("Allow", "GET, HEAD"), None),
@@ -894,7 +895,7 @@ fn file(site: &Site, req: &Request, path: &str, now: i64) -> Response {
         Class::Immutable
     } else if page {
         Class::Page
-    } else if segs.first() == Some(&NODES) && fp.extension().is_some_and(|e| e == "json") {
+    } else if fp.extension().is_some_and(|e| e == "jsonld") || (segs.first() == Some(&NODES) && fp.extension().is_some_and(|e| e == "json")) {
         Class::Node
     } else if fp.extension().is_some_and(|e| e == "json") {
         Class::Data
@@ -907,6 +908,31 @@ fn file(site: &Site, req: &Request, path: &str, now: i64) -> Response {
         r.headers.iter_mut().filter(|(k, _)| k == "Cache-Control").for_each(|(_, v)| *v = "private, no-cache".into());
     }
     r
+}
+
+/// The longest a `?wait=` asks to be held: under the 30 s a proxy or a phone commonly drops an idle request at.
+pub const WAIT_MAX_S: u64 = 25;
+
+/// `file`, held as a long poll when asked (BRIEF-stint-2026-11-03-basis-live-folds: the "node changed" push). A GET of a fold
+/// (`.jsonld`) with `?wait=<s>` and the `If-None-Match` of the copy the viewer holds is answered as soon as the file's ETag moves
+/// (a 200 with the new bytes), or with the usual 304 after `s` seconds (at most [`WAIT_MAX_S`]); the file is read again each second.
+/// Its cost is one parked connection thread per waiting viewer (src/http.rs runs one per connection). Without `wait`, or with no
+/// `If-None-Match` to wait against, it is `file` as ever.
+fn waited(site: &Site, req: &Request, path: &str, now: i64) -> Response {
+    let wait = req
+        .target
+        .split_once('?')
+        .and_then(|(_, q)| q.split('#').next()?.split('&').find_map(|kv| kv.strip_prefix("wait=")?.parse::<u64>().ok()))
+        .filter(|_| req.method == "GET" && path.ends_with(".jsonld") && req.header("If-None-Match").is_some())
+        .map_or(0, |s| s.min(WAIT_MAX_S));
+    let until = std::time::Instant::now() + std::time::Duration::from_secs(wait);
+    loop {
+        let r = file(site, req, path, now);
+        if r.status != 304 || std::time::Instant::now() >= until {
+            return r;
+        }
+        std::thread::sleep(std::time::Duration::from_secs(1).min(until.saturating_duration_since(std::time::Instant::now())));
+    }
 }
 
 /// The live nodes' directory under the root (`nodes/<id>.json`, one per fold, each written whole by its own handler): what a viewer

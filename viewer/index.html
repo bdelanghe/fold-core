@@ -17,6 +17,9 @@
      written by its own handler. Each is read on open and revalidated by ETag (on focus, on its own cadence_s): a 304 changes nothing;
      a 200 puts that node's data in its fold and re-renders only when the fold in view shows it. For the document whose source it names. -->
 <meta name="fold-nodes" content="/fold-data/fleet/nodes/" data-source="fleet-map">
+<!-- Folds by reference (Addendum 2): the document's manifest, one JSON-LD file per fold, each part read and revalidated on its own and
+     held by a long poll on the manifest (fold serve `?wait=`). A part lands in its own slot; one with no derivation is not drawn. -->
+<meta name="fold-manifest" content="/fold-data/fleet/everything.jsonld" data-source="fleet-map">
 <!-- Clax, through @empathic/clax-sdk only (basis-clax goal): the instance's /_clax/overlay.js, as fold serve passes it through on
      this origin (clax/overlay.js, src/report.rs: the instance sends no CORS header, so a pinned script must be same-origin), with the
      SDK's version and the SRI digest of the instance's bytes. Never copied here. The version is the SDK's (clax Cargo.toml
@@ -69,7 +72,7 @@
 // the next and previous slide in reading order; l or Enter still goes into the point under the cursor, h back out.
 import { core } from "./fold-core.js";
 import { toDom, liveLine } from "./fold-dom.js";
-import { at, beside, dataOf, docId, graft, haecceityOf, href as link, liveNodes, modeOf, open, pathOf, shows, since, stamp, viewOf } from "./view.js";
+import { at, beside, dataOf, docId, foldNodes, graft, haecceityOf, href as link, liveFolds, liveNodes, manifestRoot, modeOf, open, pathOf, shows, since, stamp, viewOf } from "./view.js";
 import { ENDPOINTS, intentOk, notifyHere, readNeeds, sign } from "./sign.js";
 import { embed } from "./clax.js";
 const zone = Intl.DateTimeFormat().resolvedOptions().timeZone;
@@ -94,6 +97,17 @@ let shown = false;
 const folds = nodesUrl ? liveNodes(nodesUrl, { changed: async (ids) => {
   if (!shown) return; // the first read is folded by the first load
   if (await load() && ids.some((id) => shows(id, pathOf(location.hash)))) render(false);
+} }) : null;
+// Folds by reference (Addendum 2): the document's manifest (the meta's, for the document whose source it names), or the document
+// itself when it is one (`?data=…/everything.jsonld`). Each part read on its own lands in its own slot (view.js liveFolds, foldNodes);
+// the fold in view is drawn again only when it shows a part that changed.
+const manifestMeta = document.querySelector('meta[name="fold-manifest"]');
+const dataIsManifest = !!data.url && /\.jsonld$/.test(new URL(data.url, location.href).pathname);
+const manifestUrl = dataIsManifest ? data.url : manifestMeta?.content && data.source && data.source === manifestMeta.dataset.source ? new URL(manifestMeta.content, location.href).href : null;
+let placed = [], refsEarly = false;
+const refs = manifestUrl ? liveFolds(manifestUrl, { changed: async (keys) => {
+  if (!shown) { refsEarly = true; return; }
+  if (await load() && placed.some((n) => keys.includes(n.id.split("/").pop()) && shows(n.id, pathOf(location.hash)))) render(false);
 } }) : null;
 // Kept (sw.js answered from its copy): the note says since when and how long ago, and the heading is described by it, so a screen
 // reader hears it with the title as the page opens. Fresh again, it goes.
@@ -157,7 +171,13 @@ async function load() {
     // each live node's data in its fold (graft), and each such fold says its node's source and time (stamp)
     const held = folds?.nodes() ?? [];
     const withNeeds = reading ? async (root) => { live = await reading; return needs({ root, ...live, now: Date.now() }); } : (root) => root;
-    const next = stamp(await open(fold, data.url, { root: async (root) => withNeeds(graft(root, held)), opts: (modified) => ({ ...(data.source ? { source: data.source } : {}), updated: modified ?? new Date().toISOString(), localTimeZone: zone }), stored: (at) => { kept = at; } }), held);
+    // and each fold read by reference in its slot (a manifest read as the document is its placeholders first)
+    const top = async (root) => {
+      const r = root?.["@type"] === "FoldManifest" ? manifestRoot(root) : root;
+      placed = refs ? foldNodes(r, refs.folds()) : [];
+      return withNeeds(graft(graft(r, held), placed));
+    };
+    const next = stamp(await open(fold, data.url, { root: top, opts: (modified) => ({ ...(data.source ? { source: data.source } : {}), updated: modified ?? new Date().toISOString(), localTimeZone: zone }), stored: (at) => { kept = at; } }), [...held, ...placed]);
     const text = JSON.stringify([...next]);
     if (text === said) { stale(); return false; }
     nodes = next; said = text; return true;
@@ -228,13 +248,16 @@ document.addEventListener("submit", async (e) => {
 navigator.serviceWorker?.register("sw.js").catch(() => {});
 const { fold, ax, needs } = await core(await (await fetch("fold_core.wasm")).arrayBuffer());
 await folds?.check();
+// Folds by reference are not waited for: the page is drawn now, and each part lands in its own slot when it is read.
+refs?.check().then(() => refs.watch());
 await load();
 // Allie's keys work on arrival: the first render focuses the title, so the page gets the arrow keys without a click first.
 show(true);
 shown = true;
+if (refsEarly && await load()) render(false); // parts that landed before the first draw
 // Back to the page (focus, or the tab shown again): every node revalidated at once, a 304 each when nothing changed.
-addEventListener("focus", () => folds?.check());
-document.addEventListener("visibilitychange", () => { if (!document.hidden) folds?.check(); });
+addEventListener("focus", () => { folds?.check(); refs?.check({ deep: true }); });
+document.addEventListener("visibilitychange", () => { if (!document.hidden) { folds?.check(); refs?.check({ deep: true }); } });
 document.body.dataset.ready = "1";
 // Clax, once the fold is up and never ahead of it: the pinned overlay, mounted only where fold serve mints this reader a token.
 // It is told the fold in view: its haecceity (null for a document named in the address) and its rows.

@@ -175,6 +175,64 @@ fn each_live_node_and_their_index_revalidate_by_etag() {
     let _ = fs::remove_dir_all(&s.root);
 }
 
+/// One fold per file (Addendum 2): a fold's JSON-LD (`<id>.jsonld`, written by rename) is served as `application/ld+json`, always
+/// revalidated, its bytes' digest the ETag; a manifest the same. Held in goldens/serve/folds.json. Then the long poll: `?wait=`
+/// with the held ETag answers 304 when the time runs out and 200 as soon as the file is renamed over.
+#[test]
+fn each_fold_file_revalidates_by_etag_and_a_wait_answers_when_it_moves() {
+    let s = site("folds");
+    let t = SystemTime::UNIX_EPOCH + Duration::from_secs(1_793_361_600);
+    let needs = "{\"@id\":\"fold:fleet/needs\",\"@type\":\"Fold\",\"id\":\"needs\",\"title\":\"Needs you\",\"updated\":\"2026-10-30T12:00:00Z\",\"madeBy\":{\"query\":\"needs\",\"version\":1,\"href\":\"/fold-data/fleet/needs.cypher\"},\"data\":[]}\n";
+    let every = "{\"@id\":\"fold:fleet/everything\",\"@type\":\"FoldManifest\",\"id\":\"everything\",\"parts\":[{\"@id\":\"fold:fleet/needs\",\"@type\":\"FoldRef\",\"url\":\"/fold-data/fleet/needs.jsonld\",\"etag\":null,\"updated\":null}]}\n";
+    for (p, body) in [("fleet/needs.jsonld", needs), ("fleet/everything.jsonld", every)] {
+        let f = s.root.join(p);
+        fs::write(&f, body).unwrap();
+        fs::File::options().write(true).open(&f).unwrap().set_modified(t).unwrap();
+    }
+    let etag = respond(&s, &req("GET", "/fleet/needs.jsonld", &[], "")).header("ETag").unwrap().to_string();
+    let cases: Vec<(&str, Request)> = vec![
+        ("a fold's own file: JSON-LD, always revalidated, its bytes' digest the ETag", req("GET", "/fleet/needs.jsonld", &[], "")),
+        ("its ETag again: 304, no body", req("GET", "/fleet/needs.jsonld", &[("If-None-Match", &etag)], "")),
+        ("a manifest: the same rule", req("GET", "/fleet/everything.jsonld", &[], "")),
+        ("a wait with nothing held to wait against: answered at once", req("GET", "/fleet/needs.jsonld?wait=25", &[], "")),
+    ];
+    let got: Vec<Value> = cases
+        .iter()
+        .map(|(what, r)| {
+            let res = respond(&s, r);
+            let body: Value = serde_json::from_slice(&res.body).unwrap_or(Value::Null);
+            json!({ "what": what, "request": { "method": r.method, "target": r.target, "headers": r.headers }, "status": res.status, "headers": res.headers, "body": body })
+        })
+        .collect();
+    let path = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("goldens/serve/folds.json");
+    let text = serde_json::to_string_pretty(&got).unwrap() + "\n";
+    if std::env::var("FOLD_BLESS").is_ok() {
+        fs::write(&path, &text).unwrap();
+    }
+    assert!(text == fs::read_to_string(&path).unwrap_or_default(), "goldens/serve/folds.json is stale (FOLD_BLESS=1 cargo test --test serve)");
+
+    // Unchanged for the whole wait: one 304, after the wait and not before.
+    let held = [("If-None-Match", etag.as_str())];
+    let t0 = std::time::Instant::now();
+    assert_eq!(respond(&s, &req("GET", "/fleet/needs.jsonld?wait=1", &held, "")).status, 304);
+    assert!(t0.elapsed() >= Duration::from_millis(900), "a wait is held for its time");
+    // Renamed over while waiting: answered with the new bytes as soon as it is seen, long before the wait is up.
+    let root = s.root.clone();
+    let writer = std::thread::spawn(move || {
+        std::thread::sleep(Duration::from_millis(300));
+        let tmp = root.join("fleet/needs.jsonld.tmp");
+        fs::write(&tmp, needs.replace("12:00:00Z", "12:01:00Z")).unwrap();
+        fs::rename(&tmp, root.join("fleet/needs.jsonld")).unwrap();
+    });
+    let t0 = std::time::Instant::now();
+    let r = respond(&s, &req("GET", "/fleet/needs.jsonld?wait=20", &held, ""));
+    writer.join().unwrap();
+    assert_eq!(r.status, 200);
+    assert!(t0.elapsed() < Duration::from_secs(5), "a moved file ends the wait");
+    assert_ne!(r.header("ETag").unwrap(), etag);
+    let _ = fs::remove_dir_all(&s.root);
+}
+
 /// One raw request to the real loop, and its whole answer.
 fn over_the_wire(port: u16, raw: &[u8]) -> String {
     let mut c = TcpStream::connect(("127.0.0.1", port)).unwrap();
