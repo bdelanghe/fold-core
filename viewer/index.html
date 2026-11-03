@@ -20,8 +20,14 @@
      818a674a, home pins/empathic/clax.json (/nix/store/ckw047…-clax-0.6.0), 141084 bytes, read from
      https://phobos.tail556f5b.ts.net/_clax/overlay.js on 2026-11-02 (the earlier pin was clax main d7812795's vite build, which no
      instance serves, so the overlay never mounted: RECOMMEND-consultant-2026-11-01-clax-sdk-in-basis.md). A mismatch fails closed.
-     It goes stale when the home clax pin moves: re-pin from the deployed build (S2 derives it from the closure). -->
-<meta name="clax-sdk" content="clax/overlay.js" data-version="0.6.0" data-integrity="sha384-HOmKT9h5Ol0a2IC6ZGJXXxo6Gnf5olfeyKNtVD8dhcCXEetJzsIwffcNRaYMPxxt">
+     It goes stale when the home clax pin moves: re-pin from the deployed build (S2 derives it from the closure).
+     Re-pinned 2026-11-03 for clax wip/reports-optional 9a63836b (the overlay's `reports` option), 141559 bytes, from a vite build of that
+     commit (web/dist/_clax/overlay.js), NOT yet read from the running instance: land it with the clax pin that serves 9a63836b, and
+     check it against https://phobos.tail556f5b.ts.net/_clax/overlay.js first. -->
+<meta name="clax-sdk" content="clax/overlay.js" data-version="0.6.0" data-integrity="sha384-ibrdGHrg5QsCPfapTW36wAmHoKV+9rjaRw07FmlVSx3qvomWZ3SFQi4WbVhXmUi4">
+<!-- "Your reports" lives in Basis's own Your reports fold (home fleet-map reports.ts), so the overlay shows Report alone: the overlay's one
+     documented setting for it (clax OverlayOptions.reports, read from this meta when the page passes none). Report (compose) stays. -->
+<meta name="clax-reports" content="off">
 <link rel="modulepreload" href="fold-core.js">
 <!-- On the Home Screen (manifest.webmanifest, sw.js): the approved Basis mark, from ~/.lobby/ops/basis-icons (Bobby 910d8009). -->
 <link rel="manifest" href="manifest.webmanifest">
