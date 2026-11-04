@@ -10,6 +10,7 @@ import { toDom } from "./fold-dom.js";
 import { at, beside, dataOf, foldNodes, graft, haecceityOf, href, liveFolds, liveNodes, manifestRoot, open, pathOf, placeIn, revalidate, segmentOf, shows, since, stamp, underived, viewOf } from "./view.js";
 import { ENDPOINTS, dec, enc, notifyHere, readNeeds, sign } from "./sign.js";
 import { aboutOf, contextOf, embed, flagUnnamed, pinOf, reportToken } from "./clax.js";
+import { KINDS, kindItems, kindView, rotorKey, rotorStart } from "./rotor.js";
 
 const goldens = join(import.meta.dir, "..", "goldens");
 const wasm = process.env.FOLD_CORE_WASM ?? join(import.meta.dir, "..", "target", "wasm32-unknown-unknown", "release", "fold_core.wasm");
@@ -635,4 +636,98 @@ test("folds by reference: placed where page.json has them, drawn with 'Made by',
   expect(underived({ "@type": "FoldManifest" })).toBeNull();
   // a manifest opened as the document: one placeholder per part, in its order, until each lands
   expect(manifestRoot({ title: "Everything", parts: [host.ref("needs"), host.ref("inbox")] }).sections.map((s: any) => [s.id, s.text])).toEqual([["needs", "Not read yet."], ["inbox", "Not read yet."]]);
+});
+
+// The rotor (rotor.js, BRIEF-stint-2026-11-03-basis-rotor): Allie's kinds and keys over a fixture page shaped like the fleet page.
+const rotorPage = async () => {
+  const input = read(import.meta.dir, "rotor.fixture.json"), o = origin("rotor", input);
+  return open(fold, o.url, { fetch: o.fetch, opts: () => input.opts });
+};
+test("rotor: each kind holds its folds from the whole page, in reading order", async () => {
+  const nodes = await rotorPage();
+  const titles = (k: string, under: string[] = []) => kindItems(nodes, k, under).map((x: any) => x.node.title);
+  expect(KINDS.map((k) => k.name)).toEqual(["needs", "actions", "sections", "stints", "landings", "messages", "links"]);
+  // An item with no name is labelled by its action (src/lib.rs LABEL_KEYS), as on the page itself (the live fleet page's asks have
+  // no name): the rotor says each item as the page does.
+  expect(titles("needs")).toEqual(["To a seat", "Answer in chitin.", "Merge it."]);
+  expect(titles("actions")).toEqual(["To a seat", "work-basis-rotor-stint"]);
+  expect(titles("sections")).toEqual(["Needs you", "Goal sessions", "Messages to you"]);
+  expect(titles("stints")).toEqual(["work-basis-rotor-stint"]);
+  expect(titles("landings")).toEqual(["Merge it."]);
+  expect(titles("messages")).toEqual(["claude-break-glass", "allie-lead"]);
+  expect(titles("links")).toEqual(["Merge it."]);
+  // from the fold you are on: only what is under it, never the fold itself
+  expect(titles("actions", ["needs"])).toEqual(["To a seat"]);
+  expect(titles("sections", ["needs"])).toEqual([]);
+  expect(titles("nonsense")).toEqual([]);
+});
+test("rotor: a kind is drawn as a fold, through the core's ax and the AX gate, each row going to its item's fold", async () => {
+  const nodes = await rotorPage();
+  const els = (n: unknown) => all(toDom(doc, ax({ node: n, path: [], mode: "folds", href: "viewer", localTimeZone: "UTC" })) as El);
+  const v = els(kindView(nodes, "actions"));
+  expect(v.filter((e) => e.tag === "h1").map((e) => e.textContent)).toEqual(["Actions"]);
+  const rows = v.filter((e) => e.tag === "li" && e.className === "obj");
+  expect(rows.length).toBe(2);
+  const links = v.filter((e) => e.tag === "a" && String(e.href).startsWith("#/")).map((e) => [e.textContent, e.href]);
+  for (const { path } of kindItems(nodes, "actions")) expect(links.map(([, h]) => pathOf(String(h)))).toContainEqual(path);
+  // each item says where it is (its trail under the document's title), read after its name
+  expect(v.filter((e) => e.tag === "span" && e.className === "hint").map((e) => e.textContent)).toEqual(["Needs you", "Goal sessions"]);
+  // none here: a line says so, and a row goes back to where you were
+  const none = kindView(nodes, "sections", ["needs"], { href: "#/needs", title: "Needs you" });
+  expect(none.text).toEqual(["No sections here."]);
+  expect(none.kids).toEqual([{ id: "back", title: "Back to Needs you", href: "#/needs" }]);
+  expect(els(none).filter((e) => e.tag === "h1").map((e) => e.textContent)).toEqual(["Sections"]);
+});
+test("rotor: Allie's keys (r, the drawer's j k [ ] Enter digits r r Esc, a kind's ] [ h), and what each says", () => {
+  const from = { hash: "#/needs", path: ["needs"], cur: 2, title: "Needs you" };
+  let s = rotorStart();
+  // off the rotor, only r is taken: j k l h Enter ] [ stay the viewer's
+  for (const k of ["j", "k", "l", "h", "Enter", "]", "[", "Escape"]) expect(rotorKey(s, k, from)).toBeNull();
+  let r = rotorKey(s, "r", from)!;
+  expect([r.state.drawer, r.state.at, r.fx.drawer]).toEqual([true, 0, "open"]);
+  // the drawer stops at either end and says so, never wraps
+  expect(rotorKey(r.state, "k", from)!.fx).toEqual({ say: "First kind" });
+  expect(rotorKey(r.state, "[", from)!.fx).toEqual({ say: "First kind" });
+  r = rotorKey(r.state, "j", from)!; expect([r.state.at, r.fx.drawer]).toEqual([1, "draw"]);
+  r = rotorKey(r.state, "ArrowDown", from)!; r = rotorKey(r.state, "]", from)!; expect(r.state.at).toBe(3);
+  // anything else is swallowed while it is open; Tab still leaves it
+  expect(rotorKey(r.state, "x", from)!.fx).toEqual({});
+  expect(rotorKey(r.state, "Tab", from)).toBeNull();
+  // Enter picks: the kind's word said once, where you came from kept
+  r = rotorKey(r.state, "Enter", from)!;
+  expect([r.state.drawer, r.state.kind, r.fx.view, r.fx.say, r.fx.drawer]).toEqual([false, "stints", "stints", "Stints", "close"]);
+  expect(r.state.from).toEqual(from);
+  s = r.state;
+  // in a kind, j k l Enter are the viewer's (they move between its items and go to one)
+  for (const k of ["j", "k", "l", "Enter", "ArrowDown"]) expect(rotorKey(s, k, from)).toBeNull();
+  // ] [ the next and previous kind, keeping where you came from
+  r = rotorKey(s, "]", { ...from, hash: "#/x" })!;
+  expect([r.state.kind, r.fx.view, r.fx.say, r.state.from]).toEqual(["landings", "landings", "Landings", from]);
+  r = rotorKey(r.state, "[", from)!; r = rotorKey(r.state, "[", from)!; r = rotorKey(r.state, "[", from)!; r = rotorKey(r.state, "[", from)!;
+  expect(r.state.kind).toBe("needs");
+  expect(rotorKey(r.state, "[", from)!.fx).toEqual({ say: "First kind" });
+  // h (or Esc ← Backspace) leaves, back to the fold and row it was entered from
+  for (const k of ["h", "Escape", "ArrowLeft", "Backspace"]) {
+    const out = rotorKey(r.state, k, from)!;
+    expect([out.state.kind, out.fx.leave]).toEqual(["", from]);
+  }
+  // r in a kind opens the drawer on that kind; r r picks the last kind; a digit picks its kind; picking the kind you are in only closes
+  let d = rotorKey(r.state, "r", from)!; expect([d.state.drawer, d.state.at]).toEqual([true, 0]);
+  expect(rotorKey(d.state, "r", from)!.fx).toEqual({ drawer: "close", say: "Needs" });
+  expect(rotorKey(d.state, "7", from)!.fx).toEqual({ drawer: "close", view: "links", say: "Links" });
+  expect(rotorKey(d.state, "9", from)!.fx).toEqual({});
+  expect(rotorKey(d.state, "Escape", from)!.fx).toEqual({ drawer: "close", say: "Needs" });
+  d = rotorKey(rotorStart(), "r", from)!;
+  r = rotorKey(d.state, "2", from)!; expect(r.state.last).toBe("actions");
+  r = rotorKey(rotorKey({ ...r.state, kind: "" }, "r", from)!.state, "r", from)!;
+  expect(r.fx.view).toBe("actions");
+});
+test("rotor: no layout shift: the drawer is fixed out of the page's flow, outside the fold, and speaks in the notices zone", () => {
+  const html = readFileSync(join(import.meta.dir, "index.html"), "utf8"), css = readFileSync(join(import.meta.dir, "fold.css"), "utf8");
+  expect(css).toMatch(/section\.rotor\{position:fixed;/);
+  expect(html).toContain('<section id="rotor" class="rotor" aria-label="Kinds" hidden><ol id="rotor-kinds" role="listbox"');
+  expect(html.indexOf('id="rotor"')).toBeGreaterThan(html.indexOf("</main>"));
+  // its words go through say(), the notices zone's one live region (#notice, role=status), never a region of its own
+  expect(html).toContain("if (fx.say) say(fx.say);");
+  expect((html.match(/aria-live|role="status"/g) ?? []).length).toBe(1);
 });
