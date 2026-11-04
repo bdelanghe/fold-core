@@ -1,0 +1,53 @@
+{
+  "root": {
+    "title": "Agent fleet",
+    "sections": [
+      {
+        "id": "needs",
+        "title": "Needs you",
+        "purpose": "What the agents need from you.",
+        "groups": [
+          {
+            "title": "",
+            "items": [
+              { "id": "needs/sign-a", "name": "To a seat", "text": "Ship the fix.", "action": "Approve with your passkey.",
+                "act": { "cap": "webauthn", "call": "approve", "label": "Sign", "args": { "challenge": "/approve/v1/challenge/a", "assertion": "/approve/v1/assertion/a" } } },
+              { "id": "needs/ask-0", "text": "Pick a name for the rotor.", "action": "Answer in chitin." },
+              { "id": "needs/landing-1", "text": "fold-core #40", "action": "Merge it.", "link": { "href": "https://github.com/bdelanghe/fold-core/pull/40", "label": "Open open" } }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "goals",
+        "title": "Goal sessions",
+        "purpose": "Each running goal session.",
+        "groups": [
+          {
+            "title": "",
+            "items": [
+              { "id": "goal/work-basis-rotor-stint", "name": "work-basis-rotor-stint", "text": "A rotor in Basis.", "state": "working",
+                "act": { "cap": "chitin", "call": "run", "label": "Run", "args": { "seat": "work-basis-rotor-stint" } } }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "inbox",
+        "title": "Messages to you",
+        "purpose": "The latest messages agents sent you.",
+        "groups": [
+          {
+            "title": "",
+            "items": [
+              { "id": "inbox/0", "name": "claude-break-glass", "text": "Read the brief.", "quoted": true },
+              { "id": "inbox/1", "name": "allie-lead", "text": "Keys are vim.", "quoted": true }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "files": {},
+  "opts": { "updated": "2026-11-03T12:00:00.000Z", "source": "rotor-fixture", "localTimeZone": "UTC" }
+}

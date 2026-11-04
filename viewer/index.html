@@ -56,6 +56,9 @@
      ceremony's steps and result, a notification result. -->
 <aside id="notices" class="notices" aria-label="Notices"><p id="stale" class="stale"></p><p id="unread"></p><p id="not-read"></p><p id="notice" role="status">No notices</p></aside>
 <main><h1 tabindex="-1">Loading…</h1></main>
+<!-- The rotor's drawer (r, rotor.js): the kinds as a listbox, Allie's. Fixed over the page, out of its flow, so opening it never moves
+     the fold or the notices zone; what the rotor says is said in the notices zone (#notice), the page's one live region. -->
+<section id="rotor" class="rotor" aria-label="Kinds" hidden><ol id="rotor-kinds" role="listbox" aria-label="Kinds" tabindex="-1"></ol></section>
 <!-- The last region, after the fold (consultant's cold read, RECOMMEND-consultant-2026-11-01-fleet-page-cold-read.md point 6):
      a way to open another document when this one fails. Where the data is from is said on every fold ("Data from …", src/ax.rs). -->
 <form class="reading" role="search" aria-label="Reading"><label for="reading">Reading</label>
@@ -70,7 +73,10 @@
 // first act (a Needs-you item's Approve, or its ack): the rotor's first action. Decline is the item's second act, its own button.
 // As a deck (#slides/<path>, or a page whose folds say present "slides" opened with no path) the same fold is a slide: → and ← go to
 // the next and previous slide in reading order; l or Enter still goes into the point under the cursor, h back out.
+// The rotor is Allie's (rotor.js): r opens its kinds; in a kind, j/k step through its items (focus moves to each), ] [ change kind,
+// h leaves it.
 import { core } from "./fold-core.js";
+import { KINDS, kindView, rotorKey, rotorStart } from "./rotor.js";
 import { toDom, liveLine } from "./fold-dom.js";
 import { at, beside, dataOf, docId, foldNodes, graft, haecceityOf, href as link, liveFolds, liveNodes, manifestRoot, modeOf, open, pathOf, shows, since, stamp, viewOf } from "./view.js";
 import { ENDPOINTS, intentOk, notifyHere, readNeeds, sign } from "./sign.js";
@@ -130,9 +136,40 @@ function say(m) {
 }
 const href = (p, m = modeOf(location.hash, node)) => link(p, m);
 const rows = () => [...document.querySelectorAll("ol.rows > li.obj")]; // the child objects; property rows are read, not entered
+// The rotor (rotor.js): its state, and the drawer's listbox.
+let rot = rotorStart(), rotWas = null;
+const rotBox = document.getElementById("rotor"), rotList = document.getElementById("rotor-kinds");
+function drawRotor() {
+  rotList.replaceChildren(...KINDS.map((k, i) => {
+    const li = document.createElement("li");
+    li.id = `rotor-k-${i}`; li.setAttribute("role", "option"); li.setAttribute("aria-selected", String(i === rot.at));
+    if (k.name === rot.kind) li.setAttribute("aria-current", "true");
+    const n = document.createElement("span"); n.className = "rk-n"; n.setAttribute("aria-hidden", "true"); n.textContent = String(i + 1);
+    li.append(n, " ", k.word);
+    li.addEventListener("click", () => rotorDo(rotorKey({ ...rot, at: i }, "Enter", here())));
+    return li;
+  }));
+  rotList.setAttribute("aria-activedescendant", `rotor-k-${rot.at}`);
+}
+// Where you are now, kept when a kind is entered: h goes back to this fold and this row.
+const here = () => ({ hash: location.hash, path: pathOf(location.hash), cur, title: nodes.get(docId(pathOf(location.hash)))?.title ?? "" });
+function rotorDo(r) {
+  rot = r.state;
+  const fx = r.fx;
+  if (fx.drawer === "open") { rotWas = document.activeElement; rotBox.hidden = false; drawRotor(); rotList.focus({ preventScroll: true }); }
+  else if (fx.drawer === "draw") drawRotor();
+  else if (fx.drawer === "close" && !rotBox.hidden) { rotBox.hidden = true; if (!fx.view && (document.activeElement === rotList || document.activeElement === document.body)) rotWas?.focus?.({ preventScroll: true }); rotWas = null; }
+  if (fx.view) { cur = 0; render(true); }
+  else if ("leave" in fx) { cur = fx.leave?.cur ?? 0; render(true); }
+  if (fx.say) say(fx.say);
+}
 function render(focus) {
+  // In a kind (the rotor): its view of the fold you came from, drawn as any fold is. Else the fold the location names.
   // Each row carries its thing's haecceity (schema:about), from the document's source: what a Clax report is about.
-  const v = viewOf(ax, nodes, location.hash, zone, data.source);
+  const v = rot.kind
+    ? { path: rot.from?.path ?? [], node: kindView(nodes, rot.kind, rot.from?.path ?? [], { href: href(rot.from?.path ?? []), title: rot.from?.title }) }
+    : viewOf(ax, nodes, location.hash, zone, data.source);
+  if (rot.kind) v.tree = ax({ node: v.node, path: [], mode: "folds", href: "viewer", localTimeZone: zone });
   node = v.node;
   const main = toDom(document, v.tree);
   document.querySelector("main").replaceWith(main);
@@ -140,21 +177,30 @@ function render(focus) {
   if (clax?.mounted && v.path.join("/") !== claxAt) { claxAt = v.path.join("/"); clax.reopen(); }
   document.title = node?.title ?? "Basis";
   for (const li of rows()) li.addEventListener("click", e => { if (e.target.tagName !== "A") li.querySelector("a").click(); });
+  // a kind's row back to the fold it was entered from names the location already, so no hashchange comes: it leaves the kind here
+  if (rot.kind) for (const a of main.querySelectorAll("ol.rows a[href^='#']")) a.addEventListener("click", e => {
+    if (docId(pathOf(a.getAttribute("href"))) !== docId(pathOf(location.hash))) return;
+    e.preventDefault(); rotorDo(rotorKey(rot, "h"));
+  });
   // A fold's acts are forms (src/ax.rs act_form) and submit as forms, natively, in every host, Allie's too: no script takes
   // them (allie-lead 968825b4). fold serve answers the post (src/serve.rs).
   // Back out (h, ←, Backspace or the path) lands the cursor on the row you came from, as in Allie.
   const back = cameFrom == null ? -1 : (node?.kids ?? []).findIndex(k => k.id === cameFrom);
   if (back >= 0) { cur = back; cameFrom = null; }
-  move(Math.min(cur, Math.max(0, rows().length - 1)));
+  move(Math.min(cur, Math.max(0, rows().length - 1)), focus);
   stale();
-  if (focus) main.querySelector("h1").focus();
+  // (in a kind, focus is on its item already: move put it there)
+  if (focus && !rot.kind) main.querySelector("h1").focus();
 }
-function move(i) {
+// In a kind, the item under the cursor takes focus, so it says itself (its title, then where it is); on a fold, the cursor is drawn only.
+function move(i, focus = true) {
   const rs = rows(); if (!rs.length) return;
   cur = Math.max(0, Math.min(rs.length - 1, i));
   rs.forEach((r, j) => r.classList.toggle("cur", j === cur));
+  if (rot.kind && focus) rs[cur].querySelector("a")?.focus({ preventScroll: false });
 }
 function show(focus) {
+  if (rot.kind || rot.drawer) { rot = { ...rot, kind: "", from: null, drawer: false }; rotBox.hidden = true; } // a move to a fold leaves the kind
   const p = pathOf(location.hash); cur = 0;
   cameFrom = last.length > p.length && p.every((x, i) => x === last[i]) ? last[p.length] : null;
   last = p;
@@ -189,6 +235,9 @@ async function load() {
 addEventListener("pointerdown", () => document.body.classList.remove("keys"));
 addEventListener("keydown", e => {
   if (e.metaKey || e.ctrlKey || e.altKey || /input|textarea/i.test(e.target.tagName)) return;
+  // the rotor first: r, the drawer's keys, and in a kind ] [ h (rotor.js rotorKey); j k l Enter go on to the viewer's own
+  const r = rotorKey(rot, e.key, here());
+  if (r) { rotorDo(r); document.body.classList.add("keys"); e.preventDefault(); e.stopPropagation(); return; }
   if (e.key === "Enter" && /^(a|button|select)$/i.test(e.target.tagName)) return; // it does its own thing, once
   const p = pathOf(location.hash), k = node?.kids ?? [], deck = modeOf(location.hash, node) === "slides";
   const twice = (key) => { const again = keyAt.key === key && performance.now() - keyAt.t < 800; keyAt = again ? { key: "", t: 0 } : { key, t: performance.now() }; return again; };
@@ -198,6 +247,7 @@ addEventListener("keydown", e => {
   else if (deck && (e.key === "ArrowRight" || e.key === "ArrowLeft")) { const s = node?.[e.key === "ArrowRight" ? "next" : "prev"]; if (!s) return; location.hash = href(at(s.id)); }
   else if (e.key === "j" || e.key === "ArrowDown") move(cur + 1);
   else if (e.key === "k" || e.key === "ArrowUp") move(cur - 1);
+  else if ((e.key === "l" || e.key === "Enter" || e.key === "ArrowRight") && k[cur] && rot.kind && k[cur].href && docId(pathOf(k[cur].href)) === docId(p)) rotorDo(rotorKey(rot, "h")); // a kind's row back to where it was entered
   else if ((e.key === "l" || e.key === "Enter" || e.key === "ArrowRight") && k[cur]) location.hash = href(k[cur].href?.startsWith("#/") ? pathOf(k[cur].href) : [...p, k[cur].id]); // an in-page row ("back to the top") goes where it says, in the mode you are in
   else if ((e.key === "h" || e.key === "Backspace" || e.key === "ArrowLeft") && p.length) location.hash = href(p.slice(0, -1));
   else return;
