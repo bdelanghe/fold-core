@@ -325,11 +325,15 @@ pub trait Actor: Send + Sync {
 
 /// A push subscription verb, as chitin's `push` takes it. The subscription is the browser's PushSubscription JSON, cut to
 /// `{endpoint, keys: {p256dh, auth}}`; chitin checks it (an https endpoint on a known push service, a P-256 point) and keeps it 0600.
+/// Subscribe and Unsubscribe carry the device's `Tailscale-User-Login` (the second field), passed as `--login`: chitin maps it to the
+/// stable tailnet user id it keys the subscription to, and refuses a call without one (chitin 7cb3da5, vapid-self-mint addendum 2.1).
 #[derive(Debug, Clone, PartialEq)]
 pub enum Push {
     Key,
-    Subscribe(String),
-    Unsubscribe(String),
+    /// (the subscription JSON, the login)
+    Subscribe(String, String),
+    /// (the endpoint, the login)
+    Unsubscribe(String, String),
 }
 
 /// The one chitin seat a typed say speaks as (Bobby 38e765d3, signed ebe199a4: S2 42184457 widened to typed say "as seat
@@ -409,25 +413,25 @@ impl Actor for Chitin {
         }
     }
 
-    /// `chitin push vapid-public | subscribe (the subscription on stdin) | unsubscribe <endpoint>`.
+    /// `chitin push vapid-public | subscribe --login <login> (the subscription on stdin) | unsubscribe --login <login> <endpoint>`.
     fn push(&self, op: &Push) -> Result<String, String> {
         use std::io::Write;
         let mut c = Command::new(&self.bin);
         match op {
             Push::Key => c.args(["push", "vapid-public"]),
-            Push::Subscribe(_) => c.args(["push", "subscribe"]),
-            Push::Unsubscribe(e) => c.args(["push", "unsubscribe", e]),
+            Push::Subscribe(_, login) => c.args(["push", "subscribe", "--login", login]),
+            Push::Unsubscribe(e, login) => c.args(["push", "unsubscribe", "--login", login, e]),
         };
         c.stdin(std::process::Stdio::piped()).stdout(std::process::Stdio::piped()).stderr(std::process::Stdio::piped());
         let mut child = c.spawn().map_err(|e| format!("could not run chitin: {e}"))?;
-        if let (Push::Subscribe(sub), Some(mut i)) = (op, child.stdin.take()) {
+        if let (Push::Subscribe(sub, _), Some(mut i)) = (op, child.stdin.take()) {
             i.write_all(sub.as_bytes()).map_err(|e| format!("could not hand chitin the subscription: {e}"))?;
         }
         let out = child.wait_with_output().map_err(|e| format!("chitin did not finish: {e}"))?;
         let (o, e) = (String::from_utf8_lossy(&out.stdout), String::from_utf8_lossy(&out.stderr));
         let line: String = o.lines().chain(e.lines()).map(str::trim).find(|l| !l.is_empty()).unwrap_or("").chars().take(200).collect();
         match (out.status.success(), op) {
-            (true, Push::Subscribe(_)) if line != "subscribed" => Err(line),
+            (true, Push::Subscribe(..)) if line != "subscribed" => Err(line),
             (true, _) => Ok(line),
             _ => Err(if line.is_empty() { format!("chitin exited {}", out.status) } else { line }),
         }

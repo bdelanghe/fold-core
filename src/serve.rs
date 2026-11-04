@@ -583,6 +583,11 @@ fn push(site: &Site, req: &Request, now: i64) -> (Response, Option<Value>) {
             Err(e) => (json_answer(503, &json!({ "error": format!("notifications are off: {}", e.chars().filter(|c| !c.is_control()).take(200).collect::<String>()) })), None),
         };
     }
+    // chitin keys a subscription to the tailnet user (chitin 7cb3da5): it takes the login with --login and refuses without one, so a
+    // request with none is refused here, before chitin runs. front() has already held it to the one login.
+    let Some(login) = req.header("Tailscale-User-Login").filter(|l| !l.is_empty()).map(str::to_string) else {
+        return no(403, "no tailnet login", "refused:no-login");
+    };
     if req.media_type() != Some("application/json") {
         return no(415, "send it as application/json", "refused:415");
     }
@@ -591,14 +596,14 @@ fn push(site: &Site, req: &Request, now: i64) -> (Response, Option<Value>) {
     let endpoint = s(body.as_ref().and_then(|b| b.get("endpoint"))).filter(|e| e.starts_with("https://") && e.len() <= 512 && !e.chars().any(char::is_control));
     let Some(endpoint) = endpoint else { return no(400, "no https endpoint", "refused:400") };
     if verb == "unsubscribe" {
-        return chitin(Push::Unsubscribe(endpoint.clone()), Some(&endpoint));
+        return chitin(Push::Unsubscribe(endpoint.clone(), login), Some(&endpoint));
     }
     let keys = body.as_ref().and_then(|b| b.get("keys"));
     let (Some(p256dh), Some(auth)) = (s(keys.and_then(|k| k.get("p256dh"))), s(keys.and_then(|k| k.get("auth")))) else {
         return no(400, "no keys.p256dh and keys.auth", "refused:400");
     };
     let sub = json!({ "endpoint": endpoint, "keys": { "p256dh": p256dh, "auth": auth } }).to_string();
-    chitin(Push::Subscribe(sub), Some(&endpoint))
+    chitin(Push::Subscribe(sub, login), Some(&endpoint))
 }
 
 /// What [`watch`] keeps between looks: the intents notified, and the last result said for each look's failures, so a failure is

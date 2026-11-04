@@ -235,9 +235,9 @@ impl Actor for Stub {
         self.calls.lock().unwrap().push(format!("push {op:?}"));
         match op {
             Push::Key => Ok("BPub_key-0".into()),
-            Push::Subscribe(s) if s.contains("evil") => Err("refused: the endpoint is not an https URL on a known push service".into()),
-            Push::Subscribe(_) => Ok("subscribed".into()),
-            Push::Unsubscribe(_) => Ok("removed".into()),
+            Push::Subscribe(s, _) if s.contains("evil") => Err("refused: the endpoint is not an https URL on a known push service".into()),
+            Push::Subscribe(..) => Ok("subscribed".into()),
+            Push::Unsubscribe(..) => Ok("removed".into()),
         }
     }
 }
@@ -409,6 +409,7 @@ fn push_routes_hand_a_subscription_to_chitin_for_the_one_login_only() {
         ("the key a device subscribes with", &on, from_me("GET", "/push/key", "", &[])),
         ("not sent here: no route", &off, from_me("GET", "/push/key", "", &[])),
         ("subscribe: handed to chitin cut to endpoint and keys", &on, from_me("POST", "/push/subscribe", sub, &[])),
+        ("subscribe: no tailnet login: refused, chitin never runs", &on, from_me("POST", "/push/subscribe", sub, &[("Tailscale-User-Login", None)])),
         ("subscribe: another login", &on, from_me("POST", "/push/subscribe", sub, &[("Tailscale-User-Login", Some("eve@example.com"))])),
         ("subscribe: cross-site", &on, from_me("POST", "/push/subscribe", sub, &[("Sec-Fetch-Site", Some("cross-site"))])),
         (
@@ -444,6 +445,7 @@ fn push_routes_hand_a_subscription_to_chitin_for_the_one_login_only() {
     let subs: Vec<String> = stub.calls.lock().unwrap().iter().filter(|c| c.starts_with("push Subscribe")).cloned().collect();
     assert_eq!(subs.len(), 2, "chitin saw the good one and the one it refused: {subs:?}");
     assert!(!subs[0].contains("extra") && !subs[0].contains("expirationTime"), "{}", subs[0]);
+    assert!(subs.iter().all(|s| s.ends_with(&format!(", \"{ME}\")"))), "chitin is handed the login (--login): {subs:?}");
     bless_or_hold("push.json", &Value::Array(got));
     for site in [on, off] {
         let _ = fs::remove_dir_all(&site.root);

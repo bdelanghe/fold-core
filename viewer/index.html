@@ -79,7 +79,7 @@ import { core } from "./fold-core.js";
 import { KINDS, kindView, rotorKey, rotorStart } from "./rotor.js";
 import { toDom, liveLine } from "./fold-dom.js";
 import { at, beside, dataOf, docId, foldNodes, graft, haecceityOf, href as link, liveFolds, liveNodes, manifestRoot, modeOf, open, pathOf, shows, since, stamp, viewOf } from "./view.js";
-import { ENDPOINTS, intentOk, notifyHere, readNeeds, sign } from "./sign.js";
+import { ENDPOINTS, intentOk, notifyHere, notifyRefresh, readNeeds, sign } from "./sign.js";
 import { embed } from "./clax.js";
 const zone = Intl.DateTimeFormat().resolvedOptions().timeZone;
 const meta = document.querySelector('meta[name="fold-data"]');
@@ -259,6 +259,9 @@ addEventListener("hashchange", () => {
   // going into Needs you reads what waits again, and shows a change in place
   if (needsUrl && pathOf(location.hash)[0] === "needs") load().then((changed) => { if (changed) render(false); });
 });
+// A device already notified, with permission already granted: if chitin's key changed, subscribe again now, with no prompt
+// (vapid-self-mint addendum 1.3). Says something only when it did something.
+notifyRefresh(location.href).then((r) => { if (r) say(r.said); });
 // An act on an intent (src/ax.rs act_form: data-intent, data-call), taken here; every other act submits natively (allie-lead 968825b4).
 // Both are passkey verdicts (BRIEF addendum 1), run against chitin-approve (sign.js), their words from the challenge. Either way, what
 // waits is read again, and an item that has gone takes you back to its group; what was done is said in the notices zone.

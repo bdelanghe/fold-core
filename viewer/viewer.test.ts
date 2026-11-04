@@ -8,7 +8,7 @@ import { join } from "node:path";
 import { core } from "../js/fold-core.ts";
 import { toDom } from "./fold-dom.js";
 import { at, beside, dataOf, foldNodes, graft, haecceityOf, href, liveFolds, liveNodes, manifestRoot, open, pathOf, placeIn, revalidate, segmentOf, shows, since, stamp, underived, viewOf } from "./view.js";
-import { ENDPOINTS, dec, enc, notifyHere, readNeeds, sign } from "./sign.js";
+import { ENDPOINTS, dec, enc, notifyHere, notifyRefresh, readNeeds, sign } from "./sign.js";
 import { aboutOf, contextOf, embed, flagUnnamed, pinOf, reportToken } from "./clax.js";
 import { KINDS, kindItems, kindView, rotorKey, rotorStart } from "./rotor.js";
 
@@ -400,6 +400,59 @@ test("notify: this device subscribes with the server's key, and stops", async ()
   // no push in this browser: told how, nothing asked
   calls.length = 0;
   expect((await notifyHere("subscribe", base, { ...env, PushManager: undefined } as any)).said).toContain("Home Screen");
+  expect(calls).toEqual([]);
+});
+
+// A key chitin minted again (vapid-self-mint addendum 1.3): a subscription made with key A while the server's key is B is never reused.
+// It is taken off (server, then browser), a new one is made with B, and that one is posted. On page load the same happens with no prompt,
+// once permission is already granted; with the same key, or no subscription, nothing is fetched beyond the key and nothing is said.
+test("notify: a subscription under an old key is replaced, on Notify me and on page load", async () => {
+  const A = new Uint8Array([4, 1, 1]), B = new Uint8Array([4, 2, 2]);
+  const calls: string[] = [];
+  const made = (key: Uint8Array, endpoint: string) => ({
+    endpoint, options: { applicationServerKey: key.buffer },
+    toJSON: () => ({ endpoint, keys: { p256dh: "P", auth: "A" } }),
+    unsubscribe: async () => { calls.push(`browser unsubscribe ${endpoint}`); sub = null; },
+  });
+  let sub: any = null, serverKey = B;
+  const reg = { pushManager: {
+    getSubscription: async () => sub,
+    subscribe: async (o: any) => { const k = new Uint8Array(o.applicationServerKey); calls.push(`subscribe ${k.join(",")}`); sub = made(k, `https://web.push.apple.com/${k.join("")}`); return sub; },
+  } };
+  const env = {
+    navigator: { serviceWorker: { ready: Promise.resolve(reg) } }, PushManager: function () {},
+    Notification: { permission: "granted", requestPermission: async () => { calls.push("permission"); return "granted"; } },
+    fetch: (async (url: string, init?: RequestInit) => {
+      calls.push(`${init?.method ?? "GET"} ${url}${init?.body ? " " + init.body : ""}`);
+      return new Response(url.endsWith("/push/key") ? JSON.stringify({ key: enc(serverKey.buffer) }) : JSON.stringify({ ok: true }));
+    }) as any,
+  };
+  const base = "https://phobos.test/fold/";
+  // Notify me, holding A while the server's key is B
+  sub = made(A, "https://web.push.apple.com/old");
+  expect((await notifyHere("subscribe", base, env)).ok).toBe(true);
+  expect(calls).toEqual(["permission", "GET https://phobos.test/fold/push/key",
+    'POST https://phobos.test/fold/push/unsubscribe {"endpoint":"https://web.push.apple.com/old"}', "browser unsubscribe https://web.push.apple.com/old",
+    "subscribe 4,2,2", 'POST https://phobos.test/fold/push/subscribe {"endpoint":"https://web.push.apple.com/422","keys":{"p256dh":"P","auth":"A"}}']);
+  // Notify me again with the same key: the subscription is reused, only posted again
+  calls.length = 0;
+  expect((await notifyHere("subscribe", base, env)).ok).toBe(true);
+  expect(calls).toEqual(["permission", "GET https://phobos.test/fold/push/key", 'POST https://phobos.test/fold/push/subscribe {"endpoint":"https://web.push.apple.com/422","keys":{"p256dh":"P","auth":"A"}}']);
+  // page load, same key: nothing to do, nothing said
+  calls.length = 0;
+  expect(await notifyRefresh(base, env)).toBe(null);
+  expect(calls).toEqual(["GET https://phobos.test/fold/push/key"]);
+  // page load after chitin's key changed (B -> A): replaced with no prompt
+  calls.length = 0; serverKey = A;
+  expect((await notifyRefresh(base, env))?.ok).toBe(true);
+  expect(calls).toEqual(["GET https://phobos.test/fold/push/key",
+    'POST https://phobos.test/fold/push/unsubscribe {"endpoint":"https://web.push.apple.com/422"}', "browser unsubscribe https://web.push.apple.com/422",
+    "subscribe 4,1,1", 'POST https://phobos.test/fold/push/subscribe {"endpoint":"https://web.push.apple.com/411","keys":{"p256dh":"P","auth":"A"}}']);
+  // page load without permission, or with no subscription: nothing fetched, nothing asked
+  calls.length = 0;
+  expect(await notifyRefresh(base, { ...env, Notification: { permission: "default", requestPermission: env.Notification.requestPermission } })).toBe(null);
+  sub = null;
+  expect(await notifyRefresh(base, env)).toBe(null);
   expect(calls).toEqual([]);
 });
 

@@ -71,7 +71,7 @@
       "said": "subscribed"
     },
     "actor": [
-      "push Subscribe(\"{\\\"endpoint\\\":\\\"https://web.push.apple.com/QGx-abc\\\",\\\"keys\\\":{\\\"p256dh\\\":\\\"BNcR\\\",\\\"auth\\\":\\\"tBHI\\\"}}\")"
+      "push Subscribe(\"{\\\"endpoint\\\":\\\"https://web.push.apple.com/QGx-abc\\\",\\\"keys\\\":{\\\"p256dh\\\":\\\"BNcR\\\",\\\"auth\\\":\\\"tBHI\\\"}}\", \"bobby@example.com\")"
     ],
     "log": {
       "ts": 1793361600,
@@ -79,6 +79,25 @@
       "push": "subscribe",
       "service": "web.push.apple.com",
       "result": "ok"
+    }
+  },
+  {
+    "what": "subscribe: no tailnet login: refused, chitin never runs",
+    "target": "/push/subscribe",
+    "method": "POST",
+    "body_limit": 4096,
+    "status": 403,
+    "body": {
+      "ok": false,
+      "reason": "not who this server acts for"
+    },
+    "actor": [],
+    "log": {
+      "ts": 1793361600,
+      "login": null,
+      "push": "subscribe",
+      "service": null,
+      "result": "refused:403"
     }
   },
   {
@@ -187,7 +206,7 @@
       "reason": "chitin did not take it: refused: the endpoint is not an https URL on a known push service"
     },
     "actor": [
-      "push Subscribe(\"{\\\"endpoint\\\":\\\"https://evil.example/x\\\",\\\"keys\\\":{\\\"p256dh\\\":\\\"a\\\",\\\"auth\\\":\\\"b\\\"}}\")"
+      "push Subscribe(\"{\\\"endpoint\\\":\\\"https://evil.example/x\\\",\\\"keys\\\":{\\\"p256dh\\\":\\\"a\\\",\\\"auth\\\":\\\"b\\\"}}\", \"bobby@example.com\")"
     ],
     "log": {
       "ts": 1793361600,
@@ -218,7 +237,7 @@
       "said": "removed"
     },
     "actor": [
-      "push Unsubscribe(\"https://web.push.apple.com/QGx-abc\")"
+      "push Unsubscribe(\"https://web.push.apple.com/QGx-abc\", \"bobby@example.com\")"
     ],
     "log": {
       "ts": 1793361600,

@@ -108,10 +108,50 @@ export async function notifyHere(call, base, { navigator: nav = globalThis.navig
     if ((await N.requestPermission()) !== "granted") return { ok: false, said: "Notifications are off for this site in the browser, so nothing changed." };
     const k = await answerOf(await fetch(url("push/key"), { cache: "no-store" }));
     if (typeof k.key !== "string") return { ok: false, said: `Not on: ${k.error ?? k.reason ?? "no key"}.` };
-    const sub = had ?? (await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: dec(k.key) }));
-    const v = await post("push/subscribe", sub.toJSON ? sub.toJSON() : sub);
+    const v = await subscribeWith(reg, had, new Uint8Array(dec(k.key)), post);
     return v.ok ? { ok: true, said: "This device will be notified when something waits for your signature." } : { ok: false, said: `Not on: ${v.reason ?? "refused"}.` };
   } catch (e) {
     return { ok: false, said: `Not on: ${why(e)}.` };
+  }
+}
+
+/** Whether `had` was made with the server's key `want` (bytes). A subscription made under an older key is never pushed to again: chitin
+ * signs with its own key, and the push service refuses the old one's (vapid-self-mint addendum 1.3). */
+const sameKey = (had, want) => {
+  const cur = had?.options?.applicationServerKey;
+  if (!cur) return false;
+  const a = new Uint8Array(cur);
+  return a.length === want.length && a.every((b, i) => b === want[i]);
+};
+
+/** This device's subscription for the key `want`, handed to push/subscribe: `had` when it was made with that key; otherwise `had` is
+ * taken off (server, then browser) and a new one made with `want`. */
+async function subscribeWith(reg, had, want, post) {
+  const same = sameKey(had, want);
+  if (had && !same) { await post("push/unsubscribe", { endpoint: had.endpoint }); await had.unsubscribe(); }
+  const sub = had && same ? had : await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: want });
+  return post("push/subscribe", sub.toJSON ? sub.toJSON() : sub);
+}
+
+/**
+ * On page load: when this device is already subscribed and permission is already granted, check its subscription's key against
+ * fold serve's (`push/key`) and, if chitin's key changed, subscribe again with no prompt. Resolves to null when there was nothing
+ * to do (no push here, no permission, no subscription, no key, or the key is the same), else {ok, said}. Never throws, never asks.
+ */
+export async function notifyRefresh(base, { navigator: nav = globalThis.navigator, fetch = globalThis.fetch, Notification: N = globalThis.Notification, PushManager: P = globalThis.PushManager } = {}) {
+  const url = (p) => new URL(p, base).href;
+  const post = async (p, body) => answerOf(await fetch(url(p), { method: "POST", cache: "no-store", headers: { "content-type": "application/json" }, body: JSON.stringify(body) }));
+  try {
+    if (!nav?.serviceWorker || !P || !N || N.permission !== "granted") return null;
+    const reg = await nav.serviceWorker.ready, had = await reg.pushManager.getSubscription();
+    if (!had) return null;
+    const k = await answerOf(await fetch(url("push/key"), { cache: "no-store" }));
+    if (typeof k.key !== "string") return null;
+    const want = new Uint8Array(dec(k.key));
+    if (sameKey(had, want)) return null;
+    const v = await subscribeWith(reg, had, want, post);
+    return v.ok ? { ok: true, said: "Notifications on this device were renewed for the server's new key." } : { ok: false, said: `Notifications on this device stopped: ${v.reason ?? "refused"}.` };
+  } catch (e) {
+    return { ok: false, said: `Notifications on this device could not be renewed: ${why(e)}.` };
   }
 }
