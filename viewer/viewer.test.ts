@@ -647,13 +647,15 @@ test("rotor: each kind holds its folds from the whole page, in reading order", a
   const nodes = await rotorPage();
   const titles = (k: string, under: string[] = []) => kindItems(nodes, k, under).map((x: any) => x.node.title);
   expect(KINDS.map((k) => k.name)).toEqual(["needs", "actions", "sections", "stints", "landings", "messages", "links"]);
-  expect(titles("needs")).toEqual(["To a seat", "Pick a name for the rotor.", "fold-core #40"]);
+  // An item with no name is labelled by its action (src/lib.rs LABEL_KEYS), as on the page itself (the live fleet page's asks have
+  // no name): the rotor says each item as the page does.
+  expect(titles("needs")).toEqual(["To a seat", "Answer in chitin.", "Merge it."]);
   expect(titles("actions")).toEqual(["To a seat", "work-basis-rotor-stint"]);
   expect(titles("sections")).toEqual(["Needs you", "Goal sessions", "Messages to you"]);
   expect(titles("stints")).toEqual(["work-basis-rotor-stint"]);
-  expect(titles("landings")).toEqual(["fold-core #40"]);
+  expect(titles("landings")).toEqual(["Merge it."]);
   expect(titles("messages")).toEqual(["claude-break-glass", "allie-lead"]);
-  expect(titles("links")).toEqual(["fold-core #40"]);
+  expect(titles("links")).toEqual(["Merge it."]);
   // from the fold you are on: only what is under it, never the fold itself
   expect(titles("actions", ["needs"])).toEqual(["To a seat"]);
   expect(titles("sections", ["needs"])).toEqual([]);
