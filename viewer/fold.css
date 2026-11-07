@@ -56,6 +56,14 @@ ol.rows li.prop{display:block;cursor:default;min-height:0}
 ol.rows li.prop a{color:var(--accent)}
 li.act button{font-family:inherit;font-size:var(--s0);color:var(--paper);background:var(--accent);border:1px solid var(--accent);border-radius:.4em;padding:.5em 1em;min-height:44px}
 li.act .result{display:block}
+/* Approve and Decline differ without colour (a mark in the word, and a different outline), not only by tint. Long unbroken text (a 64-character
+   sha) wraps at a phone's width instead of running off the page. */
+form.act[data-call="approve"] button::before{content:"\2713\00a0"}
+form.act[data-call="decline"] button::before{content:"\2715\00a0"}
+form.act[data-call="decline"] button{color:var(--ink);background:transparent;border-style:dashed;border-width:2px}
+main,main p,main li,main dd,main span,#notices p{overflow-wrap:anywhere}
+form.act{margin-block:.5rem}
+form.act + form.act{margin-block-start:.75rem}
 ol.rows li.when,ol.rows li.step{color:var(--soft);font-size:var(--s-1)}
 ol.rows li.stale,ol.rows .hint.alert{color:var(--warn)}
 /* The rotor's drawer (index.html, rotor.js): fixed over the foot of the page, out of its flow, so opening it moves nothing. */

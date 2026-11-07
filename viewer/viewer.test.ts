@@ -339,7 +339,7 @@ test("sign: decline is a passkey verdict at its own endpoint, bound to a challen
   const id = "0123456789ab", it = { id, to: "personal-assistant", text: "Route the plan." }, shown = { to: it.to, text: it.text };
   expect(ENDPOINTS.decline(id)).toEqual(["/approve/v1/decline/0123456789ab", "/approve/v1/decline/0123456789ab"]);
   let g = gateway(it, { verdict: "decline" }), said: string[] = [];
-  expect(await sign(id, "decline", shown, { ...g, say: (m: string) => said.push(m) })).toEqual({ ok: true, said: "Declined. written m-9" });
+  expect(await sign(id, "decline", shown, { ...g, say: (m: string) => said.push(m) })).toEqual({ ok: true, said: "Declined." });
   expect(g.calls.map((c) => c.split(" {")[0])).toEqual(["GET /approve/v1/decline/0123456789ab", "passkey 1,2,3 phobos.test required 9", "POST /approve/v1/decline/0123456789ab"]);
   // with no frame (nothing is sent), the h said is the intent's text hash
   expect(said).toEqual(["Declining for personal-assistant, #deadbeefcafe: “Route the plan.”. Your passkey asks next."]);
@@ -414,6 +414,18 @@ test("links: only http(s) opens a new tab", () => {
   expect(target("HTTP://example.test/x")).toEqual(["_blank", "noopener"]);
   for (const h of ["fleet-run://claim-infra-723", "mailto:a@b.test", "tel:1", "#/needs"]) expect(target(h)).toEqual([null, null]);
   expect(target("https://example.test/x", true)).toEqual([null, null]);
+});
+
+// Basis report backlog (digest 2026-11-07): a passkey form is drawn only for an intent the live read lists as waiting; Approve and Decline
+// differ by mark and outline, not colour alone; long unbroken text wraps. (The wasm/DOM draw is held by the browser check; these hold the rules.)
+test("sign: unsignable items draw no verdict; Approve and Decline differ without colour; long text wraps", () => {
+  const page = readFileSync(join(import.meta.dir, "index.html"), "utf8"), css = readFileSync(join(import.meta.dir, "fold.css"), "utf8");
+  expect(page).toContain('(live?.needs?.waiting ?? []).map((w) => w.id)');
+  expect(page).toContain('"form[data-intent]")) if (!waiting.has(f.dataset.intent)) f.remove()');
+  expect(css).toContain('form.act[data-call="approve"] button::before{content:"\\2713\\00a0"}');
+  expect(css).toContain('form.act[data-call="decline"] button::before{content:"\\2715\\00a0"}');
+  expect(css).toContain('form.act[data-call="decline"] button{color:var(--ink);background:transparent;border-style:dashed');
+  expect(css).toContain("main,main p,main li,main dd,main span,#notices p{overflow-wrap:anywhere}");
 });
 
 // One notification action, in the rotor's drawer at the foot (Bobby 2026-11-07: "notification is weird. and we want all actions in the rotary

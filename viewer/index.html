@@ -192,6 +192,13 @@ function render(focus) {
   const main = toDom(document, v.tree);
   // The notification acts are the rotor's, not the fold's: one action in the drawer at the foot, its word following state (pageActs).
   for (const f of main.querySelectorAll("form[data-push]")) f.remove();
+  // An item that can't be signed is not drawn as signable (reports H30CX6, H5HTME, H60AWS, H6QXDQ, H8F5FC, H663EV, HV9H73): a passkey form
+  // is kept only for an intent the live read lists as waiting now. A producer's stale copy (page.json) of a signed or expired intent, or any
+  // item while the live read failed, offers neither Approve nor Decline.
+  if (needsUrl) {
+    const waiting = new Set((live?.needs?.waiting ?? []).map((w) => w.id));
+    for (const f of main.querySelectorAll("form[data-intent]")) if (!waiting.has(f.dataset.intent)) f.remove();
+  }
   document.querySelector("main").replaceWith(main);
   // Clax says the fold in view: reopened with its haecceity and its rows' (clax.js embed), never left on the last fold.
   if (clax?.mounted && v.path.join("/") !== claxAt) { claxAt = v.path.join("/"); clax.reopen(); }

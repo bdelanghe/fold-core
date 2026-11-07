@@ -68,7 +68,8 @@ export async function sign(id, verdict, shown, { fetch = globalThis.fetch, crede
     const body = { id: cred.id, rawId: enc(cred.rawId), type: cred.type, response: { clientDataJSON: enc(r.clientDataJSON), authenticatorData: enc(r.authenticatorData), signature: enc(r.signature), userHandle: r.userHandle ? enc(r.userHandle) : null } };
     const v = await again(() => fetch(assertion, { method: "POST", cache: "no-store", headers: { "content-type": "application/json" }, body: JSON.stringify(body) }), 0, wait);
     if (!v.ok) throw v.reason ?? "the assertion was refused";
-    return { ok: true, said: `${DONE[verdict](it.to)}${v.message ? ` ${v.message}` : ""}` };
+    // a decline's message only repeats it ("written <sha> declined"): "Declined." says it once; an approval's tells where it went
+    return { ok: true, said: `${DONE[verdict](it.to)}${verdict === "approve" && v.message ? ` ${v.message}` : ""}` };
   } catch (e) {
     return { ok: false, said: `${not}: ${why(e)}.` };
   }
