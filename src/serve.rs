@@ -536,7 +536,7 @@ fn needs(site: &Site, req: &Request) -> Response {
         return Response::text(403, why).with("Cache-Control", "no-store");
     }
     match a.actor.pending(title) {
-        Ok(p) => json_answer(200, &crate::needs::answer(title, &crate::needs::waiting(&p, title), a.notify_as.is_some())),
+        Ok(p) => json_answer(200, &crate::needs::live_answer(&p, title, a.notify_as.is_some())),
         Err(e) => json_answer(502, &json!({ "error": format!("chitin did not list them: {}", e.chars().filter(|c| !c.is_control()).take(200).collect::<String>()) })),
     }
 }

@@ -64,6 +64,50 @@ fn overlay(case: Value) -> Value {
     serde_json::from_str(&fold_core::wasm::needs_text(&case.to_string())).unwrap()
 }
 
+/// `basis needs --live` is the page: the same needs answer (needs::live_answer, which fold serve's needs.json also runs) and the same
+/// document give the same accessibility tree from the CLI's path (Doc over overlay_case) and from the viewer's (the wasm entries
+/// needs_text, then ax_text with the viewer's hrefs). Links and form actions are written in each reader's own address style (basis paths
+/// there, `#/…` here), so those two keys are dropped before comparing; everything else (names, roles, text, order, acts) must be equal.
+#[test]
+fn the_cli_reads_the_tree_the_page_is_drawn_from() {
+    fn bare(v: &mut Value) {
+        match v {
+            Value::Object(m) => {
+                m.remove("href");
+                m.remove("action");
+                m.values_mut().for_each(bare);
+            }
+            Value::Array(a) => a.iter_mut().for_each(bare),
+            _ => {}
+        }
+    }
+    let zone = Some("UTC".to_string());
+    for push in [false, true] {
+        let case = json!({ "root": page(), "needs": fold_core::needs::live_answer(&pending(), "bobby", push), "now": NOW_MS });
+        // the CLI's path
+        let cli_root = fold_core::needs::overlay_case(&case).unwrap();
+        let doc = fold_core::basis::Doc::new(&cli_root, zone.clone()).unwrap();
+        // the viewer's path
+        let page_root: Value = overlay(case);
+        let opts = fold_core::FoldOpts { local_time_zone: zone.clone(), ..Default::default() };
+        let nodes: std::collections::HashMap<String, Value> =
+            fold_core::fold(&page_root, &opts).into_iter().map(|(id, n)| (id, serde_json::to_value(n).unwrap())).collect();
+        let mut seen = 0;
+        for path in doc.paths() {
+            let key = if path.is_empty() { "root".to_string() } else { path.join("~") };
+            let input = json!({ "node": nodes.get(&key), "path": path, "mode": "folds", "href": "viewer", "localTimeZone": "UTC" });
+            let mut page_tree: Value = serde_json::from_str(&fold_core::wasm::ax_text(&input.to_string())).unwrap();
+            let mut cli_tree = doc.ax(&path);
+            bare(&mut page_tree);
+            bare(&mut cli_tree);
+            assert_eq!(cli_tree, page_tree, "fold {key} (push {push}): the CLI's tree is not the page's");
+            seen += 1;
+        }
+        assert_eq!(seen, nodes.len(), "every fold the page has, the CLI has");
+        assert!(doc.resolve("Needs you/Approvals").is_ok(), "Approvals is there to read");
+    }
+}
+
 #[test]
 fn the_overlay_puts_the_live_list_first_and_nothing_else() {
     let answered = json!({ "as": "bobby", "waiting": fold_core::needs::waiting(&pending(), "bobby") });

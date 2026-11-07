@@ -217,6 +217,12 @@ pub fn answer(title: &str, waiting: &[Value], push: bool) -> Value {
     json!({ "as": title, "waiting": waiting, "push": push })
 }
 
+/// `needs.json` as `fold serve` answers it for `title`, from `chitin pending --as <title> --json`'s list: the one place that list becomes the
+/// answer, shared by the route (src/serve.rs) and `basis needs --live`, so the CLI reads what the page reads.
+pub fn live_answer(pending: &Value, title: &str, push: bool) -> Value {
+    answer(title, &waiting(pending, title), push)
+}
+
 /// What is pushed for one waiting intent, as a `chitin notify` record chitin's notify-sink turns into a Web Push (its webpush.ts
 /// `needsYou`): the item's one line (its fold's title, `To <recipient>`: never its text, which may say more than a lock screen
 /// should), the item's fold as a path on `host` under the site's `mount`, with no query or fragment
