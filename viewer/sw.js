@@ -60,6 +60,9 @@ const NEEDS = "#/needs";
 /** A pushed fold path as the viewer's location: only a path under this app's own, each step plain; anything else is Needs you. */
 function itemUrl(p) {
   const root = new URL(scope).pathname;
+  // chitin names every pushed path under the mount /fold/ (webpush.ts safePath), but Basis is served at the root of its own origin
+  // (https://basis.<tailnet>.ts.net/, scope "/"): the mount is then not part of the app's location, so #/fold/needs/... would open nothing.
+  if (typeof p === "string" && root === "/" && p.startsWith("/fold/")) p = p.slice("/fold".length);
   if (typeof p !== "string" || !p.startsWith(root)) return scope + NEEDS;
   const steps = p.slice(root.length).split("/").filter(Boolean);
   if (!steps.length || steps.length > 8 || !steps.every((s) => /^[A-Za-z0-9._~-]{1,80}$/.test(s) && s !== "." && s !== "..")) return scope + NEEDS;
