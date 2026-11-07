@@ -115,6 +115,18 @@ export async function notifyHere(call, base, { navigator: nav = globalThis.navig
   }
 }
 
+/** Whether this device is being notified now: true (granted and subscribed), false (it could be), null (this browser can't). Never throws,
+ * never asks. The one notification action is labelled by it: "Notify me on this device", or "Stop notifying this device". */
+export async function notifyState({ navigator: nav = globalThis.navigator, Notification: N = globalThis.Notification, PushManager: P = globalThis.PushManager } = {}) {
+  try {
+    if (!nav?.serviceWorker || !P || !N) return null;
+    if (N.permission !== "granted") return false;
+    return !!(await (await nav.serviceWorker.ready).pushManager.getSubscription());
+  } catch {
+    return null;
+  }
+}
+
 /** Whether `had` was made with the server's key `want` (bytes). A subscription made under an older key is never pushed to again: chitin
  * signs with its own key, and the push service refuses the old one's (vapid-self-mint addendum 1.3). */
 const sameKey = (had, want) => {

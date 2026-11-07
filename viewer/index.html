@@ -79,7 +79,7 @@ import { core } from "./fold-core.js";
 import { KINDS, kindView, rotorKey, rotorStart } from "./rotor.js";
 import { toDom, liveLine } from "./fold-dom.js";
 import { at, beside, dataOf, docId, foldNodes, graft, haecceityOf, href as link, liveFolds, liveNodes, manifestRoot, modeOf, open, pathOf, shows, since, stamp, viewOf } from "./view.js";
-import { ENDPOINTS, intentOk, notifyHere, notifyRefresh, readNeeds, sign } from "./sign.js";
+import { ENDPOINTS, intentOk, notifyHere, notifyRefresh, notifyState, readNeeds, sign } from "./sign.js";
 import { embed } from "./clax.js";
 const zone = Intl.DateTimeFormat().resolvedOptions().timeZone;
 const meta = document.querySelector('meta[name="fold-data"]');
@@ -139,14 +139,19 @@ const rows = () => [...document.querySelectorAll("ol.rows > li.obj")]; // the ch
 // The rotor (rotor.js): its state, and the drawer's listbox.
 let rot = rotorStart(), rotWas = null;
 const rotBox = document.getElementById("rotor"), rotList = document.getElementById("rotor-kinds");
+// The page's own actions, after the kinds in the drawer: the one notification action, whose word follows state (never both words at once).
+// Only where this server sends notifications (needs.json's push) and this browser can take them (devOn is not null).
+let devOn = null;
+const pageActs = () => live?.needs?.push && devOn !== null ? [{ id: "notify", word: devOn ? "Stop notifying this device" : "Notify me on this device" }] : [];
 function drawRotor() {
-  rotList.replaceChildren(...KINDS.map((k, i) => {
+  const items = [...KINDS.map((k) => ({ word: k.word, current: k.name === rot.kind })), ...pageActs().map((a) => ({ word: a.word, current: false }))];
+  rotList.replaceChildren(...items.map((k, i) => {
     const li = document.createElement("li");
     li.id = `rotor-k-${i}`; li.setAttribute("role", "option"); li.setAttribute("aria-selected", String(i === rot.at));
-    if (k.name === rot.kind) li.setAttribute("aria-current", "true");
+    if (k.current) li.setAttribute("aria-current", "true");
     const n = document.createElement("span"); n.className = "rk-n"; n.setAttribute("aria-hidden", "true"); n.textContent = String(i + 1);
     li.append(n, " ", k.word);
-    li.addEventListener("click", () => rotorDo(rotorKey({ ...rot, at: i }, "Enter", here())));
+    li.addEventListener("click", () => rotorDo(rotorKey({ ...rot, at: i }, "Enter", here(), pageActs())));
     return li;
   }));
   rotList.setAttribute("aria-activedescendant", `rotor-k-${rot.at}`);
@@ -162,6 +167,19 @@ function rotorDo(r) {
   if (fx.view) { cur = 0; render(true); }
   else if ("leave" in fx) { cur = fx.leave?.cur ?? 0; render(true); }
   if (fx.say) say(fx.say);
+  if (fx.act === "notify") notifyToggle();
+}
+// The notification action: the one the label says, taken once; its confirmation is said once in the notices zone and goes after a while
+// (no standing banner). The state is read again after, so the drawer's word is right the next time.
+let toggling = false;
+async function notifyToggle() {
+  if (toggling) return;
+  toggling = true;
+  const r = await notifyHere(devOn ? "unsubscribe" : "subscribe", location.href);
+  devOn = await notifyState();
+  toggling = false;
+  say(r.said);
+  setTimeout(() => { if (said_ === r.said) say(null); }, 8000);
 }
 function render(focus) {
   // In a kind (the rotor): its view of the fold you came from, drawn as any fold is. Else the fold the location names.
@@ -172,6 +190,8 @@ function render(focus) {
   if (rot.kind) v.tree = ax({ node: v.node, path: [], mode: "folds", href: "viewer", localTimeZone: zone });
   node = v.node;
   const main = toDom(document, v.tree);
+  // The notification acts are the rotor's, not the fold's: one action in the drawer at the foot, its word following state (pageActs).
+  for (const f of main.querySelectorAll("form[data-push]")) f.remove();
   document.querySelector("main").replaceWith(main);
   // Clax says the fold in view: reopened with its haecceity and its rows' (clax.js embed), never left on the last fold.
   if (clax?.mounted && v.path.join("/") !== claxAt) { claxAt = v.path.join("/"); clax.reopen(); }
@@ -236,7 +256,7 @@ addEventListener("pointerdown", () => document.body.classList.remove("keys"));
 addEventListener("keydown", e => {
   if (e.metaKey || e.ctrlKey || e.altKey || /input|textarea/i.test(e.target.tagName)) return;
   // the rotor first: r, the drawer's keys, and in a kind ] [ h (rotor.js rotorKey); j k l Enter go on to the viewer's own
-  const r = rotorKey(rot, e.key, here());
+  const r = rotorKey(rot, e.key, here(), pageActs());
   if (r) { rotorDo(r); document.body.classList.add("keys"); e.preventDefault(); e.stopPropagation(); return; }
   if (e.key === "Enter" && /^(a|button|select)$/i.test(e.target.tagName)) return; // it does its own thing, once
   const p = pathOf(location.hash), k = node?.kids ?? [], deck = modeOf(location.hash, node) === "slides";
@@ -261,7 +281,8 @@ addEventListener("hashchange", () => {
 });
 // A device already notified, with permission already granted: if chitin's key changed, subscribe again now, with no prompt
 // (vapid-self-mint addendum 1.3). Says something only when it did something.
-notifyRefresh(location.href).then((r) => { if (r) say(r.said); });
+notifyRefresh(location.href).then((r) => { if (r) { say(r.said); setTimeout(() => { if (said_ === r.said) say(null); }, 8000); } });
+notifyState().then((s) => { devOn = s; });
 // An act on an intent (src/ax.rs act_form: data-intent, data-call), taken here; every other act submits natively (allie-lead 968825b4).
 // Both are passkey verdicts (BRIEF addendum 1), run against chitin-approve (sign.js), their words from the challenge. Either way, what
 // waits is read again, and an item that has gone takes you back to its group; what was done is said in the notices zone.

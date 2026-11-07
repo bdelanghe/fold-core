@@ -73,19 +73,23 @@ export const rotorStart = () => ({ drawer: false, at: 0, kind: "", from: null, l
  * the viewer's), else `{state, fx}`: `fx.view` enter that kind, `fx.leave` go back to where you were, `fx.drawer` "open" | "close" |
  * "draw", `fx.say` words for the live region. `from` is where you are now (`{hash, cur, title}`), kept when a kind is entered.
  */
-export function rotorKey(s, key, from = null) {
+export function rotorKey(s, key, from = null, acts = []) {
   const names = KINDS.map((k) => k.name);
+  // `acts`: actions of the page itself, listed after the kinds in the drawer (the notification act, whose word follows state). Picking one
+  // closes the drawer and returns `fx.act` = its id; it is not a kind, so no kind is entered and nothing is remembered as the last kind.
+  const total = names.length + acts.length;
+  const pick = (st, i) => (i < names.length ? enter(st, names[i]) : { state: { ...st, drawer: false }, fx: { drawer: "close", act: acts[i - names.length].id } });
   const say = (d) => (d < 0 ? "First kind" : "Last kind");
   const enter = (st, kind) => {
     if (kind === st.kind) return { state: { ...st, drawer: false }, fx: { drawer: "close", say: st.kind ? kindOf(kind).word : "" } };
     return { state: { ...st, drawer: false, kind, last: kind, from: st.kind ? st.from : from }, fx: { drawer: "close", view: kind, say: kindOf(kind).word } };
   };
   if (s.drawer) {
-    const move = (d) => { const j = s.at + d; return j < 0 || j >= names.length ? { state: s, fx: { say: say(d) } } : { state: { ...s, at: j }, fx: { drawer: "draw" } }; };
+    const move = (d) => { const j = s.at + d; return j < 0 || j >= total ? { state: s, fx: { say: say(d) } } : { state: { ...s, at: j }, fx: { drawer: "draw" } }; };
     if (key === "j" || key === "ArrowDown" || key === "]") return move(1);
     if (key === "k" || key === "ArrowUp" || key === "[") return move(-1);
-    if (key === "Enter") return enter(s, names[s.at]);
-    if (/^[1-9]$/.test(key) && names[Number(key) - 1]) return enter(s, names[Number(key) - 1]);
+    if (key === "Enter") return pick(s, s.at);
+    if (/^[1-9]$/.test(key) && Number(key) <= total) return pick(s, Number(key) - 1);
     if (key === "r") return enter(s, s.last);
     if (key === "Escape" || key === "h" || key === "ArrowLeft") return { state: { ...s, drawer: false }, fx: { drawer: "close", say: s.kind ? kindOf(s.kind).word : "" } };
     if (key === "Tab") return null; // Tab still leaves it, as anywhere

@@ -8,7 +8,7 @@ import { join } from "node:path";
 import { core } from "../js/fold-core.ts";
 import { toDom } from "./fold-dom.js";
 import { at, beside, dataOf, foldNodes, graft, haecceityOf, href, liveFolds, liveNodes, manifestRoot, open, pathOf, placeIn, revalidate, segmentOf, shows, since, stamp, underived, viewOf } from "./view.js";
-import { ENDPOINTS, dec, enc, notifyHere, notifyRefresh, readNeeds, sign } from "./sign.js";
+import { ENDPOINTS, dec, enc, notifyHere, notifyRefresh, notifyState, readNeeds, sign } from "./sign.js";
 import { aboutOf, contextOf, embed, flagUnnamed, pinOf, reportToken } from "./clax.js";
 import { KINDS, kindItems, kindView, rotorKey, rotorStart } from "./rotor.js";
 
@@ -401,6 +401,35 @@ test("notify: this device subscribes with the server's key, and stops", async ()
   calls.length = 0;
   expect((await notifyHere("subscribe", base, { ...env, PushManager: undefined } as any)).said).toContain("Home Screen");
   expect(calls).toEqual([]);
+});
+
+// One notification action, in the rotor's drawer at the foot (Bobby 2026-11-07: "notification is weird. and we want all actions in the rotary
+// control on the bottom"): its word follows state, never both words; picking it closes the drawer and returns fx.act; the folds carry no
+// notification form; its confirmation is said once and goes.
+test("notify: the one action lives in the rotor drawer and follows state", async () => {
+  const sub = { endpoint: "https://web.push.apple.com/x" };
+  const env = (permission: string, had: unknown) => ({ navigator: { serviceWorker: { ready: Promise.resolve({ pushManager: { getSubscription: async () => had } }) } }, PushManager: function () {}, Notification: { permission } });
+  expect(await notifyState(env("default", null))).toBe(false);
+  expect(await notifyState(env("granted", null))).toBe(false);
+  expect(await notifyState(env("granted", sub))).toBe(true);
+  expect(await notifyState({ ...env("granted", sub), PushManager: undefined } as any)).toBe(null);
+  // the drawer: the kinds, then the action; j/k and digits reach it; Enter or its digit picks it and closes the drawer
+  const from = { hash: "#/", path: [], cur: 0, title: "" }, acts = [{ id: "notify", word: "Notify me on this device" }];
+  let d = rotorKey(rotorStart(), "r", from, acts)!;
+  for (let i = 0; i < KINDS.length; i++) d = rotorKey(d.state, "j", from, acts)!;
+  expect([d.state.at, d.fx.drawer]).toEqual([KINDS.length, "draw"]);
+  expect(rotorKey(d.state, "j", from, acts)!.fx).toEqual({ say: "Last kind" });
+  expect(rotorKey(d.state, "Enter", from, acts)!.fx).toEqual({ drawer: "close", act: "notify" });
+  expect(rotorKey(d.state, "Enter", from, acts)!.state.last).toBe(KINDS[0].name); // not a kind: nothing remembered
+  const open = rotorKey(rotorStart(), "r", from, acts)!;
+  expect(rotorKey(open.state, String(KINDS.length + 1), from, acts)!.fx).toEqual({ drawer: "close", act: "notify" });
+  expect(rotorKey(open.state, String(KINDS.length + 1), from, [])!.fx).toEqual({}); // no action offered: that digit does nothing
+  // the page: the action only where the server sends notifications and the browser can take them; the folds' own notification forms are dropped;
+  // the confirmation is said once and cleared
+  const page = readFileSync(join(import.meta.dir, "index.html"), "utf8");
+  expect(page).toContain('live?.needs?.push && devOn !== null ? [{ id: "notify", word: devOn ? "Stop notifying this device" : "Notify me on this device" }] : []');
+  expect(page).toContain('main.querySelectorAll("form[data-push]")) f.remove()');
+  expect(page).toContain("if (said_ === r.said) say(null)");
 });
 
 // A key chitin minted again (vapid-self-mint addendum 1.3): a subscription made with key A while the server's key is B is never reused.
