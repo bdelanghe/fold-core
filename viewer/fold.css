@@ -61,7 +61,7 @@ li.act .result{display:block}
 form.act[data-call="approve"] button::before{content:"\2713\00a0"}
 form.act[data-call="decline"] button::before{content:"\2715\00a0"}
 form.act[data-call="decline"] button{color:var(--ink);background:transparent;border-style:dashed;border-width:2px}
-main,main p,main li,main dd,main span,#notices p{overflow-wrap:anywhere}
+main,main p,main li,main dd,main span,aside.notices p{overflow-wrap:anywhere}
 form.act{margin-block:.5rem}
 form.act + form.act{margin-block-start:.75rem}
 ol.rows li.when,ol.rows li.step{color:var(--soft);font-size:var(--s-1)}

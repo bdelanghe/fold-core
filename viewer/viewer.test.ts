@@ -425,7 +425,7 @@ test("sign: unsignable items draw no verdict; Approve and Decline differ without
   expect(css).toContain('form.act[data-call="approve"] button::before{content:"\\2713\\00a0"}');
   expect(css).toContain('form.act[data-call="decline"] button::before{content:"\\2715\\00a0"}');
   expect(css).toContain('form.act[data-call="decline"] button{color:var(--ink);background:transparent;border-style:dashed');
-  expect(css).toContain("main,main p,main li,main dd,main span,#notices p{overflow-wrap:anywhere}");
+  expect(css).toContain("main,main p,main li,main dd,main span,aside.notices p{overflow-wrap:anywhere}");
 });
 
 // One notification action, in the rotor's drawer at the foot (Bobby 2026-11-07: "notification is weird. and we want all actions in the rotary
