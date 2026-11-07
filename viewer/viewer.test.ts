@@ -403,6 +403,19 @@ test("notify: this device subscribes with the server's key, and stops", async ()
   expect(calls).toEqual([]);
 });
 
+// Only http(s) links open a new tab; fleet-run:, mailto: and the like navigate in place (a _blank tab stayed behind empty after Chrome handed
+// fleet-run:// to FleetRun.app). A page-local link and a fold's own page are not new tabs either.
+test("links: only http(s) opens a new tab", () => {
+  const target = (href: string, local = false) => {
+    const a = toDom(doc, { role: "link", name: "x", href, ...(local ? { local: true } : {}) } as any) as El;
+    return [a.target ?? null, a.rel ?? null];
+  };
+  expect(target("https://example.test/x")).toEqual(["_blank", "noopener"]);
+  expect(target("HTTP://example.test/x")).toEqual(["_blank", "noopener"]);
+  for (const h of ["fleet-run://claim-infra-723", "mailto:a@b.test", "tel:1", "#/needs"]) expect(target(h)).toEqual([null, null]);
+  expect(target("https://example.test/x", true)).toEqual([null, null]);
+});
+
 // One notification action, in the rotor's drawer at the foot (Bobby 2026-11-07: "notification is weird. and we want all actions in the rotary
 // control on the bottom"): its word follows state, never both words; picking it closes the drawer and returns fx.act; the folds carry no
 // notification form; its confirmation is said once and goes.

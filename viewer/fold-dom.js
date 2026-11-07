@@ -69,7 +69,8 @@ export function toDom(doc, ax, ids = { n: 0 }, row = null) {
   if (ax.role === "status") e.setAttribute("role", "status");
   // Off-page links open a new tab: clax frames the page without allow-top-navigation, so a plain link there goes nowhere.
   // A link to another fold's page (`local`, src/page.rs) is a move within the fold, as a `#` one is.
-  if (ax.role === "link" && !ax.href.startsWith("#") && !ax.local) { e.target = "_blank"; e.rel = "noopener"; }
+  // Only http(s) opens a tab: another scheme (fleet-run:, mailto:) is handed to its app by the browser, and a _blank tab would stay behind empty.
+  if (ax.role === "link" && /^https?:/i.test(ax.href) && !ax.local) { e.target = "_blank"; e.rel = "noopener"; }
   if (ax.index != null) e.dataset.i = ax.index;
   if (ax.name && !(ax.children ?? []).length && ax.role !== "list" && ax.role !== "navigation" && ax.role !== "textbox") e.textContent = ax.name;
   for (const c of ax.children ?? []) { const x = toDom(doc, c, ids, ax.id || row); e.append(x); if (x._desc) e.append(x._desc); }
