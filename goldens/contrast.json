@@ -20,6 +20,10 @@
     "primitive.washi-dark": "#1C2822",
     "primitive.seam-dark": "#0E1612",
     "primitive.moss-dark": "#26352D",
+    "primitive.olive": "#3B4535",
+    "primitive.olive-dark": "#24322A",
+    "primitive.edge": "#CFC9BA",
+    "primitive.edge-dark": "#3A4138",
     "light.paper": "#EDEAE1",
     "light.card": "#FFFFFF",
     "light.ink": "#16221C",
@@ -27,9 +31,11 @@
     "light.line": "#888374",
     "light.accent": "#0C5A42",
     "light.warn": "#8A2B12",
-    "light.floor": "#E3DFD3",
+    "light.floor": "#CFC9BA",
     "light.mat": "#F7F4EE",
     "light.here": "#D8DBCE",
+    "light.rail": "#3B4535",
+    "light.on-rail": "#F7F4EE",
     "dark.paper": "#16221C",
     "dark.card": "#22302A",
     "dark.ink": "#ECEAE3",
@@ -37,9 +43,11 @@
     "dark.line": "#888374",
     "dark.accent": "#8FC3A8",
     "dark.warn": "#FF9C80",
-    "dark.floor": "#0E1612",
+    "dark.floor": "#3A4138",
     "dark.mat": "#1C2822",
     "dark.here": "#26352D",
+    "dark.rail": "#24322A",
+    "dark.on-rail": "#ECEAE3",
     "light-more.paper": "#FFFFFF",
     "light-more.card": "#FFFFFF",
     "light-more.ink": "#000000",
@@ -50,6 +58,8 @@
     "light-more.floor": "#000000",
     "light-more.mat": "#FFFFFF",
     "light-more.here": "#FFFFFF",
+    "light-more.rail": "#000000",
+    "light-more.on-rail": "#FFFFFF",
     "dark-more.paper": "#000000",
     "dark-more.card": "#16221C",
     "dark-more.ink": "#FFFFFF",
@@ -60,6 +70,8 @@
     "dark-more.floor": "#FFFFFF",
     "dark-more.mat": "#000000",
     "dark-more.here": "#000000",
+    "dark-more.rail": "#FFFFFF",
+    "dark-more.on-rail": "#000000",
     "forced.paper": "Canvas",
     "forced.card": "Canvas",
     "forced.ink": "CanvasText",
@@ -69,7 +81,9 @@
     "forced.warn": "CanvasText",
     "forced.floor": "CanvasText",
     "forced.mat": "Canvas",
-    "forced.here": "Canvas"
+    "forced.here": "Canvas",
+    "forced.rail": "Canvas",
+    "forced.on-rail": "CanvasText"
   },
   "pairs": [
     {
@@ -181,10 +195,16 @@
       "label": "a link or the search button on a mat (light)"
     },
     {
+      "fg": "light.on-rail",
+      "bg": "light.rail",
+      "min": 4.5,
+      "label": "the rail: 畳 / Basis, the places and Report (light)"
+    },
+    {
       "fg": "light.floor",
       "bg": "light.mat",
-      "min": 1.1,
-      "label": "the seam between mats (an edge, not text) (light)"
+      "min": 1.15,
+      "label": "the hairline edge between mats (an edge, not text) (light)"
     },
     {
       "fg": "dark.ink",
@@ -295,10 +315,16 @@
       "label": "a link or the search button on a mat (dark)"
     },
     {
+      "fg": "dark.on-rail",
+      "bg": "dark.rail",
+      "min": 4.5,
+      "label": "the rail: 畳 / Basis, the places and Report (dark)"
+    },
+    {
       "fg": "dark.floor",
       "bg": "dark.mat",
-      "min": 1.1,
-      "label": "the seam between mats (an edge, not text) (dark)"
+      "min": 1.15,
+      "label": "the hairline edge between mats (an edge, not text) (dark)"
     },
     {
       "fg": "light-more.ink",
@@ -409,10 +435,16 @@
       "label": "a link or the search button on a mat (light-more)"
     },
     {
+      "fg": "light-more.on-rail",
+      "bg": "light-more.rail",
+      "min": 7.0,
+      "label": "the rail: 畳 / Basis, the places and Report (light-more)"
+    },
+    {
       "fg": "light-more.floor",
       "bg": "light-more.mat",
       "min": 3.0,
-      "label": "the seam between mats (an edge, not text) (light-more)"
+      "label": "the hairline edge between mats (an edge, not text) (light-more)"
     },
     {
       "fg": "dark-more.ink",
@@ -523,10 +555,16 @@
       "label": "a link or the search button on a mat (dark-more)"
     },
     {
+      "fg": "dark-more.on-rail",
+      "bg": "dark-more.rail",
+      "min": 7.0,
+      "label": "the rail: 畳 / Basis, the places and Report (dark-more)"
+    },
+    {
       "fg": "dark-more.floor",
       "bg": "dark-more.mat",
       "min": 3.0,
-      "label": "the seam between mats (an edge, not text) (dark-more)"
+      "label": "the hairline edge between mats (an edge, not text) (dark-more)"
     }
   ],
   "results": [
@@ -675,11 +713,19 @@
       "pass": true
     },
     {
+      "fg": "light.on-rail",
+      "bg": "light.rail",
+      "min": 4.5,
+      "label": "the rail: 畳 / Basis, the places and Report (light)",
+      "ratio": 9.15902789688883,
+      "pass": true
+    },
+    {
       "fg": "light.floor",
       "bg": "light.mat",
-      "min": 1.1,
-      "label": "the seam between mats (an edge, not text) (light)",
-      "ratio": 1.2136696550573685,
+      "min": 1.15,
+      "label": "the hairline edge between mats (an edge, not text) (light)",
+      "ratio": 1.5042901660845012,
       "pass": true
     },
     {
@@ -827,11 +873,19 @@
       "pass": true
     },
     {
+      "fg": "dark.on-rail",
+      "bg": "dark.rail",
+      "min": 4.5,
+      "label": "the rail: 畳 / Basis, the places and Report (dark)",
+      "ratio": 11.149131397160184,
+      "pass": true
+    },
+    {
       "fg": "dark.floor",
       "bg": "dark.mat",
-      "min": 1.1,
-      "label": "the seam between mats (an edge, not text) (dark)",
-      "ratio": 1.2047154282391714,
+      "min": 1.15,
+      "label": "the hairline edge between mats (an edge, not text) (dark)",
+      "ratio": 1.4485066401543014,
       "pass": true
     },
     {
@@ -979,10 +1033,18 @@
       "pass": true
     },
     {
+      "fg": "light-more.on-rail",
+      "bg": "light-more.rail",
+      "min": 7.0,
+      "label": "the rail: 畳 / Basis, the places and Report (light-more)",
+      "ratio": 21.0,
+      "pass": true
+    },
+    {
       "fg": "light-more.floor",
       "bg": "light-more.mat",
       "min": 3.0,
-      "label": "the seam between mats (an edge, not text) (light-more)",
+      "label": "the hairline edge between mats (an edge, not text) (light-more)",
       "ratio": 21.0,
       "pass": true
     },
@@ -1131,10 +1193,18 @@
       "pass": true
     },
     {
+      "fg": "dark-more.on-rail",
+      "bg": "dark-more.rail",
+      "min": 7.0,
+      "label": "the rail: 畳 / Basis, the places and Report (dark-more)",
+      "ratio": 21.0,
+      "pass": true
+    },
+    {
       "fg": "dark-more.floor",
       "bg": "dark-more.mat",
       "min": 3.0,
-      "label": "the seam between mats (an edge, not text) (dark-more)",
+      "label": "the hairline edge between mats (an edge, not text) (dark-more)",
       "ratio": 21.0,
       "pass": true
     }
@@ -1321,13 +1391,23 @@
       "pass": true
     },
     {
+      "fg": "on-rail",
+      "bg": "rail",
+      "system": [
+        "CanvasText",
+        "Canvas"
+      ],
+      "label": "the rail: 畳 / Basis, the places and Report",
+      "pass": true
+    },
+    {
       "fg": "floor",
       "bg": "mat",
       "system": [
         "CanvasText",
         "Canvas"
       ],
-      "label": "the seam between mats (an edge, not text)",
+      "label": "the hairline edge between mats (an edge, not text)",
       "pass": true
     }
   ]
