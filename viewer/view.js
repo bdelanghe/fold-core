@@ -318,11 +318,18 @@ export function liveFolds(top, { fetch = globalThis.fetch, changed = () => {}, w
 
 /** The kinds of source Basis knows (Bobby 11-02: "think like adding a podcast or rss feed"). Only a fold document is read today; a
  * feed (RSS, Atom, a podcast's) is named so the box can say it is not read yet, never fetched as if it were a fold. */
-export const KINDS = { fold: "a fold document", feed: "a feed (RSS, Atom or a podcast)" };
+export const KINDS = { fold: "a fold document", feed: "a feed (RSS, Atom or a podcast)", query: "a stored query" };
 /** The kind of source a typed address is: a feed by its scheme or its look (`feed:`, `podcast:`, `.rss`, `.atom`, `.xml`, a
- * `/feed` or `/rss` path), else a fold document. */
+ * `/feed` or `/rss` path); a stored query by its NAME (a bare word like `needs-you`: no slash, dot or colon, so it can never be a path or
+ * a URL); else a fold document. */
 export const kindOf = (text) =>
-  /^(feed|podcast|itpc|pcast):/i.test(text) || /(\.(rss|atom|xml)|\/(feed|rss|atom))\/?(\?.*)?$/i.test(text) ? "feed" : "fold";
+  /^(feed|podcast|itpc|pcast):/i.test(text) || /(\.(rss|atom|xml)|\/(feed|rss|atom))\/?(\?.*)?$/i.test(text) ? "feed"
+    : QUERY_NAME.test(text) ? "query" : "fold";
+/** A stored query's name (facto Query vertices, programs/fleet-map/nodes/*.cypher `// query: <name> v<n>`). */
+export const QUERY_NAME = /^[a-z][a-z0-9-]*$/;
+/** Where a stored query is read: the fold its runner writes (`// pick: true` queries, run-queries.ts), a manifest of one part. The name is
+ * checked against QUERY_NAME, so no path is ever built from free text beyond a name. */
+export const queryPath = (name) => `/fold-data/fleet/q.${name}.jsonld`;
 
 /** The document this viewer reads: the fold-data meta's (`{path, source}`), or one named in the address (`?data=<path>`, as Basis's
  * add-a-source box submits it) by an absolute path on this origin. Anything else is refused, never fetched: `{path, error}`. */
@@ -330,6 +337,8 @@ export function dataOf(search, base, meta) {
   const named = new URLSearchParams(search).get("data")?.trim();
   if (named == null || named === "") return { path: meta.path, url: new URL(meta.path, base).href, source: meta.source };
   const kind = kindOf(named);
+  // a stored query by name: its fold is the manifest the runner writes beside the fleet's folds; one not registered is a missing fold, said on Basis
+  if (kind === "query") { const path = queryPath(named); return { path, url: new URL(path, base).href, source: null, kind, query: named }; }
   if (kind !== "fold") return { path: named, kind, error: `${KINDS[kind]} is not read yet; only a fold document is` };
   const u = new URL(named, base);
   if (!/^\/(?![/\\])/.test(named) || u.origin !== new URL(base).origin) return { path: named, error: "only a path on this site, from /, is read" };

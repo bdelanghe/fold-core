@@ -78,7 +78,7 @@
 import { core } from "./fold-core.js";
 import { KINDS, kindView, rotorKey, rotorStart } from "./rotor.js";
 import { toDom, liveLine } from "./fold-dom.js";
-import { at, basisOf, beside, BASIS, dataOf, docId, foldNodes, framed, graft, haecceityOf, href as link, isBasis, keep, liveFolds, liveNodes, manifestRoot, modeOf, named, nameOf, open, pathOf, shows, since, stamp, viewOf } from "./view.js";
+import { at, basisOf, beside, BASIS, dataOf, docId, foldNodes, framed, graft, haecceityOf, href as link, isBasis, keep, liveFolds, liveNodes, manifestRoot, modeOf, named, nameOf, open, pathOf, queryPath, shows, since, stamp, viewOf } from "./view.js";
 import { ENDPOINTS, intentOk, notifyHere, notifyRefresh, notifyState, readNeeds, sign } from "./sign.js";
 import { embed } from "./clax.js";
 const zone = Intl.DateTimeFormat().resolvedOptions().timeZone;
@@ -188,8 +188,15 @@ async function notifyToggle() {
 function basis() {
   const homeName = (name && !data.error && data.url === new URL(meta.content, location.href).href ? name : null)
     ?? sources.find((s) => s.path === meta.content)?.name ?? nameOf(meta.content, null);
-  return basisOf(ax, sources, meta.content, homeName, data.error ? { value: data.path, error: data.error } : {}, zone);
+  // the stored queries a person can pick (fleet/queries.jsonld, written by the runner from the facto Query vertices marked pick), listed after the sources kept
+  const picks = registered.filter((q) => !sources.some((s) => s.path === q.path));
+  return basisOf(ax, [...sources, ...picks], meta.content, homeName, data.error ? { value: data.path, error: data.error } : {}, zone);
 }
+let registered = [];
+fetch(new URL("/fold-data/fleet/queries.jsonld", location.href), { cache: "no-cache" }).then((r) => (r.ok ? r.json() : null)).then((m) => {
+  registered = (m?.parts ?? []).filter((p) => typeof p?.["@id"] === "string").map((p) => ({ kind: "query", path: queryPath(String(p["@id"]).split("/").pop().replace(/^q\./, "")), name: String(p.title ?? p["@id"]) }));
+  if (registered.length && isBasis(location.hash)) render(false);
+}).catch(() => {});
 function render(focus) {
   // On Basis: its own fold. In a kind (the rotor): its view of the fold you came from, drawn as any fold is. Else the fold the location names,
   // with Basis above it (its path starts there) and its root named by the document, not "Everything".
@@ -275,7 +282,7 @@ async function load() {
     // Its root named by the document (its own title, or its path: "Fleet"), never "Everything"; and kept on Basis by that name.
     name = nameOf(data.path, read.get("root")?.title);
     const next = named(read, name);
-    if (!kept) { sources = keep(sources, { kind: "fold", path: data.path, name }); try { localStorage.setItem(KEPT, JSON.stringify(sources)); } catch {} }
+    if (!kept) { sources = keep(sources, { kind: data.kind ?? "fold", path: data.path, name }); try { localStorage.setItem(KEPT, JSON.stringify(sources)); } catch {} }
     const text = JSON.stringify([...next]);
     if (text === said) { stale(); return false; }
     nodes = next; said = text; return true;
