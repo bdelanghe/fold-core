@@ -128,11 +128,18 @@
       "label": "a link or the search button on a mat"
     },
     {
+      "fg": "on-rail",
+      "bg": "rail",
+      "min": 4.5,
+      "more": 7,
+      "label": "the rail: 畳 / Basis, the places and Report"
+    },
+    {
       "fg": "floor",
       "bg": "mat",
-      "min": 1.1,
+      "min": 1.15,
       "more": 3,
-      "label": "the seam between mats (an edge, not text)"
+      "label": "the hairline edge between mats (an edge, not text)"
     }
   ],
   "primitive": {
@@ -193,6 +200,18 @@
     },
     "moss-dark": {
       "$value": "#26352D"
+    },
+    "olive": {
+      "$value": "#3B4535"
+    },
+    "olive-dark": {
+      "$value": "#24322A"
+    },
+    "edge": {
+      "$value": "#CFC9BA"
+    },
+    "edge-dark": {
+      "$value": "#3A4138"
     }
   },
   "light": {
@@ -219,13 +238,19 @@
       "$value": "{primitive.rust}"
     },
     "floor": {
-      "$value": "{primitive.seam}"
+      "$value": "{primitive.edge}"
     },
     "mat": {
       "$value": "{primitive.washi}"
     },
     "here": {
       "$value": "{primitive.moss}"
+    },
+    "rail": {
+      "$value": "{primitive.olive}"
+    },
+    "on-rail": {
+      "$value": "{primitive.washi}"
     }
   },
   "dark": {
@@ -252,13 +277,19 @@
       "$value": "{primitive.coral}"
     },
     "floor": {
-      "$value": "{primitive.seam-dark}"
+      "$value": "{primitive.edge-dark}"
     },
     "mat": {
       "$value": "{primitive.washi-dark}"
     },
     "here": {
       "$value": "{primitive.moss-dark}"
+    },
+    "rail": {
+      "$value": "{primitive.olive-dark}"
+    },
+    "on-rail": {
+      "$value": "{primitive.bone}"
     }
   },
   "light-more": {
@@ -291,6 +322,12 @@
       "$value": "{primitive.white}"
     },
     "here": {
+      "$value": "{primitive.white}"
+    },
+    "rail": {
+      "$value": "{primitive.black}"
+    },
+    "on-rail": {
       "$value": "{primitive.white}"
     }
   },
@@ -325,6 +362,12 @@
     },
     "here": {
       "$value": "{primitive.black}"
+    },
+    "rail": {
+      "$value": "{primitive.white}"
+    },
+    "on-rail": {
+      "$value": "{primitive.black}"
     }
   },
   "forced": {
@@ -358,6 +401,12 @@
     },
     "here": {
       "$value": "Canvas"
+    },
+    "rail": {
+      "$value": "Canvas"
+    },
+    "on-rail": {
+      "$value": "CanvasText"
     }
   }
 }

@@ -8,14 +8,14 @@
 /* The colours, light and dark, are written from theme.tokens.json (a Baobab pinning, src/baobab.rs) and proven there; edit the tokens
    and run FOLD_BLESS=1 cargo test --test contrast, never the lines between these marks. */
 /* baobab:begin */
-:root{--paper:#EDEAE1;--card:#FFFFFF;--ink:#16221C;--soft:#5C6B63;--line:#888374;--accent:#0C5A42;--warn:#8A2B12;--floor:#E3DFD3;--mat:#F7F4EE;--here:#D8DBCE;}
-@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--paper:#16221C;--card:#22302A;--ink:#ECEAE3;--soft:#A9B5AE;--line:#888374;--accent:#8FC3A8;--warn:#FF9C80;--floor:#0E1612;--mat:#1C2822;--here:#26352D;}}
-:root[data-theme="dark"]{--paper:#16221C;--card:#22302A;--ink:#ECEAE3;--soft:#A9B5AE;--line:#888374;--accent:#8FC3A8;--warn:#FF9C80;--floor:#0E1612;--mat:#1C2822;--here:#26352D;}
-@media (prefers-contrast:more) and (prefers-color-scheme:light){:root:not([data-theme="dark"]){--paper:#FFFFFF;--card:#FFFFFF;--ink:#000000;--soft:#16221C;--line:#5C6B63;--accent:#0C5A42;--warn:#8A2B12;--floor:#000000;--mat:#FFFFFF;--here:#FFFFFF;}}
-@media (prefers-contrast:more){:root[data-theme="light"]{--paper:#FFFFFF;--card:#FFFFFF;--ink:#000000;--soft:#16221C;--line:#5C6B63;--accent:#0C5A42;--warn:#8A2B12;--floor:#000000;--mat:#FFFFFF;--here:#FFFFFF;}}
-@media (prefers-contrast:more) and (prefers-color-scheme:dark){:root:not([data-theme="light"]){--paper:#000000;--card:#16221C;--ink:#FFFFFF;--soft:#ECEAE3;--line:#A9B5AE;--accent:#8FC3A8;--warn:#FF9C80;--floor:#FFFFFF;--mat:#000000;--here:#000000;}}
-@media (prefers-contrast:more){:root[data-theme="dark"]{--paper:#000000;--card:#16221C;--ink:#FFFFFF;--soft:#ECEAE3;--line:#A9B5AE;--accent:#8FC3A8;--warn:#FF9C80;--floor:#FFFFFF;--mat:#000000;--here:#000000;}}
-@media (forced-colors:active){:root,:root[data-theme]{--paper:Canvas;--card:Canvas;--ink:CanvasText;--soft:CanvasText;--line:CanvasText;--accent:LinkText;--warn:CanvasText;--floor:CanvasText;--mat:Canvas;--here:Canvas;}}
+:root{--paper:#EDEAE1;--card:#FFFFFF;--ink:#16221C;--soft:#5C6B63;--line:#888374;--accent:#0C5A42;--warn:#8A2B12;--floor:#CFC9BA;--mat:#F7F4EE;--here:#D8DBCE;--rail:#3B4535;--on-rail:#F7F4EE;}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--paper:#16221C;--card:#22302A;--ink:#ECEAE3;--soft:#A9B5AE;--line:#888374;--accent:#8FC3A8;--warn:#FF9C80;--floor:#3A4138;--mat:#1C2822;--here:#26352D;--rail:#24322A;--on-rail:#ECEAE3;}}
+:root[data-theme="dark"]{--paper:#16221C;--card:#22302A;--ink:#ECEAE3;--soft:#A9B5AE;--line:#888374;--accent:#8FC3A8;--warn:#FF9C80;--floor:#3A4138;--mat:#1C2822;--here:#26352D;--rail:#24322A;--on-rail:#ECEAE3;}
+@media (prefers-contrast:more) and (prefers-color-scheme:light){:root:not([data-theme="dark"]){--paper:#FFFFFF;--card:#FFFFFF;--ink:#000000;--soft:#16221C;--line:#5C6B63;--accent:#0C5A42;--warn:#8A2B12;--floor:#000000;--mat:#FFFFFF;--here:#FFFFFF;--rail:#000000;--on-rail:#FFFFFF;}}
+@media (prefers-contrast:more){:root[data-theme="light"]{--paper:#FFFFFF;--card:#FFFFFF;--ink:#000000;--soft:#16221C;--line:#5C6B63;--accent:#0C5A42;--warn:#8A2B12;--floor:#000000;--mat:#FFFFFF;--here:#FFFFFF;--rail:#000000;--on-rail:#FFFFFF;}}
+@media (prefers-contrast:more) and (prefers-color-scheme:dark){:root:not([data-theme="light"]){--paper:#000000;--card:#16221C;--ink:#FFFFFF;--soft:#ECEAE3;--line:#A9B5AE;--accent:#8FC3A8;--warn:#FF9C80;--floor:#FFFFFF;--mat:#000000;--here:#000000;--rail:#FFFFFF;--on-rail:#000000;}}
+@media (prefers-contrast:more){:root[data-theme="dark"]{--paper:#000000;--card:#16221C;--ink:#FFFFFF;--soft:#ECEAE3;--line:#A9B5AE;--accent:#8FC3A8;--warn:#FF9C80;--floor:#FFFFFF;--mat:#000000;--here:#000000;--rail:#FFFFFF;--on-rail:#000000;}}
+@media (forced-colors:active){:root,:root[data-theme]{--paper:Canvas;--card:Canvas;--ink:CanvasText;--soft:CanvasText;--line:CanvasText;--accent:LinkText;--warn:CanvasText;--floor:CanvasText;--mat:Canvas;--here:Canvas;--rail:Canvas;--on-rail:CanvasText;}}
 /* baobab:end */
 :root{--face:"Atkinson Hyperlegible Next",system-ui,-apple-system,sans-serif;
   --s0:18px;--r:1.2;--s-1:calc(var(--s0) / var(--r));--s1:calc(var(--s0) * var(--r));--s2:calc(var(--s0) * var(--r) * var(--r));--s3:calc(var(--s2) * var(--r))}
@@ -70,40 +70,88 @@ main.slide{max-width:56rem}
 main.slide h1{font-size:var(--s3);margin-top:1.5rem}
 main.slide ol.rows li.prop{font-size:var(--s1)}
 
-/* ── The room (Tatami design rules v0.1, Bobby 2026-11-08: "a system of adjoining surfaces, not a collection of cards"). The top of the
-   document only (index.html adds main.room): its heading is the title mat, its one list's objects are mats laid on a narrow floor
-   seam, the first (what needs you) in the "here" colour, and its read rows share a mat under them. Nothing floats: no shadow, no
-   rounded corner; whitespace lives inside a mat. The tree is untouched (one heading, one list, rows that are links). Colours are
-   the tokens' floor, mat and here (theme.tokens.json); each mat keeps an edge, so forced colours still draw the seams. */
-body.in-room aside.notices{max-width:none;margin:8px 8px 0;background:var(--mat);border:1px solid var(--floor);border-left:4px solid var(--accent)}
-body.in-room form.reading{max-width:none;margin:0 8px 8px;padding:14px 26px;background:var(--mat);border:1px solid var(--floor)}
-main.room{max-width:none;margin:0;padding:8px;display:grid;gap:8px;background:var(--floor);outline:1px solid var(--floor)}
-main.room h1{margin:0;padding:28px 26px 30px;background:var(--mat);border:1px solid var(--floor);font-size:var(--s3);font-weight:700;letter-spacing:-.01em}
-main.room h1::before{content:"畳 / Basis" / "";display:block;font:var(--s-1)/1.3 var(--face);font-weight:400;color:var(--soft);margin-bottom:.6rem;letter-spacing:0}
-main.room ol.rows{margin:0;display:grid;grid-template-columns:1fr;gap:8px;counter-reset:mat}
+/* ── The room (Tatami design rules v0.1; Bobby's Basis design 2026-11-08, https://claude.ai/artifact/JpC8GjYAzwgKa2yRsJMia2).
+   The top of the document (index.html adds main.room, body.in-room): the viewport is the room and the page never scrolls (100dvh,
+   overflow hidden). Mats share 1px edges (--floor is the edge colour); nothing floats; no shadow, no rounded corner, no arrow out.
+   Wide: an olive rail (the heading 畳 / Basis, the places past the fourth mat, the read rows) beside the mats in a 1.62 : 1 room, the
+   notices strip on the room's top edge; narrow: the strip, then the mats stacked, the rail's places last. The tree is untouched
+   (one heading, one list, rows that are links); kickers and 畳 are CSS content with empty alt text. Colours: the tokens' floor,
+   mat, here, rail and on-rail. */
+body.in-room{height:100dvh;overflow:hidden;display:grid;grid-template-rows:2rem minmax(0,1fr);background:var(--floor);outline:1px solid var(--floor)}
+body.in-room aside.notices{max-width:none;height:auto;margin:0;padding:0 26px;display:flex;align-items:center;gap:1em;overflow:hidden;font-size:var(--s-1);
+  background:var(--mat);border:0;border-bottom:1px solid var(--floor);border-left:4px solid var(--accent)}
+body.in-room aside.notices p{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+body.in-room form.reading{max-width:none;margin:0;padding:10px 26px;background:var(--mat);border:1px solid var(--floor)}
+body.in-room section.rotor{bottom:0;max-width:none;margin:0;border-radius:0}
+main.room{max-width:none;margin:0;padding:0;min-height:0;display:grid;grid-template-rows:auto minmax(0,1fr);gap:1px;background:var(--floor);outline:1px solid var(--floor);overflow:hidden}
+main.room h1{margin:0;padding:16px 26px;background:var(--rail);border:1px solid var(--rail);color:var(--on-rail);font-size:var(--s1);font-weight:700;display:flex;gap:.5em;align-items:baseline}
+main.room h1::before{content:"畳 / Basis" / "";font:var(--s-1)/1.3 var(--face);font-weight:400;flex:none}
+main.room ol.rows{margin:0;min-height:0;display:grid;grid-template-columns:1fr;grid-auto-rows:minmax(0,1fr);gap:1px;overflow:hidden}
 main.room ol.rows li{border-radius:0}
-main.room ol.rows li.obj{counter-increment:mat;display:grid;grid-template-columns:1fr auto;grid-template-rows:auto auto 1fr;align-content:start;row-gap:.5rem;
-  min-height:11rem;padding:28px 26px 24px;background:var(--mat);border:1px solid var(--floor)}
-main.room ol.rows li.obj::before{content:counter(mat,decimal-leading-zero) " /" / "";grid-column:1;grid-row:1;font:var(--s-1)/1.3 var(--face);color:var(--soft)}
-main.room ol.rows li.obj .n{display:none}
-main.room ol.rows li.obj a{grid-column:1/-1;grid-row:2;font-size:var(--s3);font-weight:700;line-height:1.1;letter-spacing:-.01em}
-main.room ol.rows li.obj .hint{grid-column:1;grid-row:3;font-size:var(--s0);max-width:24ch}
-main.room ol.rows li.obj .go{grid-column:2;grid-row:3;align-self:end;font-size:0}
-main.room ol.rows li.obj .go::after{content:"↗" / "";font-size:var(--s1);color:var(--ink)}
+main.room ol.rows li.obj{display:grid;grid-template-columns:1fr;grid-template-rows:auto auto minmax(0,1fr);align-content:start;row-gap:.4rem;min-height:0;padding:22px 26px;background:var(--mat);border:1px solid var(--floor);overflow:hidden}
+main.room ol.rows li.obj .n,main.room ol.rows li.obj .go,main.room ol.rows li.obj .enter{display:none}
+/* the kicker names the query (Bobby's render: "01 / Attention"); a mat the design does not name gets its number alone */
+main.room ol.rows li.obj::before{grid-row:1;font:var(--s-1)/1.3 var(--face);color:var(--soft);content:"" / ""}
+main.room ol.rows li.obj:nth-child(1)::before{content:"01 /" / ""} main.room ol.rows li.obj:nth-child(2)::before{content:"02 /" / ""}
+main.room ol.rows li.obj:nth-child(3)::before{content:"03 /" / ""} main.room ol.rows li.obj:nth-child(4)::before{content:"04 /" / ""}
+main.room ol.rows li.obj:has(> a[href$="/needs"])::before{content:"01 / Attention" / ""}
+main.room ol.rows li.obj:has(> a[href$="/machines"])::before{content:"02 / Infrastructure" / ""}
+main.room ol.rows li.obj:has(> a[href$="/signed"])::before{content:"03 / Activity" / ""}
+main.room ol.rows li.obj:has(> a[href$="/fleet"])::before{content:"04 / Fleet" / ""}
+main.room ol.rows li.obj:has(> a[href$="/trip"])::before{content:"Trip" / ""}
+main.room ol.rows li.obj a{grid-row:2;font-size:var(--s2);font-weight:700;line-height:1.1;letter-spacing:-.01em;align-self:start}
+main.room ol.rows li.obj .hint{grid-row:3;font-size:var(--s0);max-width:30ch;overflow:hidden}
 main.room ol.rows li.obj:first-child{background:var(--here);border:1px solid var(--floor)}
-main.room ol.rows li.obj:first-child .hint,main.room ol.rows li.obj:first-child::before{color:var(--ink)}
-/* the read rows (when the data is from, and the like) share one mat under the room */
-main.room ol.rows li.prop{grid-column:1/-1;padding:14px 26px;background:var(--mat);border:1px solid var(--floor)}
-body.keys main.room ol.rows li.cur{background:var(--mat);outline:3px solid var(--ink);outline-offset:-3px}
-body.keys main.room ol.rows li.obj:first-child.cur{background:var(--here);outline:3px solid var(--ink)}
-@media (min-width:760px){
-  main.room ol.rows{grid-template-columns:1fr 1fr}
-  main.room ol.rows li.obj:first-child{grid-row:span 2;min-height:23rem}
-  main.room ol.rows li.obj:nth-child(n+4){grid-column:2}
-  main.room ol.rows li.obj:nth-child(n+5){grid-column:1/-1;min-height:0}
+main.room ol.rows li.obj:first-child::before,main.room ol.rows li.obj:first-child .hint{color:var(--ink)}
+main.room ol.rows li.obj:first-child a{font-size:var(--s3)}
+/* past the fourth, and the read rows: the rail's places and its foot, quiet */
+main.room ol.rows li.obj:nth-child(n+5),main.room ol.rows li.prop{min-height:0;padding:10px 26px;background:var(--rail);border:1px solid var(--rail);color:var(--on-rail);display:block}
+main.room ol.rows li.obj:nth-child(n+5)::before{content:none}
+main.room ol.rows li.obj:nth-child(n+5) a{font-size:var(--s0);font-weight:600;color:var(--on-rail)}
+main.room ol.rows li.obj:nth-child(n+5) .hint,main.room ol.rows li.prop,main.room ol.rows li.prop a{font-size:var(--s-1);color:var(--on-rail)}
+main.room ol.rows li.obj:nth-child(n+5) .hint{display:none}
+body.keys main.room ol.rows li.cur{outline:3px solid var(--ink);outline-offset:-3px}
+body.keys main.room ol.rows li.obj:nth-child(n+5).cur,body.keys main.room ol.rows li.prop.cur{outline:3px solid var(--on-rail)}
+@media (max-width:999px){
+  /* narrow: the mats stacked, the rail's places as one band under them; still no page scroll (the mats share the height) */
+  main.room ol.rows li.obj:nth-child(n+5),main.room ol.rows li.prop{padding:6px 26px}
 }
-@media (min-width:1200px){
-  main.room ol.rows{grid-template-columns:1.62fr 1fr 1fr}
-  main.room ol.rows li.obj:nth-child(n+4){grid-column:2/-1}
-  main.room ol.rows li.obj:nth-child(n+5){grid-column:1/-1}
+@media (min-width:1000px){
+  body.in-room{grid-template-columns:232px minmax(0,1fr);background:var(--floor);outline:1px solid var(--floor)}
+  body.in-room::before{content:"";grid-column:1;grid-row:1/-1;background:var(--rail);border:1px solid var(--rail)}
+  body.in-room > aside.notices,body.in-room > main,body.in-room > form.reading{position:relative}
+  body.in-room aside.notices{grid-column:2;grid-row:1}
+  main.room{grid-column:1/-1;grid-row:1/-1;grid-template-columns:232px minmax(0,1fr);grid-template-rows:2rem minmax(0,1fr);background:transparent;column-gap:1px}
+  main.room h1{grid-column:1;grid-row:1/-1;align-self:start;z-index:1;border:0;background:transparent;padding:26px 24px 18px;flex-direction:column;align-items:flex-start;gap:.25em;pointer-events:none}
+  main.room ol.rows{grid-column:1/-1;grid-row:2;grid-template-columns:232px minmax(0,1.62fr) minmax(0,1fr);grid-template-rows:minmax(0,1fr) minmax(0,1fr);gap:1px;padding-top:0}
+  main.room ol.rows::before{content:"";grid-column:1;grid-row:1/-1;background:var(--rail);border:1px solid var(--rail)}
+  main.room ol.rows li.obj:nth-child(1){grid-column:2;grid-row:1/-1}
+  main.room ol.rows li.obj:nth-child(2){grid-column:3;grid-row:1}
+  main.room ol.rows li.obj:nth-child(3),main.room ol.rows li.obj:nth-child(4){grid-column:3;grid-row:2}
+  /* two mats in the last cell: the third and fourth share it side by side */
+  main.room ol.rows:has(li.obj:nth-child(4)) li.obj:nth-child(3){margin-right:calc(50% + .5px);}
+  main.room ol.rows:has(li.obj:nth-child(4)) li.obj:nth-child(4){margin-left:calc(50% + .5px);}
+  main.room ol.rows li.obj:nth-child(3),main.room ol.rows li.obj:nth-child(4){padding:18px 22px}
+  main.room ol.rows li.obj:nth-child(3) a,main.room ol.rows li.obj:nth-child(4) a{font-size:var(--s1)}
+  /* the rail's places under its heading, its foot (the read rows) at the bottom */
+  main.room ol.rows li.obj:nth-child(n+5),main.room ol.rows li.prop{grid-column:1;background:transparent;border:0;padding:8px 24px;align-self:start}
+  main.room ol.rows li.obj:nth-child(5){grid-row:1;margin-top:5.5rem}
+  main.room ol.rows li.obj:nth-child(6){grid-row:1;margin-top:8.5rem} main.room ol.rows li.obj:nth-child(7){grid-row:1;margin-top:11.5rem} main.room ol.rows li.obj:nth-child(8){grid-row:1;margin-top:14.5rem}
+  main.room ol.rows li.prop{grid-row:2;align-self:end}
+  main.room ol.rows li.prop.when{padding-bottom:18px}
+  body.in-room form.reading{grid-column:1;grid-row:1/-1;align-self:end;z-index:2;margin:0 0 56px;padding:8px 24px;background:var(--rail);border:1px solid var(--rail);color:var(--on-rail)}
 }
+/* Every other fold is one mat (the rules apply to every page): the path is its kicker, the heading its title, its one list of rows
+   on the same surface; the subtree of what needs you keeps that mat's "here". */
+main.mat-page{max-width:none;margin:0;padding:28px 26px 30px;background:var(--mat);border:1px solid var(--floor);min-height:0;overflow:auto}
+main.mat-page.here{background:var(--here);border:1px solid var(--floor)}
+main.mat-page nav ol{font-size:var(--s-1)}
+main.mat-page nav a{color:var(--soft)}
+main.mat-page.here nav a{color:var(--ink)}
+main.mat-page h1{font-size:var(--s3);font-weight:700;letter-spacing:-.01em;margin:.5rem 0 .75rem}
+main.mat-page ol.rows li{border-radius:0}
+main.mat-page ol.rows li+li{border-top:1px solid var(--line)}
+main.mat-page.here ol.rows .hint,main.mat-page.here ol.rows .n,main.mat-page.here ol.rows .go,main.mat-page.here ol.rows li.when{color:var(--ink)}
+body.keys main.mat-page ol.rows li.cur{background:var(--mat);outline:3px solid var(--ink);outline-offset:-3px}
+body.keys main.mat-page.here ol.rows li.cur{background:var(--here);outline:3px solid var(--ink)}
+@media (min-width:1000px){body.in-room:has(main.mat-page){grid-template-columns:1fr;background:var(--floor);outline:1px solid var(--floor)} main.mat-page{padding:36px 40px 40px}}

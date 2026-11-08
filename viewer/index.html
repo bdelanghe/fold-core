@@ -200,7 +200,9 @@ function render(focus) {
   // The top of the document is a room of mats (Tatami design rules v0.1, Bobby 2026-11-08): its fold's one list, laid out as
   // adjoining surfaces. The tree, the list and every row are unchanged; only fold.css's main.room arrangement applies.
   if (!rot.kind && v.path.length === 0) main.classList.add("room");
-  document.body.classList.toggle("in-room", main.classList.contains("room"));
+  // Every other fold is one mat; the subtree of the room's first mat (what needs you) keeps its "here" colour. The tree is untouched.
+  else if (!rot.kind) { main.classList.add("mat-page"); if (v.path[0] && v.path[0] === nodes.get("root")?.kids?.[0]?.id) main.classList.add("here"); }
+  document.body.classList.toggle("in-room", main.classList.contains("room") || main.classList.contains("mat-page"));
   pushOnly(main);
   document.querySelector("main").replaceWith(main);
   // Clax says the fold in view: reopened with its haecceity and its rows' (clax.js embed), never left on the last fold.
