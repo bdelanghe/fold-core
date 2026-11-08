@@ -87,6 +87,8 @@ const meta = document.querySelector('meta[name="fold-data"]');
 // (?data=/fold-data/demo/page.json, as Open submits it). The box holds its path; the note says why it was not read, or that the address
 // named it. Its source is not said here: every fold says "Data from <source>, <when>" (src/ax.rs).
 const data = dataOf(location.search, location.href, { path: meta.content, source: meta.dataset.source });
+// The reading box (open another document on this site) is a developer's control: shown only with ?dev in the address.
+if (!new URLSearchParams(location.search).has("dev")) document.querySelector("form.reading").hidden = true;
 document.getElementById("reading").value = data.path;
 // why it was not read is a notice (the notices zone); the box's own note only says whose path it holds
 document.getElementById("reading-note").textContent = data.error || data.source ? "" : "Named in the address";
@@ -117,6 +119,29 @@ const refs = manifestUrl ? liveFolds(manifestUrl, { changed: async (keys) => {
 } }) : null;
 // Kept (sw.js answered from its copy): the note says since when and how long ago, and the heading is described by it, so a screen
 // reader hears it with the title as the page opens. Fresh again, it goes.
+// "Data from <source>, <when>" (src/ax.rs) says when the content was last WRITTEN, which reads as stale while nothing changes. Here it
+// also says when this page last checked it (each successful read, changed or not): "unchanged since <when> · checked <time>".
+let checkedAt = null;
+function checkedLine() {
+  const t = checkedAt && new Intl.DateTimeFormat([], { timeZone: zone || undefined, hour: "numeric", minute: "2-digit", second: "2-digit" }).format(checkedAt);
+  for (const li of document.querySelectorAll("main li.when")) {
+    const base = li.dataset.from ?? (li.dataset.from = li.textContent);
+    const m = /^Data from (.+), ([A-Z][a-z]{2} .+)$/.exec(base);
+    const want = m && t ? `Data from ${m[1]}, unchanged since ${m[2]} · checked ${t}` : base;
+    const span = li.querySelector("span") ?? li;
+    if (span.textContent !== want) span.textContent = want;
+  }
+}
+setInterval(() => { if (!document.hidden) checkedLine(); }, 15000);
+// Needs you's two notification acts (src/needs.rs PUSH_ACTS): show exactly one, the one that would change something on this device.
+let pushOn = null;
+navigator.serviceWorker?.ready?.then((r) => r.pushManager?.getSubscription()).then((s) => { pushOn = !!s; if (shown) render(false); }).catch(() => { pushOn = false; });
+function pushOnly(main) {
+  for (const f of main.querySelectorAll("form[data-push]")) {
+    const keep = f.dataset.push === (pushOn === true ? "unsubscribe" : "subscribe");
+    if (!keep) f.closest("li")?.remove();
+  }
+}
 function stale() {
   const p = document.getElementById("stale"), h = document.querySelector("main h1");
   p.textContent = kept ? since(kept, new Date(), zone) : "";
@@ -176,6 +201,7 @@ function render(focus) {
   // adjoining surfaces. The tree, the list and every row are unchanged; only fold.css's main.room arrangement applies.
   if (!rot.kind && v.path.length === 0) main.classList.add("room");
   document.body.classList.toggle("in-room", main.classList.contains("room"));
+  pushOnly(main);
   document.querySelector("main").replaceWith(main);
   // Clax says the fold in view: reopened with its haecceity and its rows' (clax.js embed), never left on the last fold.
   if (clax?.mounted && v.path.join("/") !== claxAt) { claxAt = v.path.join("/"); clax.reopen(); }
@@ -193,6 +219,7 @@ function render(focus) {
   if (back >= 0) { cur = back; cameFrom = null; }
   move(Math.min(cur, Math.max(0, rows().length - 1)), focus);
   stale();
+  checkedLine();
   // (in a kind, focus is on its item already: move put it there)
   if (focus && !rot.kind) main.querySelector("h1").focus();
 }
@@ -228,8 +255,9 @@ async function load() {
       return withNeeds(graft(graft(r, held), placed));
     };
     const next = stamp(await open(fold, data.url, { root: top, opts: (modified) => ({ ...(data.source ? { source: data.source } : {}), updated: modified ?? new Date().toISOString(), localTimeZone: zone }), stored: (at) => { kept = at; } }), [...held, ...placed]);
+    checkedAt = Date.now(); // read now: a check that found nothing new is still a check (Bobby 11-08: "reads as stale")
     const text = JSON.stringify([...next]);
-    if (text === said) { stale(); return false; }
+    if (text === said) { stale(); checkedLine(); return false; }
     nodes = next; said = text; return true;
   } catch (e) {
     if (!nodes.size) nodes = new Map([["root", { title: "Could not read the data", trail: [], failed: `Could not read ${data.path}: ${e?.message ?? e}` }]]);
@@ -278,6 +306,7 @@ document.addEventListener("submit", async (e) => {
     f.setAttribute("aria-busy", "true");
     const r = await notifyHere(f.dataset.push, location.href);
     f.removeAttribute("aria-busy");
+    if (r.ok) { pushOn = f.dataset.push === "subscribe"; render(false); }
     say(r.said);
     return;
   }
