@@ -131,8 +131,8 @@ fn a_live_item_is_a_fold_with_two_passkey_verdicts() {
     assert_eq!(
         row["children"],
         json!([
-            { "role": "form", "name": "Approve with passkey", "cls": "act", "method": "get", "action": "", "intent": ID, "call": "approve",
-              "children": [{ "role": "button", "name": "Approve with passkey", "cls": "act" }] },
+            { "role": "form", "name": "Sign with passkey", "cls": "act", "method": "get", "action": "", "intent": ID, "call": "approve",
+              "children": [{ "role": "button", "name": "Sign with passkey", "cls": "act" }] },
             { "role": "form", "name": "Decline with passkey", "cls": "act", "method": "get", "action": "", "intent": ID, "call": "decline",
               "children": [{ "role": "button", "name": "Decline with passkey", "cls": "act" }] },
             { "role": "status", "cls": "result", "id": "did" }
@@ -140,7 +140,7 @@ fn a_live_item_is_a_fold_with_two_passkey_verdicts() {
     );
     let html: Value = serde_json::from_str(&fold_core::wasm::html_text(&tree.to_string())).unwrap();
     let html = html["html"].as_str().unwrap();
-    assert!(html.contains(&format!("<form class=\"act\" aria-label=\"Approve with passkey\" method=\"get\" action=\"\" data-intent=\"{ID}\" data-call=\"approve\">")), "{html}");
+    assert!(html.contains(&format!("<form class=\"act\" aria-label=\"Sign with passkey\" method=\"get\" action=\"\" data-intent=\"{ID}\" data-call=\"approve\">")), "{html}");
     assert!(
         html.contains(&format!(
             "aria-label=\"Decline with passkey\" method=\"get\" action=\"\" data-intent=\"{ID}\" data-call=\"decline\">"

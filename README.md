@@ -54,7 +54,7 @@ on going into Needs you, with each minute's refresh, and after every act on an i
 
 Each live item is sign.ts's (`needs/sign-<id>`) and has two acts, both the passkey, each a verdict on the item (the brief's
 addendum 1). Both are forms carrying `data-intent` and `data-call`, and `viewer/sign.js` `sign` takes them in the page:
-- **Approve with passkey** is the item's first act, so Enter on the item runs it, as the rotor's first action does. It uses
+- **Sign with passkey** is the item's first act, so Enter on the item runs it, as the rotor's first action does. It uses
   chitin-approve's `GET /approve/v1/challenge/<id>` and `POST /approve/v1/assertion/<id>`, unchanged.
 - **Decline with passkey** is the item's second act, its own button. It uses `GET` and `POST /approve/v1/decline/<id>`, the
   path addendum 1 names for chitin-approve's decline. It is signed only when the challenge says `verdict: "decline"`, and an
@@ -210,7 +210,7 @@ document the way the viewer does and writes nothing (src/basis.rs, src/bin/basis
     … [--needs <needs.json>]                # Needs you read live, as the viewer reads it
 
 With `--needs` (a saved `needs.json` answer), the document gets the same overlay the viewer gives it, so
-`Needs you/Approvals/<item>` is the same path in both. An act on an intent reads `act: Approve with passkey [approve <id>]`.
+`Needs you/Approvals/<item>` is the same path in both. An act on an intent reads `act: Sign with passkey [approve <id>]`.
 
 The document is `--doc`, else `$BASIS_DOC`, else fleet-map's `~/.local/state/fold-data/fleet/page.json`. A path is a list of
 steps joined by `/`. Each step is a fold's id, as written or as its page's anchor writes it, or else its title (case folded),
