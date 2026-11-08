@@ -8,14 +8,14 @@
 /* The colours, light and dark, are written from theme.tokens.json (a Baobab pinning, src/baobab.rs) and proven there; edit the tokens
    and run FOLD_BLESS=1 cargo test --test contrast, never the lines between these marks. */
 /* baobab:begin */
-:root{--paper:#EDEAE1;--card:#FFFFFF;--ink:#16221C;--soft:#5C6B63;--line:#888374;--accent:#0C5A42;--warn:#8A2B12;}
-@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--paper:#16221C;--card:#22302A;--ink:#ECEAE3;--soft:#A9B5AE;--line:#888374;--accent:#8FC3A8;--warn:#FF9C80;}}
-:root[data-theme="dark"]{--paper:#16221C;--card:#22302A;--ink:#ECEAE3;--soft:#A9B5AE;--line:#888374;--accent:#8FC3A8;--warn:#FF9C80;}
-@media (prefers-contrast:more) and (prefers-color-scheme:light){:root:not([data-theme="dark"]){--paper:#FFFFFF;--card:#FFFFFF;--ink:#000000;--soft:#16221C;--line:#5C6B63;--accent:#0C5A42;--warn:#8A2B12;}}
-@media (prefers-contrast:more){:root[data-theme="light"]{--paper:#FFFFFF;--card:#FFFFFF;--ink:#000000;--soft:#16221C;--line:#5C6B63;--accent:#0C5A42;--warn:#8A2B12;}}
-@media (prefers-contrast:more) and (prefers-color-scheme:dark){:root:not([data-theme="light"]){--paper:#000000;--card:#16221C;--ink:#FFFFFF;--soft:#ECEAE3;--line:#A9B5AE;--accent:#8FC3A8;--warn:#FF9C80;}}
-@media (prefers-contrast:more){:root[data-theme="dark"]{--paper:#000000;--card:#16221C;--ink:#FFFFFF;--soft:#ECEAE3;--line:#A9B5AE;--accent:#8FC3A8;--warn:#FF9C80;}}
-@media (forced-colors:active){:root,:root[data-theme]{--paper:Canvas;--card:Canvas;--ink:CanvasText;--soft:CanvasText;--line:CanvasText;--accent:LinkText;--warn:CanvasText;}}
+:root{--paper:#EDEAE1;--card:#FFFFFF;--ink:#16221C;--soft:#5C6B63;--line:#888374;--accent:#0C5A42;--warn:#8A2B12;--floor:#E3DFD3;--mat:#F7F4EE;--here:#D8DBCE;}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--paper:#16221C;--card:#22302A;--ink:#ECEAE3;--soft:#A9B5AE;--line:#888374;--accent:#8FC3A8;--warn:#FF9C80;--floor:#0E1612;--mat:#1C2822;--here:#26352D;}}
+:root[data-theme="dark"]{--paper:#16221C;--card:#22302A;--ink:#ECEAE3;--soft:#A9B5AE;--line:#888374;--accent:#8FC3A8;--warn:#FF9C80;--floor:#0E1612;--mat:#1C2822;--here:#26352D;}
+@media (prefers-contrast:more) and (prefers-color-scheme:light){:root:not([data-theme="dark"]){--paper:#FFFFFF;--card:#FFFFFF;--ink:#000000;--soft:#16221C;--line:#5C6B63;--accent:#0C5A42;--warn:#8A2B12;--floor:#000000;--mat:#FFFFFF;--here:#FFFFFF;}}
+@media (prefers-contrast:more){:root[data-theme="light"]{--paper:#FFFFFF;--card:#FFFFFF;--ink:#000000;--soft:#16221C;--line:#5C6B63;--accent:#0C5A42;--warn:#8A2B12;--floor:#000000;--mat:#FFFFFF;--here:#FFFFFF;}}
+@media (prefers-contrast:more) and (prefers-color-scheme:dark){:root:not([data-theme="light"]){--paper:#000000;--card:#16221C;--ink:#FFFFFF;--soft:#ECEAE3;--line:#A9B5AE;--accent:#8FC3A8;--warn:#FF9C80;--floor:#FFFFFF;--mat:#000000;--here:#000000;}}
+@media (prefers-contrast:more){:root[data-theme="dark"]{--paper:#000000;--card:#16221C;--ink:#FFFFFF;--soft:#ECEAE3;--line:#A9B5AE;--accent:#8FC3A8;--warn:#FF9C80;--floor:#FFFFFF;--mat:#000000;--here:#000000;}}
+@media (forced-colors:active){:root,:root[data-theme]{--paper:Canvas;--card:Canvas;--ink:CanvasText;--soft:CanvasText;--line:CanvasText;--accent:LinkText;--warn:CanvasText;--floor:CanvasText;--mat:Canvas;--here:Canvas;}}
 /* baobab:end */
 :root{--face:"Atkinson Hyperlegible Next",system-ui,-apple-system,sans-serif;
   --s0:18px;--r:1.2;--s-1:calc(var(--s0) / var(--r));--s1:calc(var(--s0) * var(--r));--s2:calc(var(--s0) * var(--r) * var(--r));--s3:calc(var(--s2) * var(--r))}
@@ -69,3 +69,41 @@ section.rotor li[aria-selected="true"]{outline:2px solid var(--ink);outline-offs
 main.slide{max-width:56rem}
 main.slide h1{font-size:var(--s3);margin-top:1.5rem}
 main.slide ol.rows li.prop{font-size:var(--s1)}
+
+/* ── The room (Tatami design rules v0.1, Bobby 2026-11-08: "a system of adjoining surfaces, not a collection of cards"). The top of the
+   document only (index.html adds main.room): its heading is the title mat, its one list's objects are mats laid on a narrow floor
+   seam, the first (what needs you) in the "here" colour, and its read rows share a mat under them. Nothing floats: no shadow, no
+   rounded corner; whitespace lives inside a mat. The tree is untouched (one heading, one list, rows that are links). Colours are
+   the tokens' floor, mat and here (theme.tokens.json); each mat keeps an edge, so forced colours still draw the seams. */
+body.in-room aside.notices{max-width:none;margin:8px 8px 0;background:var(--mat);border:1px solid var(--floor);border-left:4px solid var(--accent)}
+body.in-room form.reading{max-width:none;margin:0 8px 8px;padding:14px 26px;background:var(--mat);border:1px solid var(--floor)}
+main.room{max-width:none;margin:0;padding:8px;display:grid;gap:8px;background:var(--floor);outline:1px solid var(--floor)}
+main.room h1{margin:0;padding:28px 26px 30px;background:var(--mat);border:1px solid var(--floor);font-size:var(--s3);font-weight:700;letter-spacing:-.01em}
+main.room h1::before{content:"畳 / Basis" / "";display:block;font:var(--s-1)/1.3 var(--face);font-weight:400;color:var(--soft);margin-bottom:.6rem;letter-spacing:0}
+main.room ol.rows{margin:0;display:grid;grid-template-columns:1fr;gap:8px;counter-reset:mat}
+main.room ol.rows li{border-radius:0}
+main.room ol.rows li.obj{counter-increment:mat;display:grid;grid-template-columns:1fr auto;grid-template-rows:auto auto 1fr;align-content:start;row-gap:.5rem;
+  min-height:11rem;padding:28px 26px 24px;background:var(--mat);border:1px solid var(--floor)}
+main.room ol.rows li.obj::before{content:counter(mat,decimal-leading-zero) " /" / "";grid-column:1;grid-row:1;font:var(--s-1)/1.3 var(--face);color:var(--soft)}
+main.room ol.rows li.obj .n{display:none}
+main.room ol.rows li.obj a{grid-column:1/-1;grid-row:2;font-size:var(--s3);font-weight:700;line-height:1.1;letter-spacing:-.01em}
+main.room ol.rows li.obj .hint{grid-column:1;grid-row:3;font-size:var(--s0);max-width:24ch}
+main.room ol.rows li.obj .go{grid-column:2;grid-row:3;align-self:end;font-size:0}
+main.room ol.rows li.obj .go::after{content:"↗" / "";font-size:var(--s1);color:var(--ink)}
+main.room ol.rows li.obj:first-child{background:var(--here);border:1px solid var(--floor)}
+main.room ol.rows li.obj:first-child .hint,main.room ol.rows li.obj:first-child::before{color:var(--ink)}
+/* the read rows (when the data is from, and the like) share one mat under the room */
+main.room ol.rows li.prop{grid-column:1/-1;padding:14px 26px;background:var(--mat);border:1px solid var(--floor)}
+body.keys main.room ol.rows li.cur{background:var(--mat);outline:3px solid var(--ink);outline-offset:-3px}
+body.keys main.room ol.rows li.obj:first-child.cur{background:var(--here);outline:3px solid var(--ink)}
+@media (min-width:760px){
+  main.room ol.rows{grid-template-columns:1fr 1fr}
+  main.room ol.rows li.obj:first-child{grid-row:span 2;min-height:23rem}
+  main.room ol.rows li.obj:nth-child(n+4){grid-column:2}
+  main.room ol.rows li.obj:nth-child(n+5){grid-column:1/-1;min-height:0}
+}
+@media (min-width:1200px){
+  main.room ol.rows{grid-template-columns:1.62fr 1fr 1fr}
+  main.room ol.rows li.obj:nth-child(n+4){grid-column:2/-1}
+  main.room ol.rows li.obj:nth-child(n+5){grid-column:1/-1}
+}

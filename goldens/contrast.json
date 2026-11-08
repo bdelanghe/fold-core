@@ -14,6 +14,12 @@
     "primitive.sage": "#8FC3A8",
     "primitive.rust": "#8A2B12",
     "primitive.coral": "#FF9C80",
+    "primitive.washi": "#F7F4EE",
+    "primitive.seam": "#E3DFD3",
+    "primitive.moss": "#D8DBCE",
+    "primitive.washi-dark": "#1C2822",
+    "primitive.seam-dark": "#0E1612",
+    "primitive.moss-dark": "#26352D",
     "light.paper": "#EDEAE1",
     "light.card": "#FFFFFF",
     "light.ink": "#16221C",
@@ -21,6 +27,9 @@
     "light.line": "#888374",
     "light.accent": "#0C5A42",
     "light.warn": "#8A2B12",
+    "light.floor": "#E3DFD3",
+    "light.mat": "#F7F4EE",
+    "light.here": "#D8DBCE",
     "dark.paper": "#16221C",
     "dark.card": "#22302A",
     "dark.ink": "#ECEAE3",
@@ -28,6 +37,9 @@
     "dark.line": "#888374",
     "dark.accent": "#8FC3A8",
     "dark.warn": "#FF9C80",
+    "dark.floor": "#0E1612",
+    "dark.mat": "#1C2822",
+    "dark.here": "#26352D",
     "light-more.paper": "#FFFFFF",
     "light-more.card": "#FFFFFF",
     "light-more.ink": "#000000",
@@ -35,6 +47,9 @@
     "light-more.line": "#5C6B63",
     "light-more.accent": "#0C5A42",
     "light-more.warn": "#8A2B12",
+    "light-more.floor": "#000000",
+    "light-more.mat": "#FFFFFF",
+    "light-more.here": "#FFFFFF",
     "dark-more.paper": "#000000",
     "dark-more.card": "#16221C",
     "dark-more.ink": "#FFFFFF",
@@ -42,13 +57,19 @@
     "dark-more.line": "#A9B5AE",
     "dark-more.accent": "#8FC3A8",
     "dark-more.warn": "#FF9C80",
+    "dark-more.floor": "#FFFFFF",
+    "dark-more.mat": "#000000",
+    "dark-more.here": "#000000",
     "forced.paper": "Canvas",
     "forced.card": "Canvas",
     "forced.ink": "CanvasText",
     "forced.soft": "CanvasText",
     "forced.line": "CanvasText",
     "forced.accent": "LinkText",
-    "forced.warn": "CanvasText"
+    "forced.warn": "CanvasText",
+    "forced.floor": "CanvasText",
+    "forced.mat": "Canvas",
+    "forced.here": "Canvas"
   },
   "pairs": [
     {
@@ -130,6 +151,42 @@
       "label": "the rows' rule (light)"
     },
     {
+      "fg": "light.ink",
+      "bg": "light.mat",
+      "min": 4.5,
+      "label": "text on a mat (Tatami rules v0.1: the room at the top of the document) (light)"
+    },
+    {
+      "fg": "light.soft",
+      "bg": "light.mat",
+      "min": 4.5,
+      "label": "a mat's number and description (light)"
+    },
+    {
+      "fg": "light.ink",
+      "bg": "light.here",
+      "min": 4.5,
+      "label": "text on the mat that needs you (light)"
+    },
+    {
+      "fg": "light.line",
+      "bg": "light.mat",
+      "min": 3.0,
+      "label": "the rule between rows on a mat (light)"
+    },
+    {
+      "fg": "light.accent",
+      "bg": "light.mat",
+      "min": 4.5,
+      "label": "a link or the search button on a mat (light)"
+    },
+    {
+      "fg": "light.floor",
+      "bg": "light.mat",
+      "min": 1.1,
+      "label": "the seam between mats (an edge, not text) (light)"
+    },
+    {
       "fg": "dark.ink",
       "bg": "dark.paper",
       "min": 4.5,
@@ -206,6 +263,42 @@
       "bg": "dark.paper",
       "min": 3.0,
       "label": "the rows' rule (dark)"
+    },
+    {
+      "fg": "dark.ink",
+      "bg": "dark.mat",
+      "min": 4.5,
+      "label": "text on a mat (Tatami rules v0.1: the room at the top of the document) (dark)"
+    },
+    {
+      "fg": "dark.soft",
+      "bg": "dark.mat",
+      "min": 4.5,
+      "label": "a mat's number and description (dark)"
+    },
+    {
+      "fg": "dark.ink",
+      "bg": "dark.here",
+      "min": 4.5,
+      "label": "text on the mat that needs you (dark)"
+    },
+    {
+      "fg": "dark.line",
+      "bg": "dark.mat",
+      "min": 3.0,
+      "label": "the rule between rows on a mat (dark)"
+    },
+    {
+      "fg": "dark.accent",
+      "bg": "dark.mat",
+      "min": 4.5,
+      "label": "a link or the search button on a mat (dark)"
+    },
+    {
+      "fg": "dark.floor",
+      "bg": "dark.mat",
+      "min": 1.1,
+      "label": "the seam between mats (an edge, not text) (dark)"
     },
     {
       "fg": "light-more.ink",
@@ -286,6 +379,42 @@
       "label": "the rows' rule (light-more)"
     },
     {
+      "fg": "light-more.ink",
+      "bg": "light-more.mat",
+      "min": 7.0,
+      "label": "text on a mat (Tatami rules v0.1: the room at the top of the document) (light-more)"
+    },
+    {
+      "fg": "light-more.soft",
+      "bg": "light-more.mat",
+      "min": 7.0,
+      "label": "a mat's number and description (light-more)"
+    },
+    {
+      "fg": "light-more.ink",
+      "bg": "light-more.here",
+      "min": 7.0,
+      "label": "text on the mat that needs you (light-more)"
+    },
+    {
+      "fg": "light-more.line",
+      "bg": "light-more.mat",
+      "min": 4.5,
+      "label": "the rule between rows on a mat (light-more)"
+    },
+    {
+      "fg": "light-more.accent",
+      "bg": "light-more.mat",
+      "min": 7.0,
+      "label": "a link or the search button on a mat (light-more)"
+    },
+    {
+      "fg": "light-more.floor",
+      "bg": "light-more.mat",
+      "min": 3.0,
+      "label": "the seam between mats (an edge, not text) (light-more)"
+    },
+    {
       "fg": "dark-more.ink",
       "bg": "dark-more.paper",
       "min": 7.0,
@@ -362,6 +491,42 @@
       "bg": "dark-more.paper",
       "min": 4.5,
       "label": "the rows' rule (dark-more)"
+    },
+    {
+      "fg": "dark-more.ink",
+      "bg": "dark-more.mat",
+      "min": 7.0,
+      "label": "text on a mat (Tatami rules v0.1: the room at the top of the document) (dark-more)"
+    },
+    {
+      "fg": "dark-more.soft",
+      "bg": "dark-more.mat",
+      "min": 7.0,
+      "label": "a mat's number and description (dark-more)"
+    },
+    {
+      "fg": "dark-more.ink",
+      "bg": "dark-more.here",
+      "min": 7.0,
+      "label": "text on the mat that needs you (dark-more)"
+    },
+    {
+      "fg": "dark-more.line",
+      "bg": "dark-more.mat",
+      "min": 4.5,
+      "label": "the rule between rows on a mat (dark-more)"
+    },
+    {
+      "fg": "dark-more.accent",
+      "bg": "dark-more.mat",
+      "min": 7.0,
+      "label": "a link or the search button on a mat (dark-more)"
+    },
+    {
+      "fg": "dark-more.floor",
+      "bg": "dark-more.mat",
+      "min": 3.0,
+      "label": "the seam between mats (an edge, not text) (dark-more)"
     }
   ],
   "results": [
@@ -470,6 +635,54 @@
       "pass": true
     },
     {
+      "fg": "light.ink",
+      "bg": "light.mat",
+      "min": 4.5,
+      "label": "text on a mat (Tatami rules v0.1: the room at the top of the document) (light)",
+      "ratio": 14.948666582985764,
+      "pass": true
+    },
+    {
+      "fg": "light.soft",
+      "bg": "light.mat",
+      "min": 4.5,
+      "label": "a mat's number and description (light)",
+      "ratio": 5.117208111025481,
+      "pass": true
+    },
+    {
+      "fg": "light.ink",
+      "bg": "light.here",
+      "min": 4.5,
+      "label": "text on the mat that needs you (light)",
+      "ratio": 11.677512850470125,
+      "pass": true
+    },
+    {
+      "fg": "light.line",
+      "bg": "light.mat",
+      "min": 3.0,
+      "label": "the rule between rows on a mat (light)",
+      "ratio": 3.4495557631084135,
+      "pass": true
+    },
+    {
+      "fg": "light.accent",
+      "bg": "light.mat",
+      "min": 4.5,
+      "label": "a link or the search button on a mat (light)",
+      "ratio": 7.4819912453211375,
+      "pass": true
+    },
+    {
+      "fg": "light.floor",
+      "bg": "light.mat",
+      "min": 1.1,
+      "label": "the seam between mats (an edge, not text) (light)",
+      "ratio": 1.2136696550573685,
+      "pass": true
+    },
+    {
       "fg": "dark.ink",
       "bg": "dark.paper",
       "min": 4.5,
@@ -571,6 +784,54 @@
       "min": 3.0,
       "label": "the rows' rule (dark)",
       "ratio": 4.333504836435935,
+      "pass": true
+    },
+    {
+      "fg": "dark.ink",
+      "bg": "dark.mat",
+      "min": 4.5,
+      "label": "text on a mat (Tatami rules v0.1: the room at the top of the document) (dark)",
+      "ratio": 12.6780739612522,
+      "pass": true
+    },
+    {
+      "fg": "dark.soft",
+      "bg": "dark.mat",
+      "min": 4.5,
+      "label": "a mat's number and description (dark)",
+      "ratio": 7.200449539436628,
+      "pass": true
+    },
+    {
+      "fg": "dark.ink",
+      "bg": "dark.here",
+      "min": 4.5,
+      "label": "text on the mat that needs you (dark)",
+      "ratio": 10.705372437895099,
+      "pass": true
+    },
+    {
+      "fg": "dark.line",
+      "bg": "dark.mat",
+      "min": 3.0,
+      "label": "the rule between rows on a mat (dark)",
+      "ratio": 4.03022999677033,
+      "pass": true
+    },
+    {
+      "fg": "dark.accent",
+      "bg": "dark.mat",
+      "min": 4.5,
+      "label": "a link or the search button on a mat (dark)",
+      "ratio": 7.65950071822787,
+      "pass": true
+    },
+    {
+      "fg": "dark.floor",
+      "bg": "dark.mat",
+      "min": 1.1,
+      "label": "the seam between mats (an edge, not text) (dark)",
+      "ratio": 1.2047154282391714,
       "pass": true
     },
     {
@@ -678,6 +939,54 @@
       "pass": true
     },
     {
+      "fg": "light-more.ink",
+      "bg": "light-more.mat",
+      "min": 7.0,
+      "label": "text on a mat (Tatami rules v0.1: the room at the top of the document) (light-more)",
+      "ratio": 21.0,
+      "pass": true
+    },
+    {
+      "fg": "light-more.soft",
+      "bg": "light-more.mat",
+      "min": 7.0,
+      "label": "a mat's number and description (light-more)",
+      "ratio": 16.410177174452468,
+      "pass": true
+    },
+    {
+      "fg": "light-more.ink",
+      "bg": "light-more.here",
+      "min": 7.0,
+      "label": "text on the mat that needs you (light-more)",
+      "ratio": 21.0,
+      "pass": true
+    },
+    {
+      "fg": "light-more.line",
+      "bg": "light-more.mat",
+      "min": 4.5,
+      "label": "the rule between rows on a mat (light-more)",
+      "ratio": 5.617510516693913,
+      "pass": true
+    },
+    {
+      "fg": "light-more.accent",
+      "bg": "light-more.mat",
+      "min": 7.0,
+      "label": "a link or the search button on a mat (light-more)",
+      "ratio": 8.213495248677797,
+      "pass": true
+    },
+    {
+      "fg": "light-more.floor",
+      "bg": "light-more.mat",
+      "min": 3.0,
+      "label": "the seam between mats (an edge, not text) (light-more)",
+      "ratio": 21.0,
+      "pass": true
+    },
+    {
       "fg": "dark-more.ink",
       "bg": "dark-more.paper",
       "min": 7.0,
@@ -779,6 +1088,54 @@
       "min": 4.5,
       "label": "the rows' rule (dark-more)",
       "ratio": 9.907751159561892,
+      "pass": true
+    },
+    {
+      "fg": "dark-more.ink",
+      "bg": "dark-more.mat",
+      "min": 7.0,
+      "label": "text on a mat (Tatami rules v0.1: the room at the top of the document) (dark-more)",
+      "ratio": 21.0,
+      "pass": true
+    },
+    {
+      "fg": "dark-more.soft",
+      "bg": "dark-more.mat",
+      "min": 7.0,
+      "label": "a mat's number and description (dark-more)",
+      "ratio": 17.444911085431464,
+      "pass": true
+    },
+    {
+      "fg": "dark-more.ink",
+      "bg": "dark-more.here",
+      "min": 7.0,
+      "label": "text on the mat that needs you (dark-more)",
+      "ratio": 21.0,
+      "pass": true
+    },
+    {
+      "fg": "dark-more.line",
+      "bg": "dark-more.mat",
+      "min": 4.5,
+      "label": "the rule between rows on a mat (dark-more)",
+      "ratio": 9.907751159561892,
+      "pass": true
+    },
+    {
+      "fg": "dark-more.accent",
+      "bg": "dark-more.mat",
+      "min": 7.0,
+      "label": "a link or the search button on a mat (dark-more)",
+      "ratio": 10.539401284190504,
+      "pass": true
+    },
+    {
+      "fg": "dark-more.floor",
+      "bg": "dark-more.mat",
+      "min": 3.0,
+      "label": "the seam between mats (an edge, not text) (dark-more)",
+      "ratio": 21.0,
       "pass": true
     }
   ],
@@ -911,6 +1268,66 @@
         "Canvas"
       ],
       "label": "the rows' rule",
+      "pass": true
+    },
+    {
+      "fg": "ink",
+      "bg": "mat",
+      "system": [
+        "CanvasText",
+        "Canvas"
+      ],
+      "label": "text on a mat (Tatami rules v0.1: the room at the top of the document)",
+      "pass": true
+    },
+    {
+      "fg": "soft",
+      "bg": "mat",
+      "system": [
+        "CanvasText",
+        "Canvas"
+      ],
+      "label": "a mat's number and description",
+      "pass": true
+    },
+    {
+      "fg": "ink",
+      "bg": "here",
+      "system": [
+        "CanvasText",
+        "Canvas"
+      ],
+      "label": "text on the mat that needs you",
+      "pass": true
+    },
+    {
+      "fg": "line",
+      "bg": "mat",
+      "system": [
+        "CanvasText",
+        "Canvas"
+      ],
+      "label": "the rule between rows on a mat",
+      "pass": true
+    },
+    {
+      "fg": "accent",
+      "bg": "mat",
+      "system": [
+        "LinkText",
+        "Canvas"
+      ],
+      "label": "a link or the search button on a mat",
+      "pass": true
+    },
+    {
+      "fg": "floor",
+      "bg": "mat",
+      "system": [
+        "CanvasText",
+        "Canvas"
+      ],
+      "label": "the seam between mats (an edge, not text)",
       "pass": true
     }
   ]

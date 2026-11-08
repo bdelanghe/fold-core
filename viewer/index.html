@@ -172,6 +172,10 @@ function render(focus) {
   if (rot.kind) v.tree = ax({ node: v.node, path: [], mode: "folds", href: "viewer", localTimeZone: zone });
   node = v.node;
   const main = toDom(document, v.tree);
+  // The top of the document is a room of mats (Tatami design rules v0.1, Bobby 2026-11-08): its fold's one list, laid out as
+  // adjoining surfaces. The tree, the list and every row are unchanged; only fold.css's main.room arrangement applies.
+  if (!rot.kind && v.path.length === 0) main.classList.add("room");
+  document.body.classList.toggle("in-room", main.classList.contains("room"));
   document.querySelector("main").replaceWith(main);
   // Clax says the fold in view: reopened with its haecceity and its rows' (clax.js embed), never left on the last fold.
   if (clax?.mounted && v.path.join("/") !== claxAt) { claxAt = v.path.join("/"); clax.reopen(); }
