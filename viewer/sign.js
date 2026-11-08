@@ -76,7 +76,7 @@ export async function sign(id, verdict, shown, { fetch = globalThis.fetch, crede
 
 /** What fold serve's needs.json answered, as the core's needs entry takes it: {needs} or {error}. Never throws, and never waits past
  * `wait` ms: with the host asleep the page still opens on its kept copy, saying nothing here can be signed. */
-export async function readNeeds(url, { fetch = globalThis.fetch, wait = 4000 } = {}) {
+export async function readNeeds(url, { fetch = globalThis.fetch, wait = 8000 } = {}) {
   try {
     const r = await fetch(url, { cache: "no-store", signal: AbortSignal.timeout(wait) });
     if (!r.ok) return { error: `${r.status} ${(await r.text().catch(() => "")).trim() || r.statusText || ""}`.trim() };

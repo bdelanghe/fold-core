@@ -82,6 +82,10 @@ pub struct Acting {
     /// The chitin seat Needs-you records are published as (`--notify-as`, a producer chitin's notify-sink pushes for), if any:
     /// without it, no notification is sent and the push routes say so.
     pub notify_as: Option<String>,
+    /// The last `needs.json` answer and when chitin gave it ([`NEEDS_FRESH`]): every reader in that window gets this copy, and
+    /// readers that arrive while chitin runs wait for its one answer instead of starting a chitin each (2026-11-08: a Basis window
+    /// polling under load spawned a chitin per read, they timed out, the page retried, the load rose).
+    pub pending: std::sync::Mutex<Option<(std::time::Instant, serde_json::Value)>>,
 }
 
 /// How a resource may be cached (item 23's table), by its path.
@@ -517,6 +521,9 @@ fn comment(site: &Site, req: &Request, now: i64) -> (Response, Option<Value>) {
 /// Needs you, live (src/needs.rs): what waits for the title's signature, read from chitin on each request, under the mount.
 pub const NEEDS: &str = "/needs.json";
 
+/// How long one chitin answer serves every `needs.json` reader (single-flight: one chitin at a time, its answer shared).
+pub const NEEDS_FRESH: std::time::Duration = std::time::Duration::from_secs(3);
+
 /// Whom the live Needs you reads for, if anyone: the acting login and the `--needs-as` title.
 fn needs_for(site: &Site) -> Option<(&Acting, &str)> {
     let a = site.acting.as_ref()?;
@@ -535,10 +542,21 @@ fn needs(site: &Site, req: &Request) -> Response {
     if let Err(why) = front(req, &a.login, &a.host) {
         return Response::text(403, why).with("Cache-Control", "no-store");
     }
-    match a.actor.pending(title) {
-        Ok(p) => json_answer(200, &crate::needs::answer(title, &crate::needs::waiting(&p, title), a.notify_as.is_some())),
-        Err(e) => json_answer(502, &json!({ "error": format!("chitin did not list them: {}", e.chars().filter(|c| !c.is_control()).take(200).collect::<String>()) })),
-    }
+    // One chitin at a time: the lock is held across the read, so readers that arrive meanwhile wait for this answer and then
+    // find it fresh. A failure is not kept; the next reader asks again.
+    let mut kept = a.pending.lock().unwrap_or_else(|e| e.into_inner());
+    let p = match kept.as_ref().filter(|(at, _)| at.elapsed() < NEEDS_FRESH) {
+        Some((_, p)) => p.clone(),
+        None => match a.actor.pending(title) {
+            Ok(p) => {
+                *kept = Some((std::time::Instant::now(), p.clone()));
+                p
+            }
+            Err(e) => return json_answer(502, &json!({ "error": format!("chitin did not list them: {}", e.chars().filter(|c| !c.is_control()).take(200).collect::<String>()) })),
+        },
+    };
+    drop(kept);
+    json_answer(200, &crate::needs::answer(title, &crate::needs::waiting(&p, title), a.notify_as.is_some()))
 }
 
 /// Needs you's notifications, under the mount: `push/key` (GET: the VAPID public key a device subscribes with), `push/subscribe`
