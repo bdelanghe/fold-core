@@ -1,0 +1,25 @@
+1 cold read of one leaf is lazy: needs/asks -> Ok("open")
+  evals [eval needs/asks] total evals=1 hits=0 revalidated=0
+2 cold read of the root reads the rest: needs -> Ok("approvals=[v:a1] asks=[open]")
+  evals [eval needs, eval needs/approvals] total evals=3 hits=1 revalidated=0
+3 warm read evaluates nothing: needs -> Ok("approvals=[v:a1] asks=[open]")
+  evals [] total evals=3 hits=2 revalidated=0
+readers of v:a1 ["needs/approvals"]; of needs/approvals ["needs"]
+4 feed seq 1 v:a2@2: Applied(["needs", "needs/approvals"])
+4 read after a cutoff: needs -> Ok("approvals=[v:a1] asks=[open]")
+  evals [eval needs/approvals] total evals=4 hits=3 revalidated=1
+5 feed seq 2 v:a1@2: Applied(["needs", "needs/approvals"])
+5 read after a real change: needs -> Ok("approvals=[] asks=[open]")
+  evals [eval needs/approvals, eval needs] total evals=6 hits=5 revalidated=1
+6 redelivered seq 2: Duplicate
+6 read after a redelivery: needs -> Ok("approvals=[] asks=[open]")
+  evals [] total evals=6 hits=6 revalidated=1
+7 feed seq 4 after 2: Gap { from: 2, to: 4 }
+7 read after a gap: needs -> Ok("approvals=[] asks=[answered]")
+  evals [eval needs/approvals, eval needs/asks, eval needs] total evals=9 hits=8 revalidated=1
+7 and again: needs -> Ok("approvals=[] asks=[answered]")
+  evals [] total evals=9 hits=9 revalidated=1
+8 a cycle is an error, not a hang: loop/a -> Err("cycle: loop/a -> loop/b -> loop/a")
+  evals [eval loop/a, eval loop/b] total evals=11 hits=9 revalidated=1
+8 an unknown node is an error: nope -> Err("no node nope")
+  evals [eval nope] total evals=12 hits=9 revalidated=1
