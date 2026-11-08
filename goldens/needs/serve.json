@@ -148,9 +148,7 @@
       ],
       "push": false
     },
-    "actor": [
-      "pending --as bobby"
-    ],
+    "actor": [],
     "log": null
   },
   {

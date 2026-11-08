@@ -267,6 +267,7 @@ fn served_as(stub: &Stub, needs_as: Option<&str>, notify_as: Option<&str>) -> Si
         spent: Default::default(),
         needs_as: needs_as.map(str::to_string),
         notify_as: notify_as.map(str::to_string),
+        pending: Default::default(),
     };
     Site { root, mount: "/fold".into(), no_store: vec![], acting: Some(acting), reporting: None }
 }
@@ -297,6 +298,36 @@ fn from_me(method: &str, target: &str, body: &str, change: &[(&str, Option<&str>
         body: body.as_bytes().to_vec(),
         peer: Some("127.0.0.1".parse().unwrap()),
     }
+}
+
+#[test]
+fn needs_json_is_read_from_chitin_once_per_window_and_shared() {
+    // One chitin at a time, its answer served to every reader for NEEDS_FRESH (2026-11-08: a polling Basis window spawned a chitin per
+    // read under load; they timed out; the page retried; the load rose). Three reads in the window = one `chitin pending`; a changed
+    // list shows after the window, not before; a failure is never kept.
+    let stub = Stub::default();
+    let s = served(&stub, Some("bobby"));
+    for _ in 0..3 {
+        let (res, _) = answer(&s, &from_me("GET", "/needs.json", "", &[]), NOW);
+        assert_eq!(res.status, 200);
+    }
+    assert_eq!(stub.calls.lock().unwrap().iter().filter(|c| c.starts_with("pending")).count(), 1, "three reads in the window ran chitin once");
+    *stub.list.lock().unwrap() = Some(json!([]));
+    let (res, _) = answer(&s, &from_me("GET", "/needs.json", "", &[]), NOW);
+    let body: Value = serde_json::from_slice(&res.body).unwrap();
+    assert!(!body["waiting"].as_array().unwrap().is_empty(), "inside the window the kept answer is served, so the emptied list is not seen yet");
+    *s.acting.as_ref().unwrap().pending.lock().unwrap() = None; // the window has passed
+    let (res, _) = answer(&s, &from_me("GET", "/needs.json", "", &[]), NOW);
+    let body: Value = serde_json::from_slice(&res.body).unwrap();
+    assert!(body["waiting"].as_array().unwrap().is_empty(), "after the window chitin is read again");
+    assert_eq!(stub.calls.lock().unwrap().iter().filter(|c| c.starts_with("pending")).count(), 2);
+    let down = Stub { down: true, ..Default::default() };
+    let b = served(&down, Some("bobby"));
+    for _ in 0..2 {
+        let (res, _) = answer(&b, &from_me("GET", "/needs.json", "", &[]), NOW);
+        assert_eq!(res.status, 502);
+    }
+    assert_eq!(down.calls.lock().unwrap().len(), 2, "a failure is not kept: the next reader asks chitin again");
 }
 
 #[test]
@@ -342,8 +373,9 @@ fn needs_json_refuses_all_but_the_one_login_and_nothing_declines_here() {
             })
         })
         .collect();
-    // chitin was only ever read, and only for what passed every check
-    assert_eq!(*stub.calls.lock().unwrap(), ["pending --as bobby", "pending --as bobby"]);
+    // chitin was only ever read, and only for what passed every check; the HEAD right after the GET is served from the one answer
+    // (NEEDS_FRESH), so the two reads ran chitin once
+    assert_eq!(*stub.calls.lock().unwrap(), ["pending --as bobby"]);
     assert_eq!(*down.calls.lock().unwrap(), ["pending --as bobby"]);
     bless_or_hold("serve.json", &Value::Array(got));
     for site in [s, off, broken] {

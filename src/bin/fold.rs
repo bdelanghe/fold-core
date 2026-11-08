@@ -112,7 +112,7 @@ fn main() {
                     eprintln!("fold serve: a new waiting intent is a Needs-you record from chitin seat {s}, pushed by chitin's notify-sink; devices subscribe at https://{host}{mount}{}subscribe", serve::PUSH);
                 }
                 let actor = Box::new(act::Chitin { bin, seat: act_seat });
-                (Some(serve::Acting { login, host, key, actor, spent: Default::default(), needs_as, notify_as }), Some(log))
+                (Some(serve::Acting { login, host, key, actor, spent: Default::default(), needs_as, notify_as, pending: Default::default() }), Some(log))
             }
             _ => die("fold serve: --act-as, --act-host, --act-key and --chitin go together", 2),
         };
