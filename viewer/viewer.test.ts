@@ -845,6 +845,8 @@ test("rotor: no layout shift: the drawer is fixed out of the page's flow, outsid
   // its words go through say(), the notices zone's one live region (#notice, role=status), never a region of its own
   expect(html).toContain("if (fx.say) say(fx.say);");
   expect((html.match(/aria-live|role="status"/g) ?? []).length).toBe(1);
+});
+
 // Basis (Bobby 11-02): a document's root is named by the document, Basis is the level above it, and the Reading box is Basis's
 // add-a-source box, search-like, with a named seam for feeds.
 test("a document's root is named by the document: its own title, or its path, never the generic Everything", () => {
