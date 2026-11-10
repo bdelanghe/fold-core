@@ -115,6 +115,32 @@ fn every_resource_class_has_its_headers() {
     let _ = fs::remove_dir_all(&s.root);
 }
 
+/// A pushed notice's url (needs.rs `notice`, `https://<host>/fold/needs/approvals/needs-sign-<id>/`) opened as a plain link on a
+/// host that serves the site at its root (Basis): the request still carries the mount and no file holds it, so it goes to the
+/// viewer's own location for that item, where its row is, instead of a 404. Anything that isn't such a path stays a 404.
+#[test]
+fn a_notice_url_opened_as_a_link_goes_to_the_items_row_in_the_viewer() {
+    let s = site("viewer-link");
+    let at = |target: &str| {
+        let r = respond(&s, &req("GET", target, &[], ""));
+        (r.status, r.header("Location").map(str::to_string))
+    };
+    assert_eq!(at("/fold/needs/approvals/needs-sign-0123456789ab/"), (302, Some("/#/needs/approvals/needs-sign-0123456789ab".into())));
+    assert_eq!(at("/fold/needs"), (302, Some("/#/needs".into())));
+    assert_eq!(respond(&s, &req("GET", "/fold/needs/", &[], "")).header("Cache-Control"), Some("no-store"));
+    // not under the mount, the mount alone, a step that isn't plain, or too deep: still no such fold
+    for t in ["/needs/approvals/x/", "/fold/", "/folder/x/", "/fold/a%20b/", "/fold/a/b/c/d/e/f/g/h/i/"] {
+        assert_eq!(at(t), (404, None), "{t}");
+    }
+    // a file that is there is served as before, mount or not
+    assert_eq!(at("/view.js").0, 200);
+    // a site served at the root has no mount to strip: every missing file is a 404
+    let root = Site { mount: "/".into(), ..site("viewer-link-root") };
+    assert_eq!(respond(&root, &req("GET", "/needs/x/", &[], "")).status, 404);
+    let _ = fs::remove_dir_all(&s.root);
+    let _ = fs::remove_dir_all(&root.root);
+}
+
 /// Live nodes (BRIEF-stint-2026-11-03-basis-live-folds Part A): each fold's `nodes/<id>.json` and their index `nodes/`, revalidated
 /// always, a strong ETag of the bytes, 304 on `If-None-Match`; held in goldens/serve/nodes.json.
 #[test]

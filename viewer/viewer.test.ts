@@ -457,9 +457,9 @@ test("notify: a subscription under an old key is replaced, on Notify me and on p
 });
 
 /** sw.js run in a fake worker: its listeners, and what they did. */
-function worker() {
+function worker(sw = "https://phobos.test/fold/sw.js") {
   const on: Record<string, (e: any) => void> = {}, did: any[] = [];
-  const self: any = { location: new URL("https://phobos.test/fold/sw.js"), addEventListener: (k: string, f: any) => { on[k] = f; },
+  const self: any = { location: new URL(sw), addEventListener: (k: string, f: any) => { on[k] = f; },
     registration: { showNotification: async (t: string, o: any) => { did.push(["show", t, o]); } }, clients: { claim: async () => {} }, skipWaiting: () => {} };
   new Function("self", "caches", "fetch", readFileSync(join(import.meta.dir, "sw.js"), "utf8").replace("@VERSION@", "t"))(self, {}, () => {});
   const fire = async (k: string, e: any) => { let w: Promise<unknown> = Promise.resolve(); on[k]({ ...e, waitUntil: (p: Promise<unknown>) => { w = p; } }); await w; };
@@ -492,6 +492,14 @@ test("sw: a push shows the item's one line, tagged by it, and a tap opens its fo
   w.self.clients.matchAll = async () => [{ url: "https://phobos.test/fold/#/", focus: async () => opened.push("focus"), navigate: async () => { throw new TypeError("not controlled"); } }];
   await w.fire("notificationclick", { notification: note });
   expect(opened).toEqual(["closed", "focus", `navigate ${url}`, "closed", `open ${url}`, "closed", "focus", `open ${url}`]);
+});
+
+test("sw: Basis at its own origin's root: chitin's /fold/ path lands on the item, not on #/fold/...; the manifest focuses the open window", async () => {
+  const w = worker("https://basis.test/sw.js");
+  await w.fire("push", { data: { json: () => ({ text: "To x", path: "/fold/needs/approvals/needs-sign-0123456789ab/" }) } });
+  await w.fire("push", { data: { json: () => ({ text: "To y", path: "/fold/../x/" }) } });
+  expect(w.did.map(([, , o]) => o.data.url)).toEqual(["https://basis.test/#/needs/approvals/needs-sign-0123456789ab", "https://basis.test/#/needs"]);
+  expect(JSON.parse(readFileSync(join(import.meta.dir, "manifest.webmanifest"), "utf8")).launch_handler).toEqual({ client_mode: "focus-existing" });
 });
 
 /** fold serve's nodes/ and its nodes, as src/serve.rs answers them: a strong ETag of the bytes, 304 on If-None-Match. Every request

@@ -221,7 +221,9 @@ pub fn answer(title: &str, waiting: &[Value], push: bool) -> Value {
 /// `needsYou`): the item's one line (its fold's title, `To <recipient>`: never its text, which may say more than a lock screen
 /// should), the item's fold as a path on `host` under the site's `mount`, with no query or fragment
 /// (`https://<host><mount>/needs/approvals/needs-sign-<id>/`;
-/// the service worker opens it as the viewer's `#/needs/approvals/needs-sign-<id>`), and `needs-you:sign-<id>`, the key chitin
+/// the service worker opens it as the viewer's `#/needs/approvals/needs-sign-<id>`, dropping a `/fold` lead on a root-served host
+/// such as Basis, and fold serve redirects it there when it is opened as a link: serve.rs `viewer_link`; no file holds it), and
+/// `needs-you:sign-<id>`, the key chitin
 /// pushes once per item, ever. None for an intent that isn't one ([`intent_ok`]) or a host that isn't a plain name.
 pub fn notice(w: &Value, host: &str, mount: &str) -> Option<(String, String, String)> {
     let id = text(w, "id").filter(|i| intent_ok(i))?;
