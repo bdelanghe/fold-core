@@ -92,7 +92,22 @@ async function inChrome(w: number, h: number, url: string, submit?: string) {
       .map((x: any) => [x.role.value, x.name?.value ?? "", x.value?.value, x.description?.value].filter((v) => v != null && v !== ""));
     const href = await value("location.pathname + decodeURIComponent(location.search)"); // Open submits the path %2F-encoded
     const zone = await value(`[...document.querySelectorAll("#notices p")].map((p) => p.textContent).filter(Boolean).join(" | ")`);
-    return { ready, h1, objs, box, href, zone, err: c.err() };
+    // The room (main.room) cuts nothing off and hides nothing: no row's words run past its mat (a fixed-height mat with overflow
+    // hidden sliced them mid-glyph), every row's words are shown (More of this page's names too), and each mat's title sits under
+    // its kicker, not in a column beside it. Each problem is named "<title>: <what>"; none, outside the room.
+    const room: string[] = JSON.parse(await value(`JSON.stringify([...document.querySelectorAll("main.room ol.rows > li")].flatMap((li) => {
+      const r = li.getBoundingClientRect(), cs = getComputedStyle(li), why = [];
+      if (li.scrollHeight > li.clientHeight + 1 || li.scrollWidth > li.clientWidth + 1) why.push("its words run past its mat");
+      for (const e of li.querySelectorAll(":scope > a, :scope > .hint")) {
+        if (getComputedStyle(e).display === "none") why.push((e.className || e.localName) + " hidden");
+        else if (e.getBoundingClientRect().bottom > r.bottom + 1) why.push((e.className || e.localName) + " cut off");
+      }
+      const a = li.querySelector(":scope > a");
+      if (a && li.classList.contains("obj") && Math.abs(a.getBoundingClientRect().left - (r.left + parseFloat(cs.borderLeftWidth) + parseFloat(cs.paddingLeft))) > 1)
+        why.push("title beside its kicker");
+      return why.length ? [(a?.textContent ?? li.textContent).trim() + ": " + why.join(", ")] : [];
+    }))`));
+    return { ready, h1, objs, box, href, zone, room, err: c.err() };
   } finally { await c.close(); }
 }
 
@@ -107,12 +122,12 @@ runs.push([390, 844, "root", { title: "Could not read the data", kids: [] }, "/f
 const typed = [390, 844, "root", { ...places[0][1], title: "Demo" }, "/fold/", "/fold-data/demo/page.json"] as const;
 for (const [w, h, id, n, at0, submit] of [...runs, typed] as (readonly [number, number, string, { title: string; kids?: unknown[] }, string, string?])[]) {
   const url = `http://127.0.0.1:${server.port}${at0}${href(at(id), "folds")}`;
-  const { ready, h1, objs, box, href: landed, zone, err } = await inChrome(w, h, url, submit);
+  const { ready, h1, objs, box, href: landed, zone, room, err } = await inChrome(w, h, url, submit);
   const want = reading[landed];
   // the notices zone: why a document was not read is said there, never in the Reading box; otherwise it says there is nothing
   const wantZone = landed.includes("evil.test") ? "Not read: only a path on this site, from /, is read" : "No notices";
-  const ok = ready && h1.length === 1 && h1[0] === n.title && objs === (n.kids ?? []).length && !!want && JSON.stringify(box) === JSON.stringify(want) && zone === wantZone;
-  console.log(`${ok ? "ok  " : "FAIL"} ${w}x${h} ${at0}${submit ? ` opened ${submit}` : ""} ${id}: heading ${JSON.stringify(h1)}, ${objs} rows, reading ${JSON.stringify(box)} at ${landed} notices ${JSON.stringify(zone)} (want ${JSON.stringify(n.title)}, ${(n.kids ?? []).length}, ${JSON.stringify(want)}, ${JSON.stringify(wantZone)})`);
+  const ok = ready && h1.length === 1 && h1[0] === n.title && objs === (n.kids ?? []).length && !!want && JSON.stringify(box) === JSON.stringify(want) && zone === wantZone && room.length === 0;
+  console.log(`${ok ? "ok  " : "FAIL"} ${w}x${h} ${at0}${submit ? ` opened ${submit}` : ""} ${id}: heading ${JSON.stringify(h1)}, ${objs} rows, reading ${JSON.stringify(box)} at ${landed} notices ${JSON.stringify(zone)} room ${JSON.stringify(room)} (want ${JSON.stringify(n.title)}, ${(n.kids ?? []).length}, ${JSON.stringify(want)}, ${JSON.stringify(wantZone)})`);
   if (!ok) { failed++; console.log(err.slice(-2000)); }
 }
 // The host asleep (brief items 10 and 22): /fold opened once through its service worker (sw.js), then its host answers nothing.
