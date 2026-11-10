@@ -71,24 +71,27 @@ main.slide h1{font-size:var(--s3);margin-top:1.5rem}
 main.slide ol.rows li.prop{font-size:var(--s1)}
 
 /* ── The room (Tatami design rules v0.1; Bobby's Basis design 2026-11-08, https://claude.ai/artifact/JpC8GjYAzwgKa2yRsJMia2).
-   The top of the document (index.html adds main.room, body.in-room): the viewport is the room and the page never scrolls (100dvh,
-   overflow hidden). Mats share 1px edges (--floor is the edge colour); nothing floats; no shadow, no rounded corner, no arrow out.
+   The top of the document (index.html adds main.room, body.in-room): the viewport is the room (at least 100dvh); when the mats'
+   words need more, the room grows and the page scrolls, never cutting a mat off (no hidden content). Mats share 1px edges (--floor is the edge colour); nothing floats; no shadow, no rounded corner, no arrow out.
    Wide: an olive rail (the heading 畳 / Basis, the places past the fourth mat, the read rows) beside the mats in a 1.62 : 1 room, the
    notices strip on the room's top edge; narrow: the strip, then the mats stacked, the rail's places last. The tree is untouched
    (one heading, one list, rows that are links); kickers and 畳 are CSS content with empty alt text. Colours: the tokens' floor,
    mat, here, rail and on-rail. */
-body.in-room{height:100dvh;overflow:hidden;display:grid;grid-template-rows:2rem minmax(0,1fr);background:var(--floor);outline:1px solid var(--floor)}
+/* The room fills the viewport and grows past it when its words need more (no mat is ever cut off, nothing is hidden: the page
+   scrolls instead). Every track is at least its content (1fr, auto), never minmax(0, …), and no mat clips (overflow is visible). */
+body.in-room{min-height:100dvh;display:grid;grid-template-rows:2rem 1fr;background:var(--floor);outline:1px solid var(--floor)}
 body.in-room aside.notices{max-width:none;height:auto;margin:0;padding:0 26px;display:flex;align-items:center;gap:1em;overflow:hidden;font-size:var(--s-1);
   background:var(--mat);border:0;border-bottom:1px solid var(--floor);border-left:4px solid var(--accent)}
 body.in-room aside.notices p{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 body.in-room form.reading{max-width:none;margin:0;padding:10px 26px;background:var(--mat);border:1px solid var(--floor)}
 body.in-room section.rotor{bottom:0;max-width:none;margin:0;border-radius:0}
-main.room{max-width:none;margin:0;padding:0;min-height:0;display:grid;grid-template-rows:auto minmax(0,1fr);gap:1px;background:var(--floor);outline:1px solid var(--floor);overflow:hidden}
+main.room{max-width:none;margin:0;padding:0;display:grid;grid-template-rows:auto 1fr;gap:1px;background:var(--floor);outline:1px solid var(--floor)}
 main.room h1{margin:0;padding:16px 26px;background:var(--rail);border:1px solid var(--rail);color:var(--on-rail);font-size:var(--s1);font-weight:700;display:flex;gap:.5em;align-items:baseline}
 main.room h1::before{content:"畳 / Basis" / "";font:var(--s-1)/1.3 var(--face);font-weight:400;flex:none}
-main.room ol.rows{margin:0;min-height:0;display:grid;grid-template-columns:1fr;grid-auto-rows:minmax(0,1fr);gap:1px;overflow:hidden}
+/* narrow: one column; the mats share what height is left (flex 1) but each is at least its words; the rail's rows stay their size */
+main.room ol.rows{margin:0;display:flex;flex-direction:column;gap:1px}
 main.room ol.rows li{border-radius:0}
-main.room ol.rows li.obj{display:grid;grid-template-columns:1fr;grid-template-rows:auto auto minmax(0,1fr);align-content:start;row-gap:.4rem;min-height:0;padding:22px 26px;background:var(--mat);border:1px solid var(--floor);overflow:hidden}
+main.room ol.rows li.obj{display:grid;grid-template-columns:1fr;grid-template-rows:auto auto 1fr;align-content:start;row-gap:.4rem;flex:1 0 auto;padding:22px 26px;background:var(--mat);border:1px solid var(--floor)}
 main.room ol.rows li.obj .n,main.room ol.rows li.obj .go,main.room ol.rows li.obj .enter{display:none}
 /* the kicker names the query (Bobby's render: "01 / Attention"); a mat the design does not name gets its number alone */
 main.room ol.rows li.obj::before{grid-row:1;font:var(--s-1)/1.3 var(--face);color:var(--soft);content:"" / ""}
@@ -99,21 +102,22 @@ main.room ol.rows li.obj:has(> a[href$="/machines"])::before{content:"02 / Infra
 main.room ol.rows li.obj:has(> a[href$="/signed"])::before{content:"03 / Activity" / ""}
 main.room ol.rows li.obj:has(> a[href$="/fleet"])::before{content:"04 / Fleet" / ""}
 main.room ol.rows li.obj:has(> a[href$="/trip"])::before{content:"Trip" / ""}
-main.room ol.rows li.obj a{grid-row:2;font-size:var(--s2);font-weight:700;line-height:1.1;letter-spacing:-.01em;align-self:start}
-main.room ol.rows li.obj .hint{grid-row:3;font-size:var(--s0);max-width:30ch;overflow:hidden}
+/* one column: the kicker, then the title under it, then its words (ol.rows's own grid-column:2 would put them in a second column) */
+main.room ol.rows li.obj a{grid-column:1;grid-row:2;font-size:var(--s2);font-weight:700;line-height:1.1;letter-spacing:-.01em;align-self:start}
+main.room ol.rows li.obj .hint{grid-column:1;grid-row:3;font-size:var(--s0);max-width:30ch}
 main.room ol.rows li.obj:first-child{background:var(--here);border:1px solid var(--floor)}
 main.room ol.rows li.obj:first-child::before,main.room ol.rows li.obj:first-child .hint{color:var(--ink)}
 main.room ol.rows li.obj:first-child a{font-size:var(--s3)}
 /* past the fourth, and the read rows: the rail's places and its foot, quiet */
-main.room ol.rows li.obj:nth-child(n+5),main.room ol.rows li.prop{min-height:0;padding:10px 26px;background:var(--rail);border:1px solid var(--rail);color:var(--on-rail);display:block}
+main.room ol.rows li.obj:nth-child(n+5),main.room ol.rows li.prop{flex:none;min-height:0;padding:10px 26px;background:var(--rail);border:1px solid var(--rail);color:var(--on-rail);display:block}
 main.room ol.rows li.obj:nth-child(n+5)::before{content:none}
 main.room ol.rows li.obj:nth-child(n+5) a{font-size:var(--s0);font-weight:600;color:var(--on-rail)}
 main.room ol.rows li.obj:nth-child(n+5) .hint,main.room ol.rows li.prop,main.room ol.rows li.prop a{font-size:var(--s-1);color:var(--on-rail)}
-main.room ol.rows li.obj:nth-child(n+5) .hint{display:none}
+main.room ol.rows li.obj:nth-child(n+5) .hint{display:block;max-width:none}
 body.keys main.room ol.rows li.cur{outline:3px solid var(--ink);outline-offset:-3px}
 body.keys main.room ol.rows li.obj:nth-child(n+5).cur,body.keys main.room ol.rows li.prop.cur{outline:3px solid var(--on-rail)}
 @media (max-width:999px){
-  /* narrow: the mats stacked, the rail's places as one band under them; still no page scroll (the mats share the height) */
+  /* narrow: the mats stacked, the rail's places as one band under them (the mats share the height, each at least its words) */
   main.room ol.rows li.obj:nth-child(n+5),main.room ol.rows li.prop{padding:6px 26px}
 }
 @media (min-width:1000px){
@@ -121,9 +125,9 @@ body.keys main.room ol.rows li.obj:nth-child(n+5).cur,body.keys main.room ol.row
   body.in-room::before{content:"";grid-column:1;grid-row:1/-1;background:var(--rail);border:1px solid var(--rail)}
   body.in-room > aside.notices,body.in-room > main,body.in-room > form.reading{position:relative}
   body.in-room aside.notices{grid-column:2;grid-row:1}
-  main.room{grid-column:1/-1;grid-row:1/-1;grid-template-columns:232px minmax(0,1fr);grid-template-rows:2rem minmax(0,1fr);background:transparent;column-gap:1px}
+  main.room{grid-column:1/-1;grid-row:1/-1;grid-template-columns:232px minmax(0,1fr);grid-template-rows:2rem 1fr;background:transparent;column-gap:1px}
   main.room h1{grid-column:1;grid-row:1/-1;align-self:start;z-index:1;border:0;background:transparent;padding:26px 24px 18px;flex-direction:column;align-items:flex-start;gap:.25em;pointer-events:none}
-  main.room ol.rows{grid-column:1/-1;grid-row:2;grid-template-columns:232px minmax(0,1.62fr) minmax(0,1fr);grid-template-rows:minmax(0,1fr) minmax(0,1fr);gap:1px;padding-top:0}
+  main.room ol.rows{grid-column:1/-1;grid-row:2;display:grid;grid-template-columns:232px minmax(0,1.62fr) minmax(0,1fr);grid-template-rows:1fr 1fr;gap:1px;padding-top:0}
   main.room ol.rows::before{content:"";grid-column:1;grid-row:1/-1;background:var(--rail);border:1px solid var(--rail)}
   main.room ol.rows li.obj:nth-child(1){grid-column:2;grid-row:1/-1}
   main.room ol.rows li.obj:nth-child(2){grid-column:3;grid-row:1}
