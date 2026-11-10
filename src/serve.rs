@@ -866,6 +866,19 @@ fn not_yet(site: &Site, fold: &[String]) -> Response {
     r
 }
 
+/// A fold path that arrived still carrying the mount (`/fold/needs/approvals/needs-sign-<id>/`) and names no file, as the viewer's
+/// own location for it (`/#/needs/approvals/needs-sign-<id>`). Such a request reaches this server only from a host that serves the
+/// site at its root (Basis, `https://basis.<tailnet>.ts.net/`: tailscale serve strips nothing there), and a pushed notice's url is
+/// such a path (needs.rs `notice`: chitin takes only a `/fold/` path, no fragment), so opening it as a link lands on the item in the
+/// viewer instead of a 404. Each step plain (the service worker's rule, sw.js `itemUrl`), at most 8; anything else stays a 404.
+fn viewer_link(site: &Site, rel: &str) -> Option<String> {
+    let mount = site.mount.trim_end_matches('/');
+    let tail = rel.strip_prefix(mount).filter(|_| !mount.is_empty())?.strip_prefix('/')?;
+    let steps: Vec<&str> = tail.split('/').filter(|s| !s.is_empty()).collect();
+    let plain = |s: &&str| s.len() <= 80 && *s != "." && *s != ".." && s.bytes().all(|b| b.is_ascii_alphanumeric() || b"._~-".contains(&b));
+    (!steps.is_empty() && steps.len() <= 8 && steps.iter().all(plain)).then(|| format!("/#/{}", steps.join("/")))
+}
+
 fn file(site: &Site, req: &Request, path: &str, now: i64) -> Response {
     let Some(rel) = decode(path).filter(|p| p.starts_with('/')) else {
         return Response::text(400, "not a path");
@@ -889,7 +902,10 @@ fn file(site: &Site, req: &Request, path: &str, now: i64) -> Response {
         fp.push("index.html");
     }
     let (Ok(mut bytes), Ok(meta)) = (fs::read(&fp), fs::metadata(&fp)) else {
-        return Response::text(404, "no such fold or file");
+        return match viewer_link(site, &rel) {
+            Some(to) => Response::new(302).with("Location", to).with("Cache-Control", "no-store"),
+            None => Response::text(404, "no such fold or file"),
+        };
     };
     let page = content_type(&fp).starts_with("text/html");
     // A page with an act: its tokens filled for whoever asks, if it is the person this server acts for, and its status said.

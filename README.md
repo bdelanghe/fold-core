@@ -169,9 +169,18 @@ serve, same-origin):
   - `POST <mount>/push/subscribe` and `push/unsubscribe` take JSON only. They hand the subscription, cut to
     `{endpoint, keys}`, to `chitin push subscribe`, or take it off with `chitin push unsubscribe`.
   - Every 30 s a watcher reads what waits. For each new intent it publishes one Needs-you record:
-    `chitin notify --as <seat> --dedupe needs-you:sign-<id> --url https://<host>/fold/needs/approvals/needs-sign-<id>/ "To <recipient>"`.
+    `chitin notify --as <seat> --dedupe needs-you:sign-<id> --url https://<host><mount>/needs/approvals/needs-sign-<id>/ "To <recipient>"`.
     Nothing is sent for an item that leaves. chitin's notify-sink sends the Web Push: VAPID, RFC 8291, one push per item ever,
     coalesced, quiet hours.
+  - That url is not a page: no file holds an item's fold, which exists only in the live Needs you. It is a `/fold/` path because
+    chitin takes nothing else for a push (no query, no fragment). Both ways of opening it land on the item's row, where Sign and
+    Decline are, at the viewer's own location `#/needs/approvals/needs-sign-<id>`:
+    - A tap on the push: the service worker (`sw.js` `itemUrl`) maps the path onto the app's scope. On a host that serves Basis at
+      its root (`https://basis.<tailnet>.ts.net/`) the `/fold` lead is dropped, so the tap opens `/#/needs/approvals/needs-sign-<id>`.
+    - The url opened as a plain link (chitin's say to bobby, the notify outbox): on such a host the request still carries the
+      mount, and fold serve answers it with `302 Location: /#/needs/approvals/needs-sign-<id>` (`serve.rs` `viewer_link`).
+    - To link to an item by hand, use the viewer location: `https://<host>/#/needs/approvals/needs-sign-<id>` (Basis), or
+      `https://<host>/fold/#/needs/approvals/needs-sign-<id>` where the viewer is under `/fold`. `#/needs` is Needs you itself.
   - Each line in the log names the intent, or the push service's host, never the text or an endpoint's path.
 
 goldens/needs/serve.json and push.json hold these routes' refusals and successes, and act-e2e runs them with the stub. The act tools replace
