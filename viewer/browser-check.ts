@@ -130,6 +130,45 @@ for (const [w, h, id, n, at0, submit] of [...runs, typed] as (readonly [number, 
   console.log(`${ok ? "ok  " : "FAIL"} ${w}x${h} ${at0}${submit ? ` opened ${submit}` : ""} ${id}: heading ${JSON.stringify(h1)}, ${objs} rows, reading ${JSON.stringify(box)} at ${landed} notices ${JSON.stringify(zone)} room ${JSON.stringify(room)} (want ${JSON.stringify(n.title)}, ${(n.kids ?? []).length}, ${JSON.stringify(want)}, ${JSON.stringify(wantZone)})`);
   if (!ok) { failed++; console.log(err.slice(-2000)); }
 }
+// The room's rail at the phone's, a laptop's and a wide width: its pieces (the heading's words, the places past the fourth mat, the read
+// rows such as "Data from …", the Reading box) never overlap (the Reading box once sat over "Data from" at 1000px); each mat's kicker
+// is numbered by its place (a counter), never by its link; and a long notice wraps whole in the strip (never cut with "…"), the strip
+// keeping its height.
+async function rail(w: number, h: number) {
+  const c = await chrome(chromium, w, h, `chromium-rail-${w}`), { send, value } = c;
+  try {
+    await send("Page.enable");
+    await send("Page.navigate", { url: `http://127.0.0.1:${server.port}/fold/` });
+    const until = Date.now() + 20_000;
+    while ((await value(`document.body?.dataset.ready === "1" && !!document.querySelector("main.room")`)) !== true && Date.now() < until) await Bun.sleep(100);
+    const out = JSON.parse(await value(`(() => {
+      const h1 = document.querySelector("main.room h1"), r = document.createRange(); r.selectNodeContents(h1);
+      const parts = [["heading", r.getBoundingClientRect()],
+        ...[...document.querySelectorAll("main.room ol.rows > li.obj:nth-child(n+5), main.room ol.rows > li.prop")].map((li) => [li.textContent.trim().slice(0, 30), li.getBoundingClientRect()]),
+        ["Reading box", document.querySelector("form.reading").getBoundingClientRect()]];
+      const overlaps = [];
+      for (let i = 0; i < parts.length; i++) for (let j = i + 1; j < parts.length; j++) {
+        const [a, p] = parts[i], [b, q] = parts[j];
+        if (p.height && q.height && p.left < q.right - 1 && q.left < p.right - 1 && p.top < q.bottom - 1 && q.top < p.bottom - 1) overlaps.push(a + " over " + b);
+      }
+      const kickers = [...document.querySelectorAll("main.room ol.rows > li.obj:nth-child(-n+4)")].map((li) => getComputedStyle(li, "::before").content)
+        .filter((k) => !k.startsWith("counter(mat"));
+      const zone = document.getElementById("notices"), before = zone.getBoundingClientRect().height, n = document.getElementById("notice");
+      n.textContent = "A long notice: " + "every word of it is shown, wrapping onto the next line, never cut short with an ellipsis. ".repeat(3);
+      const after = zone.getBoundingClientRect().height, cs = getComputedStyle(n);
+      const notice = [cs.whiteSpace === "nowrap" ? "nowrap" : "", cs.textOverflow === "ellipsis" ? "ellipsis" : "", n.scrollWidth > n.clientWidth + 1 ? "runs past the strip" : "",
+        Math.abs(after - before) > 0.5 ? "strip height " + before + " -> " + after : ""].filter(Boolean);
+      return JSON.stringify({ overlaps, kickers, notice });
+    })()`));
+    return { ...out, err: c.err() };
+  } finally { await c.close(); }
+}
+for (const [w, h] of [[390, 844], [1000, 900], [1400, 900]]) {
+  const r = await rail(w, h);
+  const ok = r.overlaps.length === 0 && r.kickers.length === 0 && r.notice.length === 0;
+  console.log(`${ok ? "ok  " : "FAIL"} ${w}x${h} the room's rail: overlaps ${JSON.stringify(r.overlaps)}, kickers not numbered by place ${JSON.stringify(r.kickers)}, long notice ${JSON.stringify(r.notice)}`);
+  if (!ok) { failed++; console.log(r.err.slice(-2000)); }
+}
 // The host asleep (brief items 10 and 22): /fold opened once through its service worker (sw.js), then its host answers nothing.
 // Opened again, it shows the last fold it read, its rows, and a note of since when and how long ago, which is the heading's
 // description in Chrome's accessibility tree, so VoiceOver hears it with the title as the page opens.
