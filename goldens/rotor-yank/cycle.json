@@ -1,0 +1,156 @@
+{
+  "$comment": "Choosing and cycling the kind: [ ] through the kinds line in order (stopping at the ends), the rotor's drawer (r), digits, r r. See briefs/rotor-yank-core.md.",
+  "tree": "needs",
+  "cases": [
+    {
+      "id":"bracket-forward","scope":"core","what":"] goes to the next kind in order, each said once, landing on the row you came from if it is a match, else the first","start":"Approve","keys":["⌘4","]","]","]","]"],
+      "expect": [
+        {"key":"","view":"","mode":"","filter":"","rotor":null,"at":"host[phobos]/application[Fixture]/window[Needs you]/group[Signing]/button[Approve]","row":"Approve, button","said":"","hint":"","copy":[],"focus":"ax-tree"},
+        {"key":"⌘4","view":"inputs","mode":"normal","filter":"","rotor":null,"at":"host[phobos]/application[Fixture]/window[Needs you]/textfield[Comment]","row":"Comment, text field, window","said":"inputs","hint":"","copy":[],"focus":"ax-tree"},
+        {"key":"]","view":"buttons","mode":"normal","filter":"","rotor":null,"at":"host[phobos]/application[Fixture]/window[Needs you]/group[Signing]/button[Approve]","row":"Approve, button, window","said":"buttons","hint":"","copy":[],"focus":"ax-tree"},
+        {"key":"]","view":"links","mode":"normal","filter":"","rotor":null,"at":"host[phobos]/application[Fixture]/window[Needs you]/group[Signing]/link[Open approve page]","row":"Open approve page, link, window","said":"links","hint":"","copy":[],"focus":"ax-tree"},
+        {"key":"]","view":"headings","mode":"normal","filter":"","rotor":null,"at":"host[phobos]/application[Fixture]/window[Needs you]/heading[Needs you]","row":"Needs you, heading, window","said":"headings","hint":"","copy":[],"focus":"ax-tree"},
+        {"key":"]","view":"windows","mode":"normal","filter":"","rotor":null,"at":"host[phobos]/application[Fixture]/window[Needs you]","row":"Needs you, window","said":"windows","hint":"","copy":[],"focus":"ax-tree"}
+      ]
+    },
+    {
+      "id":"bracket-back","scope":"core","what":"[ goes to the previous kind","start":"Approve","keys":["⌘8","[","[","[","["],
+      "expect": [
+        {"key":"","view":"","mode":"","filter":"","rotor":null,"at":"host[phobos]/application[Fixture]/window[Needs you]/group[Signing]/button[Approve]","row":"Approve, button","said":"","hint":"","copy":[],"focus":"ax-tree"},
+        {"key":"⌘8","view":"windows","mode":"normal","filter":"","rotor":null,"at":"host[phobos]/application[Fixture]/window[Needs you]","row":"Needs you, window","said":"windows","hint":"","copy":[],"focus":"ax-tree"},
+        {"key":"[","view":"headings","mode":"normal","filter":"","rotor":null,"at":"host[phobos]/application[Fixture]/window[Needs you]/heading[Needs you]","row":"Needs you, heading, window","said":"headings","hint":"","copy":[],"focus":"ax-tree"},
+        {"key":"[","view":"links","mode":"normal","filter":"","rotor":null,"at":"host[phobos]/application[Fixture]/window[Needs you]/group[Signing]/link[Open approve page]","row":"Open approve page, link, window","said":"links","hint":"","copy":[],"focus":"ax-tree"},
+        {"key":"[","view":"buttons","mode":"normal","filter":"","rotor":null,"at":"host[phobos]/application[Fixture]/window[Needs you]/group[Signing]/button[Approve]","row":"Approve, button, window","said":"buttons","hint":"","copy":[],"focus":"ax-tree"},
+        {"key":"[","view":"inputs","mode":"normal","filter":"","rotor":null,"at":"host[phobos]/application[Fixture]/window[Needs you]/textfield[Comment]","row":"Comment, text field, window","said":"inputs","hint":"","copy":[],"focus":"ax-tree"}
+      ]
+    },
+    {
+      "id":"bracket-leave","scope":"core","what":"after [ ] the kind still leaves to where you were before the first","start":"Ship it","keys":["⌘4","]","]","h"],
+      "expect": [
+        {"key":"","view":"","mode":"","filter":"","rotor":null,"at":"host[phobos]/application[Fixture]/window[Needs you]/group[Decisions]/group[]/radiobutton[Ship it]","row":"Ship it, radio button","said":"","hint":"","copy":[],"focus":"ax-tree"},
+        {"key":"⌘4","view":"inputs","mode":"normal","filter":"","rotor":null,"at":"host[phobos]/application[Fixture]/window[Needs you]/textfield[Comment]","row":"Comment, text field, window","said":"inputs","hint":"","copy":[],"focus":"ax-tree"},
+        {"key":"]","view":"buttons","mode":"normal","filter":"","rotor":null,"at":"host[phobos]/application[Fixture]/window[Needs you]/group[Decisions]/group[]/radiobutton[Ship it]","row":"Ship it, radio button, window","said":"buttons","hint":"","copy":[],"focus":"ax-tree"},
+        {"key":"]","view":"links","mode":"normal","filter":"","rotor":null,"at":"host[phobos]/application[Fixture]/window[Needs you]/group[Signing]/link[Open approve page]","row":"Open approve page, link, window","said":"links","hint":"","copy":[],"focus":"ax-tree"},
+        {"key":"h","view":"","mode":"","filter":"","rotor":null,"at":"host[phobos]/application[Fixture]/window[Needs you]/group[Decisions]/group[]/radiobutton[Ship it]","row":"Ship it, radio button","said":"","hint":"","copy":[],"focus":"ax-tree"}
+      ]
+    },
+    {
+      "id":"bracket-past-inputs","scope":"allie","what":"[ before inputs is Allie's keys kind, then the keyboard (the box comes up)","start":"Approve","keys":["⌘4","[","["],
+      "expect": [
+        {"key":"","view":"","mode":"","filter":"","rotor":null,"at":"host[phobos]/application[Fixture]/window[Needs you]/group[Signing]/button[Approve]","row":"Approve, button","said":"","hint":"","copy":[],"focus":"ax-tree"},
+        {"key":"⌘4","view":"inputs","mode":"normal","filter":"","rotor":null,"at":"host[phobos]/application[Fixture]/window[Needs you]/textfield[Comment]","row":"Comment, text field, window","said":"inputs","hint":"","copy":[],"focus":"ax-tree"},
+        {"key":"[","view":"keys","mode":"normal","filter":"","rotor":null,"at":"host[phobos]/application[Allie]/group[Help]/list[Keys]/key[Esc]","row":"Esc, key, while an agent may act, Esc stops it first (agent mode off), before it lowers the box or goes back","said":"keys","hint":"","copy":[],"focus":"ax-tree"},
+        {"key":"[","view":"","mode":"","filter":"","rotor":null,"at":"host[phobos]/application[Fixture]/window[Needs you]/group[Signing]/button[Approve]","row":"Approve, button","said":"","hint":"Insert","copy":[],"focus":"ax-ask"}
+      ]
+    },
+    {
+      "id":"bracket-past-windows","scope":"allie","what":"] after windows is Allie's apps kind, then actions, then it stops and says last kind","start":"Approve","keys":["⌘8","]","]","]"],
+      "expect": [
+        {"key":"","view":"","mode":"","filter":"","rotor":null,"at":"host[phobos]/application[Fixture]/window[Needs you]/group[Signing]/button[Approve]","row":"Approve, button","said":"","hint":"","copy":[],"focus":"ax-tree"},
+        {"key":"⌘8","view":"windows","mode":"normal","filter":"","rotor":null,"at":"host[phobos]/application[Fixture]/window[Needs you]","row":"Needs you, window","said":"windows","hint":"","copy":[],"focus":"ax-tree"},
+        {"key":"]","view":"apps","mode":"normal","filter":"","rotor":null,"at":"host[phobos]/application[Allie]/list[Apps]/list[show hidden apps]","row":"show hidden apps, list","said":"apps","hint":"","copy":[],"focus":"ax-tree"},
+        {"key":"]","view":"actions","mode":"normal","filter":"","rotor":null,"at":"◎","row":"show hidden apps, action, ⏎","said":"actions","hint":"","copy":[],"focus":"ax-tree"},
+        {"key":"]","view":"actions","mode":"normal","filter":"","rotor":null,"at":"◎","row":"show hidden apps, action, ⏎","said":"last kind","hint":"","copy":[],"focus":"ax-tree"}
+      ]
+    },
+    {
+      "id":"bracket-in-tree","scope":"core","what":"[ and ] do nothing in the plain tree (only inside a kind)","start":"Approve","keys":["]","["],
+      "expect": [
+        {"key":"","view":"","mode":"","filter":"","rotor":null,"at":"host[phobos]/application[Fixture]/window[Needs you]/group[Signing]/button[Approve]","row":"Approve, button","said":"","hint":"","copy":[],"focus":"ax-tree"},
+        {"key":"]","view":"","mode":"","filter":"","rotor":null,"at":"host[phobos]/application[Fixture]/window[Needs you]/group[Signing]/button[Approve]","row":"Approve, button","said":"] isn't a key here. i to type, ? for keys","hint":"] isn't a key here. i to type, ? for keys","copy":[],"focus":"ax-tree"},
+        {"key":"[","view":"","mode":"","filter":"","rotor":null,"at":"host[phobos]/application[Fixture]/window[Needs you]/group[Signing]/button[Approve]","row":"Approve, button","said":"[ isn't a key here. i to type, ? for keys","hint":"[ isn't a key here. i to type, ? for keys","copy":[],"focus":"ax-tree"}
+      ]
+    },
+    {
+      "id":"drawer-open","scope":"core","what":"r opens the drawer on the last kind (keys before any), the tree stays as it is","start":"Approve","keys":["r"],
+      "expect": [
+        {"key":"","view":"","mode":"","filter":"","rotor":null,"at":"host[phobos]/application[Fixture]/window[Needs you]/group[Signing]/button[Approve]","row":"Approve, button","said":"","hint":"","copy":[],"focus":"ax-tree"},
+        {"key":"r","view":"","mode":"","filter":"","rotor":"keys","at":"host[phobos]/application[Fixture]/window[Needs you]/group[Signing]/button[Approve]","row":"Approve, button","said":"","hint":"","copy":[],"focus":"ax-rotor-list"}
+      ]
+    },
+    {
+      "id":"drawer-pick","scope":"core","what":"j moves in the drawer, Enter picks that kind","start":"Approve","keys":["r","j","j","Enter"],
+      "expect": [
+        {"key":"","view":"","mode":"","filter":"","rotor":null,"at":"host[phobos]/application[Fixture]/window[Needs you]/group[Signing]/button[Approve]","row":"Approve, button","said":"","hint":"","copy":[],"focus":"ax-tree"},
+        {"key":"r","view":"","mode":"","filter":"","rotor":"keys","at":"host[phobos]/application[Fixture]/window[Needs you]/group[Signing]/button[Approve]","row":"Approve, button","said":"","hint":"","copy":[],"focus":"ax-rotor-list"},
+        {"key":"j","view":"","mode":"","filter":"","rotor":"inputs","at":"host[phobos]/application[Fixture]/window[Needs you]/group[Signing]/button[Approve]","row":"Approve, button","said":"","hint":"","copy":[],"focus":"ax-rotor-list"},
+        {"key":"j","view":"","mode":"","filter":"","rotor":"buttons","at":"host[phobos]/application[Fixture]/window[Needs you]/group[Signing]/button[Approve]","row":"Approve, button","said":"","hint":"","copy":[],"focus":"ax-rotor-list"},
+        {"key":"Enter","view":"buttons","mode":"normal","filter":"","rotor":null,"at":"host[phobos]/application[Fixture]/window[Needs you]/group[Signing]/button[Approve]","row":"Approve, button, window","said":"buttons","hint":"","copy":[],"focus":"ax-tree"}
+      ]
+    },
+    {
+      "id":"drawer-on-current","scope":"core","what":"inside a kind, r opens the drawer on that kind","start":"Approve","keys":["⌘6","r"],
+      "expect": [
+        {"key":"","view":"","mode":"","filter":"","rotor":null,"at":"host[phobos]/application[Fixture]/window[Needs you]/group[Signing]/button[Approve]","row":"Approve, button","said":"","hint":"","copy":[],"focus":"ax-tree"},
+        {"key":"⌘6","view":"links","mode":"normal","filter":"","rotor":null,"at":"host[phobos]/application[Fixture]/window[Needs you]/group[Signing]/link[Open approve page]","row":"Open approve page, link, window","said":"links","hint":"","copy":[],"focus":"ax-tree"},
+        {"key":"r","view":"links","mode":"normal","filter":"","rotor":"links","at":"host[phobos]/application[Fixture]/window[Needs you]/group[Signing]/link[Open approve page]","row":"Open approve page, link, window","said":"","hint":"","copy":[],"focus":"ax-rotor-list"}
+      ]
+    },
+    {
+      "id":"drawer-ends","scope":"core","what":"the drawer stops at its ends and says first kind / last kind","start":"Approve","keys":["r","k","k","k","k"],
+      "expect": [
+        {"key":"","view":"","mode":"","filter":"","rotor":null,"at":"host[phobos]/application[Fixture]/window[Needs you]/group[Signing]/button[Approve]","row":"Approve, button","said":"","hint":"","copy":[],"focus":"ax-tree"},
+        {"key":"r","view":"","mode":"","filter":"","rotor":"keys","at":"host[phobos]/application[Fixture]/window[Needs you]/group[Signing]/button[Approve]","row":"Approve, button","said":"","hint":"","copy":[],"focus":"ax-rotor-list"},
+        {"key":"k","view":"","mode":"","filter":"","rotor":"commands","at":"host[phobos]/application[Fixture]/window[Needs you]/group[Signing]/button[Approve]","row":"Approve, button","said":"","hint":"","copy":[],"focus":"ax-rotor-list"},
+        {"key":"k","view":"","mode":"","filter":"","rotor":"keyboard","at":"host[phobos]/application[Fixture]/window[Needs you]/group[Signing]/button[Approve]","row":"Approve, button","said":"","hint":"","copy":[],"focus":"ax-rotor-list"},
+        {"key":"k","view":"","mode":"","filter":"","rotor":"keyboard","at":"host[phobos]/application[Fixture]/window[Needs you]/group[Signing]/button[Approve]","row":"Approve, button","said":"first kind","hint":"","copy":[],"focus":"ax-rotor-list"},
+        {"key":"k","view":"","mode":"","filter":"","rotor":"keyboard","at":"host[phobos]/application[Fixture]/window[Needs you]/group[Signing]/button[Approve]","row":"Approve, button","said":"first kind","hint":"","copy":[],"focus":"ax-rotor-list"}
+      ]
+    },
+    {
+      "id":"drawer-digit","scope":"core","what":"a digit in the drawer picks that kind (5 is buttons)","start":"Approve","keys":["r","5"],
+      "expect": [
+        {"key":"","view":"","mode":"","filter":"","rotor":null,"at":"host[phobos]/application[Fixture]/window[Needs you]/group[Signing]/button[Approve]","row":"Approve, button","said":"","hint":"","copy":[],"focus":"ax-tree"},
+        {"key":"r","view":"","mode":"","filter":"","rotor":"keys","at":"host[phobos]/application[Fixture]/window[Needs you]/group[Signing]/button[Approve]","row":"Approve, button","said":"","hint":"","copy":[],"focus":"ax-rotor-list"},
+        {"key":"5","view":"buttons","mode":"normal","filter":"","rotor":null,"at":"host[phobos]/application[Fixture]/window[Needs you]/group[Signing]/button[Approve]","row":"Approve, button, window","said":"buttons","hint":"","copy":[],"focus":"ax-tree"}
+      ]
+    },
+    {
+      "id":"drawer-r-r","scope":"core","what":"r r opens the last kind again (history)","start":"Approve","keys":["⌘7","h","r","r"],
+      "expect": [
+        {"key":"","view":"","mode":"","filter":"","rotor":null,"at":"host[phobos]/application[Fixture]/window[Needs you]/group[Signing]/button[Approve]","row":"Approve, button","said":"","hint":"","copy":[],"focus":"ax-tree"},
+        {"key":"⌘7","view":"headings","mode":"normal","filter":"","rotor":null,"at":"host[phobos]/application[Fixture]/window[Needs you]/heading[Needs you]","row":"Needs you, heading, window","said":"headings","hint":"","copy":[],"focus":"ax-tree"},
+        {"key":"h","view":"","mode":"","filter":"","rotor":null,"at":"host[phobos]/application[Fixture]/window[Needs you]/group[Signing]/button[Approve]","row":"Approve, button","said":"","hint":"","copy":[],"focus":"ax-tree"},
+        {"key":"r","view":"","mode":"","filter":"","rotor":"headings","at":"host[phobos]/application[Fixture]/window[Needs you]/group[Signing]/button[Approve]","row":"Approve, button","said":"","hint":"","copy":[],"focus":"ax-rotor-list"},
+        {"key":"r","view":"headings","mode":"normal","filter":"","rotor":null,"at":"host[phobos]/application[Fixture]/window[Needs you]/heading[Needs you]","row":"Needs you, heading, window","said":"headings","hint":"","copy":[],"focus":"ax-tree"}
+      ]
+    },
+    {
+      "id":"drawer-close","scope":"core","what":"Esc closes the drawer and says where you are","start":"Approve","keys":["r","Escape"],
+      "expect": [
+        {"key":"","view":"","mode":"","filter":"","rotor":null,"at":"host[phobos]/application[Fixture]/window[Needs you]/group[Signing]/button[Approve]","row":"Approve, button","said":"","hint":"","copy":[],"focus":"ax-tree"},
+        {"key":"r","view":"","mode":"","filter":"","rotor":"keys","at":"host[phobos]/application[Fixture]/window[Needs you]/group[Signing]/button[Approve]","row":"Approve, button","said":"","hint":"","copy":[],"focus":"ax-rotor-list"},
+        {"key":"Escape","view":"","mode":"","filter":"","rotor":null,"at":"host[phobos]/application[Fixture]/window[Needs you]/group[Signing]/button[Approve]","row":"Approve, button","said":"tree: Approve, button","hint":"","copy":[],"focus":"ax-tree"}
+      ]
+    },
+    {
+      "id":"drawer-close-h","scope":"core","what":"h closes the drawer too","start":"Approve","keys":["⌘5","r","h"],
+      "expect": [
+        {"key":"","view":"","mode":"","filter":"","rotor":null,"at":"host[phobos]/application[Fixture]/window[Needs you]/group[Signing]/button[Approve]","row":"Approve, button","said":"","hint":"","copy":[],"focus":"ax-tree"},
+        {"key":"⌘5","view":"buttons","mode":"normal","filter":"","rotor":null,"at":"host[phobos]/application[Fixture]/window[Needs you]/group[Signing]/button[Approve]","row":"Approve, button, window","said":"buttons","hint":"","copy":[],"focus":"ax-tree"},
+        {"key":"r","view":"buttons","mode":"normal","filter":"","rotor":"buttons","at":"host[phobos]/application[Fixture]/window[Needs you]/group[Signing]/button[Approve]","row":"Approve, button, window","said":"","hint":"","copy":[],"focus":"ax-rotor-list"},
+        {"key":"h","view":"buttons","mode":"normal","filter":"","rotor":null,"at":"host[phobos]/application[Fixture]/window[Needs you]/group[Signing]/button[Approve]","row":"Approve, button, window","said":"buttons view: Approve, button","hint":"","copy":[],"focus":"ax-tree"}
+      ]
+    },
+    {
+      "id":"drawer-pick-same","scope":"core","what":"picking the kind you are in only closes the drawer","start":"Approve","keys":["⌘5","r","Enter"],
+      "expect": [
+        {"key":"","view":"","mode":"","filter":"","rotor":null,"at":"host[phobos]/application[Fixture]/window[Needs you]/group[Signing]/button[Approve]","row":"Approve, button","said":"","hint":"","copy":[],"focus":"ax-tree"},
+        {"key":"⌘5","view":"buttons","mode":"normal","filter":"","rotor":null,"at":"host[phobos]/application[Fixture]/window[Needs you]/group[Signing]/button[Approve]","row":"Approve, button, window","said":"buttons","hint":"","copy":[],"focus":"ax-tree"},
+        {"key":"r","view":"buttons","mode":"normal","filter":"","rotor":"buttons","at":"host[phobos]/application[Fixture]/window[Needs you]/group[Signing]/button[Approve]","row":"Approve, button, window","said":"","hint":"","copy":[],"focus":"ax-rotor-list"},
+        {"key":"Enter","view":"buttons","mode":"normal","filter":"","rotor":null,"at":"host[phobos]/application[Fixture]/window[Needs you]/group[Signing]/button[Approve]","row":"Approve, button, window","said":"buttons view: Approve, button","hint":"","copy":[],"focus":"ax-tree"}
+      ]
+    },
+    {
+      "id":"drawer-brackets","scope":"core","what":"[ ] move in the drawer as k j do","start":"Approve","keys":["r","]","]","[","Enter"],
+      "expect": [
+        {"key":"","view":"","mode":"","filter":"","rotor":null,"at":"host[phobos]/application[Fixture]/window[Needs you]/group[Signing]/button[Approve]","row":"Approve, button","said":"","hint":"","copy":[],"focus":"ax-tree"},
+        {"key":"r","view":"","mode":"","filter":"","rotor":"keys","at":"host[phobos]/application[Fixture]/window[Needs you]/group[Signing]/button[Approve]","row":"Approve, button","said":"","hint":"","copy":[],"focus":"ax-rotor-list"},
+        {"key":"]","view":"","mode":"","filter":"","rotor":"inputs","at":"host[phobos]/application[Fixture]/window[Needs you]/group[Signing]/button[Approve]","row":"Approve, button","said":"","hint":"","copy":[],"focus":"ax-rotor-list"},
+        {"key":"]","view":"","mode":"","filter":"","rotor":"buttons","at":"host[phobos]/application[Fixture]/window[Needs you]/group[Signing]/button[Approve]","row":"Approve, button","said":"","hint":"","copy":[],"focus":"ax-rotor-list"},
+        {"key":"[","view":"","mode":"","filter":"","rotor":"inputs","at":"host[phobos]/application[Fixture]/window[Needs you]/group[Signing]/button[Approve]","row":"Approve, button","said":"","hint":"","copy":[],"focus":"ax-rotor-list"},
+        {"key":"Enter","view":"inputs","mode":"normal","filter":"","rotor":null,"at":"host[phobos]/application[Fixture]/window[Needs you]/textfield[Comment]","row":"Comment, text field, window","said":"inputs","hint":"","copy":[],"focus":"ax-tree"}
+      ]
+    }
+  ]
+}

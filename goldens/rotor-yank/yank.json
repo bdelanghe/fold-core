@@ -1,0 +1,203 @@
+{
+  "$comment": "Yank: y copies the node, Y the node with its spoken path and address; a piece's Y copies its whole line. Said quietly on the line under the path. See briefs/rotor-yank-core.md.",
+  "tree": "needs",
+  "cases": [
+    {
+      "id":"y-button","scope":"core","what":"y on a button copies its name","start":"Approve","keys":["y"],
+      "expect": [
+        {"key":"","view":"","mode":"","filter":"","rotor":null,"at":"host[phobos]/application[Fixture]/window[Needs you]/group[Signing]/button[Approve]","row":"Approve, button","said":"","hint":"","copy":[],"focus":"ax-tree"},
+        {"key":"y","view":"","mode":"","filter":"","rotor":null,"at":"host[phobos]/application[Fixture]/window[Needs you]/group[Signing]/button[Approve]","row":"Approve, button","said":"","hint":"yanked: Approve","copy":["Approve"],"focus":"ax-tree"}
+      ]
+    },
+    {
+      "id":"Y-button","scope":"core","what":"Y copies the name, a blank line, the spoken path and the address","start":"Approve","keys":["Y"],
+      "expect": [
+        {"key":"","view":"","mode":"","filter":"","rotor":null,"at":"host[phobos]/application[Fixture]/window[Needs you]/group[Signing]/button[Approve]","row":"Approve, button","said":"","hint":"","copy":[],"focus":"ax-tree"},
+        {"key":"Y","view":"","mode":"","filter":"","rotor":null,"at":"host[phobos]/application[Fixture]/window[Needs you]/group[Signing]/button[Approve]","row":"Approve, button","said":"","hint":"yanked with its path: Approve","copy":["Approve\n\nphobos › Fixture › Needs you › Signing › Approve\nhost[phobos]/application[Fixture]/window[Needs you]/group[Signing]/button[Approve]"],"focus":"ax-tree"}
+      ]
+    },
+    {
+      "id":"y-link","scope":"core","what":"y on a link copies its name — its value (the URL)","start":"Open approve page","keys":["y","Y"],
+      "expect": [
+        {"key":"","view":"","mode":"","filter":"","rotor":null,"at":"host[phobos]/application[Fixture]/window[Needs you]/group[Signing]/link[Open approve page]","row":"Open approve page, link","said":"","hint":"","copy":[],"focus":"ax-tree"},
+        {"key":"y","view":"","mode":"","filter":"","rotor":null,"at":"host[phobos]/application[Fixture]/window[Needs you]/group[Signing]/link[Open approve page]","row":"Open approve page, link","said":"","hint":"yanked: Open approve page","copy":["Open approve page — https://phobos.example/approve/7f3a9c2e"],"focus":"ax-tree"},
+        {"key":"Y","view":"","mode":"","filter":"","rotor":null,"at":"host[phobos]/application[Fixture]/window[Needs you]/group[Signing]/link[Open approve page]","row":"Open approve page, link","said":"","hint":"yanked with its path: Open approve page","copy":["Open approve page — https://phobos.example/approve/7f3a9c2e\n\nphobos › Fixture › Needs you › Signing › Open approve page\nhost[phobos]/application[Fixture]/window[Needs you]/group[Signing]/link[Open approve page]"],"focus":"ax-tree"}
+      ]
+    },
+    {
+      "id":"y-pr-link","scope":"core","what":"y on a PR link copies the whole name and URL, not the PR number alone","start":"PR #1234 fold-core rotor in the core","keys":["y"],
+      "expect": [
+        {"key":"","view":"","mode":"","filter":"","rotor":null,"at":"host[phobos]/application[Fixture]/window[Needs you]/group[Do]/link[PR #1234 fold-core rotor in the core]","row":"PR #1234 fold-core rotor in the core, link","said":"","hint":"","copy":[],"focus":"ax-tree"},
+        {"key":"y","view":"","mode":"","filter":"","rotor":null,"at":"host[phobos]/application[Fixture]/window[Needs you]/group[Do]/link[PR #1234 fold-core rotor in the core]","row":"PR #1234 fold-core rotor in the core, link","said":"","hint":"yanked: PR #1234 fold-core rotor …","copy":["PR #1234 fold-core rotor in the core — https://github.com/empathic/fold-core/pull/1234"],"focus":"ax-tree"}
+      ]
+    },
+    {
+      "id":"y-intent-text","scope":"core","what":"y on a row holding an intent id copies the row's text, not the id alone","start":"intent 7f3a9c2e approve the deploy","keys":["y","Y"],
+      "expect": [
+        {"key":"","view":"","mode":"","filter":"","rotor":null,"at":"host[phobos]/application[Fixture]/window[Needs you]/group[Signing]/statictext[intent 7f3a9c2e approve the deploy]","row":"intent 7f3a9c2e approve the deploy, text","said":"","hint":"","copy":[],"focus":"ax-tree"},
+        {"key":"y","view":"","mode":"","filter":"","rotor":null,"at":"host[phobos]/application[Fixture]/window[Needs you]/group[Signing]/statictext[intent 7f3a9c2e approve the deploy]","row":"intent 7f3a9c2e approve the deploy, text","said":"","hint":"yanked: intent 7f3a9c2e approve the …","copy":["intent 7f3a9c2e approve the deploy"],"focus":"ax-tree"},
+        {"key":"Y","view":"","mode":"","filter":"","rotor":null,"at":"host[phobos]/application[Fixture]/window[Needs you]/group[Signing]/statictext[intent 7f3a9c2e approve the deploy]","row":"intent 7f3a9c2e approve the deploy, text","said":"","hint":"yanked with its path: intent 7f3a9c2e approve the …","copy":["intent 7f3a9c2e approve the deploy\n\nphobos › Fixture › Needs you › Signing › intent 7f3a9c2e approve the deploy\nhost[phobos]/application[Fixture]/window[Needs you]/group[Signing]/statictext[intent 7f3a9c2e approve the deploy]"],"focus":"ax-tree"}
+      ]
+    },
+    {
+      "id":"y-heading","scope":"core","what":"y on a heading copies its name","start":"Decisions","keys":["l","y"],
+      "expect": [
+        {"key":"","view":"","mode":"","filter":"","rotor":null,"at":"host[phobos]/application[Fixture]/window[Needs you]/group[Decisions]","row":"Decisions, group","said":"","hint":"","copy":[],"focus":"ax-tree"},
+        {"key":"l","view":"","mode":"","filter":"","rotor":null,"at":"host[phobos]/application[Fixture]/window[Needs you]/group[Decisions]/heading[Decisions]","row":"Decisions, heading","said":"","hint":"","copy":[],"focus":"ax-tree"},
+        {"key":"y","view":"","mode":"","filter":"","rotor":null,"at":"host[phobos]/application[Fixture]/window[Needs you]/group[Decisions]/heading[Decisions]","row":"Decisions, heading","said":"","hint":"yanked: Decisions","copy":["Decisions"],"focus":"ax-tree"}
+      ]
+    },
+    {
+      "id":"y-group","scope":"core","what":"y on a fold (a named group) copies its name only, not what it holds","start":"Signing","keys":["y","Y"],
+      "expect": [
+        {"key":"","view":"","mode":"","filter":"","rotor":null,"at":"host[phobos]/application[Fixture]/window[Needs you]/group[Signing]","row":"Signing, group","said":"","hint":"","copy":[],"focus":"ax-tree"},
+        {"key":"y","view":"","mode":"","filter":"","rotor":null,"at":"host[phobos]/application[Fixture]/window[Needs you]/group[Signing]","row":"Signing, group","said":"","hint":"yanked: Signing","copy":["Signing"],"focus":"ax-tree"},
+        {"key":"Y","view":"","mode":"","filter":"","rotor":null,"at":"host[phobos]/application[Fixture]/window[Needs you]/group[Signing]","row":"Signing, group","said":"","hint":"yanked with its path: Signing","copy":["Signing\n\nphobos › Fixture › Needs you › Signing\nhost[phobos]/application[Fixture]/window[Needs you]/group[Signing]"],"focus":"ax-tree"}
+      ]
+    },
+    {
+      "id":"y-checkbox","scope":"core","what":"y on a checkbox copies its name — its value","start":"Remember","keys":["y"],
+      "expect": [
+        {"key":"","view":"","mode":"","filter":"","rotor":null,"at":"host[phobos]/application[Fixture]/window[Needs you]/group[Decisions]/checkbox[Remember]","row":"Remember, checkbox","said":"","hint":"","copy":[],"focus":"ax-tree"},
+        {"key":"y","view":"","mode":"","filter":"","rotor":null,"at":"host[phobos]/application[Fixture]/window[Needs you]/group[Decisions]/checkbox[Remember]","row":"Remember, checkbox","said":"","hint":"yanked: Remember","copy":["Remember — 0"],"focus":"ax-tree"}
+      ]
+    },
+    {
+      "id":"y-combo","scope":"core","what":"y on a combo box copies its name — its value","start":"Seat","keys":["y"],
+      "expect": [
+        {"key":"","view":"","mode":"","filter":"","rotor":null,"at":"host[phobos]/application[Fixture]/window[Needs you]/combobox[Seat]","row":"Seat, combo box","said":"","hint":"","copy":[],"focus":"ax-tree"},
+        {"key":"y","view":"","mode":"","filter":"","rotor":null,"at":"host[phobos]/application[Fixture]/window[Needs you]/combobox[Seat]","row":"Seat, combo box","said":"","hint":"yanked: Seat","copy":["Seat — personal-allie-lead"],"focus":"ax-tree"}
+      ]
+    },
+    {
+      "id":"y-empty-field","scope":"core","what":"y on an empty text field copies its name only","start":"Comment","keys":["y"],
+      "expect": [
+        {"key":"","view":"","mode":"","filter":"","rotor":null,"at":"host[phobos]/application[Fixture]/window[Needs you]/textfield[Comment]","row":"Comment, text field","said":"","hint":"","copy":[],"focus":"ax-tree"},
+        {"key":"y","view":"","mode":"","filter":"","rotor":null,"at":"host[phobos]/application[Fixture]/window[Needs you]/textfield[Comment]","row":"Comment, text field","said":"","hint":"yanked: Comment","copy":["Comment"],"focus":"ax-tree"}
+      ]
+    },
+    {
+      "id":"y-window","scope":"core","what":"y and Y on a window","start":"Log","keys":["y","Y"],
+      "expect": [
+        {"key":"","view":"","mode":"","filter":"","rotor":null,"at":"host[phobos]/application[Fixture]/window[Log]","row":"Log, window","said":"","hint":"","copy":[],"focus":"ax-tree"},
+        {"key":"y","view":"","mode":"","filter":"","rotor":null,"at":"host[phobos]/application[Fixture]/window[Log]","row":"Log, window","said":"","hint":"yanked: Log","copy":["Log"],"focus":"ax-tree"},
+        {"key":"Y","view":"","mode":"","filter":"","rotor":null,"at":"host[phobos]/application[Fixture]/window[Log]","row":"Log, window","said":"","hint":"yanked with its path: Log","copy":["Log\n\nphobos › Fixture › Log\nhost[phobos]/application[Fixture]/window[Log]"],"focus":"ax-tree"}
+      ]
+    },
+    {
+      "id":"y-in-kind","scope":"core","what":"y and Y in a kind copy the match itself, its real path (not the kind's)","start":"Approve","keys":["⌘6","j","y","Y"],
+      "expect": [
+        {"key":"","view":"","mode":"","filter":"","rotor":null,"at":"host[phobos]/application[Fixture]/window[Needs you]/group[Signing]/button[Approve]","row":"Approve, button","said":"","hint":"","copy":[],"focus":"ax-tree"},
+        {"key":"⌘6","view":"links","mode":"normal","filter":"","rotor":null,"at":"host[phobos]/application[Fixture]/window[Needs you]/group[Signing]/link[Open approve page]","row":"Open approve page, link, window","said":"links","hint":"","copy":[],"focus":"ax-tree"},
+        {"key":"j","view":"links","mode":"normal","filter":"","rotor":null,"at":"host[phobos]/application[Fixture]/window[Needs you]/group[Do]/link[PR #1234 fold-core rotor in the core]","row":"PR #1234 fold-core rotor in the core, link, window","said":"","hint":"","copy":[],"focus":"ax-tree"},
+        {"key":"y","view":"links","mode":"normal","filter":"","rotor":null,"at":"host[phobos]/application[Fixture]/window[Needs you]/group[Do]/link[PR #1234 fold-core rotor in the core]","row":"PR #1234 fold-core rotor in the core, link, window","said":"","hint":"yanked: PR #1234 fold-core rotor …","copy":["PR #1234 fold-core rotor in the core — https://github.com/empathic/fold-core/pull/1234"],"focus":"ax-tree"},
+        {"key":"Y","view":"links","mode":"normal","filter":"","rotor":null,"at":"host[phobos]/application[Fixture]/window[Needs you]/group[Do]/link[PR #1234 fold-core rotor in the core]","row":"PR #1234 fold-core rotor in the core, link, window","said":"","hint":"yanked with its path: PR #1234 fold-core rotor …","copy":["PR #1234 fold-core rotor in the core — https://github.com/empathic/fold-core/pull/1234\n\nphobos › Fixture › Needs you › Do › PR #1234 fold-core rotor in the core\nhost[phobos]/application[Fixture]/window[Needs you]/group[Do]/link[PR #1234 fold-core rotor in the core]"],"focus":"ax-tree"}
+      ]
+    },
+    {
+      "id":"y-twice","scope":"core","what":"y twice copies twice; the line under the path already says it, so the second changes nothing there","start":"Wait","keys":["y","y"],
+      "expect": [
+        {"key":"","view":"","mode":"","filter":"","rotor":null,"at":"host[phobos]/application[Fixture]/window[Needs you]/group[Decisions]/group[]/radiobutton[Wait]","row":"Wait, radio button","said":"","hint":"","copy":[],"focus":"ax-tree"},
+        {"key":"y","view":"","mode":"","filter":"","rotor":null,"at":"host[phobos]/application[Fixture]/window[Needs you]/group[Decisions]/group[]/radiobutton[Wait]","row":"Wait, radio button","said":"","hint":"yanked: Wait","copy":["Wait"],"focus":"ax-tree"},
+        {"key":"y","view":"","mode":"","filter":"","rotor":null,"at":"host[phobos]/application[Fixture]/window[Needs you]/group[Decisions]/group[]/radiobutton[Wait]","row":"Wait, radio button","said":"","hint":"","copy":["Wait"],"focus":"ax-tree"}
+      ]
+    },
+    {
+      "id":"y-long-row","scope":"allie","what":"y on a long row copies all of it (its row is cut, the copy is not)","start":"Land the rotor and yank contract first, then let fold-core implement it in Rust, then switch Allie's fold.js to call the core for every move and every copy, keeping the goldens green the whole way through.","keys":["y"],
+      "expect": [
+        {"key":"","view":"","mode":"","filter":"","rotor":null,"at":"host[phobos]/application[Fixture]/window[Needs you]/group[Do]/statictext[Land the rotor and yank contract first, then let fold-core i]","row":"Land the rotor and yank contract first, then let fold-core implement it …, text","said":"","hint":"","copy":[],"focus":"ax-tree"},
+        {"key":"y","view":"","mode":"","filter":"","rotor":null,"at":"host[phobos]/application[Fixture]/window[Needs you]/group[Do]/statictext[Land the rotor and yank contract first, then let fold-core i]","row":"Land the rotor and yank contract first, then let fold-core implement it …, text","said":"","hint":"yanked: Land the rotor and …","copy":["Land the rotor and yank contract first, then let fold-core implement it in Rust, then switch Allie's fold.js to call the core for every move and every copy, keeping the goldens green the whole way through."],"focus":"ax-tree"}
+      ]
+    },
+    {
+      "id":"y-piece","scope":"allie","what":"in a long row, y on a piece copies the piece, Y the whole line","start":"Land the rotor and yank contract first, then let fold-core implement it in Rust, then switch Allie's fold.js to call the core for every move and every copy, keeping the goldens green the whole way through.","keys":["l","y","Y","j","y"],
+      "expect": [
+        {"key":"","view":"","mode":"","filter":"","rotor":null,"at":"host[phobos]/application[Fixture]/window[Needs you]/group[Do]/statictext[Land the rotor and yank contract first, then let fold-core i]","row":"Land the rotor and yank contract first, then let fold-core implement it …, text","said":"","hint":"","copy":[],"focus":"ax-tree"},
+        {"key":"l","view":"","mode":"","filter":"","rotor":null,"at":"host[phobos]/application[Fixture]/window[Needs you]/group[Do]/statictext[Land the rotor and yank contract first, then let fold-core i]/piece[Land the rotor and yank contract first,]","row":"Land the rotor and yank contract first,, piece","said":"","hint":"","copy":[],"focus":"ax-tree"},
+        {"key":"y","view":"","mode":"","filter":"","rotor":null,"at":"host[phobos]/application[Fixture]/window[Needs you]/group[Do]/statictext[Land the rotor and yank contract first, then let fold-core i]/piece[Land the rotor and yank contract first,]","row":"Land the rotor and yank contract first,, piece","said":"","hint":"yanked: Land the rotor …","copy":["Land the rotor and yank contract first,"],"focus":"ax-tree"},
+        {"key":"Y","view":"","mode":"","filter":"","rotor":null,"at":"host[phobos]/application[Fixture]/window[Needs you]/group[Do]/statictext[Land the rotor and yank contract first, then let fold-core i]/piece[Land the rotor and yank contract first,]","row":"Land the rotor and yank contract first,, piece","said":"","hint":"yanked the whole line: Land the rotor and …","copy":["Land the rotor and yank contract first, then let fold-core implement it in Rust, then switch Allie's fold.js to call the core for every move and every copy, keeping the goldens green the whole way through."],"focus":"ax-tree"},
+        {"key":"j","view":"","mode":"","filter":"","rotor":null,"at":"host[phobos]/application[Fixture]/window[Needs you]/group[Do]/statictext[Land the rotor and yank contract first, then let fold-core i]/piece[then let fold-core implement it in Rust,]","row":"then let fold-core implement it in Rust,, piece","said":"","hint":"","copy":[],"focus":"ax-tree"},
+        {"key":"y","view":"","mode":"","filter":"","rotor":null,"at":"host[phobos]/application[Fixture]/window[Needs you]/group[Do]/statictext[Land the rotor and yank contract first, then let fold-core i]/piece[then let fold-core implement it in Rust,]","row":"then let fold-core implement it in Rust,, piece","said":"","hint":"yanked: then let fold-core …","copy":["then let fold-core implement it in Rust,"],"focus":"ax-tree"}
+      ]
+    },
+    {
+      "id":"short-text-flat","scope":"allie","what":"a short static text has nothing inside: Allie finds entities (the commit) only in a text area's lines and in long rows' pieces","start":"commit 8a447f0 is the base","keys":["l"],
+      "expect": [
+        {"key":"","view":"","mode":"","filter":"","rotor":null,"at":"host[phobos]/application[Fixture]/window[Needs you]/group[Do]/statictext[commit 8a447f0 is the base]","row":"commit 8a447f0 is the base, text","said":"","hint":"","copy":[],"focus":"ax-tree"},
+        {"key":"l","view":"","mode":"","filter":"","rotor":null,"at":"host[phobos]/application[Fixture]/window[Needs you]/group[Do]/statictext[commit 8a447f0 is the base]","row":"commit 8a447f0 is the base, text","said":"nothing inside commit 8a447f0 is the base","hint":"","copy":[],"focus":"ax-tree"}
+      ]
+    },
+    {
+      "id":"y-entity","scope":"allie","what":"y on an entity Allie found in a text area's line (a seat) copies the entity's words; Y adds its path and address","start":"log","keys":["l","j","l","y","Y"],
+      "expect": [
+        {"key":"","view":"","mode":"","filter":"","rotor":null,"at":"host[phobos]/application[Fixture]/window[Log]/textarea[log]","row":"log, text box","said":"","hint":"","copy":[],"focus":"ax-tree"},
+        {"key":"l","view":"","mode":"","filter":"","rotor":null,"at":"host[phobos]/application[Fixture]/window[Log]/textarea[log]/line[0]","row":"first line, text","said":"","hint":"","copy":[],"focus":"ax-tree"},
+        {"key":"j","view":"","mode":"","filter":"","rotor":null,"at":"host[phobos]/application[Fixture]/window[Log]/textarea[log]/line[1]","row":"second line mentions personal-allie-lead, text","said":"","hint":"","copy":[],"focus":"ax-tree"},
+        {"key":"l","view":"","mode":"","filter":"","rotor":null,"at":"host[phobos]/application[Fixture]/window[Log]/textarea[log]/line[1]/seat[personal-allie-lead]","row":"personal-allie-lead, seat","said":"","hint":"","copy":[],"focus":"ax-tree"},
+        {"key":"y","view":"","mode":"","filter":"","rotor":null,"at":"host[phobos]/application[Fixture]/window[Log]/textarea[log]/line[1]/seat[personal-allie-lead]","row":"personal-allie-lead, seat","said":"","hint":"yanked: personal-allie-lead","copy":["personal-allie-lead"],"focus":"ax-tree"},
+        {"key":"Y","view":"","mode":"","filter":"","rotor":null,"at":"host[phobos]/application[Fixture]/window[Log]/textarea[log]/line[1]/seat[personal-allie-lead]","row":"personal-allie-lead, seat","said":"","hint":"yanked with its path: personal-allie-lead","copy":["personal-allie-lead\n\nphobos › Fixture › Log › log\nhost[phobos]/application[Fixture]/window[Log]/textarea[log]/line[1]/seat[personal-allie-lead]"],"focus":"ax-tree"}
+      ]
+    },
+    {
+      "id":"y-text-area","scope":"allie","what":"y on a text area copies its name — its whole text","start":"log","keys":["y"],
+      "expect": [
+        {"key":"","view":"","mode":"","filter":"","rotor":null,"at":"host[phobos]/application[Fixture]/window[Log]/textarea[log]","row":"log, text box","said":"","hint":"","copy":[],"focus":"ax-tree"},
+        {"key":"y","view":"","mode":"","filter":"","rotor":null,"at":"host[phobos]/application[Fixture]/window[Log]/textarea[log]","row":"log, text box","said":"","hint":"yanked: log","copy":["log — first line\nsecond line mentions personal-allie-lead\nthird"],"focus":"ax-tree"}
+      ]
+    },
+    {
+      "id":"y-line","scope":"allie","what":"y on a line of a text area copies the line, Y adds the path and address","start":"log","keys":["l","j","y","Y"],
+      "expect": [
+        {"key":"","view":"","mode":"","filter":"","rotor":null,"at":"host[phobos]/application[Fixture]/window[Log]/textarea[log]","row":"log, text box","said":"","hint":"","copy":[],"focus":"ax-tree"},
+        {"key":"l","view":"","mode":"","filter":"","rotor":null,"at":"host[phobos]/application[Fixture]/window[Log]/textarea[log]/line[0]","row":"first line, text","said":"","hint":"","copy":[],"focus":"ax-tree"},
+        {"key":"j","view":"","mode":"","filter":"","rotor":null,"at":"host[phobos]/application[Fixture]/window[Log]/textarea[log]/line[1]","row":"second line mentions personal-allie-lead, text","said":"","hint":"","copy":[],"focus":"ax-tree"},
+        {"key":"y","view":"","mode":"","filter":"","rotor":null,"at":"host[phobos]/application[Fixture]/window[Log]/textarea[log]/line[1]","row":"second line mentions personal-allie-lead, text","said":"","hint":"yanked: line 2","copy":["second line mentions personal-allie-lead"],"focus":"ax-tree"},
+        {"key":"Y","view":"","mode":"","filter":"","rotor":null,"at":"host[phobos]/application[Fixture]/window[Log]/textarea[log]/line[1]","row":"second line mentions personal-allie-lead, text","said":"","hint":"yanked with its path: line 2","copy":["text\n\nsecond line mentions personal-allie-lead\n\nphobos › Fixture › Log › log\nhost[phobos]/application[Fixture]/window[Log]/textarea[log]/line[1]"],"focus":"ax-tree"}
+      ]
+    },
+    {
+      "id":"y-from-actions","scope":"allie","what":"the actions kind (⌘0) lists yank and yank with path for the row you were on; Enter on one copies as y / Y would","start":"Approve","keys":["⌘0","/","y","a","n","k","Enter","Enter"],
+      "expect": [
+        {"key":"","view":"","mode":"","filter":"","rotor":null,"at":"host[phobos]/application[Fixture]/window[Needs you]/group[Signing]/button[Approve]","row":"Approve, button","said":"","hint":"","copy":[],"focus":"ax-tree"},
+        {"key":"⌘0","view":"actions","mode":"normal","filter":"","rotor":null,"at":"◎","row":"press Approve, action, ⏎","said":"actions","hint":"","copy":[],"focus":"ax-tree"},
+        {"key":"/","view":"actions","mode":"filter","filter":"","rotor":null,"at":"◎","row":"press Approve, action, ⏎","said":"","hint":"","copy":[],"focus":"ax-tree"},
+        {"key":"y","view":"actions","mode":"filter","filter":"y","rotor":null,"at":"◎","row":"send keys to Approve, action, ⌃V","said":"","hint":"","copy":[],"focus":"ax-tree"},
+        {"key":"a","view":"actions","mode":"filter","filter":"ya","rotor":null,"at":"◎","row":"yank, action, y","said":"","hint":"","copy":[],"focus":"ax-tree"},
+        {"key":"n","view":"actions","mode":"filter","filter":"yan","rotor":null,"at":"◎","row":"yank, action, y","said":"","hint":"","copy":[],"focus":"ax-tree"},
+        {"key":"k","view":"actions","mode":"filter","filter":"yank","rotor":null,"at":"◎","row":"yank, action, y","said":"","hint":"","copy":[],"focus":"ax-tree"},
+        {"key":"Enter","view":"actions","mode":"normal","filter":"yank","rotor":null,"at":"◎","row":"yank, action, y","said":"","hint":"","copy":[],"focus":"ax-tree"},
+        {"key":"Enter","view":"","mode":"","filter":"","rotor":null,"at":"host[phobos]/application[Fixture]/window[Needs you]/group[Signing]/button[Approve]","row":"Approve, button","said":"","hint":"yanked: Approve","copy":["Approve"],"focus":"ax-tree"}
+      ]
+    },
+    {
+      "id":"keys-kind","scope":"allie","what":"⌘3 lists Allie's keys as a kind","start":"Approve","keys":["⌘3","j"],
+      "expect": [
+        {"key":"","view":"","mode":"","filter":"","rotor":null,"at":"host[phobos]/application[Fixture]/window[Needs you]/group[Signing]/button[Approve]","row":"Approve, button","said":"","hint":"","copy":[],"focus":"ax-tree"},
+        {"key":"⌘3","view":"keys","mode":"normal","filter":"","rotor":null,"at":"host[phobos]/application[Allie]/group[Help]/list[Keys]/key[Esc]","row":"Esc, key, while an agent may act, Esc stops it first (agent mode off), before it lowers the box or goes back","said":"keys","hint":"","copy":[],"focus":"ax-tree"},
+        {"key":"j","view":"keys","mode":"normal","filter":"","rotor":null,"at":"host[phobos]/application[Allie]/group[Help]/list[Keys]/key[⌃⌥Esc]","row":"⌃⌥Esc, key, stop from any app (the menu bar's Stop agent too)","said":"","hint":"","copy":[],"focus":"ax-tree"}
+      ]
+    },
+    {
+      "id":"apps-kind","scope":"allie","what":"⌘9 lists Allie › Apps (none in the fixture)","start":"Approve","keys":["⌘9"],
+      "expect": [
+        {"key":"","view":"","mode":"","filter":"","rotor":null,"at":"host[phobos]/application[Fixture]/window[Needs you]/group[Signing]/button[Approve]","row":"Approve, button","said":"","hint":"","copy":[],"focus":"ax-tree"},
+        {"key":"⌘9","view":"apps","mode":"normal","filter":"","rotor":null,"at":"host[phobos]/application[Allie]/list[Apps]/list[show hidden apps]","row":"show hidden apps, list","said":"apps","hint":"","copy":[],"focus":"ax-tree"}
+      ]
+    },
+    {
+      "id":"keyboard-kind","scope":"allie","what":"⌘1 is the keyboard: the box takes the keys; ⌘1 again puts it down","start":"Approve","keys":["⌘1","⌘1"],
+      "expect": [
+        {"key":"","view":"","mode":"","filter":"","rotor":null,"at":"host[phobos]/application[Fixture]/window[Needs you]/group[Signing]/button[Approve]","row":"Approve, button","said":"","hint":"","copy":[],"focus":"ax-tree"},
+        {"key":"⌘1","view":"","mode":"","filter":"","rotor":null,"at":"host[phobos]/application[Fixture]/window[Needs you]/group[Signing]/button[Approve]","row":"Approve, button","said":"","hint":"Insert","copy":[],"focus":"ax-ask"},
+        {"key":"⌘1","view":"","mode":"","filter":"","rotor":null,"at":"host[phobos]/application[Fixture]/window[Needs you]/group[Signing]/button[Approve]","row":"Approve, button","said":"","hint":"","copy":[],"focus":"ax-tree"}
+      ]
+    },
+    {
+      "id":"help-is-actions","scope":"allie","what":"? opens the actions kind on keys for this","start":"Approve","keys":["?"],
+      "expect": [
+        {"key":"","view":"","mode":"","filter":"","rotor":null,"at":"host[phobos]/application[Fixture]/window[Needs you]/group[Signing]/button[Approve]","row":"Approve, button","said":"","hint":"","copy":[],"focus":"ax-tree"},
+        {"key":"?","view":"actions","mode":"normal","filter":"","rotor":null,"at":"◎~5","row":"keys for this, action, ?","said":"actions","hint":"","copy":[],"focus":"ax-tree"}
+      ]
+    }
+  ]
+}
