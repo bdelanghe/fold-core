@@ -78,3 +78,101 @@ fn a_path_is_ids_or_titles_and_a_miss_says_what_is_there() {
     let e = d.resolve("nope").unwrap_err();
     assert!(e.contains("needs (Needs you)"), "{e}");
 }
+
+// basis say, ack and ask (slice 2).
+
+use fold_core::basis::{add_ask, approve_shaped, ask_row, Ask, ASK_MAX};
+use std::process::Command;
+
+fn ask() -> Ask {
+    Ask {
+        seat: "seat-a".into(),
+        topic: "fold".into(),
+        item: "Look at #32".into(),
+        why: "slice 1".into(),
+        link: Some(("https://example.test/32".into(), "Open".into())),
+        ..Ask::default()
+    }
+}
+
+#[test]
+fn an_ask_is_a_typed_row_with_a_button_and_an_id_from_what_it_asks() {
+    let row = ask_row(&ask(), "2026-11-01T00:00:00Z").unwrap();
+    assert_eq!(
+        row,
+        json!({ "id": "fold-656960", "item": "Look at #32", "why": "slice 1", "seat": "seat-a", "at": "2026-11-01T00:00:00Z",
+                "topic": "fold", "link": { "href": "https://example.test/32", "label": "Open" } })
+    );
+    // The id is the topic's and the item's alone: not the seat's, the time's or the place in the file.
+    let other = ask_row(&Ask { seat: "seat-b".into(), ..ask() }, "2026-11-02T00:00:00Z").unwrap();
+    assert_eq!(other["id"], row["id"]);
+    let signed = ask_row(&Ask { intent: Some("0123456789ab".into()), link: None, ..ask() }, "t").unwrap();
+    assert_eq!(signed["intent"], "0123456789ab");
+    let refused = |a: Ask| ask_row(&a, "t").unwrap_err();
+    assert!(refused(Ask { link: None, ..ask() }).contains("no button"));
+    assert!(refused(Ask { topic: "Fold".into(), ..ask() }).contains("--topic"));
+    assert!(refused(Ask { topic: "-x".into(), ..ask() }).contains("--topic"));
+    assert!(refused(Ask { seat: " ".into(), ..ask() }).contains("no seat"));
+    assert!(refused(Ask { item: "a\nb".into(), ..ask() }).contains("one line"));
+    assert!(refused(Ask { why: "x".repeat(ASK_MAX + 1), ..ask() }).contains("over 300"));
+    assert!(ask_row(&Ask { why: "é".repeat(ASK_MAX), ..ask() }, "t").is_ok(), "the limit counts chars, not bytes");
+    assert!(refused(Ask { intent: Some("0123456789AB".into()), ..ask() }).contains("12 lowercase hex"));
+    assert!(refused(Ask { link: Some(("javascript:x".into(), "Open".into())), ..ask() }).contains("--link"));
+}
+
+#[test]
+fn an_ask_is_added_to_the_file_in_its_shape_once() {
+    let row = ask_row(&ask(), "t").unwrap();
+    let list: Value = serde_json::from_str(&add_ask(None, row.clone()).unwrap()).unwrap();
+    assert_eq!(list, json!([row]));
+    let wrapped = add_ask(Some(r#"{"asks": [{"item": "old"}], "note": "kept"}"#), row.clone()).unwrap();
+    let w: Value = serde_json::from_str(&wrapped).unwrap();
+    assert_eq!(w["note"], "kept");
+    assert_eq!(w["asks"][1], row);
+    assert!(add_ask(Some(&list.to_string()), row.clone()).unwrap_err().contains("already asked"));
+    assert!(add_ask(Some("{}"), row.clone()).is_err());
+    assert!(add_ask(Some("not json"), row).is_err());
+}
+
+#[test]
+fn a_say_that_asks_for_a_signature_is_not_a_say() {
+    for t in ["Approve: fold-core builds basis", "  sign: this", "Please approve the PR"] {
+        assert!(approve_shaped(t), "{t}");
+    }
+    for t in ["approved, thanks", "Signed off on #32", "what to approve next?"] {
+        assert!(!approve_shaped(t), "{t}");
+    }
+}
+
+/// The binary against a stub chitin that prints its arguments: what basis runs, as which seat, and what it refuses.
+#[test]
+fn basis_says_acks_and_asks_through_chitin_and_the_asks_file() {
+    let dir = std::env::temp_dir().join(format!("basis-test-{}", std::process::id()));
+    fs::create_dir_all(&dir).unwrap();
+    let stub = dir.join("chitin");
+    fs::write(&stub, "#!/bin/sh\necho \"$@\"\n").unwrap();
+    fs::set_permissions(&stub, std::os::unix::fs::PermissionsExt::from_mode(0o755)).unwrap();
+    let run = |args: &[&str]| {
+        let o = Command::new(env!("CARGO_BIN_EXE_basis"))
+            .args(args)
+            .env("BASIS_CHITIN", &stub)
+            .env("BASIS_SEAT", "seat-a")
+            .env("FM_ASKS", dir.join("asks.json"))
+            .output()
+            .unwrap();
+        (o.status.code(), String::from_utf8_lossy(&o.stdout).into_owned(), String::from_utf8_lossy(&o.stderr).into_owned())
+    };
+    assert_eq!(run(&["say", "bobby", "slice 1 is up", "--ref", "needs"]).1, "say --as seat-a --meta ref=basis:needs bobby slice 1 is up\n");
+    assert_eq!(run(&["say", "bobby", "hi", "--in-reply-to", "m1", "--as", "seat-b"]).1, "say --as seat-b --meta ref=basis --in-reply-to m1 bobby hi\n");
+    let (code, out, err) = run(&["say", "bobby", "Approve: ship it"]);
+    assert_eq!((code, out.as_str()), (Some(1), ""), "{err}");
+    assert_eq!(run(&["ack", "m1", "done", "--why", "built"]).1, "ack m1 done --as seat-a --why built\n");
+    assert_eq!(run(&["ack", "m1", "maybe"]).0, Some(2));
+    let a = ["ask", "--topic", "fold", "--item", "Look at #32", "--why", "slice 1", "--link", "https://example.test/32"];
+    assert_eq!(run(&a), (Some(0), "fold-656960\n".to_string(), String::new()));
+    assert_eq!(run(&a).0, Some(1), "the same ask twice");
+    let rows: Value = serde_json::from_str(&fs::read_to_string(dir.join("asks.json")).unwrap()).unwrap();
+    assert_eq!(rows.as_array().unwrap().len(), 1);
+    assert_eq!(rows[0]["seat"], "seat-a");
+    fs::remove_dir_all(&dir).unwrap();
+}

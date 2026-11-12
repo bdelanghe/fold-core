@@ -260,6 +260,24 @@ so `needs`, `"Needs you"` and `needs/needs-ask-0` all reach the same fold. The t
 `--json` prints the fold's accessibility tree instead. `tests/basis.rs` holds every walk golden's folds against
 `goldens/basis/<case>.txt`, and checks that every `→` path resolves and is an anchor its page writes.
 
+basis keeps no state of its own. A message goes through chitin as the calling seat, and an ask becomes a row in the file
+fleet-map reads. The seat is `--as`, else `$BASIS_SEAT`; chitin is `$BASIS_CHITIN`, else `chitin` on PATH.
+
+    basis say <to> <text> [--in-reply-to <id>] [--ref <path>]          # chitin say --as <seat> --meta ref=basis[:<path>]
+    basis ack <msg id> acting|declined|deferred|done [--why <t>] [--ref <a>]
+    basis ask --topic <topic> --item <text> --why <text> (--intent <12 hex> | --link <href> [--label <t>]) [--pr <pr>] [--thread <n>]
+
+- `say` refuses an approve-shaped text (`Approve:`, `Sign:`, `Please approve`, …): signing stays on /approve, by `basis ask --intent`.
+- `ask` checks the row before writing it:
+  - The topic is lowercase letters, digits and `-`.
+  - The item and why are one line each, at most 300 chars.
+  - The intent is 12 lowercase hex.
+  - The link is https or a path from `/`.
+  - It has an intent or a link, so the row has a button.
+- `ask` then adds the row to `--asks`, else `$FM_ASKS`, else `~/.lobby/ops/needs-you/asks.json`. It writes under a lock and by
+  rename, keeps the file's shape, and prints the row's `id`, which is `<topic>-<6 hex of the item's sha-256>`. The id comes from
+  what is asked, not from the row's place in the file, and the same ask twice is refused.
+
 ## Schema
 
 `schema/node.schema.json` is the fold node types (`Node`, `Kid`, `Step`) as JSON Schema (draft 2020-12), generated from them by
