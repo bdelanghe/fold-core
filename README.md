@@ -200,6 +200,15 @@ serve, same-origin):
 goldens/needs/serve.json and push.json hold these routes' refusals and successes, and act-e2e runs them with the stub. The act tools replace
 fold-serve's darkhttpd agents (brief items 23-24), which send no ETag, no per-file Cache-Control and no custom headers.
 
+With `--private <prefix>... --private-as <login> --private-host <host>` (Bobby ecc464a7, for a seat's conversation at `seats/`),
+everything under a prefix is read by that one login alone: its files, its act route and its comment page. A request must be
+loopback, carry that `Tailscale-User-Login` and come through serve to that host (the act checks above, less same-origin, since a
+typed URL or a bookmark carries none and a read changes nothing). Anything else gets 403 before the path is looked at, so a
+refusal never says whether something is there. Prefixes match whole segments after percent-decoding, with empty segments
+dropped, so `seats` covers `/se%61ts/a` and `//seats/a` but not `/seatsx/`. A path that will not decode is held as private.
+What it serves is `private, no-cache`, and a `--no-store` prefix inside it stays `no-store`. goldens/serve/private.json holds
+each case. A page outside the prefix that links in (a root listing its seats) is the producer's to keep content-free.
+
 | Resource | Cache-Control | Validator |
 |---|---|---|
 | a path holding `@sha256:` | `public, max-age=31536000, immutable` | strong ETag |
@@ -207,6 +216,7 @@ fold-serve's darkhttpd agents (brief items 23-24), which send no ETag, no per-fi
 | a data document (`.json`) | `max-age=60, stale-while-revalidate=240, stale-if-error=86400` | the same |
 | any other file (viewer JS, CSS, WASM, fonts, `sw.js`) | `no-cache` | the same |
 | a `--no-store` prefix (the Sign fold, pending, presence), every error | `no-store` | none |
+| a `--private` prefix (a seat's conversation) | `private, no-cache` | the same as its class |
 
 - Every file also gets `Content-Digest` (the same digest) and `Server-Timing: digest;desc="sha-256:…", asof;desc="…", serve;dur=…`.
 - No page names a reporting endpoint or a report-only CSP: nothing is deployed to take them.

@@ -39,7 +39,8 @@ export STUB_RECORD=$work/record
 login=bobby@example.com host=phobos.example.ts.net
 "$fold" serve --root "$work/site" --mount /fold --port 0 \
   --act-as "$login" --act-host "$host" --act-key "$work/state/act.key" --chitin "$work/chitin" \
-  --act-seat fold-ack --needs-as bobby --notify-as fold-notify 2> "$work/serve.log" &
+  --act-seat fold-ack --needs-as bobby --notify-as fold-notify \
+  --private talk/ --private-as "$login" --private-host "$host" 2> "$work/serve.log" &
 pid=$!
 for _ in $(seq 50); do grep -q ' on 127.0.0.1:' "$work/serve.log" && break; sleep 0.1; done
 port=$(grep -o ' on 127.0.0.1:[0-9]*' "$work/serve.log" | cut -d: -f2)
@@ -78,6 +79,16 @@ got=$(say "$stok" "$line")
 got=$(say "$(token talk say)" "café")
 [ "${got%% *}" = 422 ] || fail "a non-ASCII say: $got"
 [ "$(wc -l < "$STUB_RECORD" | tr -d ' ')" = 3 ] || fail "chitin saw more than one say: $(cat "$STUB_RECORD")"
+
+# talk/ is private (Bobby ecc464a7): the say above went through as the one login; anyone else is 403 there, page and act alike,
+# while m1/ stays the tailnet's
+eve=(-H "Tailscale-User-Login: eve@example.com" -H "X-Forwarded-Proto: https" -H "X-Forwarded-Host: $host" -H "Sec-Fetch-Site: same-origin")
+code() { curl -sS -o /dev/null -w '%{http_code}' "$@"; }
+[ "$(code "${eve[@]}" "$base/talk/")" = 403 ] || fail "another login read the private talk/"
+[ "$(code "${eve[@]}" --data "token=x" "$base/act/talk/say")" = 403 ] || fail "another login reached the private act"
+[ "$(code "${eve[@]}" "$base/m1/")" = 200 ] || fail "another login could not read the open m1/"
+[ "$(code -H "Sec-Fetch-Site: none" "${serve[@]:0:6}" "$base/talk/")" = 200 ] || fail "the one login could not read talk/ from a typed URL"
+[ "$(wc -l < "$STUB_RECORD" | tr -d ' ')" = 3 ] || fail "chitin was called by a refused request: $(cat "$STUB_RECORD")"
 
 # the item's act changes under the open page: its old token is refused, and nothing is sent
 zeros=$(printf '0%.0s' $(seq 64))
@@ -124,4 +135,4 @@ code=$(curl -sS -o /dev/null -w '%{http_code}' -H "Tailscale-User-Login: eve@exa
 grep -q '"notify":"0123456789ab".*"result":"ok"' "$work/state/acts.jsonl" || fail "the notify left no log line: $(cat "$work/state/acts.jsonl")"
 grep -q "web.push.apple.com/abc" "$work/state/acts.jsonl" && fail "an endpoint's path was logged"
 grep -qF "Route the plan" "$work/state/acts.jsonl" "$work/serve.log" && fail "an intent's text was logged"
-echo "act-e2e: ok (303 ok, 303 already, a say sent once and a non-ASCII one refused, 409 changed; key and log 0600; no token or line logged; needs.json live and never stored, no unsigned decline; one notify per new intent, a device subscribed and unsubscribed through chitin)"
+echo "act-e2e: ok (303 ok, 303 already, a say sent once and a non-ASCII one refused, private talk/ 403 to another login, 409 changed; key and log 0600; no token or line logged; needs.json live and never stored, no unsigned decline; one notify per new intent, a device subscribed and unsubscribed through chitin)"
