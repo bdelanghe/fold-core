@@ -224,7 +224,7 @@ async function signs(w: number, h: number) {
     await value(`window.__hold = new Promise((r) => { window.__release = r; }); const g = navigator.credentials.get; navigator.credentials.get = async (o) => { await window.__hold; return g(o); }`);
     await value(`document.querySelector("main h1").focus()`);
     await key("Enter", "Enter", 13);
-    const during = (await wait(`document.getElementById("notice").textContent.startsWith("Approving for personal-assistant")`)) ? await rects() : "never said";
+    const during = (await wait(`document.getElementById("notice").textContent.startsWith("Signing for personal-assistant")`)) ? await rects() : "never said";
     await value("window.__release()");
     const approved = await wait(`location.hash === "#/needs/approvals" && document.getElementById("notice").textContent.startsWith("Sent to personal-assistant")`);
     const asked = await value("window.__asked");
@@ -235,7 +235,7 @@ async function signs(w: number, h: number) {
     await send("Page.navigate", { url: `http://127.0.0.1:${server.port}/fold/#/needs/approvals/needs-sign-0a0a0a0a0a0a` });
     await wait(`document.querySelector("main h1")?.textContent === "To personal-cake-goal"`);
     await value(`document.querySelector('form[data-call="decline"] button').click()`);
-    const declined = await wait(`location.hash === "#/needs" && document.getElementById("notice").textContent.startsWith("Declined.")`);
+    const declined = await wait(`location.hash === "#/needs" && document.getElementById("notice").textContent.startsWith("Declined ")`);
     const groups = await value(`[...document.querySelectorAll("ol.rows > li.obj > a")].map((a) => a.textContent).join("|")`);
     const last = await rects();
     return { ready, forms, approved, asked, said1, stepped, declined, groups, empty, still: [before, during, after, last], err: c.err() };
@@ -243,7 +243,7 @@ async function signs(w: number, h: number) {
 }
 {
   const r = await signs(390, 844);
-  const ok = r.ready && JSON.stringify(r.forms) === JSON.stringify(["Approve with passkey", "Decline with passkey"]) && r.approved && r.asked === "1,2,3 required"
+  const ok = r.ready && JSON.stringify(r.forms) === JSON.stringify(["Sign with passkey", "Decline with passkey"]) && r.approved && r.asked === "1,2,3 required"
     && r.stepped && r.declined && !r.groups.includes("Approvals") && waiting.length === 0
     && r.empty === "No notices" && r.still.every((x: string) => x === r.still[0])
     && JSON.stringify(seen) === JSON.stringify(["GET /approve/v1/challenge/0123456789ab", "POST /approve/v1/assertion/0123456789ab application/json", "GET /approve/v1/decline/0a0a0a0a0a0a", "POST /approve/v1/decline/0a0a0a0a0a0a application/json"]);

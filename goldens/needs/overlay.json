@@ -116,7 +116,7 @@
                   "act": {
                     "cap": "webauthn",
                     "call": "approve",
-                    "label": "Approve with passkey",
+                    "label": "Sign with passkey",
                     "args": {
                       "challenge": "/approve/v1/challenge/0123456789ab",
                       "assertion": "/approve/v1/assertion/0123456789ab"
@@ -145,7 +145,7 @@
                   "act": {
                     "cap": "webauthn",
                     "call": "approve",
-                    "label": "Approve with passkey",
+                    "label": "Sign with passkey",
                     "args": {
                       "challenge": "/approve/v1/challenge/0a0a0a0a0a0a",
                       "assertion": "/approve/v1/assertion/0a0a0a0a0a0a"
@@ -779,7 +779,7 @@
                   "act": {
                     "cap": "webauthn",
                     "call": "approve",
-                    "label": "Approve with passkey",
+                    "label": "Sign with passkey",
                     "args": {
                       "challenge": "/approve/v1/challenge/0123456789ab",
                       "assertion": "/approve/v1/assertion/0123456789ab"
@@ -808,7 +808,7 @@
                   "act": {
                     "cap": "webauthn",
                     "call": "approve",
-                    "label": "Approve with passkey",
+                    "label": "Sign with passkey",
                     "args": {
                       "challenge": "/approve/v1/challenge/0a0a0a0a0a0a",
                       "assertion": "/approve/v1/assertion/0a0a0a0a0a0a"

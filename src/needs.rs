@@ -51,7 +51,7 @@ pub fn endpoints(id: &str, verdict: &str) -> Option<(String, String)> {
 }
 
 /// The two verdicts a Needs-you item takes, in its acts' order: Enter runs the first.
-pub const VERDICTS: [(&str, &str); 2] = [("approve", "Approve with passkey"), ("decline", "Decline with passkey")];
+pub const VERDICTS: [(&str, &str); 2] = [("approve", "Sign with passkey"), ("decline", "Decline with passkey")];
 
 fn text<'a>(o: &'a Value, k: &str) -> Option<&'a str> {
     o.get(k).and_then(Value::as_str)
