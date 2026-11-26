@@ -422,8 +422,15 @@ impl Key<'_> {
             "j" | "ArrowDown" | "]" => self.say("last kind"),
             "k" | "ArrowUp" | "[" if at > 0 => self.s.drawer = Some(Drawer { at: at - 1 }),
             "k" | "ArrowUp" | "[" => self.say("first kind"),
-            "Enter" => self.pick(self.kinds[at].name.clone()),
-            "r" => self.pick(if self.s.last.is_empty() { self.kinds[at].name.clone() } else { self.s.last.clone() }),
+            // the row is host state and the kinds its options: a row past them (none, or fewer than when it opened) picks nothing
+            "Enter" | "r" => {
+                let here = self.kinds.get(at).map(|k| k.name.clone());
+                let name = if key == "r" && !self.s.last.is_empty() { Some(self.s.last.clone()) } else { here };
+                match name {
+                    Some(n) => self.pick(n),
+                    None => self.say("no kind here"),
+                }
+            }
             "Escape" | "h" | "ArrowLeft" => {
                 self.s.drawer = None;
                 self.e.focus = Some("tree".into());

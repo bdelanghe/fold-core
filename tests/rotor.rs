@@ -124,3 +124,25 @@ fn core_cases_match_allies_goldens() {
     assert!(failed.is_empty());
     assert_eq!(run, 57, "the brief's 57 core cases");
 }
+
+/// The drawer's row is the host's to keep between calls, and its kinds are the host's to give: a row past the end of them (a host
+/// that gives none, or fewer than when the drawer opened) picks nothing and says so, never indexing past the kinds. Release builds
+/// abort on a panic, so an out-of-range row would take the viewer's module, or the native host, down with it.
+#[test]
+fn a_drawer_row_past_the_kinds_picks_nothing_and_never_panics() {
+    let tree = json!({ "role": "window", "name": "w", "kids": [{ "role": "link", "name": "a" }] });
+    // a host with no kinds: r opens the drawer at row 0, and Enter (or r again) there has no kind to pick
+    let opened = call(json!({ "op": "key", "tree": tree, "state": { "at": [0], "view": null, "drawer": null }, "key": "r", "opts": { "kinds": [] } }));
+    let state = opened["state"].clone();
+    assert_eq!(state["drawer"]["at"], 0, "{opened}");
+    for key in ["Enter", "r"] {
+        let r = std::panic::catch_unwind(|| fold_core::wasm::rotor_text(&json!({ "op": "key", "tree": tree, "state": state, "key": key, "opts": { "kinds": [] } }).to_string()));
+        let out: Value = serde_json::from_str(&r.unwrap_or_else(|_| panic!("{key} in an empty drawer panicked"))).unwrap();
+        assert!(out.get("error").is_none(), "{out}");
+    }
+    // a row kept from when the host had more kinds than it has now
+    let two = json!([{ "name": "links", "roles": ["link"] }, { "name": "keys", "roles": null }]);
+    let stale = json!({ "at": [0], "view": null, "drawer": { "at": 5 } });
+    let r = std::panic::catch_unwind(|| fold_core::wasm::rotor_text(&json!({ "op": "key", "tree": tree, "state": stale, "key": "Enter", "opts": { "kinds": two } }).to_string()));
+    assert!(r.is_ok(), "Enter on a stale drawer row panicked");
+}
