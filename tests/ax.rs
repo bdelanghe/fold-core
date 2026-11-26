@@ -138,4 +138,18 @@ fn a_url_that_would_run_script_is_never_a_link_or_an_action() {
         let want = serde_json::to_string(good).unwrap();
         assert!(got.matches(&want).count() >= 3, "{good:?} is kept as the link, the action and the kid's link: {got}");
     }
+    // A non-string href (an array or object holding a script URL) fails closed too: no link, no action, in the tree or its HTML.
+    for bad in [json!(["javascript:alert(1)"]), json!({ "u": "javascript:alert(1)" }), json!([["JavaScript:x"]])] {
+        let node = json!({
+            "title": "Sign it", "href": bad,
+            "act": { "cap": "webauthn", "call": "sign", "args": {}, "label": "Sign" },
+            "madeBy": { "query": "q", "href": bad },
+            "kids": [{ "id": "k", "title": "Kid", "href": bad }],
+        });
+        let case = json!({ "node": node, "path": ["s"], "mode": "folds", "href": "viewer" });
+        let got = fold_core::wasm::ax_text(&case.to_string());
+        assert!(!got.to_lowercase().contains("javascript:"), "{bad} reached the tree: {got}");
+        let html = fold_core::wasm::html_text(&got);
+        assert!(!html.to_lowercase().contains("javascript:"), "{bad} reached the html: {html}");
+    }
 }

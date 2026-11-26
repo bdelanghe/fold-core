@@ -49,7 +49,8 @@ fn present(v: Option<&Value>) -> Option<&Value> {
 /// scheme: a path, a fragment), missing when its scheme could run script in the page's origin (`javascript:`, `data:`, any other).
 /// The scheme is read as a browser reads it: leading C0 controls and spaces skipped, tabs and line breaks anywhere dropped.
 fn safe_url(v: Option<&Value>) -> Option<&Value> {
-    let Some(Value::String(u)) = v else { return v };
+    // Not a string (absent, null, an array, an object): no URL at all. Passing it through would let a sink stringify a script URL.
+    let Some(Value::String(u)) = v else { return None };
     let u: String = u.trim_start_matches(|c: char| c <= ' ').chars().filter(|c| !matches!(c, '\t' | '\n' | '\r')).collect();
     let scheme = u.find(':').map(|i| &u[..i]).filter(|s| {
         s.chars().next().is_some_and(|c| c.is_ascii_alphabetic()) && s.chars().all(|c| c.is_ascii_alphanumeric() || "+-.".contains(c))
