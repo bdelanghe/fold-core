@@ -43,12 +43,21 @@ pub fn href(base: &str, path: &[String], mode: &str) -> String {
     s
 }
 
+/// A step the site names its own files with: `@slides` and `index.html` at any depth (a step named `index.html` becomes a
+/// directory where its parent fold's page file goes), `_acts.json` at the top. Compared ignoring ASCII case, because a Mac's
+/// filesystem folds case: `@SLIDES` is the same file as `@slides`.
+fn reserved(i: usize, p: &str) -> bool {
+    p.eq_ignore_ascii_case(SLIDES) || p.eq_ignore_ascii_case("index.html") || (i == 0 && p.eq_ignore_ascii_case(ACTS))
+}
+
 /// The page's file under the site's directory: the href's segments as a static server decodes them, so each is the id itself.
-/// An id no file name can hold (empty, `.`, `..`, or holding `/` or NUL) is refused, never written.
+/// An id no file name can hold (empty, `.`, `..`, or holding `/` or NUL) is refused, never written; so is one the site names its
+/// own files with (`@slides`, a fold's slides page; `index.html`, a page file; `_acts.json` at the top, the act map), in any
+/// ASCII case, which a page would be written over (see `reserved`).
 pub fn file(path: &[String], mode: &str) -> Result<String, String> {
     let mut f = String::new();
-    for p in path {
-        if p.is_empty() || p == "." || p == ".." || p.contains(['/', '\0']) {
+    for (i, p) in path.iter().enumerate() {
+        if p.is_empty() || p == "." || p == ".." || p.contains(['/', '\0']) || reserved(i, p) {
             return Err(format!("page: no file can hold the step {p:?}"));
         }
         f.push_str(p);

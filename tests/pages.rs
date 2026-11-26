@@ -129,3 +129,35 @@ fn the_act_map_is_written_beside_the_pages() {
     assert_eq!(m2["m%201/ack"]["fixity"], m["m%201/ack"]["fixity"]);
     assert_eq!(m2["m2/ack"]["fixity"], m["m2/ack"]["fixity"]);
 }
+
+/// A fold whose id is a name the site already uses is refused, never written over it: `@slides` is its parent's slides page,
+/// and `_acts.json` at the top is the act map fold serve reads (a directory there would leave no file for it).
+#[test]
+fn a_step_named_as_the_site_names_its_own_files_is_refused() {
+    let pages = one(json!([
+        ["root", { "title": "R", "trail": [], "kids": [
+            { "id": "@slides", "title": "X" }, { "id": "_acts.json", "title": "Y" }, { "id": "index.html", "title": "I" },
+            { "id": "@SLIDES", "title": "XU" }, { "id": "_ACTS.JSON", "title": "YU" }, { "id": "a", "title": "A" }
+        ], "present": "slides" }],
+        ["@slides", { "title": "X", "trail": ["R"], "kids": [] }],
+        ["_acts.json", { "title": "Y", "trail": ["R"], "kids": [] }],
+        ["index.html", { "title": "I", "trail": ["R"], "kids": [] }],
+        ["@SLIDES", { "title": "XU", "trail": ["R"], "kids": [] }],
+        ["_ACTS.JSON", { "title": "YU", "trail": ["R"], "kids": [] }],
+        ["a", { "title": "A", "trail": ["R"], "kids": [{ "id": "a~index.html", "title": "AI" }] }],
+        ["a~index.html", { "title": "AI", "trail": ["R", "A"], "kids": [] }]
+    ]));
+    let mut files: Vec<&str> = pages.iter().filter_map(|p| p["file"].as_str()).collect();
+    let n = files.len();
+    files.sort();
+    files.dedup();
+    assert_eq!(files.len(), n, "two pages, one file: {files:?}");
+    assert!(!files.iter().any(|f| f.starts_with("_acts.json/")), "a page where the act map goes: {files:?}");
+    for id in ["@slides", "_acts.json", "index.html", "@SLIDES", "_ACTS.JSON"] {
+        let p = pages.iter().find(|p| p["id"] == id).unwrap();
+        assert_eq!(p["error"], format!("page: no file can hold the step {id:?}"), "{p}");
+    }
+    // Nested too: `a~index.html` would be the directory `a/index.html/`, where `a`'s own page file goes.
+    let p = pages.iter().find(|p| p["id"] == "a~index.html").unwrap();
+    assert_eq!(p["error"], format!("page: no file can hold the step {:?}", "index.html"), "{p}");
+}
