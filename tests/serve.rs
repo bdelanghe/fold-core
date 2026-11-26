@@ -687,3 +687,23 @@ fn a_private_prefix_is_read_by_one_login_alone() {
     );
     let _ = fs::remove_dir_all(&s.root);
 }
+
+/// The act map's refusal and the `--no-store` class hold for the path the file is read at, not its spelling: an empty segment
+/// (`//_acts.json`, `/_acts.json/`, `//sign/…`) is dropped when the file is found, so it is dropped before each check too.
+#[test]
+fn an_empty_segment_reaches_no_act_map_and_no_cached_live_state() {
+    let s = site("empty-segments");
+    fs::write(s.root.join("_acts.json"), "{\"needs/m/ack\":{\"cap\":\"chitin\",\"call\":\"ack\"}}\n").unwrap();
+    for t in ["/_acts.json", "//_acts.json", "/_acts.json/", "///_acts.json//", "/%2F_acts.json"] {
+        let r = respond(&s, &req("GET", t, &[], ""));
+        assert_eq!(r.status, 404, "{t}: the act map is never served");
+        assert!(!String::from_utf8_lossy(&r.body).contains("chitin"), "{t}: the act map's bytes were served");
+    }
+    for t in ["/sign/pending.json", "//sign/pending.json", "/sign//pending.json", "/%2Fsign/pending.json"] {
+        let r = respond(&s, &req("GET", t, &[], ""));
+        assert_eq!(r.status, 200, "{t}");
+        assert_eq!(r.header("Cache-Control"), Some("no-store"), "{t}: live state is never stored");
+        assert_eq!(r.header("ETag"), None, "{t}: live state carries no validator");
+    }
+    let _ = fs::remove_dir_all(&s.root);
+}
