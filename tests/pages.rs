@@ -129,3 +129,24 @@ fn the_act_map_is_written_beside_the_pages() {
     assert_eq!(m2["m%201/ack"]["fixity"], m["m%201/ack"]["fixity"]);
     assert_eq!(m2["m2/ack"]["fixity"], m["m2/ack"]["fixity"]);
 }
+
+/// A fold whose id is a name the site already uses is refused, never written over it: `@slides` is its parent's slides page,
+/// and `_acts.json` at the top is the act map fold serve reads (a directory there would leave no file for it).
+#[test]
+fn a_step_named_as_the_site_names_its_own_files_is_refused() {
+    let pages = one(json!([
+        ["root", { "title": "R", "trail": [], "kids": [{ "id": "@slides", "title": "X" }, { "id": "_acts.json", "title": "Y" }], "present": "slides" }],
+        ["@slides", { "title": "X", "trail": ["R"], "kids": [] }],
+        ["_acts.json", { "title": "Y", "trail": ["R"], "kids": [] }]
+    ]));
+    let mut files: Vec<&str> = pages.iter().filter_map(|p| p["file"].as_str()).collect();
+    let n = files.len();
+    files.sort();
+    files.dedup();
+    assert_eq!(files.len(), n, "two pages, one file: {files:?}");
+    assert!(!files.iter().any(|f| f.starts_with("_acts.json/")), "a page where the act map goes: {files:?}");
+    for id in ["@slides", "_acts.json"] {
+        let p = pages.iter().find(|p| p["id"] == id).unwrap();
+        assert_eq!(p["error"], format!("page: no file can hold the step {id:?}"), "{p}");
+    }
+}

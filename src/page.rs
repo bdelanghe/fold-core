@@ -44,11 +44,12 @@ pub fn href(base: &str, path: &[String], mode: &str) -> String {
 }
 
 /// The page's file under the site's directory: the href's segments as a static server decodes them, so each is the id itself.
-/// An id no file name can hold (empty, `.`, `..`, or holding `/` or NUL) is refused, never written.
+/// An id no file name can hold (empty, `.`, `..`, or holding `/` or NUL) is refused, never written; so is one the site names its
+/// own files with (`@slides`, a fold's slides page; `_acts.json` at the top, the act map), which a page would be written over.
 pub fn file(path: &[String], mode: &str) -> Result<String, String> {
     let mut f = String::new();
-    for p in path {
-        if p.is_empty() || p == "." || p == ".." || p.contains(['/', '\0']) {
+    for (i, p) in path.iter().enumerate() {
+        if p.is_empty() || p == "." || p == ".." || p.contains(['/', '\0']) || p == SLIDES || (i == 0 && p == ACTS) {
             return Err(format!("page: no file can hold the step {p:?}"));
         }
         f.push_str(p);
