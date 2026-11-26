@@ -45,6 +45,22 @@ fn present(v: Option<&Value>) -> Option<&Value> {
     v.filter(|x| !x.is_null())
 }
 
+/// A URL the data carries, as a link's href or a form's action: kept when it can only go somewhere (http, https, mailto, or no
+/// scheme: a path, a fragment), missing when its scheme could run script in the page's origin (`javascript:`, `data:`, any other).
+/// The scheme is read as a browser reads it: leading C0 controls and spaces skipped, tabs and line breaks anywhere dropped.
+fn safe_url(v: Option<&Value>) -> Option<&Value> {
+    // Not a string (absent, null, an array, an object): no URL at all. Passing it through would let a sink stringify a script URL.
+    let Some(Value::String(u)) = v else { return None };
+    let u: String = u.trim_start_matches(|c: char| c <= ' ').chars().filter(|c| !matches!(c, '\t' | '\n' | '\r')).collect();
+    let scheme = u.find(':').map(|i| &u[..i]).filter(|s| {
+        s.chars().next().is_some_and(|c| c.is_ascii_alphabetic()) && s.chars().all(|c| c.is_ascii_alphanumeric() || "+-.".contains(c))
+    });
+    match scheme.map(str::to_ascii_lowercase).as_deref() {
+        None | Some("http" | "https" | "mailto") => v,
+        Some(_) => None,
+    }
+}
+
 /// `[].concat(v ?? [])`.
 pub(crate) fn concat(v: Option<&Value>) -> Vec<Value> {
     match present(v) {
@@ -164,7 +180,7 @@ fn act_form(node: &Value, act: &Value, path: &[String], key: &str, one: bool) ->
     let (method, action, fields) = if push.is_some() {
         ("get", "".into(), vec![])
     } else if passkey {
-        ("get", present(get(node, "href")).cloned().unwrap_or_else(|| "".into()), vec![])
+        ("get", present(safe_url(get(node, "href"))).cloned().unwrap_or_else(|| "".into()), vec![])
     } else {
         let mut f = vec![json!([TOKEN_FIELD, ""]), json!(["cap", cap]), json!(["call", js::string(get(act, "call"))])];
         match present(get(act, "args")) {
@@ -252,7 +268,7 @@ pub fn ax_of(node: Option<&Value>, path: &[String], href: Href, mode: &str, cloc
         row.push(json!({ "role": "status", "cls": "result", "id": STATUS_ID }));
         props.push(prop(row, "prop act"));
     }
-    if truthy(get(node, "href")) {
+    if truthy(safe_url(get(node, "href"))) {
         let name = present(get(node, "hrefLabel")).unwrap_or(&node["href"]).clone();
         props.push(prop(vec![json!({ "role": "link", "name": name, "href": node["href"] })], "prop"));
     }
@@ -291,7 +307,7 @@ pub fn ax_of(node: Option<&Value>, path: &[String], href: Href, mode: &str, cloc
             Some(v) => format!("Made by {q}, version {}", js::string(Some(v))),
             None => format!("Made by {q}"),
         };
-        let row = match present(get(m, "href")) {
+        let row = match present(safe_url(get(m, "href"))) {
             Some(h) => json!({ "role": "link", "name": name, "href": h }),
             None => json!({ "role": "text", "name": name }),
         };
@@ -300,7 +316,7 @@ pub fn ax_of(node: Option<&Value>, path: &[String], href: Href, mode: &str, cloc
 
     let objs = kids.iter().enumerate().map(|(i, k)| {
         let id = js::string(get(k, "id"));
-        let to = present(get(k, "href")).cloned().unwrap_or_else(|| {
+        let to = present(safe_url(get(k, "href"))).cloned().unwrap_or_else(|| {
             let mut p = path.to_vec();
             p.push(id.clone());
             href(&p, mode).into()
