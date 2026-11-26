@@ -282,8 +282,10 @@ pub fn public_key_ok(k: &str) -> bool {
 
 /// One line of an upstream's answer, safe to show: printable, short, and never holding a secret.
 fn said(body: &[u8], secrets: &[&str]) -> String {
-    let t: String = String::from_utf8_lossy(body).chars().filter(|c| !c.is_control()).take(200).collect();
-    if secrets.iter().any(|s| t.contains(s)) {
+    // looked for in the whole answer, before the cut: a secret the cut falls across would otherwise show its head
+    let all: String = String::from_utf8_lossy(body).chars().filter(|c| !c.is_control()).collect();
+    let t: String = all.chars().take(200).collect();
+    if secrets.iter().any(|s| all.contains(s)) {
         "(its answer held a secret, so it is not shown)".into()
     } else {
         t

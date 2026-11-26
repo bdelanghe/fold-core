@@ -496,3 +496,24 @@ fn an_answer_is_read_by_its_length_or_its_chunks() {
     assert!(answer_of(b"HTTP/1.1 200 OK\r\nTransfer-Encoding: chunked\r\n\r\nzz\r\n").is_none(), "not a chunk");
     assert!(answer_of(b"garbage").is_none());
 }
+
+/// An instance whose refusal echoes a secret where the 200-character cut falls: the error shows none of it, not even its head.
+#[test]
+fn a_refusal_that_echoes_a_secret_across_the_cut_shows_none_of_it() {
+    let l = TcpListener::bind("127.0.0.1:0").unwrap();
+    let port = l.local_addr().unwrap().port();
+    std::thread::spawn(move || {
+        for s in l.incoming() {
+            let Ok(mut s) = s else { continue };
+            let Ok(_) = parse(&mut BufReader::new(s.try_clone().unwrap()), 1 << 20) else { continue };
+            // the reporter's token starts at character 195, so a 200-character cut keeps its first five
+            let body = format!("{}cxr_minted", "x".repeat(195));
+            let _ = s.write_all(format!("HTTP/1.1 403 X\r\nContent-Length: {}\r\n\r\n{body}", body.len()).as_bytes());
+        }
+    });
+    let filer = ClaxFiler::new(format!("http://127.0.0.1:{port}"), QUEUE.into(), "https://phobos.example.ts.net".into(), ME.into(), Box::new(Stub::default()));
+    let c = Comment { external_id: "x".into(), url: "https://x/".into(), title: "t".into(), body: "b".into() };
+    let e = filer.file_with(&c, &[0x42; 32], 1_760_000_000, "AAECAwQFBgcICQoLDA0ODw", "fold-b").unwrap_err();
+    assert!(e.starts_with("clax answered 403"), "{e}");
+    assert!(!e.contains("cxr_"), "no part of the token in an error: {e}");
+}
