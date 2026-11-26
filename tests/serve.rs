@@ -707,3 +707,26 @@ fn an_empty_segment_reaches_no_act_map_and_no_cached_live_state() {
     }
     let _ = fs::remove_dir_all(&s.root);
 }
+
+/// A private prefix on a case-insensitive filesystem (APFS and HFS+ by default, so a Mac's): `/SEATS/a/` opens the same files as
+/// `/seats/a/`, so it is gated the same. Here (Linux) the file is not there under the other case, so the gate is what is held:
+/// another login gets 403 for every casing of the prefix, never a 404 or the page.
+#[test]
+fn a_private_prefix_holds_whatever_case_the_path_is_typed_in() {
+    let mut s = site("private-case");
+    let f = s.root.join("seats/a/index.html");
+    fs::create_dir_all(f.parent().unwrap()).unwrap();
+    fs::write(&f, "<!doctype html><title>a</title><main><h1>a</h1></main>\n").unwrap();
+    s.private = Some(Private { prefixes: vec!["seats/".into()], login: ME.into(), host: HOST.into() });
+    let eve = [("Tailscale-User-Login", Some("eve@example.com")), ("Sec-Fetch-Site", Some("none")), ("Content-Type", None)];
+    for t in ["/seats/a/", "/SEATS/a/", "/Seats/a/", "/sE%41ts/a/", "/comment/SEATS/a/", "/%C5%BFeats/a/"] {
+        assert_eq!(answer(&s, &from_me("GET", t, "", &eve), NOW).0.status, 403, "{t}: another login is refused");
+    }
+    assert_eq!(answer(&s, &from_me("GET", "/SEATSX/", "", &eve), NOW).0.status, 404, "a path that only starts the same is the tailnet's");
+    // APFS folds U+1E9E (capital sharp s) and U+00DF (sharp s) to "ss": a prefix holding ss is held for them too.
+    s.private = Some(Private { prefixes: vec!["seats/".into(), "sessions/".into()], login: ME.into(), host: HOST.into() });
+    for t in ["/se%E1%BA%9Eions/a/", "/se%C3%9Fions/a/", "/SESSIONS/a/"] {
+        assert_eq!(answer(&s, &from_me("GET", t, "", &eve), NOW).0.status, 403, "{t}: another login is refused");
+    }
+    let _ = fs::remove_dir_all(&s.root);
+}
