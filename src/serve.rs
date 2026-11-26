@@ -73,7 +73,7 @@ pub struct Site {
 /// a read changes nothing. What it serves is `private, no-cache`.
 pub struct Private {
     /// Each a path under the mount (`seats/`), matched whole segment by whole segment once the path is percent-decoded and its
-    /// empty segments dropped, so `seats` covers `/seats`, `/seats/a/` and `//se%61ts/a` but not `/seatsx/`.
+    /// empty segments dropped, so `seats` covers `/seats`, `/seats/a/`, `//se%61ts/a` and `/SEATS/a` but not `/seatsx/`.
     pub prefixes: Vec<String>,
     /// The one tailnet login that may read them, as `Tailscale-User-Login` carries it.
     pub login: String,
@@ -86,7 +86,10 @@ impl Private {
     fn covers(&self, segs: &[String]) -> bool {
         self.prefixes.iter().any(|p| {
             let want: Vec<&str> = p.split('/').filter(|s| !s.is_empty()).collect();
-            !want.is_empty() && segs.len() >= want.len() && want.iter().zip(segs).all(|(w, s)| w == s)
+            // in any case: on a case-insensitive filesystem (a Mac's, by default) `SEATS/a` opens `seats/a`, so it is held the same.
+            // Folded as upper then lower, so U+017F (long s) and U+212A (Kelvin sign) fold too: a wider match only ever refuses more.
+            let fold = |s: &str| s.to_uppercase().to_lowercase();
+            !want.is_empty() && segs.len() >= want.len() && want.iter().zip(segs).all(|(w, s)| fold(w) == fold(s))
         })
     }
 }
