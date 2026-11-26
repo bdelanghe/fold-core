@@ -944,7 +944,9 @@ fn file(site: &Site, req: &Request, path: &str, now: i64) -> Response {
     if segs.iter().any(|s| *s == "." || *s == ".." || s.contains('\0') || s.contains('\\')) {
         return Response::text(400, "no . or .. segments");
     }
-    if segs == [page::ACTS] {
+    // the file is found with the empty segments dropped (`//_acts.json` is `_acts.json`), so every check is made on that path too
+    let at: Vec<&str> = segs.iter().copied().filter(|s| !s.is_empty()).collect();
+    if at == [page::ACTS] {
         return Response::text(404, "no such fold or file");
     }
     let mut fp = site.root.clone();
@@ -985,7 +987,9 @@ fn file(site: &Site, req: &Request, path: &str, now: i64) -> Response {
             bytes = p.replacen("</ol></main>", &row, 1).into_bytes();
         }
     }
-    let class = if site.no_store.iter().any(|p| rel[1..].starts_with(p.as_str())) {
+    // `/` after it, so a prefix `sign/` covers the directory `sign` as well as what is under it
+    let joined = format!("{}/", at.join("/"));
+    let class = if site.no_store.iter().any(|p| joined.starts_with(p.as_str())) {
         Class::NoStore
     } else if rel.contains("@sha256:") {
         Class::Immutable
