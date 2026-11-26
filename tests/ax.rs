@@ -112,3 +112,30 @@ fn acts_keep_their_own_ids() {
         ["act/needs/m%201/0", "act/needs/m%201/1", "act/needs/m%201/defer"]
     );
 }
+
+/// A URL the data carries becomes a link, a passkey form's action, or a kid's link only when it can do no more than go somewhere:
+/// http(s), mailto, or relative. `javascript:` (in any case, behind spaces or with a tab inside, as a browser still reads it),
+/// `data:` and `vbscript:` are dropped, so no document can put script in the page's origin.
+#[test]
+fn a_url_that_would_run_script_is_never_a_link_or_an_action() {
+    let tree = |href: &str| {
+        let node = json!({
+            "title": "Sign it", "href": href,
+            "act": { "cap": "webauthn", "call": "sign", "args": {}, "label": "Sign" },
+            "madeBy": { "query": "q", "href": href },
+            "kids": [{ "id": "k", "title": "Kid", "href": href }],
+        });
+        let case = json!({ "node": node, "path": ["s"], "mode": "folds", "href": "viewer" });
+        fold_core::wasm::ax_text(&case.to_string())
+    };
+    for bad in ["javascript:alert(1)", "JavaScript:alert(1)", "  javascript:alert(1)", "java\tscript:alert(1)", "\u{1}javascript:x", "data:text/html,<script>alert(1)</script>", "vbscript:x"] {
+        let got = tree(bad);
+        let low = got.to_lowercase().replace("\\t", "").replace("\\u0001", "");
+        assert!(!low.contains("script:") && !low.contains("data:"), "{bad:?} reached the tree: {got}");
+    }
+    for good in ["https://example.com/x", "http://example.com/", "mailto:a@example.com", "/fold/needs/", "needs/a", "#top", "needs/a:b"] {
+        let got = tree(good);
+        let want = serde_json::to_string(good).unwrap();
+        assert!(got.matches(&want).count() >= 3, "{good:?} is kept as the link, the action and the kid's link: {got}");
+    }
+}
