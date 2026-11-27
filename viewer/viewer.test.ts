@@ -256,7 +256,7 @@ test("needs: the overlay through the module is the golden, and the viewer folds 
   expect([...nodes.keys()].some((k) => k.includes("999999999999"))).toBe(false);
   const els = all(toDom(doc, viewOf(ax, nodes, href(at, "folds"), "UTC").tree) as El);
   expect(els.filter((e) => e.tag === "form").map((e) => [e.attrs["aria-label"], e.attrs.method, e.attrs.action, e.attrs["data-intent"], e.attrs["data-call"]])).toEqual([
-    ["Approve with passkey", "get", "", "0123456789ab", "approve"],
+    ["Sign with passkey", "get", "", "0123456789ab", "approve"],
     ["Decline with passkey", "get", "", "0123456789ab", "decline"],
   ]);
   // ]] and [[: path arithmetic over the parent's folds, null at either end, at the root, and onto a row that is a link
@@ -300,7 +300,7 @@ test("sign: approve signs only the challenge's own intent, said before it asks, 
   const say = (m: string) => { said.push(m); g.calls.push("said"); };
   expect(await sign(id, "approve", shown, { ...g, say })).toEqual({ ok: true, said: "Sent to personal-assistant. written m-9" });
   expect(g.calls.map((c) => c.split(" {")[0])).toEqual(["GET /approve/v1/challenge/0123456789ab", "said", "passkey 1,2,3 phobos.test required 9", "POST /approve/v1/assertion/0123456789ab"]);
-  expect(said).toEqual(["Approving for personal-assistant, #f00dfeed: “Route the plan.”. Your passkey asks next."]);
+  expect(said).toEqual(["Signing for personal-assistant, #f00dfeed: “Route the plan.”. Your passkey asks next."]);
   expect(JSON.parse(g.calls[3].slice(g.calls[3].indexOf("{")))).toEqual({ id: "cred", rawId: "CQ", type: "public-key", response: { clientDataJSON: "AQ", authenticatorData: "Ag", signature: "Aw", userHandle: null } });
   // a challenge that says it is for a decline is never signed as an approval
   g = gateway(it, { verdict: "decline" });
@@ -320,6 +320,15 @@ test("sign: approve signs only the challenge's own intent, said before it asks, 
   g = gateway(it, { refuse: "recipient personal-assistant is not running" });
   expect(await sign(id, "approve", shown, g)).toEqual({ ok: false, said: "Not signed: recipient personal-assistant is not running." });
   expect(g.calls.length).toBe(1);
+  // no longer waiting (signed, sent, declined, being signed or expired): nothing to sign, and `changed`, so the page reads Needs you
+  // again and the row goes, rather than failing the same way on every press (Bobby 11-03: "I can't sign these two, it always fails")
+  for (const reason of [`no waiting item ${id}`, `${id} was declined and is never retried; queue it again`, `${id} is already being approved`, `${id} is expired (the limit is 24 hours): queue it again`]) {
+    for (const verdict of ["approve", "decline"]) {
+      g = gateway(it, { refuse: reason });
+      expect(await sign(id, verdict, shown, g)).toEqual({ ok: false, changed: true, said: `Nothing to sign: ${reason}.` });
+      expect(g.calls.length).toBe(1);
+    }
+  }
   // busy (429) and a slow challenge (504) are asked again; an assertion that timed out (504) never is
   g = gateway(it, { challenge: [429, 504, 200] });
   expect((await sign(id, "approve", shown, g)).ok).toBe(true);
@@ -339,7 +348,7 @@ test("sign: decline is a passkey verdict at its own endpoint, bound to a challen
   const id = "0123456789ab", it = { id, to: "personal-assistant", text: "Route the plan." }, shown = { to: it.to, text: it.text };
   expect(ENDPOINTS.decline(id)).toEqual(["/approve/v1/decline/0123456789ab", "/approve/v1/decline/0123456789ab"]);
   let g = gateway(it, { verdict: "decline" }), said: string[] = [];
-  expect(await sign(id, "decline", shown, { ...g, say: (m: string) => said.push(m) })).toEqual({ ok: true, said: "Declined. written m-9" });
+  expect(await sign(id, "decline", shown, { ...g, say: (m: string) => said.push(m) })).toEqual({ ok: true, said: "Declined 0123456789ab." });
   expect(g.calls.map((c) => c.split(" {")[0])).toEqual(["GET /approve/v1/decline/0123456789ab", "passkey 1,2,3 phobos.test required 9", "POST /approve/v1/decline/0123456789ab"]);
   // with no frame (nothing is sent), the h said is the intent's text hash
   expect(said).toEqual(["Declining for personal-assistant, #deadbeefcafe: “Route the plan.”. Your passkey asks next."]);

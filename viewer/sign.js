@@ -17,8 +17,12 @@ export const ENDPOINTS = {
   approve: (id) => [`/approve/v1/challenge/${id}`, `/approve/v1/assertion/${id}`],
   decline: (id) => [`/approve/v1/decline/${id}`, `/approve/v1/decline/${id}`],
 };
-const DONE = { approve: (to) => `Sent to ${to}.`, decline: () => "Declined." };
-const VERB = { approve: "Approving", decline: "Declining" };
+const DONE = { approve: (to) => `Sent to ${to}.`, decline: (_, id) => `Declined ${id}.` };
+const VERB = { approve: "Signing", decline: "Declining" };
+/** chitin-approve's refusals for an intent that is no longer waiting (src/approve-webauthn.ts `notWaiting`): signed, sent, declined,
+ * being signed or expired. Nothing can be signed for it, so the page reads Needs you again and the row goes (Bobby, Clax on Needs
+ * you 11-03: "I can't sign these two, it always fails"). */
+const GONE = /^(no waiting item|[0-9a-f]{12} (was declined|is already being approved|is expired))/;
 
 /** base64url to bytes, and bytes to base64url (chitin-approve's page's `dec`/`enc`). */
 export const dec = (s) => { const b = atob(s.replace(/-/g, "+").replace(/_/g, "/") + "===".slice((s.length + 3) % 4)); const u = new Uint8Array(b.length); for (let i = 0; i < b.length; i++) u[i] = b.charCodeAt(i); return u.buffer; };
@@ -54,6 +58,7 @@ export async function sign(id, verdict, shown, { fetch = globalThis.fetch, crede
   const [challenge, assertion] = ENDPOINTS[verdict](id);
   try {
     const c = await again(() => fetch(challenge, { cache: "no-store" }), 504, wait);
+    if (!c.ok && typeof c.reason === "string" && GONE.test(c.reason)) return { ok: false, changed: true, said: `Nothing to sign: ${c.reason}.` };
     if (!c.ok) throw c.reason ?? "the challenge was refused";
     // a decline's challenge must say it is one (addendum 1's binding); an approve's may say so, and may not say otherwise
     if (verdict === "decline" ? c.verdict !== "decline" : c.verdict !== undefined && c.verdict !== "approve") throw `the challenge is not for ${verdict === "decline" ? "a decline" : "an approval"}`;
@@ -68,7 +73,8 @@ export async function sign(id, verdict, shown, { fetch = globalThis.fetch, crede
     const body = { id: cred.id, rawId: enc(cred.rawId), type: cred.type, response: { clientDataJSON: enc(r.clientDataJSON), authenticatorData: enc(r.authenticatorData), signature: enc(r.signature), userHandle: r.userHandle ? enc(r.userHandle) : null } };
     const v = await again(() => fetch(assertion, { method: "POST", cache: "no-store", headers: { "content-type": "application/json" }, body: JSON.stringify(body) }), 0, wait);
     if (!v.ok) throw v.reason ?? "the assertion was refused";
-    return { ok: true, said: `${DONE[verdict](it.to)}${v.message ? ` ${v.message}` : ""}` };
+    // a decline says so once (Bobby, 11-03: "Declined. 9916582af1bb declined" is "a bit repetitive"); a send adds chitin's message
+    return { ok: true, said: verdict === "decline" ? DONE.decline(it.to, id) : `${DONE.approve(it.to)}${v.message ? ` ${v.message}` : ""}` };
   } catch (e) {
     return { ok: false, said: `${not}: ${why(e)}.` };
   }

@@ -18,4 +18,4 @@ Route the plan to the hubs.
 Fri 11:57
 What to do: Approve or decline it with your passkey.
 Waits for your signature. Queued by claude-break-glass; intent 0123456789ab, text hash deadbeefcafe.
-act: Approve with passkey [approve 0123456789ab] · Decline with passkey [decline 0123456789ab]
+act: Sign with passkey [approve 0123456789ab] · Decline with passkey [decline 0123456789ab]

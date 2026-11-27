@@ -55,6 +55,9 @@ body.keys ol.rows li.cur .enter{display:block}
 ol.rows li.prop{display:block;cursor:default;min-height:0}
 ol.rows li.prop a{color:var(--accent)}
 li.act button{font-family:inherit;font-size:var(--s0);color:var(--paper);background:var(--accent);border:1px solid var(--accent);border-radius:.4em;padding:.5em 1em;min-height:44px}
+/* Decline is told from Sign by its word and its shape, never by colour alone (Bobby, Clax 11-03: "both being the same color isn't
+   great"; WCAG 1.4.1): Sign is filled, Decline an outline in the text colour. */
+li.act form[data-call="decline"] button{color:var(--ink);background:transparent;border:2px solid var(--ink)}
 li.act .result{display:block}
 ol.rows li.when,ol.rows li.step{color:var(--soft);font-size:var(--s-1)}
 ol.rows li.stale,ol.rows .hint.alert{color:var(--warn)}
