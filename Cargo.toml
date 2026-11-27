@@ -22,6 +22,8 @@ default = ["tzdb", "schema"]
 tzdb = ["dep:chrono-tz"]
 # the fold node types as JSON Schema (schema/node.schema.json, tests/schema.rs)
 schema = ["dep:schemars"]
+# lazy, reactive evaluation keyed by node identity (src/reactive.rs, docs/DESIGN-lazy-reactive.md); off until a caller uses it
+reactive = []
 
 [dependencies]
 serde = { version = "1", features = ["derive"] }

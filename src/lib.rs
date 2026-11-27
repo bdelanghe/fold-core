@@ -19,6 +19,8 @@ pub mod id;
 mod js;
 pub mod needs;
 pub mod page;
+#[cfg(feature = "reactive")]
+pub mod reactive;
 #[cfg(not(target_arch = "wasm32"))]
 pub mod report;
 #[cfg(not(target_arch = "wasm32"))]
